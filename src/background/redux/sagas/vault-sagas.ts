@@ -8,6 +8,7 @@ import {
   MapTimeoutDurationSettingToValue
 } from '@popup/constants';
 
+import { collectRequestIdsFromOpenWindows } from '@background/open-request-windows';
 import { sagaError } from '@background/redux/app-events/actions';
 import {
   loginRetryLockoutTimeReseted,
@@ -72,7 +73,11 @@ import {
   selectVaultActiveAccount,
   selectVaultDerivedAccounts
 } from '../vault/selectors';
-import { popupWindowInit } from '../windowManagement/actions';
+import {
+  popupWindowInit,
+  windowRequestResponded
+} from '../windowManagement/actions';
+import { selectOpenRequests } from '../windowManagement/selectors';
 import {
   createAccount,
   lockVault,
@@ -92,6 +97,7 @@ export function* vaultSagas() {
     setDelayForLockoutVaultSaga
   );
   yield takeLatest(unlockVault.type, unlockVaultSaga);
+  yield takeLatest(vaultLoaded.type, reconcileStalePayloadsSaga);
   yield takeLatest(
     [
       startBackground.type,
@@ -122,6 +128,18 @@ export function* vaultSagas() {
       activeTimeoutDurationSettingChanged.type,
       deployPayloadReceived.type,
       eip712PayloadReceived.type,
+      // The deletion belongs here for the same reason the two writes above do.
+      // The vault reducer drops an answered request's payload from
+      // `jsonById`/`eip712ById`, but that is an in-memory edit: without a
+      // re-encryption the cipher still holds the entry, and an MV3
+      // service-worker restart before the next vault write would resurrect it
+      // through `vaultLoaded` — for a requestId `windowRequestResponded` has
+      // already fired for — and nothing removes it: the map has a ceiling, but
+      // the ceiling refuses new writes rather than evicting stored ones.
+      // Most responses have no payload entry, so this usually re-encrypts an
+      // unchanged vault; at ~2ms behind a 500ms debounce that is cheaper than
+      // the alternative of persisting writes but not deletes.
+      windowRequestResponded.type,
       hideAccountFromListChanged.type
     ],
     updateVaultCipher
@@ -246,6 +264,93 @@ export function* setDelayForLockoutVaultSaga(
   yield put(loginRetryCountReseted());
   yield put(loginRetryLockoutTimeReseted());
   yield* sagaCall(clearLockoutDeadline);
+}
+
+/**
+ * Reclaim the capped payload slots (`MAX_STORED_PAYLOADS`) that no live request
+ * can answer for. A plain auto-lock is enough to strand one: `lockVaultSaga`
+ * flushes `updateVaultCipher` BEFORE the resets, so an unanswered payload is
+ * persisted, the later `windowRequestResponded` finds an emptied in-memory map,
+ * and `vaultLoaded` restores the entry on the next unlock.
+ *
+ * `windowRequestResponded` is reused rather than a new action added because it
+ * is already in the re-encrypt debounce list above, which is how the deletion
+ * reaches the cipher rather than living in memory until the next restart.
+ */
+export function* reconcileStalePayloadsSaga() {
+  try {
+    // Nothing stored, nothing to reclaim: skip the round trip over every tab
+    // URL. Sound as a pre-await read because it only decides whether to do
+    // nothing at all — never reuse it for the purge decision.
+    const payloadsAtEntry = yield* sagaSelect(selectVault);
+
+    if (
+      Object.keys(payloadsAtEntry.jsonById).length === 0 &&
+      Object.keys(payloadsAtEntry.eip712ById).length === 0
+    ) {
+      return;
+    }
+
+    // `null` is a failed enumeration, not "no window displays a request". Fail
+    // closed: purging on no evidence strands a live request.
+    const liveIdsFromWindows = yield* sagaCall(
+      collectRequestIdsFromOpenWindows
+    );
+
+    if (liveIdsFromWindows == null) {
+      return;
+    }
+
+    // Re-read after the await: a keep-set computed before it is already stale.
+    const openRequests = yield* sagaSelect(selectOpenRequests);
+    const vault = yield* sagaSelect(selectVault);
+
+    // Both halves are needed. After a service-worker restart the descriptors
+    // are gone while the window still shows its `?requestId=`; on window reuse
+    // a live window still reports the previous request's URL mid-navigation.
+    const keep = new Set(liveIdsFromWindows);
+
+    for (const { requestId } of openRequests) {
+      keep.add(requestId);
+    }
+
+    const orphans = new Set<string>();
+
+    for (const requestId of [
+      ...Object.keys(vault.jsonById),
+      ...Object.keys(vault.eip712ById)
+    ]) {
+      if (!keep.has(requestId)) {
+        orphans.add(requestId);
+      }
+    }
+
+    if (orphans.size === 0) {
+      return;
+    }
+
+    // Ids and counts only — no URL, window or tab may be logged: a `signMessage`
+    // approval URL carries the user's plaintext message as a search param.
+    console.warn('reconcileStalePayloadsSaga: reclaiming stale payload slots', {
+      reclaimed: [...orphans],
+      keptCount: keep.size
+    });
+
+    for (const requestId of orphans) {
+      yield put(windowRequestResponded({ requestId }));
+    }
+  } catch (err) {
+    // `root-saga.ts` is a bare `all([...])` with no `onError`, so an escaping
+    // throw aborts every saga — auto-lock and cipher persistence included. The
+    // reported message is fixed: nothing from a window URL may reach the banner.
+    console.error('reconcileStalePayloadsSaga: failed', errorToMessage(err));
+    yield put(
+      sagaError({
+        source: 'reconcileStalePayloadsSaga',
+        message: 'Could not reclaim stored signing payloads'
+      })
+    );
+  }
 }
 
 /**

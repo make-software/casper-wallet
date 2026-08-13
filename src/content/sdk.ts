@@ -36,6 +36,7 @@ export type SignatureResponse =
   | {
       cancelled: true; // if sign was cancelled
       message?: string;
+      errorCode?: string; // set → refused by the wallet, see `SdkErrorCode`
     }
   | {
       cancelled: false; // if sign was successfull
@@ -205,6 +206,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
      * @param deployJson - stringified json of a deploy (use `DeployUtil.deployToJson` from `casper-js-sdk` and `JSON.stringify`)
      * @param signingPublicKeyHex - public key hash (in hex format)
      * @returns a payload response when user responded to transaction request, it will contain `signature` if approved, or `cancelled === true` flag when rejected.
+     * `cancelled: true` carrying an `errorCode` (`SdkErrorCode`) is a wallet-side refusal: no window was shown and the user rejected nothing.
      */
     sign: (
       deployJson: string,

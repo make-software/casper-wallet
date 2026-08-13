@@ -44,7 +44,8 @@ export const sdkMethod = {
     signingPublicKeyHex: string;
   }>('CasperWalletProvider:Sign'),
   signResponse: createSdkAction<
-    | { cancelled: true; message?: string }
+    // `errorCode`: see `SdkErrorCode` — refused without showing a window.
+    | { cancelled: true; message?: string; errorCode?: string }
     | { cancelled: false; signatureHex: string }
   >('CasperWalletProvider:Sign:Response'),
   signError: createSdkAction<Error>('CasperWalletProvider:Sign:Error'),

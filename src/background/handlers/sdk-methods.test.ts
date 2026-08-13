@@ -12,13 +12,21 @@ import { openWindow } from '@background/open-window';
 import { MainStore } from '@background/redux/get-main-store';
 import { selectVaultIsLocked } from '@background/redux/session/selectors';
 import {
+  deployPayloadReceived,
+  eip712PayloadReceived
+} from '@background/redux/vault/actions';
+import {
   selectAccountNamesByOriginDict,
+  selectDeploysJsonById,
+  selectEip712JsonById,
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
+import { windowRequestOpened } from '@background/redux/windowManagement/actions';
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { sdkMethod } from '@content/sdk-method';
+import { SdkErrorCode } from '@content/sdk-types';
 
 import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
 
@@ -48,7 +56,9 @@ jest.mock('@src/utils', () => ({
 jest.mock('@background/redux/vault/selectors', () => ({
   selectVaultActiveAccount: jest.fn(),
   selectIsAccountConnected: jest.fn(),
-  selectAccountNamesByOriginDict: jest.fn()
+  selectAccountNamesByOriginDict: jest.fn(),
+  selectDeploysJsonById: jest.fn(),
+  selectEip712JsonById: jest.fn()
 }));
 jest.mock('@background/redux/session/selectors', () => ({
   selectVaultIsLocked: jest.fn()
@@ -89,6 +99,12 @@ const selectNamesByOriginMock =
 const selectIsLockedMock = selectVaultIsLocked as jest.MockedFunction<
   typeof selectVaultIsLocked
 >;
+const selectDeploysJsonByIdMock = selectDeploysJsonById as jest.MockedFunction<
+  typeof selectDeploysJsonById
+>;
+const selectEip712JsonByIdMock = selectEip712JsonById as jest.MockedFunction<
+  typeof selectEip712JsonById
+>;
 
 const ORIGIN = 'https://dapp.example';
 const META = { requestId: 'req-1' };
@@ -109,6 +125,31 @@ const SENDER = {
   tab: { id: 9 }
 } as Runtime.MessageSender;
 
+// `reconcileStalePayloadsSaga` may resume at any `await`, and a payload that no
+// descriptor and no window claims is exactly what it purges — so the payload
+// write and `windowRequestOpened` have to land in one synchronous block. The
+// probe is a microtask queued at the write: an `await` in between would let it
+// run before the descriptor.
+function watchGapBeforeDescriptor(dispatch: jest.Mock, payloadType: string) {
+  const seen: { microtaskRanBeforeDescriptor: boolean | null } = {
+    microtaskRanBeforeDescriptor: null
+  };
+  let microtaskRan = false;
+
+  dispatch.mockImplementation((action: { type: string }) => {
+    if (action.type === payloadType) {
+      void Promise.resolve().then(() => {
+        microtaskRan = true;
+      });
+    }
+    if (action.type === windowRequestOpened.type) {
+      seen.microtaskRanBeforeDescriptor = microtaskRan;
+    }
+  });
+
+  return seen;
+}
+
 let consoleErrorSpy: jest.SpyInstance;
 
 beforeEach(() => {
@@ -119,6 +160,10 @@ beforeEach(() => {
     publicKey: 'PK-1'
   } as any);
   selectIsConnectedMock.mockReturnValue(false);
+  // `dispatch` is a spy, so the store never really changes: the default stands
+  // for a payload write that was accepted.
+  selectDeploysJsonByIdMock.mockReturnValue({ [META.requestId]: '{}' });
+  selectEip712JsonByIdMock.mockReturnValue({ [META.requestId]: '{}' });
   consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
@@ -410,6 +455,12 @@ describe('signRequest', () => {
         { requestId: 'req-1' }
       )
     });
+    // A different condition from a capacity refusal, and it must stay
+    // distinguishable: this one is about the deploy, not about the wallet.
+    const refused = result as {
+      response: { payload: { errorCode?: string } };
+    };
+    expect(refused.response.payload.errorCode).toBeUndefined();
     expect(openWindowMock).not.toHaveBeenCalled();
     expect(dispatch).not.toHaveBeenCalled();
   });
@@ -443,6 +494,126 @@ describe('signRequest', () => {
       })
     );
     expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('dispatches the deploy payload and the descriptor in one synchronous block', async () => {
+    isEqualCIMock.mockReturnValue(false);
+    const { store, dispatch } = makeStore();
+    const seen = watchGapBeforeDescriptor(dispatch, deployPayloadReceived.type);
+
+    await handleSdkMethod(
+      sdkMethod.signRequest({ deployJson, signingPublicKeyHex: 'PK-1' }, META),
+      SENDER,
+      store
+    );
+
+    // `null` would mean no descriptor was dispatched at all.
+    expect(seen.microtaskRanBeforeDescriptor).toBe(false);
+  });
+
+  it('payload write refused at capacity → cancelled response, no window', async () => {
+    // The map stays empty after the dispatch, so the signature page would have
+    // had nothing to render and the dapp promise would have hung to its own
+    // 30-minute timeout.
+    isEqualCIMock.mockReturnValue(false);
+    selectDeploysJsonByIdMock.mockReturnValue({});
+    const { store, dispatch } = makeStore();
+
+    const result = await handleSdkMethod(
+      sdkMethod.signRequest({ deployJson, signingPublicKeyHex: 'PK-1' }, META),
+      SENDER,
+      store
+    );
+
+    expect(result).toEqual({
+      handled: true,
+      response: sdkMethod.signResponse(
+        {
+          cancelled: true,
+          message: 'Too many pending signature requests',
+          errorCode: SdkErrorCode.tooManyPendingRequests
+        },
+        { requestId: 'req-1' }
+      )
+    });
+    // Only the payload dispatch — no `windowRequestOpened` descriptor.
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(openWindowMock).not.toHaveBeenCalled();
+  });
+
+  it('a capacity refusal is surfaced in the extension log, identifiers only', async () => {
+    isEqualCIMock.mockReturnValue(false);
+    selectDeploysJsonByIdMock.mockReturnValue({});
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signRequest({ deployJson, signingPublicKeyHex: 'PK-1' }, META),
+      SENDER,
+      store
+    );
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(String), {
+      requestId: 'req-1',
+      method: sdkMethod.signRequest.type
+    });
+    const logged = JSON.stringify(consoleErrorSpy.mock.calls);
+    expect(logged).not.toContain('PK-1');
+    expect(logged).not.toContain(ORIGIN);
+  });
+
+  it('a prototype-name requestId reads as absent, not as an inherited member', async () => {
+    // A bare `map[requestId]` would answer with the `Object` constructor here
+    // and conclude the refused write had succeeded.
+    isEqualCIMock.mockReturnValue(false);
+    selectDeploysJsonByIdMock.mockReturnValue({});
+    const { store, dispatch } = makeStore();
+
+    const result = await handleSdkMethod(
+      sdkMethod.signRequest(
+        { deployJson, signingPublicKeyHex: 'PK-1' },
+        { requestId: 'constructor' }
+      ),
+      SENDER,
+      store
+    );
+
+    expect(result).toEqual({
+      handled: true,
+      response: sdkMethod.signResponse(
+        {
+          cancelled: true,
+          message: 'Too many pending signature requests',
+          errorCode: SdkErrorCode.tooManyPendingRequests
+        },
+        { requestId: 'constructor' }
+      )
+    });
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(openWindowMock).not.toHaveBeenCalled();
+  });
+
+  it('a falsy stored payload counts as present', async () => {
+    // `JSON.parse('0')` is what lands in the map, so presence must be a
+    // null check — a truthiness test would refuse an accepted write.
+    isEqualCIMock.mockReturnValue(false);
+    selectDeploysJsonByIdMock.mockReturnValue({ [META.requestId]: 0 } as any);
+    const { store, dispatch } = makeStore();
+
+    const result = await handleSdkMethod(
+      sdkMethod.signRequest(
+        { deployJson: '0', signingPublicKeyHex: 'PK-1' },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(result).toEqual({ handled: true, response: undefined });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(openWindowMock).toHaveBeenCalledWith(
+      store,
+      expect.objectContaining({ windowApp: WindowApp.SignatureRequestDeploy })
+    );
   });
 
   it('passes the requestId to openWindow so the window can be attached', async () => {
@@ -541,6 +712,147 @@ describe('signTypedDataRequest', () => {
       expect.objectContaining({ windowApp: WindowApp.SignatureRequestEip712 })
     );
     expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('dispatches the eip712 payload and the descriptor in one synchronous block', async () => {
+    const { store, dispatch } = makeStore();
+    const seen = watchGapBeforeDescriptor(dispatch, eip712PayloadReceived.type);
+
+    await handleSdkMethod(
+      sdkMethod.signTypedDataRequest(
+        {
+          typedData: { foo: 'bar' } as any,
+          options: undefined,
+          signingPublicKeyHex: 'PK-1'
+        },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(seen.microtaskRanBeforeDescriptor).toBe(false);
+  });
+
+  it('payload write refused at capacity → cancelled response, no window', async () => {
+    selectEip712JsonByIdMock.mockReturnValue({});
+    const { store, dispatch } = makeStore();
+
+    const result = await handleSdkMethod(
+      sdkMethod.signTypedDataRequest(
+        {
+          typedData: { foo: 'bar' } as any,
+          options: undefined,
+          signingPublicKeyHex: 'PK-1'
+        },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(result).toEqual({
+      handled: true,
+      response: sdkMethod.signTypedDataResponse(
+        {
+          cancelled: true,
+          signature: null,
+          digest: null,
+          publicKey: null,
+          error: 'Too many pending signature requests',
+          errorCode: SdkErrorCode.tooManyPendingRequests
+        },
+        { requestId: 'req-1' }
+      )
+    });
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(openWindowMock).not.toHaveBeenCalled();
+  });
+
+  it('a capacity refusal is surfaced in the extension log, identifiers only', async () => {
+    selectEip712JsonByIdMock.mockReturnValue({});
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signTypedDataRequest(
+        {
+          typedData: { foo: 'secret' } as any,
+          options: undefined,
+          signingPublicKeyHex: 'PK-1'
+        },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(String), {
+      requestId: 'req-1',
+      method: sdkMethod.signTypedDataRequest.type
+    });
+    const logged = JSON.stringify(consoleErrorSpy.mock.calls);
+    expect(logged).not.toContain('secret');
+    expect(logged).not.toContain(ORIGIN);
+  });
+
+  it('a prototype-name requestId reads as absent, not as an inherited member', async () => {
+    selectEip712JsonByIdMock.mockReturnValue({});
+    const { store, dispatch } = makeStore();
+
+    const result = await handleSdkMethod(
+      sdkMethod.signTypedDataRequest(
+        {
+          typedData: { foo: 'bar' } as any,
+          options: undefined,
+          signingPublicKeyHex: 'PK-1'
+        },
+        { requestId: 'constructor' }
+      ),
+      SENDER,
+      store
+    );
+
+    expect(result).toEqual({
+      handled: true,
+      response: sdkMethod.signTypedDataResponse(
+        {
+          cancelled: true,
+          signature: null,
+          digest: null,
+          publicKey: null,
+          error: 'Too many pending signature requests',
+          errorCode: SdkErrorCode.tooManyPendingRequests
+        },
+        { requestId: 'constructor' }
+      )
+    });
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(openWindowMock).not.toHaveBeenCalled();
+  });
+
+  it('a falsy stored payload counts as present', async () => {
+    selectEip712JsonByIdMock.mockReturnValue({ [META.requestId]: '' });
+    const { store, dispatch } = makeStore();
+
+    const result = await handleSdkMethod(
+      sdkMethod.signTypedDataRequest(
+        {
+          typedData: { foo: 'bar' } as any,
+          options: undefined,
+          signingPublicKeyHex: 'PK-1'
+        },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(result).toEqual({ handled: true, response: undefined });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(openWindowMock).toHaveBeenCalledWith(
+      store,
+      expect.objectContaining({ windowApp: WindowApp.SignatureRequestEip712 })
+    );
   });
 
   it('passes the requestId to openWindow so the window can be attached', async () => {
