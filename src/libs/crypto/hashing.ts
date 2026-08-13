@@ -31,6 +31,23 @@ export async function encodePassword(
     });
 }
 
+export function constantTimeEqualHex(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  const left = convertHexToBytes(a);
+  const right = convertHexToBytes(b);
+
+  let diff = 0;
+  // must scan every byte — returning early on the first mismatch reintroduces the timing leak
+  for (let i = 0; i < left.length; i++) {
+    diff |= left[i] ^ right[i];
+  }
+
+  return diff === 0;
+}
+
 export async function verifyPasswordAgainstHash(
   passwordHash: string,
   passwordSaltHash: string,
@@ -38,7 +55,7 @@ export async function verifyPasswordAgainstHash(
 ): Promise<boolean> {
   const digest = await encodePassword(password || '', passwordSaltHash);
 
-  return passwordHash === digest;
+  return constantTimeEqualHex(passwordHash, digest);
 }
 
 export async function deriveEncryptionKey(

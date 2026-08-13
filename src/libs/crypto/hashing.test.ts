@@ -6,6 +6,7 @@ import {
   FIXED_PASSWORD_TEXT
 } from './__fixtures';
 import {
+  constantTimeEqualHex,
   deriveEncryptionKey,
   encodePassword,
   verifyPasswordAgainstHash
@@ -62,5 +63,32 @@ describe('crypto.hashing', () => {
       FIXED_ENCRYPTION_SALT
     );
     expect(Buffer.from(key).toString('hex')).toBe(FIXED_ENCRYPTION_KEY_HASH);
+  });
+});
+
+describe('constantTimeEqualHex', () => {
+  it('accepts identical hex', () => {
+    expect(constantTimeEqualHex(FIXED_PASSWORD_HASH, FIXED_PASSWORD_HASH)).toBe(
+      true
+    );
+  });
+
+  it('rejects a single flipped bit', () => {
+    const flipped =
+      FIXED_PASSWORD_HASH.slice(0, -1) +
+      (FIXED_PASSWORD_HASH.endsWith('0') ? '1' : '0');
+
+    expect(constantTimeEqualHex(FIXED_PASSWORD_HASH, flipped)).toBe(false);
+  });
+
+  it('rejects different lengths without throwing', () => {
+    expect(constantTimeEqualHex(FIXED_PASSWORD_HASH, 'ab')).toBe(false);
+    expect(constantTimeEqualHex('', FIXED_PASSWORD_HASH)).toBe(false);
+    expect(constantTimeEqualHex('', '')).toBe(true);
+  });
+
+  it('does not throw on non-hex garbage input', () => {
+    expect(() => constantTimeEqualHex('zzzz', 'zzzz')).not.toThrow();
+    expect(constantTimeEqualHex('zzzz', 'zzzz')).toBe(true);
   });
 });
