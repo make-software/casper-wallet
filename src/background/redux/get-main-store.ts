@@ -250,19 +250,3 @@ export async function getExistingMainStoreSingletonOrInit() {
 export type MainStore = Awaited<
   ReturnType<typeof getExistingMainStoreSingletonOrInit>
 >;
-
-export function createMainStoreReplica<T extends PopupState>(state: T) {
-  // `selectPopupState` strips `requests` and `exportKeysWindowId` (the
-  // background keeps both; no UI reads either). Restore the shape the slice
-  // reducer expects — an empty map is truthful for a replica's request
-  // descriptors, and `null` is truthful since no replica tracks the export
-  // window.
-  return createStore({
-    ...state,
-    windowManagement: {
-      ...state.windowManagement,
-      requests: {},
-      exportKeysWindowId: null
-    }
-  });
-}

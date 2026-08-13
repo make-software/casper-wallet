@@ -1,6 +1,6 @@
 import Big from 'big.js';
-import { KeyAlgorithm, PrivateKey, PublicKey } from 'casper-js-sdk';
 import { Maybe } from 'casper-wallet-core/src/typings/common';
+import { getAccountHashFromPublicKey } from 'casper-wallet-core/src/utils/casperSdk/accountHash';
 
 import { Browser } from '@src/constants';
 
@@ -93,7 +93,10 @@ export const isValidPublicKey = (
   }
 
   try {
-    PublicKey.fromHex(publicKey).toHex(false);
+    // Same accept/reject set as `PublicKey.fromHex`, without linking the SDK: core's derivation
+    // throws on exactly the inputs the SDK rejects, and its parity with the SDK is pinned by
+    // tests that use the SDK itself as the oracle.
+    getAccountHashFromPublicKey(publicKey);
     return true;
   } catch (error) {
     return false;
@@ -115,36 +118,6 @@ export const isValidAccountHash = (
 /** It's for old accounts that possible can have mixed private and public keys in secretKey */
 export const getPrivateKeyHexFromSecretKey = (secretKeyHex: string) => {
   return secretKeyHex.substring(0, 64);
-};
-
-/*
- * This function checks if the provided secretKey is a valid hash key.
- * Firstly, it checks if the secretKey is not an empty string.
- * Then, it tests the secretKey against the defined regular expression using test() method.
- * If the secretKey passes these checks, it attempts to parse and decode it as a 'raw' type private key.
- * If no exceptions occur during parsing and decoding, the function returns true indicating the secretKey is valid.
- * If the secretKey fails any of these checks or an exception is caught during parsing/decoding,
- * false is returned indicating the secretKey is invalid.
- */
-export const isValidSecretKeyHash = (secretKey: string) => {
-  if (!secretKey) {
-    return false;
-  }
-
-  if (!validHashRegExp.test(secretKey.trim())) {
-    return false;
-  }
-
-  try {
-    PrivateKey.fromHex(
-      getPrivateKeyHexFromSecretKey(secretKey),
-      KeyAlgorithm.SECP256K1
-    );
-
-    return true;
-  } catch (error) {
-    return false;
-  }
 };
 
 export enum NFTTokenStandard {

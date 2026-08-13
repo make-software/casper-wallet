@@ -27,7 +27,7 @@ import {
   parseRequestTabId,
   sendSdkResponseToSpecificTab
 } from '@background/send-sdk-response-to-specific-tab';
-import { eip712Repository } from '@background/wallet-repositories';
+import { eip712Repository } from '@background/signing-repositories';
 
 import { sdkMethod } from '@content/sdk-method';
 
