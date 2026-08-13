@@ -27,7 +27,14 @@ export function useWindowManager() {
       try {
         await open(props);
       } catch (error) {
-        console.error('openWindow failed', props.windowApp, error);
+        // Name only, not the rejection: `searchParams` is embedded in the URL
+        // `windows.create` was given, and a sign-message plaintext can ride
+        // there. `use-ledger.ts` logs `error.name` for the same reason.
+        console.error(
+          'openWindow failed',
+          props.windowApp,
+          (error as Error)?.name
+        );
         reportUiError('window-open-failed', props.windowApp);
       }
     };
