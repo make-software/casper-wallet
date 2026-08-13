@@ -175,7 +175,7 @@ export function NavigationMenuPageContent() {
               openWindow({
                 windowApp: WindowApp.ImportAccount,
                 isNewWindow: true
-              }).catch(e => console.error(e));
+              });
             }
           },
           {
