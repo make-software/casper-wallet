@@ -215,7 +215,7 @@ describe('webpack.config.js CSP nonce', () => {
           expect(nonceLiteral).toBe('null');
 
           if (csp !== undefined) {
-            expect(csp).toContain("style-src 'unsafe-inline'");
+            expect(csp).toContain("style-src 'self' 'unsafe-inline'");
             expect(csp).not.toContain('nonce-');
           }
 

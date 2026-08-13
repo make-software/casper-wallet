@@ -169,7 +169,7 @@ export const getSigningAccount = (
  * changes what Safari enforces.
  */
 export const getSafariCspContent = () =>
-  `${cspConfig.baseDirectives}; style-src 'unsafe-inline'; connect-src ${cspConfig.connectSrc.join(' ')}`;
+  `${cspConfig.baseDirectives}; style-src 'self' 'unsafe-inline'; connect-src ${cspConfig.connectSrc.join(' ')}`;
 
 export const setCSPForSafari = () => {
   if (isSafariBuild) {
