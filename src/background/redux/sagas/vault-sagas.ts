@@ -1,4 +1,10 @@
-import { debounce, put, select, takeLatest } from 'redux-saga/effects';
+import {
+  debounce,
+  put,
+  select,
+  takeEvery,
+  takeLatest
+} from 'redux-saga/effects';
 import { storage } from 'webextension-polyfill';
 
 import { getActiveAccountSupports, getUrlOrigin } from '@src/utils';
@@ -106,18 +112,28 @@ export function* vaultSagas() {
     ],
     timeoutCounterSaga
   );
-  // Unlike takeLatest, debounce does not cancel an in-flight run when the next
-  // trigger arrives, so two updateVaultCipher runs could overlap and the staler
-  // cipher win. This relies on the invariant that a single encryption
-  // (~2ms measured, even on a 50-account vault) stays far below the 500ms
-  // debounce window — keep that true if the vault or crypto grows.
-  yield debounce(
-    VAULT_REENCRYPT_DEBOUNCE_MS,
+  // Account mutations persist immediately: an imported secret key exists
+  // nowhere else, so losing it to a crash inside the debounce window is
+  // unrecoverable. The remaining triggers are re-derivable or cosmetic and
+  // keep the coalescing below.
+  yield takeEvery(
     [
       accountAdded.type,
       accountsAdded.type,
       accountImported.type,
-      accountsImported.type,
+      accountsImported.type
+    ],
+    updateVaultCipher
+  );
+  // Unlike takeLatest, debounce does not cancel an in-flight run when the next
+  // trigger arrives, so two updateVaultCipher runs could overlap and the staler
+  // cipher win — now also possibly a run from the takeEvery above. This relies
+  // on the invariant that a single encryption (~2ms measured, even on a
+  // 50-account vault) stays far below the 500ms debounce window — keep that
+  // true if the vault or crypto grows.
+  yield debounce(
+    VAULT_REENCRYPT_DEBOUNCE_MS,
+    [
       accountRemoved.type,
       accountRenamed.type,
       siteConnected.type,
