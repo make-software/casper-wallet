@@ -23,8 +23,13 @@ export function CreateSecretPhrasePage() {
   const { t } = useTranslation();
 
   const handleBack = () => {
-    dispatchToMainStore(resetVault());
-    navigate(RouterPath.CreateVaultPassword);
+    // A dropped reset leaves the generated secret phrase alive, so going back
+    // would have the user set a password over a phrase they never recorded.
+    dispatchToMainStore(resetVault()).then(dispatched => {
+      if (dispatched) {
+        navigate(RouterPath.CreateVaultPassword);
+      }
+    });
   };
 
   return (

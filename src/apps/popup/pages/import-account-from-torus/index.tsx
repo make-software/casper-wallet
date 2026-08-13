@@ -43,8 +43,10 @@ export const ImportAccountFromTorusPage = () => {
   const isButtonDisabled = calculateSubmitButtonDisabled({ isValid });
 
   const onSuccess = useCallback(async (accountData: Account) => {
-    dispatchToMainStore(accountImported(accountData));
-    setImportStep(ImportAccountSteps.Success);
+    // Only claim success once the account actually reached the vault.
+    if (await dispatchToMainStore(accountImported(accountData))) {
+      setImportStep(ImportAccountSteps.Success);
+    }
   }, []);
   const onFailure = useCallback((message?: string) => {
     if (message) {

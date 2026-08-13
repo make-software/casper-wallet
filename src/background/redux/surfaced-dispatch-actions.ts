@@ -1,6 +1,7 @@
+import { dismissSagaError } from './app-events/actions';
 import { ledgerNewWindowIdChanged } from './ledger/actions';
 import { lockVault, openExportKeysWindow, resetVault } from './sagas/actions';
-import { accountsImported } from './vault/actions';
+import { accountImported, accountsImported } from './vault/actions';
 
 // Which dropped dispatches the user is told about.
 //
@@ -23,6 +24,13 @@ export const SURFACED_DISPATCH_ACTIONS: ReadonlySet<string> = new Set([
   ledgerNewWindowIdChanged.type,
   // Without this the reload presents an unperformed reset as done.
   resetVault.type,
-  // Without this the navigation presents an unperformed import as done.
-  accountsImported.type
+  // Without these the navigation presents an unperformed import as done —
+  // `accountsImported` from the Ledger flow, `accountImported` from the
+  // secret-key-file and Torus flows.
+  accountsImported.type,
+  accountImported.type,
+  // The banner's own dismiss button. Without this, pressing × while the
+  // transport is down does nothing and says nothing; with it, the reason
+  // appears as one deduped row whose own × is local and always works.
+  dismissSagaError.type
 ]);

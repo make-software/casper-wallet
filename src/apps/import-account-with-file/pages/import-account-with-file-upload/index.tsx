@@ -28,8 +28,10 @@ export function ImportAccountWithFileUploadPage() {
 
   const onSuccess = useCallback(
     async (accountData: Account) => {
-      dispatchToMainStore(accountImported(accountData));
-      navigate(RouterPath.ImportAccountWithFileSuccess);
+      // Only claim success once the account actually reached the vault.
+      if (await dispatchToMainStore(accountImported(accountData))) {
+        navigate(RouterPath.ImportAccountWithFileSuccess);
+      }
     },
     [navigate]
   );
