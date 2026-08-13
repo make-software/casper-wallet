@@ -89,6 +89,14 @@ describe('constantTimeEqualHex', () => {
 
   it('does not throw on non-hex garbage input', () => {
     expect(() => constantTimeEqualHex('zzzz', 'zzzz')).not.toThrow();
-    expect(constantTimeEqualHex('zzzz', 'zzzz')).toBe(true);
+    expect(constantTimeEqualHex('zzzz', 'zzzz')).toBe(false);
+  });
+
+  it('rejects inputs that truncate to the same bytes but are not equal hex', () => {
+    expect(constantTimeEqualHex('abzz', 'abyy')).toBe(false);
+  });
+
+  it('rejects odd-length inputs that decode short', () => {
+    expect(constantTimeEqualHex('abc', 'abd')).toBe(false);
   });
 });

@@ -39,6 +39,12 @@ export function constantTimeEqualHex(a: string, b: string): boolean {
   const left = convertHexToBytes(a);
   const right = convertHexToBytes(b);
 
+  // Buffer.from(hex) truncates at a dangling nibble or the first non-hex
+  // character, so a short decode means the input was not canonical hex.
+  if (left.length !== a.length / 2 || right.length !== b.length / 2) {
+    return false;
+  }
+
   let diff = 0;
   // must scan every byte — returning early on the first mismatch reintroduces the timing leak
   for (let i = 0; i < left.length; i++) {
