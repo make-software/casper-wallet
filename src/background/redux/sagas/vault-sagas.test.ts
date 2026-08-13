@@ -1,6 +1,7 @@
 import * as matchers from 'redux-saga-test-plan/matchers';
 import { combineReducers } from '@reduxjs/toolkit';
 import { expectSaga } from 'redux-saga-test-plan';
+import { throwError } from 'redux-saga-test-plan/providers';
 import { put } from 'redux-saga/effects';
 import { storage, tabs, windows } from 'webextension-polyfill';
 
@@ -1157,6 +1158,89 @@ describe('createAccountSaga', () => {
           message: 'Account name missing'
         })
       )
+    );
+  });
+});
+
+// Every catch in this module funnels into the same broadcast error channel.
+// Each test forces exactly one of them and pins its `source` string — the
+// banner and the saga are wired together by that literal.
+describe('saga error channel', () => {
+  it('reports an encryption failure from updateVaultCipher', async () => {
+    jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockRejectedValue(Error('encrypt failed'));
+
+    const { effects } = await expectSaga(vaultSagas)
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
+        [matchers.select.selector(selectVault), EMPTY_VAULT]
+      ])
+      .dispatch(accountRenamed({ oldName: 'a', newName: 'b' }))
+      .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 200);
+
+    expect(effects.put).toContainEqual(
+      put(
+        sagaError({
+          source: 'updateVaultCipher',
+          message: 'encrypt failed'
+        })
+      )
+    );
+  });
+
+  it('reports a failed lock flush from lockVaultSaga', async () => {
+    mockStorageRemove.mockRejectedValue(Error('storage gone'));
+
+    const { effects } = await expectSaga(lockVaultSaga)
+      .provide([[matchers.select.selector(selectEncryptionKeyHash), null]])
+      .silentRun(50);
+
+    expect(effects.put).toContainEqual(
+      put(sagaError({ source: 'lockVaultSaga', message: 'storage gone' }))
+    );
+  });
+
+  it('reports a failure from unlockVaultSaga', async () => {
+    const { effects } = await expectSaga(
+      unlockVaultSaga,
+      unlockVault({
+        vault: EMPTY_VAULT,
+        newKeyDerivationSaltHash: 'salt',
+        newVaultCipher: 'cipher',
+        newEncryptionKeyHash: 'hash'
+      })
+    )
+      .provide([
+        [
+          matchers.select.selector(selectAccountNamesByOriginDict),
+          throwError(Error('unlock failed'))
+        ]
+      ])
+      .silentRun(50);
+
+    expect(effects.put).toContainEqual(
+      put(sagaError({ source: 'unlockVaultSaga', message: 'unlock failed' }))
+    );
+  });
+
+  it('reports a failure from timeoutCounterSaga', async () => {
+    mockStorageGet.mockRejectedValue(Error('read failed'));
+
+    const { effects } = await expectSaga(timeoutCounterSaga, startBackground())
+      .provide([
+        [matchers.select.selector(selectVaultCipherDoesExist), true],
+        [matchers.select.selector(selectVaultIsLocked), false],
+        [
+          matchers.select.selector(selectTimeoutDurationSetting),
+          TimeoutDurationSetting['5 min']
+        ],
+        [matchers.select.selector(selectVaultLastActivityTime), NOW]
+      ])
+      .silentRun(50);
+
+    expect(effects.put).toContainEqual(
+      put(sagaError({ source: 'timeoutCounterSaga', message: 'read failed' }))
     );
   });
 });
