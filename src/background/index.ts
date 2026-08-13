@@ -220,9 +220,14 @@ runtime.onMessage.addListener(
           if (result.handled) {
             return respond(result);
           }
-          // Type only: this message is returned to the dapp's SDK, and an SDK
-          // action's payload can carry signature material.
-          throw Error('Background: Unknown sdk message: ' + action.type);
+          // Identifiers only — an SDK action's payload can carry signature
+          // material. `requestId` stays: it is the correlation key every other
+          // log at this layer uses, and this error rejects the originating
+          // dapp's own promise, so the value is already known to the receiver.
+          // `isSDKMethod` guarantees both fields are strings.
+          throw Error(
+            `Background: Unknown sdk message: ${action.type} (requestId ${action.meta.requestId})`
+          );
         }
 
         // Must stay AFTER the isSDKMethod branch: a page-crafted message with
@@ -296,9 +301,13 @@ runtime.onMessage.addListener(
           return;
         }
 
-        // No string `type` by definition on this branch, so `typeof` is all
-        // that can be reported without echoing the message back.
-        throw Error('Background: Unknown message: typeof ' + typeof action);
+        // Every message reaching this branch lacks a string `type` by
+        // definition, so `typeof action` would always say 'object'. Report what
+        // `type` actually was — equally non-revealing, and it distinguishes a
+        // missing field from a non-string one.
+        throw Error(
+          'Background: Unknown message: type is ' + typeof action?.type
+        );
       } catch (error) {
         return sendError(error);
       }
