@@ -49,7 +49,8 @@ export const ChangePasswordPage = () => {
     register,
     handleSubmit,
     formState: { isDirty, errors },
-    control
+    control,
+    setError
   } = useCreatePasswordForm();
 
   const password = useWatch({
@@ -101,13 +102,16 @@ export const ChangePasswordPage = () => {
           vaultCipher: newVaultCipher
         })
       );
+
+      navigate(RouterPath.Home);
     };
 
     worker.onerror = error => {
       console.error(error);
+      setError('password', {
+        message: t('Something went wrong. Please try again.')
+      });
     };
-
-    navigate(RouterPath.Home);
   };
 
   if (!isPasswordConfirmed) {

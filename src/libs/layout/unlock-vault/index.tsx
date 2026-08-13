@@ -194,11 +194,17 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
 
     verifyPasswordWorker.onerror = error => {
       console.error(error);
+      setError('password', {
+        message: t('Something went wrong. Please try again.')
+      });
       setIsLoading(false);
     };
 
     unlockVaultWorker.onerror = error => {
       console.error(error);
+      setError('password', {
+        message: t('Something went wrong. Please try again.')
+      });
       setIsLoading(false);
     };
   }
