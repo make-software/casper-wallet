@@ -39,6 +39,7 @@ interface CreatePasswordWorkerMessageEvent extends MessageEvent {
 export const ChangePasswordPage = () => {
   const [isPasswordConfirmed, setIsPasswordConfirmed] =
     useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -63,13 +64,16 @@ export const ChangePasswordPage = () => {
   }, []);
 
   const isSubmitButtonDisabled = calculateSubmitButtonDisabled({
-    isDirty
+    isDirty,
+    isSubmitting
   });
 
   const onSubmit = (data: CreatePasswordFormValues) => {
     const worker = new Worker(
       new URL('@background/workers/create-password-worker.ts', import.meta.url)
     );
+
+    setIsSubmitting(true);
 
     worker.postMessage({
       password: data.password,
@@ -111,6 +115,7 @@ export const ChangePasswordPage = () => {
       setError('password', {
         message: t('Something went wrong. Please try again.')
       });
+      setIsSubmitting(false);
     };
   };
 
@@ -146,7 +151,7 @@ export const ChangePasswordPage = () => {
       renderFooter={() => (
         <FooterButtonsContainer>
           <Button disabled={isSubmitButtonDisabled}>
-            <Trans t={t}>Continue</Trans>
+            {isSubmitting ? t('Loading') : <Trans t={t}>Continue</Trans>}
           </Button>
         </FooterButtonsContainer>
       )}
