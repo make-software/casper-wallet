@@ -70,9 +70,12 @@ async function handleSdkMessage(message: unknown) {
         return;
 
       default:
+        // Type only, for the same reason the no-port branch above logs type +
+        // requestId: this runs in the content script, whose console is the dapp
+        // page's console, and these envelopes carry signatureHex /
+        // encryptedMessage.
         throw Error(
-          'Content: handleOnMessage unknown sdk message: ' +
-            JSON.stringify(message)
+          'Content: handleOnMessage unknown sdk message: ' + message.type
         );
     }
   } else {
@@ -113,9 +116,7 @@ function emitSdkEvent(message: SdkEvent) {
       break;
 
     default:
-      throw Error(
-        'Content: emit sdk event unknown action: ' + JSON.stringify(message)
-      );
+      throw Error('Content: emit sdk event unknown action: ' + message.type);
   }
 
   const event = new CustomEvent(eventType, {
