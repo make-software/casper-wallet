@@ -37,18 +37,8 @@ type MockedRuntime = {
   onMessage: { addListener: jest.Mock; removeListener: jest.Mock };
 };
 
-// `jest.resetModules()` re-invokes the `webextension-polyfill` mock factory,
-// producing a brand-new `runtime` object. A top-level `import { runtime } from
-// 'webextension-polyfill'` would bind to the pre-reset instance only, so a
-// `mockRejectedValue` set on it would never reach the `index.ts` copy actually
-// exercised below. Re-require the module *after* resetting, in the same
-// post-reset registry `./index` just populated, and hand back that live
-// instance for tests to configure and assert against.
-//
-// Loads sdk.ts FIRST (it registers the handshake listener at module load), then
-// index.ts, then fires the injected script's onload — which is where
-// establishSdkPort posts the port across. window.postMessage forwards it to
-// sdk.ts in the shape `isTrustedWindowMessage` demands.
+// Loads sdk.ts first (registers the handshake listener at module load), then
+// index.ts, then fires the injected script's onload to hand off the port.
 const loadBothModules = () => {
   const messageListeners: ((e: unknown) => void)[] = [];
   const scriptTags: { onload?: () => void; setAttribute: jest.Mock }[] = [];

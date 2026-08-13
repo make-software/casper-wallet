@@ -8,17 +8,8 @@ jest.mock('webextension-polyfill', () => ({
   }
 }));
 
-// `loadContentScript` calls `jest.resetModules()` before every `require('./index')`
-// so each test gets a fresh module instance (the content script keeps singleton
-// state — `activePort` — and registers listeners at import time). That reset
-// also invalidates the `webextension-polyfill` mock: Jest re-invokes the mock
-// factory on the next require, producing a brand-new `runtime` object. A
-// top-level `import { runtime } from 'webextension-polyfill'` would bind to the
-// *first* instance only, so assertions against it would silently stop tracking
-// whatever `index.ts` actually calls after the first reset — making the request
-// gate's `not.toHaveBeenCalled()` checks vacuously true. `loadContentScript`
-// therefore re-requires the module itself, after resetting, and hands back the
-// live `runtime` for tests to assert against.
+// After `jest.resetModules()`, a top-level `import { runtime }` binds to a
+// dead mock; assertions must use the live instance `loadContentScript` re-requires.
 type MockedRuntime = {
   sendMessage: jest.Mock;
   getURL: jest.Mock;

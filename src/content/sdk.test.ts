@@ -297,9 +297,8 @@ describe('fetchFromBackground response routing', () => {
     handshake(window, port);
 
     const provider = CasperWalletProvider({ timeout: 5000 });
-    // Attach handlers via `allSettled` the moment both promises exist, so a
-    // regression that makes either one reject fails as an assertion below
-    // instead of floating as an unhandled rejection that crashes the worker.
+    // Attach via `allSettled` immediately: a floating promise that rejects would
+    // kill the Jest worker as an unhandled rejection instead of failing an assertion.
     const first = provider.getVersion();
     const second = provider.getVersion();
     const settled = Promise.allSettled([first, second]);
