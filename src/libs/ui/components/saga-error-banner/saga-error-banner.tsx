@@ -74,10 +74,29 @@ const DismissButton = styled.button`
 // The channel carries a `kind`, not a string, so the copy lives here where `t`
 // does. Unlike `SagaError.message` — produced in the background and rendered
 // verbatim and untranslated — these lines are ours to write.
-const UI_ERROR_COPY: Record<UiErrorKind, string> = {
-  'dispatch-failed':
-    "Couldn't reach the wallet. Nothing was changed — please try again.",
-  'window-open-failed': "Couldn't open the window. Please try again."
+//
+// Literal `<Trans>` per kind rather than a lookup keyed on `kind`: a dynamic key
+// is invisible to i18next-parser, so these two strings would never reach any
+// catalog.
+//
+// The dispatch copy claims neither that nothing changed nor that retrying helps.
+// Both would be false somewhere: `handleReduxAction` dispatches `resetVault`
+// before awaiting `enableOnboardingFlow`, so a rejection can arrive with the
+// vault already wiped, and `use-ledger` sets `triggeredRef` right after its
+// dispatch, so that effect cannot re-run.
+const UiErrorMessage = ({ kind }: { kind: UiErrorKind }) => {
+  const { t } = useTranslation();
+
+  if (kind === 'dispatch-failed') {
+    return (
+      <Trans t={t}>
+        The wallet didn&apos;t respond. Your last action may not have been
+        applied.
+      </Trans>
+    );
+  }
+
+  return <Trans t={t}>Couldn&apos;t open the window. Please try again.</Trans>;
 };
 
 export const SagaErrorBanner = () => {
@@ -142,7 +161,7 @@ export const SagaErrorBanner = () => {
               <Trans t={t}>Something went wrong</Trans>
             </Typography>
             <Typography type="captionRegular" color="contentSecondary">
-              {t(UI_ERROR_COPY[uiError.kind])}
+              <UiErrorMessage kind={uiError.kind} />
             </Typography>
           </ErrorTextContainer>
           <DismissButton

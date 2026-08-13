@@ -11,30 +11,6 @@ import {
   reportUiError
 } from './ui-error-channel';
 
-// The banner pulls the `@libs/layout` / `@libs/ui/components` barrels, and those
-// transitively load two modules that cannot survive this environment:
-// `webextension-polyfill` throws on import outside an extension, and
-// `mac-scrollbar` ships only an ESM entry (no `main`), which jest cannot resolve.
-// The banner itself touches neither.
-jest.mock('webextension-polyfill', () => ({
-  windows: {},
-  runtime: {},
-  tabs: {},
-  storage: { local: {} }
-}));
-
-jest.mock(
-  'mac-scrollbar',
-  () => ({
-    __esModule: true,
-    MacScrollbar: ({ children }: { children?: React.ReactNode }) => children,
-    GlobalScrollbar: () => null
-  }),
-  // `virtual` because jest cannot resolve the real module either — a plain
-  // factory mock still resolves the path first.
-  { virtual: true }
-);
-
 // jest runs in 'node' here — no jsdom. `renderToStaticMarkup` is how this repo
 // tests components (see remote-icon.test.tsx / svg-icon.test.tsx).
 jest.mock('react-inlinesvg', () => ({
@@ -119,7 +95,7 @@ describe('SagaErrorBanner', () => {
     const html = render();
 
     expect(html).toContain(
-      "Couldn't reach the wallet. Nothing was changed — please try again."
+      "The wallet didn't respond. Your last action may not have been applied."
     );
     expect(html).not.toContain('LOCK_VAULT_SAGA');
   });
@@ -141,6 +117,6 @@ describe('SagaErrorBanner', () => {
     const html = render();
 
     expect(html).toContain('vault would not lock');
-    expect(html).toContain("Couldn't reach the wallet");
+    expect(html).toContain("The wallet didn't respond");
   });
 });
