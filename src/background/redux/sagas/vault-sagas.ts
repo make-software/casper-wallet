@@ -127,10 +127,10 @@ export function* vaultSagas() {
   );
   // Unlike takeLatest, debounce does not cancel an in-flight run when the next
   // trigger arrives, so two updateVaultCipher runs could overlap and the staler
-  // cipher win — now also possibly a run from the takeEvery above. This relies
-  // on the invariant that a single encryption (~2ms measured, even on a
-  // 50-account vault) stays far below the 500ms debounce window — keep that
-  // true if the vault or crypto grows.
+  // cipher win. The takeEvery above makes overlap materially more likely — any
+  // account mutation now spawns a run immediately — so ordering rests entirely
+  // on a single encryption (~2ms measured) staying far below the 500ms window.
+  // Keep that true if the vault or crypto grows.
   yield debounce(
     VAULT_REENCRYPT_DEBOUNCE_MS,
     [
