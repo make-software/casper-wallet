@@ -1,18 +1,14 @@
-import { PublicKey } from 'casper-js-sdk';
+import { getAccountHashFromPublicKey as deriveAccountHash } from 'casper-wallet-core/src/utils/casperSdk/accountHash';
 
-// PublicKey casper nomenclature:
-// - public key = base16 hex => algo prefix + public key hex
-// - account hash - internal representation of a public key with a fixed length
-
-// base16 hex: '01deba7173738a7f55de3ad9dc27e081df41ff285f25887ec424a8a65b43d0cf77'
-// base64 "2qdt4zi/b/uagi2L9Y+db0I0Jt62CTpR/Td9HhiRAu0="
-
-// ED = 01 public keys should be 66 chars long (with the prefix)
-// SEC = 02 public keys should be 68 chars long (with the prefix)
-
-const getRawPublicKey = (publicKeyHex: string): PublicKey =>
-  PublicKey.fromHex(publicKeyHex);
-
+/**
+ * {@link deriveAccountHash}, with the extra guard our call sites rely on: several of them read the
+ * public key off an account that may not be loaded yet and expect a throw rather than a hash of
+ * `undefined`.
+ *
+ * The derivation itself lives in `casper-wallet-core` and is byte-for-byte equivalent to
+ * `PublicKey.fromHex(publicKey).accountHash().toHex()` without linking `casper-js-sdk` — this
+ * function runs synchronously while the home screen renders, so it cannot be deferred.
+ */
 export const getAccountHashFromPublicKey = (
   publicKey: string | undefined
 ): string => {
@@ -20,5 +16,5 @@ export const getAccountHashFromPublicKey = (
     throw Error('Missing public key');
   }
 
-  return getRawPublicKey(publicKey).accountHash().toHex();
+  return deriveAccountHash(publicKey);
 };
