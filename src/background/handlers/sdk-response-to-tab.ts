@@ -192,7 +192,16 @@ export async function handleSdkResponseToTab(
 
   try {
     await tabs.sendMessage(tabId, action);
-  } catch {
+  } catch (error) {
+    // `Could not establish connection`, `Extension context invalidated`, a
+    // `DataCloneError` and a Safari-specific rejection all end up here and were
+    // otherwise indistinguishable. Identifiers only (see the SECURITY note
+    // above), and logged before the fallback so cause precedes consequence.
+    console.error(
+      'sdk-response-to-tab: delivery to tab failed',
+      { requestId, tabId, type: action?.type },
+      error
+    );
     // Tab gone / no listener → try the same-origin fallback (if we can recover
     // the origin) and surface the non-fatal error, choosing the message based
     // on whether the fallback actually delivered. The optimistic mark above
