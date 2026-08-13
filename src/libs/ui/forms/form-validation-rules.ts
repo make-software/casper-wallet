@@ -18,7 +18,6 @@ import {
 import {
   getErrorMessageForIncorrectPassword,
   isValidPublicKey,
-  isValidSecretKeyHash,
   isValidU64
 } from '@src/utils';
 
@@ -27,6 +26,7 @@ import { selectLoginRetryCount } from '@background/redux/login-retry-count/selec
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { verifyPasswordAgainstHash } from '@libs/crypto/hashing';
+import { isValidSecretKeyHash } from '@libs/crypto/is-valid-secret-key-hash';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export const minPasswordLength = 16;
