@@ -98,6 +98,8 @@ interface LoadedConfig {
   assertPlugin: PluginLike;
   /** The AssertSingleFileEntries instance registered by this config. */
   singleFilePlugin: PluginLike;
+  /** The AssertSdkFreePageEntries instance registered by this config. */
+  sdkFreePlugin: PluginLike;
   /** optimization.splitChunks.chunks — the predicate deciding what may split. */
   splitChunksPredicate: (chunk: ChunkLike) => boolean;
   entry: EntryLike;
@@ -151,6 +153,14 @@ const loadConfig = (browser: string, nodeEnv: string): LoadedConfig => {
     throw new Error('AssertSingleFileEntries is not registered');
   }
 
+  const sdkFreePlugin = config.plugins.find(
+    plugin => plugin.constructor?.name === 'AssertSdkFreePageEntries'
+  );
+
+  if (!sdkFreePlugin) {
+    throw new Error('AssertSdkFreePageEntries is not registered');
+  }
+
   const splitChunksPredicate = config.optimization?.splitChunks?.chunks;
 
   if (typeof splitChunksPredicate !== 'function') {
@@ -159,6 +169,7 @@ const loadConfig = (browser: string, nodeEnv: string): LoadedConfig => {
 
   return {
     singleFilePlugin,
+    sdkFreePlugin,
     splitChunksPredicate,
     nonceLiteral: definitions.__CSP_NONCE__,
     manifest: JSON.parse(
@@ -738,6 +749,201 @@ describe('AssertSingleFileEntries', () => {
         }
       })
     ).toThrow(/emitted 2 async chunk/);
+  });
+});
+
+/**
+ * AssertSdkFreePageEntries is the only thing keeping the ~900 KB UMD SDK off the
+ * pages this branch cleared, and its inputs are undocumented webpack internals:
+ * chunkGraph/moduleGraph, and a ConcatenatedModule's members hanging off
+ * `.modules` rather than a `resource` of its own. A build only proves the guard
+ * silent, never that it can still speak — so the cases below drive it against a
+ * compilation that does contain the SDK.
+ *
+ * The entry list is asserted through behaviour rather than read out of the
+ * config: dropping a name from SDK_FREE_PAGE_ENTRY_NAMES is exactly the silent
+ * revert this file exists to catch.
+ */
+interface FakeModule {
+  resource?: string;
+  /** A ConcatenatedModule's merged members; it carries no `resource` itself. */
+  modules?: FakeModule[];
+}
+
+interface FakeChunk {
+  modules: FakeModule[];
+}
+
+const SDK_RESOURCE = path.join(
+  ROOT,
+  'node_modules',
+  'casper-js-sdk',
+  'dist',
+  'index.js'
+);
+
+const srcModule = (relative: string): FakeModule => ({
+  resource: path.join(ROOT, 'src', relative)
+});
+
+const runSdkFreeAssertion = (
+  plugin: PluginLike,
+  entrypoints: Record<string, FakeChunk[]>,
+  /** module -> the module webpack blames for pulling it in. */
+  issuers: Map<FakeModule, FakeModule> = new Map()
+) => {
+  let tapped: (() => void) | undefined;
+
+  const compilation = {
+    hooks: {
+      processAssets: {
+        tap: (_options: unknown, fn: () => void) => {
+          tapped = fn;
+        }
+      }
+    },
+    entrypoints: new Map(
+      Object.entries(entrypoints).map(([name, chunks]) => [name, { chunks }])
+    ),
+    chunkGraph: {
+      getChunkModulesIterable: (chunk: FakeChunk) => chunk.modules
+    },
+    moduleGraph: {
+      getIssuer: (module: FakeModule) => issuers.get(module)
+    }
+  };
+
+  plugin.apply?.({
+    hooks: {
+      thisCompilation: {
+        tap: (_name: string, fn: (c: unknown) => void) => fn(compilation)
+      }
+    }
+  } as unknown as FakeCompiler);
+
+  if (!tapped) {
+    throw new Error('AssertSdkFreePageEntries tapped no processAssets hook');
+  }
+
+  return tapped;
+};
+
+const PAGE_ENTRY_NAMES = [
+  'popup',
+  'importAccountWithFile',
+  'connectToApp',
+  'signatureRequest',
+  'onboarding'
+];
+
+/** Every page entry, each with one initial chunk of ordinary app modules. */
+const healthyPageEntrypoints = (): Record<string, FakeChunk[]> =>
+  Object.fromEntries(
+    PAGE_ENTRY_NAMES.map(name => [
+      name,
+      [{ modules: [srcModule(`apps/${name}/index.tsx`)] }]
+    ])
+  );
+
+describe('AssertSdkFreePageEntries', () => {
+  it('accepts page entries whose initial chunks carry no SDK module', () => {
+    const { sdkFreePlugin } = loadConfig('chrome', 'production');
+
+    expect(
+      runSdkFreeAssertion(sdkFreePlugin, healthyPageEntrypoints())
+    ).not.toThrow();
+  });
+
+  it.each(['popup', 'connectToApp', 'onboarding'])(
+    'rejects casper-js-sdk in the initial chunks of %s',
+    name => {
+      const { sdkFreePlugin } = loadConfig('chrome', 'production');
+
+      expect(
+        runSdkFreeAssertion(sdkFreePlugin, {
+          ...healthyPageEntrypoints(),
+          [name]: [{ modules: [{ resource: SDK_RESOURCE }] }]
+        })
+      ).toThrow(new RegExp(`entry "${name}" links casper-js-sdk`));
+    }
+  );
+
+  // The two pages the SDK is still allowed on. A guard that rejected these would
+  // be unfixable without reverting the branch, so the exemption is asserted too.
+  it.each(['importAccountWithFile', 'signatureRequest'])(
+    'leaves %s free to link it eagerly',
+    name => {
+      const { sdkFreePlugin } = loadConfig('chrome', 'production');
+
+      expect(
+        runSdkFreeAssertion(sdkFreePlugin, {
+          ...healthyPageEntrypoints(),
+          [name]: [{ modules: [{ resource: SDK_RESOURCE }] }]
+        })
+      ).not.toThrow();
+    }
+  );
+
+  it('names the module that pulled it in', () => {
+    const { sdkFreePlugin } = loadConfig('chrome', 'production');
+    const sdk: FakeModule = { resource: SDK_RESOURCE };
+    const issuer = srcModule('libs/services/ledger/ledger.ts');
+
+    expect(
+      runSdkFreeAssertion(
+        sdkFreePlugin,
+        { ...healthyPageEntrypoints(), popup: [{ modules: [sdk] }] },
+        new Map([[sdk, issuer]])
+      )
+    ).toThrow(/src\/libs\/services\/ledger\/ledger\.ts -> casper-js-sdk/);
+  });
+
+  it('reports the bare package when the issuer has no resource of its own', () => {
+    // A concatenated issuer: still a violation, just one webpack cannot attribute.
+    const { sdkFreePlugin } = loadConfig('chrome', 'production');
+    const sdk: FakeModule = { resource: SDK_RESOURCE };
+
+    expect(
+      runSdkFreeAssertion(
+        sdkFreePlugin,
+        { ...healthyPageEntrypoints(), popup: [{ modules: [sdk] }] },
+        new Map([[sdk, { modules: [] }]])
+      )
+    ).toThrow(/via:\n {2}casper-js-sdk\n/);
+  });
+
+  it('finds it inside a ConcatenatedModule', () => {
+    // Concatenation runs in production builds only, which is where the guard has
+    // to work; a walk that stopped at the wrapper would see nothing there.
+    const { sdkFreePlugin } = loadConfig('chrome', 'production');
+
+    expect(
+      runSdkFreeAssertion(sdkFreePlugin, {
+        ...healthyPageEntrypoints(),
+        popup: [
+          {
+            modules: [
+              {
+                modules: [
+                  srcModule('apps/popup/index.tsx'),
+                  { resource: SDK_RESOURCE }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    ).toThrow(/entry "popup" links casper-js-sdk/);
+  });
+
+  it('rejects an entry the build did not emit at all', () => {
+    const { sdkFreePlugin } = loadConfig('chrome', 'production');
+    const entrypoints = healthyPageEntrypoints();
+    delete entrypoints.onboarding;
+
+    expect(runSdkFreeAssertion(sdkFreePlugin, entrypoints)).toThrow(
+      /emitted no entry "onboarding"/
+    );
   });
 });
 
