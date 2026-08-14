@@ -2,9 +2,9 @@ import { Reducer, configureStore } from '@reduxjs/toolkit';
 
 import { RootState } from '@background/redux/store-types';
 
+import { PopupState } from './popup-state';
 import { ReduxAction } from './redux-action';
 import rootReducer from './root-reducer';
-import { PopupState } from './types';
 
 /**
  * The read-only store a frontend app renders from.

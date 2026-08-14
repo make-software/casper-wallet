@@ -14,13 +14,12 @@ import { withDerivedFlag } from '@background/redux/keys/reducer';
 import { KeysState } from '@background/redux/keys/types';
 import { LoginRetryCountState } from '@background/redux/login-retry-count/reducer';
 import { LoginRetryLockoutTimeState } from '@background/redux/login-retry-lockout-time/types';
+import { selectPopupState } from '@background/redux/popup-state';
 import { RateAppState } from '@background/redux/rate-app/types';
 import { RecentRecipientPublicKeysState } from '@background/redux/recent-recipient-public-keys/types';
 import { startBackground } from '@background/redux/sagas/actions';
 import { SettingsState } from '@background/redux/settings/types';
-import { RootState } from '@background/redux/store-types';
 import { TrustedWasmState } from '@background/redux/trusted-wasm/types';
-import { PopupState } from '@background/redux/types';
 
 // `storage.local` key names below are immutable and append-only: renaming or
 // repurposing one strands/drops the persisted data under the old name on
@@ -56,43 +55,6 @@ type StorageState = {
 };
 // this needs to be private
 let storeSingleton: ReturnType<typeof createStore>;
-
-// These state keys will be passed to popups. P0.1: cipher/hash material is
-// NOT broadcast — UI flows that need it use fetchPrivateState() explicitly.
-const selectPopupState = (state: RootState): PopupState => {
-  return {
-    keys: {
-      passwordHash: null,
-      passwordSaltHash: null,
-      keyDerivationSaltHash: null,
-      keysDoesExist: state.keys.keysDoesExist
-    },
-    session: { ...state.session, encryptionKeyHash: null },
-    loginRetryCount: state.loginRetryCount,
-    vault: state.vault,
-    // Narrowed on purpose. `requests` maps each in-flight requestId to its dapp
-    // origin, tabId and displaying window ids, and is read only by background
-    // dedup (sdk-response-to-tab) and selectOpenRequests. No UI replica reads
-    // it, so broadcasting it would leak dapp origins into every popup update.
-    // `exportKeysWindowId` is background-only because no replica reads it either.
-    windowManagement: {
-      windowId: state.windowManagement.windowId
-    },
-    loginRetryLockoutTime: state.loginRetryLockoutTime,
-    lastActivityTime: state.lastActivityTime,
-    activeOrigin: state.activeOrigin,
-    activeOriginFavicon: state.activeOriginFavicon,
-    settings: state.settings,
-    recentRecipientPublicKeys: state.recentRecipientPublicKeys,
-    accountInfo: state.accountInfo,
-    contacts: state.contacts,
-    rateApp: state.rateApp,
-    ledger: state.ledger,
-    appEvents: state.appEvents,
-    trustedWasm: state.trustedWasm,
-    csprNameExpirations: state.csprNameExpirations
-  };
-};
 
 // Only "no receiver" is expected: `runtime.sendMessage` delivers to every
 // extension context except the sender, so with no popup open Chrome rejects

@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 import { vaultUnlocked } from '../session/reducer';
 
-export type LastActivityTimeState = number | null;
+type LastActivityTimeState = number | null;
 
 const initialState = null as LastActivityTimeState;
 

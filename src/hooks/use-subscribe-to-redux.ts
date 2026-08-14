@@ -6,7 +6,7 @@ import {
   backgroundEvent
 } from '@background/background-events';
 import { rootAction } from '@background/redux';
-import { PopupState } from '@background/redux/types';
+import { PopupState } from '@background/redux/popup-state';
 
 type Props = {
   windowInitAction: (typeof rootAction)['windowManagement'][keyof (typeof rootAction)['windowManagement']];
