@@ -44,12 +44,18 @@ interface EIP712HashArtifacts {
   structHash?: string;
 }
 
+/** Refusals the wallet generates itself, with no approval window ever shown. */
+export enum SdkErrorCode {
+  tooManyPendingRequests = 'TOO_MANY_PENDING_REQUESTS'
+}
+
 export interface SignTypedDataResult {
   cancelled: boolean;
   signature: string | null;
   digest: string | null;
   publicKey: string | null;
   error: string | null;
+  /** When set, `cancelled: true` is a wallet refusal, not a user rejection. */
   errorCode?: string;
   hashArtifacts?: EIP712HashArtifacts;
 }

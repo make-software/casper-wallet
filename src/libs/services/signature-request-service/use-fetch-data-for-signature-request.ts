@@ -4,7 +4,7 @@ import { Transaction } from 'casper-js-sdk';
 import { ErrorMessages } from '@src/constants';
 
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
-import { txSignatureRequestRepository } from '@background/wallet-repositories';
+import { txSignatureRequestRepository } from '@background/signing-repositories';
 
 import { sdkMethod } from '@content/sdk-method';
 

@@ -1,4 +1,7 @@
-import { CasperNetworkName } from 'casper-js-sdk';
+// Type-only: importing the `CasperNetworkName` enum as a value would link the whole
+// `casper-js-sdk` UMD bundle into every consumer of these constants, and `@src/constants` is on
+// the startup path of every page entry. The chain-name strings are spelled out literally below.
+import type { CasperNetworkName } from 'casper-js-sdk';
 import { CasperNetwork } from 'casper-wallet-core';
 
 const SECOND = 1000;
@@ -320,24 +323,30 @@ export const DeployResultEntryPointNameMap: { [key: string]: string } = {
   ...CsprMarketDeployEntryPointNameMap
 };
 
+/**
+ * The `CasperNetworkName` values spelled out literally, so this module carries no runtime
+ * dependency on `casper-js-sdk`. The `${CasperNetworkName}` annotation is the union of the enum's
+ * values, so a value renamed in the SDK fails the build here rather than silently going unmapped.
+ */
 export const networkNameToSdkNetworkNameMap: Record<
   NetworkName,
-  CasperNetworkName
+  `${CasperNetworkName}`
 > = {
-  [NetworkName.Mainnet]: CasperNetworkName.Mainnet,
-  [NetworkName.Testnet]: CasperNetworkName.Testnet,
-  [NetworkName.Devnet]: CasperNetworkName.DevNet,
-  [NetworkName.Integration]: CasperNetworkName.Integration
+  [NetworkName.Mainnet]: 'casper',
+  [NetworkName.Testnet]: 'casper-test',
+  [NetworkName.Devnet]: 'dev-net',
+  [NetworkName.Integration]: 'integration-test'
 };
 
+/** Keyed by the `CasperNetworkName` values; see {@link networkNameToSdkNetworkNameMap}. */
 export const chainNameToNetworkSettingsMap: Record<
   CasperNetworkName,
   NetworkSetting
 > = {
-  [CasperNetworkName.Mainnet]: NetworkSetting.Mainnet,
-  [CasperNetworkName.Testnet]: NetworkSetting.Testnet,
-  [CasperNetworkName.DevNet]: NetworkSetting.Devnet,
-  [CasperNetworkName.Integration]: NetworkSetting.Integration
+  casper: NetworkSetting.Mainnet,
+  'casper-test': NetworkSetting.Testnet,
+  'dev-net': NetworkSetting.Devnet,
+  'integration-test': NetworkSetting.Integration
 };
 
 export const ErrorMessages = {
@@ -346,6 +355,13 @@ export const ErrorMessages = {
       message: 'Something went wrong',
       description:
         'Please check the browser console for error details, this will be valuable for our team to fix the issue.'
+    },
+    // A lazy route chunk failed to load — usually an extension update swapping
+    // the build out from under an open window. Reopening picks up the new one.
+    CHUNK_LOAD_ERROR: {
+      message: 'Casper Wallet was updated',
+      description:
+        'Please close this window and open the wallet again to continue.'
     },
     MISSING_SEARCH_PARAM: {
       message: 'Missing Search Parameter',
@@ -417,6 +433,11 @@ export const ErrorMessages = {
       message: 'Unsupported Target Type',
       description:
         'The target provided in the transfer data is neither an AccountHash nor a PublicKey. Ensure the target type is valid.'
+    },
+    REQUEST_NO_LONGER_AVAILABLE: {
+      message: 'Signature Request No Longer Available',
+      description:
+        'The data for this signature request is no longer available, so it cannot be signed. Please make the request again from the application.'
     }
   },
   decryptMessage: {

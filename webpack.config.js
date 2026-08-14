@@ -116,6 +116,26 @@ const getCSP = () => {
 // the setter prepended.
 const NONCE_SETTER = path.join(__dirname, 'src', 'set-webpack-nonce.ts');
 
+// The two kinds of entry this config produces, split by how the browser loads them.
+//
+// PAGE entries are HTML pages. Each gets a <script> per file from
+// HtmlWebpackPlugin, so webpack may hoist a module several of them share into a
+// separate chunk that every page loads alongside its own bundle — which is what
+// optimization.splitChunks below does.
+//
+// SINGLE_FILE entries cannot do that. The MV3 service worker is registered as one
+// file and the two content scripts are injected as one file each by the manifest;
+// nothing loads a sibling chunk for them. A module hoisted out of one would just
+// be missing at runtime, in a context with no page to report it.
+const PAGE_ENTRY_NAMES = [
+  'popup',
+  'importAccountWithFile',
+  'connectToApp',
+  'signatureRequest',
+  'onboarding'
+];
+const SINGLE_FILE_ENTRY_NAMES = ['background', 'contentScript', 'sdk'];
+
 // The manifest CSP and the bundles receive the nonce through two different plugins
 // (CopyWebpackPlugin's manifest transform and DefinePlugin), so "the two agree" holds
 // only for as long as both keep deriving from CSP_NONCE. WALLET-1388 is what it looks
@@ -202,6 +222,159 @@ const assertNonceIntegrity = (compiler, compilation) => {
     if (!carriesNonce) {
       throw new Error(
         `CSP nonce check: the manifest pins ${JSON.stringify(pinned)}, but no bundle of entry "${name}" contains it. That entry's stylesheets would be blocked.`
+      );
+    }
+  }
+};
+
+// Same argument as the nonce assertion above, one layer earlier: rather than trust
+// that the splitChunks predicate still names the right chunks, check the artifact.
+// Each single-file entry must still emit exactly one JS file — if splitChunks ever
+// reaches one, the build fails here instead of the service worker failing to boot.
+class AssertSingleFileEntries {
+  apply(compiler) {
+    compiler.hooks.thisCompilation.tap(
+      'AssertSingleFileEntries',
+      compilation => {
+        compilation.hooks.processAssets.tap(
+          {
+            name: 'AssertSingleFileEntries',
+            stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
+          },
+          () => assertSingleFileEntries(compilation)
+        );
+      }
+    );
+  }
+}
+
+const assertSingleFileEntries = compilation => {
+  for (const name of SINGLE_FILE_ENTRY_NAMES) {
+    const entrypoint = compilation.entrypoints.get(name);
+
+    if (!entrypoint) {
+      throw new Error(
+        `Single-file entry check: the build emitted no entry "${name}".`
+      );
+    }
+
+    // Initial files only — chunks behind a dynamic import are checked below.
+    const files = entrypoint.getFiles().filter(file => file.endsWith('.js'));
+
+    if (files.length !== 1) {
+      throw new Error(
+        `Single-file entry check: entry "${name}" emitted ${files.length} JS files (${files.join(', ')}), expected exactly 1. Nothing loads a second file for that entry, so those modules would be missing at runtime.`
+      );
+    }
+
+    // No async chunks either. With no `target` set, loading defaults to jsonp,
+    // and publicPath is '/': a content script would fetch the chunk from the
+    // visited site's origin and the callback would land in the page world,
+    // where the isolated world's promise never settles. The service worker has
+    // no document to append a <script> to at all.
+    //
+    // Nothing emits one today. To let the worker load chunks, set
+    // `chunkLoading: 'import-scripts'` on that entry first, then exempt it here.
+    const asyncFiles = collectAsyncFiles(entrypoint);
+
+    if (asyncFiles.length > 0) {
+      throw new Error(
+        `Single-file entry check: entry "${name}" emitted ${asyncFiles.length} async chunk(s) (${asyncFiles.join(', ')}). Nothing can load a chunk for that entry: a content script would fetch it from the visited page's origin and its jsonp callback would never reach this world, and the service worker has no document to load it with. Import the module statically, or use webpackMode "eager".`
+      );
+    }
+  }
+};
+
+// Transitive: a dynamic import inside a dynamically imported module is still an
+// async chunk of this entry.
+const collectAsyncFiles = (group, seen = new Set()) => {
+  const files = [];
+
+  for (const child of group.getChildren()) {
+    if (seen.has(child)) {
+      continue;
+    }
+
+    seen.add(child);
+    files.push(...child.getFiles().filter(file => file.endsWith('.js')));
+    files.push(...collectAsyncFiles(child, seen));
+  }
+
+  return files;
+};
+
+// casper-js-sdk is a prebuilt UMD blob with no ESM build, so one value import
+// costs ~900 KB no bundler can shake out — parsed on every popup open
+// (WALLET-1381). Whether it stays out turns on which *names* eagerly-reached
+// modules pull from the @libs/ui/components barrel: `NoConnectedLedger` re-links
+// it through @libs/services/ledger, and nothing else would fail. Hence a
+// tripwire rather than a one-off measurement.
+//
+// Not every page entry: importAccountWithFile and signatureRequest still link it
+// eagerly. Add one here once it is cleaned up.
+const SDK_FREE_PAGE_ENTRY_NAMES = ['popup', 'connectToApp', 'onboarding'];
+const CASPER_SDK_RESOURCE = /node_modules[\\/]casper-js-sdk[\\/]/;
+
+class AssertSdkFreePageEntries {
+  apply(compiler) {
+    compiler.hooks.thisCompilation.tap(
+      'AssertSdkFreePageEntries',
+      compilation => {
+        compilation.hooks.processAssets.tap(
+          {
+            name: 'AssertSdkFreePageEntries',
+            stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
+          },
+          () => assertSdkFreePageEntries(compilation)
+        );
+      }
+    );
+  }
+}
+
+// A ConcatenatedModule has no `resource` of its own — its merged modules hang
+// off `.modules`. Missing that would blind the check in production builds,
+// which is where concatenation runs.
+const resourcesOf = module =>
+  module.modules?.length
+    ? module.modules.flatMap(resourcesOf)
+    : [module.resource].filter(Boolean);
+
+const assertSdkFreePageEntries = compilation => {
+  for (const name of SDK_FREE_PAGE_ENTRY_NAMES) {
+    const entrypoint = compilation.entrypoints.get(name);
+
+    if (!entrypoint) {
+      throw new Error(
+        `SDK-free entry check: the build emitted no entry "${name}".`
+      );
+    }
+
+    const offenders = new Set();
+
+    // Initial chunks only: the entry's own plus any split chunk the page loads
+    // with it. Chunks behind a dynamic import are the intended fix, not a
+    // violation.
+    for (const chunk of entrypoint.chunks) {
+      for (const module of compilation.chunkGraph.getChunkModulesIterable(
+        chunk
+      )) {
+        if (!resourcesOf(module).some(r => CASPER_SDK_RESOURCE.test(r))) {
+          continue;
+        }
+
+        const issuer = compilation.moduleGraph.getIssuer(module);
+        offenders.add(
+          issuer?.resource
+            ? `${path.relative(__dirname, issuer.resource)} -> casper-js-sdk`
+            : 'casper-js-sdk'
+        );
+      }
+    }
+
+    if (offenders.size > 0) {
+      throw new Error(
+        `SDK-free entry check: entry "${name}" links casper-js-sdk into its initial chunks via:\n  ${[...offenders].join('\n  ')}\nThat is ~900 KB parsed on every open of this page. Import the SDK behind a dynamic import at a service boundary, or use a type-only import if you only need its types.`
       );
     }
   }
@@ -329,6 +502,8 @@ const options = {
     // Guards the two consumers above and below against drifting apart. Runs on
     // afterEmit, so registration order here does not matter.
     new AssertCspNonceIntegrity(),
+    new AssertSingleFileEntries(),
+    new AssertSdkFreePageEntries(),
     // manifest file generation
     new CopyWebpackPlugin({
       patterns: [
@@ -505,20 +680,51 @@ const options = {
   }
 };
 
+// Both lists above are hand-written, and splitChunks only opts in what PAGE_ENTRY_NAMES
+// names. An entry added to `entry` but to neither list would quietly keep a private copy
+// of everything — the exact thing this config exists to stop — so refuse to build instead.
+const unclassifiedEntries = Object.keys(options.entry).filter(
+  name =>
+    !PAGE_ENTRY_NAMES.includes(name) && !SINGLE_FILE_ENTRY_NAMES.includes(name)
+);
+
+if (unclassifiedEntries.length > 0) {
+  throw new Error(
+    `Entry ${unclassifiedEntries.map(name => `"${name}"`).join(', ')} is in neither PAGE_ENTRY_NAMES nor SINGLE_FILE_ENTRY_NAMES. Add it to whichever describes how the browser loads it — see the comment on those lists.`
+  );
+}
+
+options.optimization = {
+  // Before this, every entry bundled its own private copy of every shared dependency:
+  // casper-js-sdk alone shipped eight times over (7.3 MB of an 18 MB package), react-dom
+  // five times. Hoisting what the page entries share into chunks they all load removes
+  // the duplicates without changing what any page can reach (WALLET-1380).
+  splitChunks: {
+    // Not 'all'. That would also split the single-file entries, which cannot load a
+    // second chunk — see PAGE_ENTRY_NAMES / SINGLE_FILE_ENTRY_NAMES above, and
+    // AssertSingleFileEntries, which fails the build if this predicate stops holding.
+    //
+    // `!chunk.canBeInitial()` keeps webpack's default treatment of chunks created by a
+    // dynamic import (the built-in default is `chunks: 'async'`, which this replaces
+    // wholesale): they are loaded on demand by the webpack runtime of whichever entry
+    // pulled them in, so they stay splittable whatever their parent entry is.
+    chunks: chunk =>
+      PAGE_ENTRY_NAMES.includes(chunk.name) || !chunk.canBeInitial()
+  }
+};
+
 if (isDev) {
   options.devtool = 'cheap-module-source-map';
 } else {
-  options.optimization = {
-    minimize: true,
-    minimizer: [
-      new TerserPlugin({
-        extractComments: false,
-        terserOptions: {
-          safari10: true
-        }
-      })
-    ]
-  };
+  options.optimization.minimize = true;
+  options.optimization.minimizer = [
+    new TerserPlugin({
+      extractComments: false,
+      terserOptions: {
+        safari10: true
+      }
+    })
+  ];
 }
 
 // Bundle size report — strictly opt-in, zero footprint unless ANALYZE=true.

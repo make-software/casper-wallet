@@ -47,8 +47,10 @@ import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectKeysDoesExist } from './redux/keys/selectors';
 import { selectVaultIsLocked } from './redux/session/selectors';
 import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
+// to resolve all repositories — the signing pair lives in its own module so that the page
+// entries, which only read data, do not link casper-js-sdk through it
+import './signing-repositories';
 import { emitSdkEventToActiveTabsWithOrigin } from './utils';
-// to resolve all repositories
 import './wallet-repositories';
 
 // setup default onboarding action

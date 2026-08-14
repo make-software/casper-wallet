@@ -20,8 +20,11 @@ import {
   eip712PayloadReceived,
   siteDisconnected
 } from '@background/redux/vault/actions';
+import { getPayload } from '@background/redux/vault/payload-map';
 import {
   selectAccountNamesByOriginDict,
+  selectDeploysJsonById,
+  selectEip712JsonById,
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
@@ -33,6 +36,7 @@ import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
 import { sdkEvent } from '@content/sdk-event';
 import { SdkMethod, sdkMethod } from '@content/sdk-method';
+import { SdkErrorCode } from '@content/sdk-types';
 
 import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
 
@@ -50,6 +54,20 @@ const APPROVAL_REQUEST_TYPES: ReadonlySet<string> = new Set([
   sdkMethod.signTypedDataRequest.type,
   sdkMethod.decryptMessageRequest.type
 ]);
+
+const CAPACITY_REFUSAL_MESSAGE = 'Too many pending signature requests';
+
+// The dapp half of a capacity refusal is `errorCode`; this is the extension
+// half, so a wallet refusing every signature is not invisible on this side
+// either. Identifiers only — never the deploy, the typed data or the origin.
+// Log-only rather than `sagaError`: this path is dapp-triggerable, and a banner
+// mounted over every app surface would be a page's to spam.
+function reportCapacityRefusal(action: SdkMethod) {
+  console.error(
+    'sdk-methods: pending-payload map at capacity, request refused',
+    { requestId: action.meta.requestId, method: action.type }
+  );
+}
 
 export async function handleSdkMethod(
   action: SdkMethod,
@@ -210,12 +228,38 @@ export async function handleSdkMethod(
       };
     }
 
+    // No `await` before `windowRequestOpened` below: `reconcileStalePayloadsSaga`
+    // purges a payload that no descriptor and no window claims.
     store.dispatch(
       deployPayloadReceived({
         id: action.meta.requestId,
         json: deployJson
       })
     );
+
+    // At capacity `storePayload` refuses the INCOMING write. Answering here is
+    // what makes that residual visible: without it the window opens on a
+    // payload the page can never read.
+    if (
+      getPayload(
+        selectDeploysJsonById(store.getState()),
+        action.meta.requestId
+      ) == null
+    ) {
+      reportCapacityRefusal(action);
+
+      return {
+        handled: true,
+        response: sdkMethod.signResponse(
+          {
+            cancelled: true,
+            message: CAPACITY_REFUSAL_MESSAGE,
+            errorCode: SdkErrorCode.tooManyPendingRequests
+          },
+          { requestId: action.meta.requestId }
+        )
+      };
+    }
 
     store.dispatch(
       windowRequestOpened({
@@ -286,12 +330,38 @@ export async function handleSdkMethod(
 
     const { signingPublicKeyHex, typedData, options } = action.payload;
 
+    // Same synchronous block as the deploy branch, for the same reason.
     store.dispatch(
       eip712PayloadReceived({
         id: action.meta.requestId,
         json: JSON.stringify({ typedData, options })
       })
     );
+
+    // Same refusal as the deploy branch above, on the other map.
+    if (
+      getPayload(
+        selectEip712JsonById(store.getState()),
+        action.meta.requestId
+      ) == null
+    ) {
+      reportCapacityRefusal(action);
+
+      return {
+        handled: true,
+        response: sdkMethod.signTypedDataResponse(
+          {
+            cancelled: true,
+            signature: null,
+            digest: null,
+            publicKey: null,
+            error: CAPACITY_REFUSAL_MESSAGE,
+            errorCode: SdkErrorCode.tooManyPendingRequests
+          },
+          { requestId: action.meta.requestId }
+        )
+      };
+    }
 
     store.dispatch(
       windowRequestOpened({
