@@ -32,6 +32,13 @@ const trustedSender = {
   url: 'chrome-extension://ext-id/popup.html'
 } as Runtime.MessageSender;
 
+// The same, displaying request `r1` — every window a dapp flow opens carries the
+// id in its query string, the approval window and the permission window alike.
+const trustedSenderForR1 = {
+  id: 'ext-id',
+  url: 'chrome-extension://ext-id/signature-request.html?requestId=r1&origin=https%3A%2F%2Fdapp.example#/sign-deploy'
+} as Runtime.MessageSender;
+
 const enableOnboardingFlowMock = enableOnboardingFlow as jest.MockedFunction<
   typeof enableOnboardingFlow
 >;
@@ -203,23 +210,37 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
     // It must NOT reach the forwarding set: there is no reducer case for it, and
     // closing windows is a lifecycle decision that needs the requests map.
     const { store, dispatch } = makeStore();
-    const action = closeLedgerFlowWindows({ requestId: 'r1' });
+    const action = closeLedgerFlowWindows({
+      requestId: 'r1',
+      permissionWindowId: 20
+    });
 
-    const result = await handleReduxAction(action, trustedSender, store);
+    const result = await handleReduxAction(action, trustedSenderForR1, store);
 
-    expect(closeLedgerFlowWindowsMock).toHaveBeenCalledWith(store, 'r1');
+    expect(closeLedgerFlowWindowsMock).toHaveBeenCalledWith(store, {
+      requestId: 'r1',
+      permissionWindowId: 20
+    });
     expect(dispatch).not.toHaveBeenCalled();
     expect(result).toEqual({ handled: true, response: undefined });
   });
 
   it('closeLedgerFlowWindows without a requestId is routed with undefined', async () => {
     // The internal flows (import-account-from-ledger, sign-with-ledger-in-new-window)
-    // have no dapp request behind them and legitimately send no requestId.
+    // have no dapp request behind them and legitimately send no requestId — and
+    // their page URL carries none either, so the two still agree.
     const { store } = makeStore();
 
-    await handleReduxAction(closeLedgerFlowWindows({}), trustedSender, store);
+    await handleReduxAction(
+      closeLedgerFlowWindows({ permissionWindowId: 20 }),
+      trustedSender,
+      store
+    );
 
-    expect(closeLedgerFlowWindowsMock).toHaveBeenCalledWith(store, undefined);
+    expect(closeLedgerFlowWindowsMock).toHaveBeenCalledWith(store, {
+      requestId: undefined,
+      permissionWindowId: 20
+    });
   });
 
   it('closeLedgerFlowWindows from an untrusted sender is dropped', async () => {
@@ -238,6 +259,47 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
     expect(result).toEqual({ handled: true });
   });
 
+  it('a trusted page naming a request it does not display is dropped', async () => {
+    // The sender gate admits every wallet page and stops there, so on its own it
+    // lets the export-keys window close a live dapp approval. The handler does
+    // not consult `method` either: connect / switchAccount / decryptMessage would
+    // be torn down exactly like a Ledger sign.
+    const { store } = makeStore();
+
+    const result = await handleReduxAction(
+      closeLedgerFlowWindows({ requestId: 'r1' }),
+      trustedSender,
+      store
+    );
+
+    expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: true });
+  });
+
+  it('a trusted page omitting the id its own URL carries is dropped', async () => {
+    const { store } = makeStore();
+
+    await handleReduxAction(
+      closeLedgerFlowWindows({ permissionWindowId: 20 }),
+      trustedSenderForR1,
+      store
+    );
+
+    expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
+  });
+
+  it('an unparseable sender URL reads as "no request", so a named one is dropped', async () => {
+    const { store } = makeStore();
+
+    await handleReduxAction(
+      closeLedgerFlowWindows({ requestId: 'r1' }),
+      { id: 'ext-id', url: undefined } as Runtime.MessageSender,
+      store
+    );
+
+    expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
+  });
+
   it('a payload-less closeLedgerFlowWindows message does not throw', async () => {
     // `.match` checks the type, not the payload; the message crosses runtime.sendMessage.
     const { store } = makeStore();
@@ -248,7 +310,10 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
       store
     );
 
-    expect(closeLedgerFlowWindowsMock).toHaveBeenCalledWith(store, undefined);
+    expect(closeLedgerFlowWindowsMock).toHaveBeenCalledWith(store, {
+      requestId: undefined,
+      permissionWindowId: undefined
+    });
     expect(result).toEqual({ handled: true, response: undefined });
   });
 
@@ -265,7 +330,7 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
 
     const result = await handleReduxAction(
       closeLedgerFlowWindows({ requestId: 'r1' }),
-      trustedSender,
+      trustedSenderForR1,
       store
     );
     // The rejection is caught off the fire-and-forget promise, not awaited by

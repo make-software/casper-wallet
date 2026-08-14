@@ -117,6 +117,20 @@ import { handleCloseLedgerFlowWindows } from './close-ledger-flow-windows';
 import { isTrustedUiSender } from './private-state';
 import { HandlerResult } from './types';
 
+// The request a sender page is displaying, read off its own URL — the same
+// recovery `handleSdkResponseToTab` does for the dapp origin. Null when the page
+// carries no id (the internal Ledger flows) or the URL will not parse.
+function recoverRequestId(url: string | undefined): string | null {
+  if (!url) {
+    return null;
+  }
+  try {
+    return new URL(url).searchParams.get('requestId');
+  } catch {
+    return null;
+  }
+}
+
 export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
   [
     lockVault,
@@ -250,13 +264,26 @@ export async function handleReduxAction(
     // `runtime.sendMessage`. Read it defensively so a payload-less message
     // becomes the no-requestId (internal-flow) case instead of a TypeError the
     // router reports as a generic sendError.
-    const payload: Partial<{ requestId: string }> = action.payload ?? {};
+    const payload: Partial<{ requestId: string; permissionWindowId: number }> =
+      action.payload ?? {};
+
+    // The sender gate admits every wallet page, so on its own it lets any of
+    // them name any request — and this branch decides that request's lifecycle.
+    // Every legitimate dispatcher runs in a window whose URL carries the id
+    // (`use-ledger` builds the permission window's URL from the same params),
+    // so binding the two costs nothing and drops the mismatch.
+    if ((payload.requestId ?? null) !== recoverRequestId(sender.url)) {
+      return { handled: true };
+    }
 
     // Fire-and-forget: the dispatcher's document is one of the windows being
     // closed. `handleCloseLedgerFlowWindows` never rejects; the `.catch` is the
     // belt for a synchronous throw before its first await.
     void Promise.resolve(
-      handleCloseLedgerFlowWindows(store, payload.requestId)
+      handleCloseLedgerFlowWindows(store, {
+        requestId: payload.requestId,
+        permissionWindowId: payload.permissionWindowId
+      })
     ).catch(error =>
       console.error('closeLedgerFlowWindows: handler failed', error)
     );

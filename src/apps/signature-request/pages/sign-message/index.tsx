@@ -7,7 +7,7 @@ import { getSigningAccount } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
-import { runLedgerFlowControl } from '@signature-request/ledger-flow-controls';
+import { decideLedgerFlowControl } from '@signature-request/ledger-flow-controls';
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
@@ -180,7 +180,7 @@ export function SignMessagePage() {
     ledgerEventStatusToRender,
     makeSubmitLedgerAction,
     closeNewLedgerWindowsAndClearState,
-    windowId: ledgerPermissionWindowId
+    ownPermissionWindowId
   } = useLedger({
     ledgerAction: handleSign,
     beforeLedgerActionCb: async () => setShowLedgerConfirm(true),
@@ -199,15 +199,28 @@ export function SignMessagePage() {
     }
   });
 
-  const onErrorCtaPressed = () =>
-    runLedgerFlowControl(isLedgerNewWindow, ledgerPermissionWindowId, {
-      returnToMain: () => setShowLedgerConfirm(false),
-      dismissThisWindow: () =>
-        closeCurrentWindow().catch(error =>
-          console.error('sign-message: dismissing this window failed', error)
-        ),
-      endLedgerFlow: closeNewLedgerWindowsAndClearState
-    });
+  const onErrorCtaPressed = () => {
+    const decision = decideLedgerFlowControl(
+      isLedgerNewWindow,
+      ownPermissionWindowId
+    );
+
+    // Unconditional, as it was before the window-ownership work: `closeCurrentWindow`
+    // both rejects and — on a window that is not a popup — resolves having done
+    // nothing, and either one used to leave the user on a dead error screen.
+    setShowLedgerConfirm(false);
+
+    if (decision === 'end-flow') {
+      closeNewLedgerWindowsAndClearState();
+      return;
+    }
+
+    if (decision === 'dismiss-this-window') {
+      closeCurrentWindow().catch(error =>
+        console.error('sign-message: dismissing this window failed', error)
+      );
+    }
+  };
 
   const renderFooter = () => {
     if (shouldTryToConnectAccount) {

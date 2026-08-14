@@ -1,79 +1,31 @@
-import { runLedgerFlowControl } from './ledger-flow-controls';
+import { decideLedgerFlowControl } from './ledger-flow-controls';
 
-const makeEffects = () => ({
-  returnToMain: jest.fn(),
-  dismissThisWindow: jest.fn(),
-  endLedgerFlow: jest.fn()
-});
-
-describe('runLedgerFlowControl', () => {
+describe('decideLedgerFlowControl', () => {
   it('the permission window never dismisses itself', () => {
-    const effects = makeEffects();
-
-    runLedgerFlowControl(true, 9, effects);
-
-    expect(effects.returnToMain).toHaveBeenCalledTimes(1);
-    expect(effects.endLedgerFlow).toHaveBeenCalledTimes(1);
-    expect(effects.dismissThisWindow).not.toHaveBeenCalled();
+    expect(decideLedgerFlowControl(true, 9)).toBe('end-flow');
   });
 
-  it('the R8 regression: the approval window dismisses itself and does NOT end the flow', () => {
-    const effects = makeEffects();
+  it('the permission branch does not depend on the id', () => {
+    expect(decideLedgerFlowControl(true, null)).toBe('end-flow');
+  });
 
-    runLedgerFlowControl(false, 9, effects);
-
-    expect(effects.dismissThisWindow).toHaveBeenCalledTimes(1);
-    expect(effects.endLedgerFlow).not.toHaveBeenCalled();
+  it('the R8 regression: the approval window dismisses itself, it does not end the flow', () => {
+    expect(decideLedgerFlowControl(false, 9)).toBe('dismiss-this-window');
   });
 
   it('a plain device error still returns to the details screen', () => {
-    const effects = makeEffects();
-
-    runLedgerFlowControl(false, null, effects);
-
-    expect(effects.returnToMain).toHaveBeenCalledTimes(1);
-    expect(effects.dismissThisWindow).not.toHaveBeenCalled();
-    expect(effects.endLedgerFlow).not.toHaveBeenCalled();
+    expect(decideLedgerFlowControl(false, null)).toBe('return-to-main');
   });
 
-  it('the permission branch does not depend on the slot', () => {
-    const effects = makeEffects();
+  // The reason this takes an owned id rather than `state.ledger.windowId`: with
+  // the global slot, a foreign flow holding it turned every one of these into
+  // 'dismiss-this-window', and dismissing the request's only display cancels the
+  // dapp — reachable from the raw-JSON back arrow with no Ledger error in play.
+  it('a foreign flow holding the slot is not this flow, so nothing is dismissed', () => {
+    const ownPermissionWindowId = null;
 
-    runLedgerFlowControl(true, null, effects);
-
-    expect(effects.returnToMain).toHaveBeenCalledTimes(1);
-    expect(effects.endLedgerFlow).toHaveBeenCalledTimes(1);
-    expect(effects.dismissThisWindow).not.toHaveBeenCalled();
-  });
-
-  it('exactly one path runs for each input', () => {
-    const cases: Array<{
-      isPermissionWindow: boolean;
-      permissionWindowId: number | null;
-      expected: [number, number, number];
-    }> = [
-      { isPermissionWindow: true, permissionWindowId: 9, expected: [1, 0, 1] },
-      { isPermissionWindow: false, permissionWindowId: 9, expected: [0, 1, 0] },
-      {
-        isPermissionWindow: false,
-        permissionWindowId: null,
-        expected: [1, 0, 0]
-      },
-      {
-        isPermissionWindow: true,
-        permissionWindowId: null,
-        expected: [1, 0, 1]
-      }
-    ];
-
-    for (const { isPermissionWindow, permissionWindowId, expected } of cases) {
-      const effects = makeEffects();
-
-      runLedgerFlowControl(isPermissionWindow, permissionWindowId, effects);
-
-      expect(effects.returnToMain).toHaveBeenCalledTimes(expected[0]);
-      expect(effects.dismissThisWindow).toHaveBeenCalledTimes(expected[1]);
-      expect(effects.endLedgerFlow).toHaveBeenCalledTimes(expected[2]);
-    }
+    expect(decideLedgerFlowControl(false, ownPermissionWindowId)).toBe(
+      'return-to-main'
+    );
   });
 });

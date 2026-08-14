@@ -22,7 +22,12 @@ export {
  * `requestId` is absent for the internal flows (`import-account-from-ledger`,
  * `sign-with-ledger-in-new-window`), which have no dapp request behind them;
  * those own the permission window and nothing else.
+ *
+ * `permissionWindowId` is the dispatcher's own window — one it opened, or the
+ * one it renders in. `state.ledger.windowId` is a single global slot that a
+ * second flow can take over, so it is not evidence of whose window it names.
  */
-export const closeLedgerFlowWindows = createAction<{ requestId?: string }>(
-  'CLOSE_LEDGER_FLOW_WINDOWS'
-);
+export const closeLedgerFlowWindows = createAction<{
+  requestId?: string;
+  permissionWindowId?: number;
+}>('CLOSE_LEDGER_FLOW_WINDOWS');
