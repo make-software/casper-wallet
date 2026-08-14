@@ -6,6 +6,10 @@ import { SDK_HANDSHAKE_TYPE } from './sdk-channel';
 import { SdkEvent, sdkEvent } from './sdk-event';
 import { CasperWalletEventType } from './sdk-event-type';
 import { isSDKMethod, sdkMethod } from './sdk-method';
+import {
+  unknownSdkEventError,
+  unknownSdkMessageError
+} from './unknown-message-errors';
 
 // The private port handed to the page-world SDK during the handshake. Both the
 // direct `runtime.sendMessage` response and the delayed `runtime.onMessage`
@@ -70,13 +74,7 @@ async function handleSdkMessage(message: unknown) {
         return;
 
       default:
-        // Type only, for the same reason the no-port branch above logs type +
-        // requestId: this runs in the content script, whose console is the dapp
-        // page's console, and these envelopes carry signatureHex /
-        // encryptedMessage.
-        throw Error(
-          'Content: handleOnMessage unknown sdk message: ' + message.type
-        );
+        throw unknownSdkMessageError(message);
     }
   } else {
     emitSdkEvent(message as SdkEvent);
@@ -116,7 +114,7 @@ function emitSdkEvent(message: SdkEvent) {
       break;
 
     default:
-      throw Error('Content: emit sdk event unknown action: ' + message.type);
+      throw unknownSdkEventError(message);
   }
 
   const event = new CustomEvent(eventType, {

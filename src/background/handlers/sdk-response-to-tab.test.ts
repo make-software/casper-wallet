@@ -9,6 +9,7 @@ import {
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { sdkMethod } from '@content/sdk-method';
+import { unknownSdkMessageError } from '@content/unknown-message-errors';
 
 import { handleSdkResponseToTab } from './sdk-response-to-tab';
 
@@ -120,6 +121,17 @@ function makeMessage(tabId: number = TAB_ID): SdkResponseToTabMessage {
     ),
     tabId
   };
+}
+
+// What a rejecting `tabs.sendMessage` actually hands back: `webextension-polyfill`
+// relays the content-script listener's `Error.message` verbatim into this
+// promise (`sendPromisedResult` → `__mozWebExtensionPolyfillReject__` →
+// `new Error(reply.message)`), and that text is the one part of the logs below
+// this file does not control. Built by the real constructor rather than pinned
+// as a literal, so reverting the content-script redaction fails the no-payload
+// assertions here too, not only the content-script's own test.
+function deliveryRejection(): Error {
+  return unknownSdkMessageError(makeMessage().action);
 }
 
 function makeCancelMessage(tabId: number = TAB_ID): SdkResponseToTabMessage {
@@ -410,7 +422,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
   it('valid tabId, delivery rejects, origin present, fallback delivers (1) → optimistic responded + "delivered" sagaError', async () => {
     const { store, dispatch } = makeStore(undefined);
-    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    sendMessageMock.mockRejectedValue(deliveryRejection());
     emitToOriginMock.mockResolvedValue(1);
 
     const result = await handleSdkResponseToTab(
@@ -428,12 +440,15 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       {
         requestId: REQUEST_ID,
         tabId: TAB_ID,
-        type: expect.any(String),
+        type: sdkMethod.signResponse.type,
         delivered: 1
       },
       expect.any(Error)
     );
     expect(outerConsoleError).not.toHaveBeenCalled();
+    // SECURITY: the Error argument included — this is the branch that fires
+    // whenever another same-origin tab is open, i.e. the common outcome.
+    expect(loggedText(outerConsoleWarn)).not.toContain('deadbeef');
     expect(sendMessageMock).toHaveBeenCalledWith(TAB_ID, makeMessage().action);
 
     // Fallback broadcast to the same-origin active tab.
@@ -460,7 +475,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
   it('valid tabId, delivery rejects, origin present, fallback delivers ZERO → optimistic responded + "not delivered" sagaError', async () => {
     const { store, dispatch } = makeStore(undefined);
-    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    sendMessageMock.mockRejectedValue(deliveryRejection());
     emitToOriginMock.mockResolvedValue(0);
 
     const result = await handleSdkResponseToTab(
@@ -476,7 +491,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       {
         requestId: REQUEST_ID,
         tabId: TAB_ID,
-        type: expect.any(String),
+        type: sdkMethod.signResponse.type,
         delivered: 0
       },
       expect.any(Error)
@@ -496,7 +511,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
   it('valid tabId, delivery rejects, sender has NO origin → "not delivered" sagaError but no fallback', async () => {
     const { store, dispatch } = makeStore(undefined);
-    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    sendMessageMock.mockRejectedValue(deliveryRejection());
 
     const result = await handleSdkResponseToTab(
       makeMessage(),
@@ -510,7 +525,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       {
         requestId: REQUEST_ID,
         tabId: TAB_ID,
-        type: expect.any(String),
+        type: sdkMethod.signResponse.type,
         delivered: 0
       },
       expect.any(Error)
@@ -527,7 +542,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
   it('never puts the response payload in the delivery-failure log', async () => {
     const { store } = makeStore(undefined);
-    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    sendMessageMock.mockRejectedValue(deliveryRejection());
 
     await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
 
@@ -538,14 +553,14 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(outerConsoleError.mock.calls[0][1]).toEqual({
       requestId: REQUEST_ID,
       tabId: TAB_ID,
-      type: expect.any(String),
+      type: sdkMethod.signResponse.type,
       delivered: 0
     });
   });
 
   it('fallback emit THROWS (valid tab path) → handler still resolves, "not delivered" sagaError, does not reject', async () => {
     const { store, dispatch } = makeStore(undefined);
-    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    sendMessageMock.mockRejectedValue(deliveryRejection());
     emitToOriginMock.mockRejectedValue(new Error('tabs.query blew up'));
 
     const result = await handleSdkResponseToTab(
@@ -560,7 +575,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     // open": both return 0, and the caller picks banner copy from that 0.
     expect(outerConsoleError).toHaveBeenCalledWith(
       'deliverViaOrigin: same-origin fallback failed',
-      { origin: DAPP_ORIGIN, type: expect.any(String) },
+      { origin: DAPP_ORIGIN, type: sdkMethod.signResponse.type },
       expect.any(Error)
     );
     expect(loggedText(outerConsoleError)).not.toContain('deadbeef');
@@ -585,7 +600,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(emitToOriginMock).toHaveBeenCalledTimes(1);
     expect(outerConsoleError).toHaveBeenCalledWith(
       'deliverViaOrigin: same-origin fallback failed',
-      { origin: DAPP_ORIGIN, type: expect.any(String) },
+      { origin: DAPP_ORIGIN, type: sdkMethod.signResponse.type },
       expect.any(Error)
     );
     expect(loggedText(outerConsoleError)).not.toContain('deadbeef');

@@ -27,6 +27,11 @@ import {
 import { handleReduxAction } from '@background/handlers/redux-actions';
 import { handleSdkMethod } from '@background/handlers/sdk-methods';
 import { handleSdkResponseToTab } from '@background/handlers/sdk-response-to-tab';
+import {
+  unknownMessageError,
+  unknownReduxActionError,
+  unknownSdkMessageError
+} from '@background/handlers/unknown-message-errors';
 import { handleWindowRemoved } from '@background/handlers/window-removed';
 import { initKeepAlive } from '@background/keep-alive';
 import {
@@ -222,14 +227,7 @@ runtime.onMessage.addListener(
           if (result.handled) {
             return respond(result);
           }
-          // Identifiers only — an SDK action's payload can carry signature
-          // material. `requestId` stays: it is the correlation key every other
-          // log at this layer uses, and this error rejects the originating
-          // dapp's own promise, so the value is already known to the receiver.
-          // `isSDKMethod` guarantees both fields are strings.
-          throw Error(
-            `Background: Unknown sdk message: ${action.type} (requestId ${action.meta.requestId})`
-          );
+          throw unknownSdkMessageError(action);
         }
 
         // Must stay AFTER the isSDKMethod branch: a page-crafted message with
@@ -295,7 +293,7 @@ runtime.onMessage.addListener(
             return respond(legacyResult);
           }
 
-          throw Error('Background: Unknown redux action: ' + typedAction.type);
+          throw unknownReduxActionError(typedAction);
         }
 
         // this is added for not spamming with errors from bringweb3
@@ -303,13 +301,7 @@ runtime.onMessage.addListener(
           return;
         }
 
-        // Every message reaching this branch lacks a string `type` by
-        // definition, so `typeof action` would always say 'object'. Report what
-        // `type` actually was — equally non-revealing, and it distinguishes a
-        // missing field from a non-string one.
-        throw Error(
-          'Background: Unknown message: type is ' + typeof action?.type
-        );
+        throw unknownMessageError(action);
       } catch (error) {
         return sendError(error);
       }

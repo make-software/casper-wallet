@@ -43,6 +43,9 @@ module.exports = {
     'src/background/redux/**/reducer.ts',
     'src/background/handlers/**/*.ts',
     'src/background/redux/sagas/**/*.ts',
+    // The rest of `src/content/` is out of scope, but this module carries the
+    // dapp-facing redaction and is pure, so it is held to the `global` 100 gate.
+    'src/content/unknown-message-errors.ts',
     '!**/*.d.ts',
     '!**/*.test.ts',
     // Types-only modules — no executable statements/branches to cover.
