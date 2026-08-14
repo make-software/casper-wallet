@@ -56,4 +56,10 @@ describe('selectPopupState', () => {
     expect(payload.session.encryptionKeyHash).toBeNull();
     expect(Object.keys(payload.windowManagement)).toEqual(['windowId']);
   });
+
+  it('does not broadcast payloadSeqById — no replica reads it', () => {
+    const payload = selectPopupState(fullState);
+
+    expect('payloadSeqById' in payload.vault).toBe(false);
+  });
 });

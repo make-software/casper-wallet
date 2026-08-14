@@ -2,7 +2,7 @@ import { Reducer, configureStore } from '@reduxjs/toolkit';
 
 import { RootState } from '@background/redux/store-types';
 
-import { PopupState } from './popup-state';
+import { POPUP_SLICES, PopupSlice, PopupState } from './popup-state';
 import { ReduxAction } from './redux-action';
 import rootReducer from './root-reducer';
 
@@ -21,7 +21,17 @@ import rootReducer from './root-reducer';
  * private-key export window, `resetVault` calls `storage.local.clear()`, and the vault sagas
  * broadcast SDK events to dapp tabs — once per open replica.
  */
-export function createMainStoreReplica<T extends PopupState>(state: T) {
+export function createMainStoreReplica(state: PopupState) {
+  // Copy by allowlist, never by spread: a payload wider than PopupState would
+  // otherwise carry vaultCipher and the real password hashes into a page.
+  const slices = POPUP_SLICES.reduce(
+    (acc, key) => {
+      acc[key] = state[key] as never;
+      return acc;
+    },
+    {} as { [K in PopupSlice]: PopupState[K] }
+  );
+
   return configureStore({
     // Same cast as `createStore`: `rootReducer` is a `combineReducers` result, whose combined
     // shape RTK cannot infer, so it collapses `preloadedState` to a never-shape.
@@ -30,18 +40,16 @@ export function createMainStoreReplica<T extends PopupState>(state: T) {
       ReduxAction,
       Partial<RootState>
     >,
-    // `selectPopupState` strips `requests` and `exportKeysWindowId` (the
-    // background keeps both; no UI reads either). Restore the shape the slice
-    // reducer expects — an empty map is truthful for a replica's request
-    // descriptors, and `null` is truthful since no replica tracks the export
-    // window.
     preloadedState: {
-      ...state,
+      ...slices,
+      // Truthful defaults for what the broadcast deliberately omits: a replica
+      // tracks no request descriptors, no export window, no payload write order.
       windowManagement: {
-        ...state.windowManagement,
+        windowId: state.windowManagement.windowId,
         requests: {},
         exportKeysWindowId: null
-      }
+      },
+      vault: { ...state.vault, payloadSeqById: {} }
     },
     middleware: getDefaultMiddleware =>
       getDefaultMiddleware({

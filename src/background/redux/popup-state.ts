@@ -1,6 +1,7 @@
 import { KeysState } from '@background/redux/keys/types';
 import { SessionState } from '@background/redux/session/types';
 import { RootState } from '@background/redux/store-types';
+import { VaultState } from '@background/redux/vault/types';
 import { WindowManagementState } from '@background/redux/windowManagement/types';
 
 // The single definition of what leaves the background for UI replicas. A slice is
@@ -45,6 +46,8 @@ type PopupSliceOverrides = {
   // `requests` carries each in-flight request's dapp origin and tabId; no replica
   // reads it, and `exportKeysWindowId` is background-only.
   windowManagement: Pick<WindowManagementState, 'windowId'>;
+  // Write-order bookkeeping for the two payload maps — background-only.
+  vault: Omit<VaultState, 'payloadSeqById'>;
 };
 
 export type PopupState = {
@@ -62,7 +65,7 @@ export const selectPopupState = (state: RootState): PopupState => ({
   },
   session: { ...state.session, encryptionKeyHash: null },
   loginRetryCount: state.loginRetryCount,
-  vault: state.vault,
+  vault: popupVault(state.vault),
   windowManagement: { windowId: state.windowManagement.windowId },
   loginRetryLockoutTime: state.loginRetryLockoutTime,
   lastActivityTime: state.lastActivityTime,
@@ -78,3 +81,15 @@ export const selectPopupState = (state: RootState): PopupState => ({
   trustedWasm: state.trustedWasm,
   csprNameExpirations: state.csprNameExpirations
 });
+
+function popupVault(vault: VaultState): Omit<VaultState, 'payloadSeqById'> {
+  return {
+    secretPhrase: vault.secretPhrase,
+    accounts: vault.accounts,
+    accountNamesByOriginDict: vault.accountNamesByOriginDict,
+    siteNameByOriginDict: vault.siteNameByOriginDict,
+    activeAccountName: vault.activeAccountName,
+    jsonById: vault.jsonById,
+    eip712ById: vault.eip712ById
+  };
+}
