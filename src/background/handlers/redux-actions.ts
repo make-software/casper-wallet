@@ -73,7 +73,7 @@ import {
 } from '@background/redux/windowManagement/actions';
 
 import { enableOnboardingFlow } from '../open-onboarding-flow';
-import { keysReseted, keysUpdated } from '../redux/keys/actions';
+import { keysReseted } from '../redux/keys/actions';
 import { lastActivityTimeRefreshed } from '../redux/last-activity-time/actions';
 import {
   loginRetryCountIncremented,
@@ -97,7 +97,6 @@ import {
 } from '../redux/sagas/actions';
 import {
   contactEditingPermissionChanged,
-  encryptionKeyHashCreated,
   sessionReseted,
   vaultUnlocked
 } from '../redux/session/actions';
@@ -108,10 +107,7 @@ import {
   themeModeSettingChanged,
   vaultSettingsReseted
 } from '../redux/settings/actions';
-import {
-  vaultCipherCreated,
-  vaultCipherReseted
-} from '../redux/vault-cipher/actions';
+import { vaultCipherReseted } from '../redux/vault-cipher/actions';
 import { attachWindowToRequest } from './attach-window-to-request';
 import { isTrustedUiSender } from './private-state';
 import { HandlerResult } from './types';
@@ -128,7 +124,6 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     changePassword,
     deploysReseted,
     sessionReseted,
-    encryptionKeyHashCreated,
     vaultUnlocked,
     vaultLoaded,
     vaultReseted,
@@ -157,9 +152,7 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     importWindowInit,
     signWindowInit,
     vaultCipherReseted,
-    vaultCipherCreated,
     keysReseted,
-    keysUpdated,
     loginRetryCountReseted,
     loginRetryCountIncremented,
     loginRetryLockoutTimeSet,

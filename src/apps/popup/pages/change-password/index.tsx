@@ -1,17 +1,13 @@
 import React, { useCallback, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import { ChangePasswordPageContent } from '@popup/pages/change-password/content';
 import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { keysUpdated } from '@background/redux/keys/actions';
-import { encryptionKeyHashCreated } from '@background/redux/session/actions';
+import { changePassword } from '@background/redux/sagas/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { vaultCipherCreated } from '@background/redux/vault-cipher/actions';
-import { selectVault } from '@background/redux/vault/selectors';
 
 import {
   FooterButtonsContainer,
@@ -32,7 +28,6 @@ interface CreatePasswordWorkerMessageEvent extends MessageEvent {
     passwordSaltHash: string;
     newEncryptionKeyHash: string;
     keyDerivationSaltHash: string;
-    newVaultCipher: string;
   };
 }
 
@@ -42,8 +37,6 @@ export const ChangePasswordPage = () => {
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
-
-  const vault = useSelector(selectVault);
 
   const {
     register,
@@ -70,35 +63,22 @@ export const ChangePasswordPage = () => {
       new URL('@background/workers/create-password-worker.ts', import.meta.url)
     );
 
-    worker.postMessage({
-      password: data.password,
-      vault
-    });
+    worker.postMessage({ password: data.password });
 
     worker.onmessage = (event: CreatePasswordWorkerMessageEvent) => {
       const {
         passwordHash,
         passwordSaltHash,
         newEncryptionKeyHash,
-        keyDerivationSaltHash,
-        newVaultCipher
+        keyDerivationSaltHash
       } = event.data;
 
       dispatchToMainStore(
-        keysUpdated({
+        changePassword({
           passwordHash,
           passwordSaltHash,
-          keyDerivationSaltHash
-        })
-      );
-
-      dispatchToMainStore(
-        encryptionKeyHashCreated({ encryptionKeyHash: newEncryptionKeyHash })
-      );
-
-      dispatchToMainStore(
-        vaultCipherCreated({
-          vaultCipher: newVaultCipher
+          keyDerivationSaltHash,
+          newEncryptionKeyHash
         })
       );
     };

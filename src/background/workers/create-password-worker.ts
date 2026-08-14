@@ -1,22 +1,18 @@
-import { VaultState } from '@background/redux/vault/types';
-
 import {
   deriveEncryptionKey,
   encodePassword,
   generateRandomSaltHex
 } from '@libs/crypto/hashing';
 import { convertBytesToHex } from '@libs/crypto/utils';
-import { encryptVault } from '@libs/crypto/vault';
 
 interface CreatePasswordWorkerEvent extends MessageEvent {
   data: {
     password: string;
-    vault: VaultState;
   };
 }
 
 onmessage = async function (event: CreatePasswordWorkerEvent) {
-  const { password, vault } = event.data;
+  const { password } = event.data;
 
   const passwordSaltHash = generateRandomSaltHex();
   const passwordHash = await encodePassword(password, passwordSaltHash);
@@ -25,15 +21,11 @@ onmessage = async function (event: CreatePasswordWorkerEvent) {
     password,
     keyDerivationSaltHash
   );
-  const newEncryptionKeyHash = convertBytesToHex(newEncryptionKeyBytes);
-
-  const newVaultCipher = await encryptVault(newEncryptionKeyHash, vault);
 
   postMessage({
     passwordHash,
     passwordSaltHash,
-    newEncryptionKeyHash,
-    keyDerivationSaltHash,
-    newVaultCipher
+    newEncryptionKeyHash: convertBytesToHex(newEncryptionKeyBytes),
+    keyDerivationSaltHash
   });
 };

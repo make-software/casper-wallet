@@ -165,7 +165,18 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // Background-only: put by the export-keys-window saga (create / stale-heal)
     // and store.dispatch'd by the onRemoved listener on close. The UI
     // dispatches only openExportKeysWindow.
-    windowManagementActions.exportKeysWindowIdCleared
+    windowManagementActions.exportKeysWindowIdCleared,
+    // Background-only since WALLET-1385: `handleReduxAction` forwards
+    // allow-listed actions without checking which page sent them, so while
+    // these stayed forwardable a compromised extension page could overwrite
+    // the stored vault cipher with arbitrary bytes via `runtime.sendMessage`.
+    // `yield put` only, from vault-sagas (unlock / recover / change-password)
+    // and onboarding-sagas — never dispatched from the UI anymore now that
+    // change-password re-encrypts inside `changePasswordSaga` (which IS
+    // forwarded) instead of the page.
+    keysActions.keysUpdated,
+    sessionActions.encryptionKeyHashCreated,
+    vaultCipherActions.vaultCipherCreated
   ].map(creator => creator.type)
 );
 
