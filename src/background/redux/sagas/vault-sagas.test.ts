@@ -25,6 +25,7 @@ import { FIXED_ENCRYPTION_KEY_HASH } from '@libs/crypto/__fixtures';
 import { decryptVault, encryptVault } from '@libs/crypto/vault';
 
 import { keysUpdated } from '../keys/actions';
+import { reducer as keysReducer } from '../keys/reducer';
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
 import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
 import { loginRetryCountReseted } from '../login-retry-count/actions';
@@ -34,12 +35,14 @@ import {
   sessionReseted,
   vaultUnlocked
 } from '../session/actions';
+import { reducer as sessionReducer } from '../session/reducer';
 import {
   selectEncryptionKeyHash,
   selectVaultIsLocked
 } from '../session/selectors';
 import { selectTimeoutDurationSetting } from '../settings/selectors';
 import { vaultCipherCreated } from '../vault-cipher/actions';
+import { reducer as vaultCipherReducer } from '../vault-cipher/reducer';
 import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
 import {
   accountAdded,
@@ -61,6 +64,7 @@ import { reducer as windowManagementReducer } from '../windowManagement/reducer'
 import { selectOpenRequests } from '../windowManagement/selectors';
 import { WindowManagementState } from '../windowManagement/types';
 import {
+  changePassword,
   createAccount,
   lockVault,
   startBackground,
@@ -68,6 +72,7 @@ import {
 } from './actions';
 import {
   VAULT_REENCRYPT_DEBOUNCE_MS,
+  changePasswordSaga,
   delay,
   lockVaultSaga,
   reconcileStalePayloadsSaga,
@@ -1242,5 +1247,104 @@ describe('saga error channel', () => {
     expect(effects.put).toContainEqual(
       put(sagaError({ source: 'timeoutCounterSaga', message: 'read failed' }))
     );
+  });
+});
+
+describe('changePasswordSaga', () => {
+  const payload = {
+    passwordHash: 'new-password-hash',
+    passwordSaltHash: 'new-password-salt',
+    keyDerivationSaltHash: 'new-derivation-salt',
+    newEncryptionKeyHash: 'new-encryption-key'
+  };
+
+  const SEEDED_VAULT: VaultState = {
+    ...EMPTY_VAULT,
+    secretPhrase: ['w1', 'w2'],
+    accounts: [{ name: 'A', publicKey: 'pk', secretKey: 'sk', hidden: false }]
+  };
+
+  it('re-encrypts the background vault with the new key and stores the new material', async () => {
+    const encryptSpy = jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockResolvedValue('cipher-under-new-key');
+
+    await expectSaga(changePasswordSaga, changePassword(payload))
+      .withReducer(
+        combineReducers({
+          vault: vaultReducer,
+          session: sessionReducer,
+          keys: keysReducer,
+          vaultCipher: vaultCipherReducer
+        }) as never,
+        {
+          vault: SEEDED_VAULT,
+          session: {
+            encryptionKeyHash: 'old-key',
+            encryptionKeyDoesExist: true,
+            isLocked: false,
+            isContactEditingAllowed: false
+          }
+        } as never
+      )
+      .put(
+        keysUpdated({
+          passwordHash: payload.passwordHash,
+          passwordSaltHash: payload.passwordSaltHash,
+          keyDerivationSaltHash: payload.keyDerivationSaltHash
+        })
+      )
+      .put(
+        encryptionKeyHashCreated({
+          encryptionKeyHash: payload.newEncryptionKeyHash
+        })
+      )
+      .put(vaultCipherCreated({ vaultCipher: 'cipher-under-new-key' }))
+      .run();
+
+    // The key is the NEW one and the vault is the background's own, not a replica's.
+    expect(encryptSpy).toHaveBeenCalledWith(
+      payload.newEncryptionKeyHash,
+      expect.objectContaining({ secretPhrase: ['w1', 'w2'] })
+    );
+  });
+
+  it('does nothing at all when the vault locked while the page was deriving the key', async () => {
+    const encryptSpy = jest.spyOn(vaultCryptoModule, 'encryptVault');
+
+    await expectSaga(changePasswordSaga, changePassword(payload))
+      .withReducer(
+        combineReducers({
+          vault: vaultReducer,
+          session: sessionReducer,
+          keys: keysReducer,
+          vaultCipher: vaultCipherReducer
+        }) as never,
+        {
+          // Post-lock: session reset, vault emptied.
+          vault: EMPTY_VAULT,
+          session: {
+            encryptionKeyHash: null,
+            encryptionKeyDoesExist: false,
+            isLocked: true,
+            isContactEditingAllowed: false
+          }
+        } as never
+      )
+      .not.put.actionType(keysUpdated.type)
+      .not.put.actionType(encryptionKeyHashCreated.type)
+      .not.put.actionType(vaultCipherCreated.type)
+      // sagaError is the ONLY signal that reaches the user here — without it
+      // they'd walk away believing the new password took effect.
+      .put(
+        sagaError({
+          source: 'changePasswordSaga',
+          message: 'Password was not changed: the wallet locked. Try again.'
+        })
+      )
+      .run();
+
+    // Fail closed: the old password still works, and the stored cipher is untouched.
+    expect(encryptSpy).not.toHaveBeenCalled();
   });
 });

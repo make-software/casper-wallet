@@ -85,6 +85,7 @@ import {
   recipientPublicKeyReseted
 } from '../redux/recent-recipient-public-keys/actions';
 import {
+  changePassword,
   createAccount,
   initKeys,
   initVault,
@@ -124,6 +125,7 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     initVault,
     recoverVault,
     createAccount,
+    changePassword,
     deploysReseted,
     sessionReseted,
     encryptionKeyHashCreated,

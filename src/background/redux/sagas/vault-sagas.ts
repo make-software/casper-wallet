@@ -79,6 +79,7 @@ import {
 } from '../windowManagement/actions';
 import { selectOpenRequests } from '../windowManagement/selectors';
 import {
+  changePassword,
   createAccount,
   lockVault,
   startBackground,
@@ -145,6 +146,7 @@ export function* vaultSagas() {
     updateVaultCipher
   );
   yield takeLatest(createAccount.type, createAccountSaga);
+  yield takeLatest(changePassword.type, changePasswordSaga);
 }
 
 /**
@@ -189,6 +191,46 @@ export function* lockVaultSaga() {
       sagaError({ source: 'lockVaultSaga', message: errorToMessage(err) })
     );
   }
+}
+
+// The page derives the new password material off-thread (argon2 cannot run in an
+// MV3 service worker) but never sees the vault: re-encryption happens here, against
+// the background's own state.
+export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
+  const isLocked = yield* sagaSelect(selectVaultIsLocked);
+
+  // The argon2 window is long enough for a manual lock, an idle timeout, or an MV3
+  // service-worker restart to land first. `lockVaultSaga` has already emptied the
+  // vault by then, and `encryptionKeyHashCreated` does not clear `isLocked`, so
+  // without this the new key would be stored and `updateVaultCipher` would persist
+  // an EMPTY vault over the real cipher. Fail closed: the old password keeps working.
+  if (isLocked) {
+    yield put(
+      sagaError({
+        source: 'changePasswordSaga',
+        message: 'Password was not changed: the wallet locked. Try again.'
+      })
+    );
+    return;
+  }
+
+  const {
+    passwordHash,
+    passwordSaltHash,
+    keyDerivationSaltHash,
+    newEncryptionKeyHash
+  } = action.payload;
+
+  yield put(
+    keysUpdated({ passwordHash, passwordSaltHash, keyDerivationSaltHash })
+  );
+  yield put(
+    encryptionKeyHashCreated({ encryptionKeyHash: newEncryptionKeyHash })
+  );
+
+  // Not atomic — each put persists separately — but the window between "new key
+  // stored" and "cipher rewritten" shrinks from a page round trip to ~2ms.
+  yield* updateVaultCipher();
 }
 
 /**
