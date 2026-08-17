@@ -27,6 +27,11 @@ import {
 import { handleReduxAction } from '@background/handlers/redux-actions';
 import { handleSdkMethod } from '@background/handlers/sdk-methods';
 import { handleSdkResponseToTab } from '@background/handlers/sdk-response-to-tab';
+import {
+  unknownMessageError,
+  unknownReduxActionError,
+  unknownSdkMessageError
+} from '@background/handlers/unknown-message-errors';
 import { handleWindowRemoved } from '@background/handlers/window-removed';
 import { initKeepAlive } from '@background/keep-alive';
 import {
@@ -222,9 +227,7 @@ runtime.onMessage.addListener(
           if (result.handled) {
             return respond(result);
           }
-          throw Error(
-            'Background: Unknown sdk message: ' + JSON.stringify(action)
-          );
+          throw unknownSdkMessageError(action);
         }
 
         // Must stay AFTER the isSDKMethod branch: a page-crafted message with
@@ -290,9 +293,7 @@ runtime.onMessage.addListener(
             return respond(legacyResult);
           }
 
-          throw Error(
-            'Background: Unknown redux action: ' + JSON.stringify(action)
-          );
+          throw unknownReduxActionError(typedAction);
         }
 
         // this is added for not spamming with errors from bringweb3
@@ -300,7 +301,7 @@ runtime.onMessage.addListener(
           return;
         }
 
-        throw Error('Background: Unknown message: ' + JSON.stringify(action));
+        throw unknownMessageError(action);
       } catch (error) {
         return sendError(error);
       }
