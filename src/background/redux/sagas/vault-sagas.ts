@@ -26,7 +26,6 @@ import { sdkEvent } from '@content/sdk-event';
 
 import { deriveKeyPair } from '@libs/crypto';
 import { encryptVault } from '@libs/crypto/vault';
-import { Account } from '@libs/types/account';
 
 import { accountInfoReset } from '../account-info/actions';
 import { keysUpdated } from '../keys/actions';
@@ -66,6 +65,7 @@ import {
   vaultLoaded,
   vaultReseted
 } from '../vault/actions';
+import { findNextDerivedIndex } from '../vault/next-derived-index';
 import {
   selectAccountNamesByOriginDict,
   selectSecretPhrase,
@@ -662,31 +662,13 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
       throw Error('Account name exist');
     }
 
-    let isAccountAlreadyAdded = true;
-    let i = 0;
-
     const secretPhrase = yield* sagaSelect(selectSecretPhrase);
+    const index = findNextDerivedIndex(secretPhrase, derivedAccounts);
+    const keyPair = deriveKeyPair(secretPhrase, index);
 
-    while (isAccountAlreadyAdded) {
-      const keyPair = deriveKeyPair(secretPhrase, i);
-      if (
-        !derivedAccounts.some(
-          account => account.publicKey === keyPair.publicKey
-        )
-      ) {
-        isAccountAlreadyAdded = false;
-
-        const account: Account = {
-          ...keyPair,
-          name,
-          hidden: false,
-          derivationIndex: i
-        };
-        yield put(accountAdded(account));
-        break;
-      }
-      i++;
-    }
+    yield put(
+      accountAdded({ ...keyPair, name, hidden: false, derivationIndex: index })
+    );
   } catch (err) {
     console.error(err);
     yield put(

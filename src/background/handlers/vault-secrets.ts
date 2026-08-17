@@ -2,7 +2,12 @@ import { Runtime, runtime } from 'webextension-polyfill';
 
 import { MainStore } from '@background/redux/get-main-store';
 import { selectVaultIsLocked } from '@background/redux/session/selectors';
-import { selectSecretPhrase } from '@background/redux/vault/selectors';
+import { findNextDerivedIndex } from '@background/redux/vault/next-derived-index';
+import {
+  selectSecretPhrase,
+  selectVaultAccountsNames,
+  selectVaultDerivedAccounts
+} from '@background/redux/vault/selectors';
 
 import { SecretPhrase } from '@libs/crypto';
 
@@ -10,6 +15,8 @@ import { isTrustedUiSender } from './private-state';
 import { HandlerResult } from './types';
 
 export const SECRET_PHRASE_REQUEST_TYPE = 'SECRET_PHRASE_REQUEST' as const;
+export const SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE =
+  'SUGGESTED_ACCOUNT_NAME_REQUEST' as const;
 
 const POPUP_PAGE = '/popup.html';
 
@@ -19,7 +26,8 @@ const POPUP_PAGE = '/popup.html';
 // phrase. Same shape as the request-window allowlist in open-request-windows.ts.
 // The export-keys window is popup.html too (sagas/export-keys-window-saga.ts:28).
 const ALLOWED_PAGES: Record<string, readonly string[]> = {
-  [SECRET_PHRASE_REQUEST_TYPE]: [POPUP_PAGE]
+  [SECRET_PHRASE_REQUEST_TYPE]: [POPUP_PAGE],
+  [SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE]: [POPUP_PAGE]
 };
 
 function isAllowedPage(type: string, sender: Runtime.MessageSender): boolean {
@@ -70,6 +78,24 @@ export function handleVaultSecrets(
       return { handled: true, response };
     }
 
+    case SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE: {
+      const derivedAccounts = selectVaultDerivedAccounts(state);
+      const existingNames = selectVaultAccountsNames(state);
+      const index = findNextDerivedIndex(
+        selectSecretPhrase(state),
+        derivedAccounts
+      );
+
+      let sequenceNumber = index + 1;
+      let name = `Account ${sequenceNumber}`;
+      while (existingNames.includes(name)) {
+        sequenceNumber++;
+        name = `Account ${sequenceNumber}`;
+      }
+
+      return { handled: true, response: name };
+    }
+
     default:
       return { handled: false };
   }
@@ -78,4 +104,9 @@ export function handleVaultSecrets(
 /** UI side. Only pages listed in ALLOWED_PAGES get an answer. */
 export function fetchSecretPhrase(): Promise<SecretPhrase | null> {
   return runtime.sendMessage({ type: SECRET_PHRASE_REQUEST_TYPE });
+}
+
+/** UI side. Only pages listed in ALLOWED_PAGES get an answer. */
+export function fetchSuggestedAccountName(): Promise<string | null> {
+  return runtime.sendMessage({ type: SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE });
 }

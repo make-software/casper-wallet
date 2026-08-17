@@ -2,9 +2,14 @@ import { Runtime, runtime } from 'webextension-polyfill';
 
 import { MainStore } from '@background/redux/get-main-store';
 
+import { deriveKeyPair } from '@libs/crypto';
+import { FIXED_SECRET_PHRASE } from '@libs/crypto/__fixtures';
+
 import {
   SECRET_PHRASE_REQUEST_TYPE,
+  SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE,
   fetchSecretPhrase,
+  fetchSuggestedAccountName,
   handleVaultSecrets
 } from './vault-secrets';
 
@@ -123,6 +128,85 @@ describe('handleVaultSecrets — SECRET_PHRASE_REQUEST', () => {
   });
 });
 
+describe('handleVaultSecrets — SUGGESTED_ACCOUNT_NAME_REQUEST', () => {
+  it('suggests "Account 1" for an empty vault', () => {
+    expect(
+      handleVaultSecrets(
+        { type: SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE },
+        POPUP_SENDER,
+        storeWith({
+          session: { isLocked: false },
+          vault: { secretPhrase: FIXED_SECRET_PHRASE, accounts: [] }
+        })
+      )
+    ).toEqual({ handled: true, response: 'Account 1' });
+  });
+
+  it('skips a name already taken by an imported account', () => {
+    // imported: true keeps selectVaultDerivedAccounts empty, so the derived
+    // index stays 0 and only the name-collision loop is exercised.
+    expect(
+      handleVaultSecrets(
+        { type: SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE },
+        POPUP_SENDER,
+        storeWith({
+          session: { isLocked: false },
+          vault: {
+            secretPhrase: FIXED_SECRET_PHRASE,
+            accounts: [
+              {
+                name: 'Account 1',
+                imported: true,
+                publicKey: 'imported-key',
+                secretKey: '',
+                hidden: false
+              }
+            ]
+          }
+        })
+      )
+    ).toEqual({ handled: true, response: 'Account 2' });
+  });
+
+  it('refuses a page that has no business suggesting names', () => {
+    expect(
+      handleVaultSecrets(
+        { type: SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE },
+        CONNECT_SENDER,
+        storeWith(unlocked)
+      )
+    ).toEqual({ handled: true, response: null });
+  });
+
+  it('ignores an imported account even when its public key matches a derived index', () => {
+    // The account IS index 0's key pair, but imported: true — only a handler
+    // wired to selectVaultDerivedAccounts (not selectVaultAccounts) sees index
+    // 0 as free and answers 'Account 1'; a wrong selector would answer 'Account 2'.
+    const derivedAccount0 = deriveKeyPair(FIXED_SECRET_PHRASE, 0);
+
+    expect(
+      handleVaultSecrets(
+        { type: SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE },
+        POPUP_SENDER,
+        storeWith({
+          session: { isLocked: false },
+          vault: {
+            secretPhrase: FIXED_SECRET_PHRASE,
+            accounts: [
+              {
+                ...derivedAccount0,
+                name: 'Imported',
+                imported: true,
+                hidden: false
+              }
+            ]
+          }
+        })
+      )
+    ).toEqual({ handled: true, response: 'Account 1' });
+  });
+});
+
 // The client fns live in this file, which is under the handlers coverage floor
 // (functions 100%) — same reason private-state.test.ts covers fetchPrivateState.
 describe('fetchSecretPhrase', () => {
@@ -132,6 +216,17 @@ describe('fetchSecretPhrase', () => {
     await expect(fetchSecretPhrase()).resolves.toEqual(['w1']);
     expect(runtime.sendMessage).toHaveBeenCalledWith({
       type: SECRET_PHRASE_REQUEST_TYPE
+    });
+  });
+});
+
+describe('fetchSuggestedAccountName', () => {
+  it('asks the background for the suggested name', async () => {
+    (runtime.sendMessage as jest.Mock).mockResolvedValue('Account 2');
+
+    await expect(fetchSuggestedAccountName()).resolves.toEqual('Account 2');
+    expect(runtime.sendMessage).toHaveBeenCalledWith({
+      type: SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE
     });
   });
 });
