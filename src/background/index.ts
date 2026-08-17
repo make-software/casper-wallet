@@ -32,6 +32,7 @@ import {
   unknownReduxActionError,
   unknownSdkMessageError
 } from '@background/handlers/unknown-message-errors';
+import { handleVaultSecrets } from '@background/handlers/vault-secrets';
 import { handleWindowRemoved } from '@background/handlers/window-removed';
 import { initKeepAlive } from '@background/keep-alive';
 import {
@@ -291,6 +292,15 @@ runtime.onMessage.addListener(
           const legacyResult = handleLegacyImport(typedAction, sender, store);
           if (legacyResult.handled) {
             return respond(legacyResult);
+          }
+
+          const vaultSecretsResult = handleVaultSecrets(
+            typedAction,
+            sender,
+            store
+          );
+          if (vaultSecretsResult.handled) {
+            return respond(vaultSecretsResult);
           }
 
           throw unknownReduxActionError(typedAction);

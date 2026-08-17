@@ -4,11 +4,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
+import { useSecretPhrase } from '@hooks/use-secret-phrase';
+
 import {
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupLayout
+  PopupLayout,
+  PrivateStateErrorPage
 } from '@libs/layout';
 import { Button } from '@libs/ui/components';
 
@@ -21,6 +24,9 @@ export function BackupSecretPhrasePage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
+  // Fetch only after password re-confirmation
+  const { secretPhrase, error, retry } = useSecretPhrase(isPasswordConfirmed);
+
   const setPasswordConfirmed = useCallback(() => {
     setIsPasswordConfirmed(true);
   }, []);
@@ -29,6 +35,14 @@ export function BackupSecretPhrasePage() {
     return (
       <PasswordProtectionPage setPasswordConfirmed={setPasswordConfirmed} />
     );
+  }
+
+  if (error) {
+    return <PrivateStateErrorPage layout="popup" onRetry={retry} />;
+  }
+
+  if (secretPhrase == null) {
+    return null;
   }
 
   return (
@@ -43,7 +57,9 @@ export function BackupSecretPhrasePage() {
           )}
         />
       )}
-      renderContent={() => <BackupSecretPhrasePageContent />}
+      renderContent={() => (
+        <BackupSecretPhrasePageContent phrase={secretPhrase} />
+      )}
       renderFooter={() => (
         <FooterButtonsContainer>
           <Button onClick={() => navigate(RouterPath.Home)}>
