@@ -63,3 +63,34 @@ describe('selectPopupState', () => {
     expect('payloadSeqById' in payload.vault).toBe(false);
   });
 });
+
+const vaultWithSecrets = {
+  ...fullState.vault,
+  secretPhrase: ['abandon', 'ability', 'able'],
+  accounts: [
+    { name: 'A', publicKey: 'pkA', secretKey: 'SECRET-KEY-A', hidden: false },
+    { name: 'Watch', publicKey: 'pkW', secretKey: '', hidden: false }
+  ]
+};
+
+describe('selectPopupState — vault sanitization', () => {
+  it('never broadcasts the secret phrase', () => {
+    const payload = selectPopupState({ ...fullState, vault: vaultWithSecrets });
+
+    expect(payload.vault.secretPhrase).toBeNull();
+    expect(JSON.stringify(payload)).not.toContain('abandon');
+  });
+
+  it('blanks every account secret key', () => {
+    const payload = selectPopupState({ ...fullState, vault: vaultWithSecrets });
+
+    expect(payload.vault.accounts.map(a => a.secretKey)).toEqual(['', '']);
+    expect(JSON.stringify(payload)).not.toContain('SECRET-KEY-A');
+  });
+
+  it('marks accounts with no signing key in the vault (watch-only or Ledger) via `watching`', () => {
+    const payload = selectPopupState({ ...fullState, vault: vaultWithSecrets });
+
+    expect(payload.vault.accounts.map(a => a.watching)).toEqual([false, true]);
+  });
+});

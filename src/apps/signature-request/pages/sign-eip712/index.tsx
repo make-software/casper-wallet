@@ -139,9 +139,7 @@ export function SignEip712Page() {
     throw error;
   }
 
-  // `watching` is set by the broadcast sanitizer; the fallback keeps the guard alive
-  // in the commit before that lands.
-  if (signingAccount.watching ?? signingAccount.secretKey === '') {
+  if (signingAccount.watching) {
     const error = Error(
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
