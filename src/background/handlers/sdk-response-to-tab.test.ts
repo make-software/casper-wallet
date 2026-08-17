@@ -77,10 +77,11 @@ const OPEN_REQUEST: Request = {
 
 // Build a fake store whose `requests` map carries the desired request entry
 // for the request under test, plus a spied dispatch.
-function makeStore(request?: Request) {
+function makeStore(request?: Request, ledgerWindowId: number | null = null) {
   const dispatch = jest.fn();
   const store = {
     getState: () => ({
+      ledger: { windowId: ledgerWindowId },
       windowManagement: {
         windowId: null,
         exportKeysWindowId: null,
@@ -96,7 +97,7 @@ function makeStore(request?: Request) {
 // `requests` map, so a subsequent `selectRequestStatus` reflects the optimistic
 // mark. Used to prove the dedupe is atomic across an in-flight (un-awaited) send.
 function makeStatefulStore() {
-  const requests: Record<string, Request> = {};
+  const requests: Record<string, Request> = { [REQUEST_ID]: OPEN_REQUEST };
   const dispatch = jest.fn((action: { payload?: { requestId?: string } }) => {
     const id = action?.payload?.requestId;
     if (id != null) {
@@ -105,6 +106,7 @@ function makeStatefulStore() {
   });
   const store = {
     getState: () => ({
+      ledger: { windowId: null },
       windowManagement: { windowId: null, exportKeysWindowId: null, requests }
     }),
     dispatch
@@ -186,8 +188,8 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     outerConsoleWarn.mockRestore();
   });
 
-  it('fresh request (no prior status) → delivers to the tab AND marks responded', async () => {
-    const { store, dispatch } = makeStore(undefined);
+  it('an open request → delivers to the tab AND marks responded', async () => {
+    const { store, dispatch } = makeStore(OPEN_REQUEST);
     const message = makeMessage();
 
     const result = await handleSdkResponseToTab(message, UI_SENDER, store);
@@ -332,7 +334,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('invalid tabId, no origin → surfaces "not delivered" sagaError, no delivery, does not mark responded', async () => {
-    const { store, dispatch } = makeStore(undefined);
+    const { store, dispatch } = makeStore(OPEN_REQUEST);
 
     const result = await handleSdkResponseToTab(
       makeMessage(-1),
@@ -365,7 +367,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('invalid tabId, origin present, fallback delivers (1) → marks responded, "delivered" sagaError', async () => {
-    const { store, dispatch } = makeStore(undefined);
+    const { store, dispatch } = makeStore(OPEN_REQUEST);
     emitToOriginMock.mockResolvedValue(1);
 
     const result = await handleSdkResponseToTab(
@@ -396,7 +398,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('invalid tabId, origin present, fallback delivers ZERO → does NOT mark responded, "not delivered" sagaError', async () => {
-    const { store, dispatch } = makeStore(undefined);
+    const { store, dispatch } = makeStore(OPEN_REQUEST);
     emitToOriginMock.mockResolvedValue(0);
 
     const result = await handleSdkResponseToTab(
@@ -421,7 +423,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('valid tabId, delivery rejects, origin present, fallback delivers (1) → optimistic responded + "delivered" sagaError', async () => {
-    const { store, dispatch } = makeStore(undefined);
+    const { store, dispatch } = makeStore(OPEN_REQUEST);
     sendMessageMock.mockRejectedValue(deliveryRejection());
     emitToOriginMock.mockResolvedValue(1);
 
@@ -474,7 +476,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('valid tabId, delivery rejects, origin present, fallback delivers ZERO → optimistic responded + "not delivered" sagaError', async () => {
-    const { store, dispatch } = makeStore(undefined);
+    const { store, dispatch } = makeStore(OPEN_REQUEST);
     sendMessageMock.mockRejectedValue(deliveryRejection());
     emitToOriginMock.mockResolvedValue(0);
 
@@ -510,7 +512,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('valid tabId, delivery rejects, sender has NO origin → "not delivered" sagaError but no fallback', async () => {
-    const { store, dispatch } = makeStore(undefined);
+    const { store, dispatch } = makeStore(OPEN_REQUEST);
     sendMessageMock.mockRejectedValue(deliveryRejection());
 
     const result = await handleSdkResponseToTab(
@@ -559,7 +561,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('fallback emit THROWS (valid tab path) → handler still resolves, "not delivered" sagaError, does not reject', async () => {
-    const { store, dispatch } = makeStore(undefined);
+    const { store, dispatch } = makeStore(OPEN_REQUEST);
     sendMessageMock.mockRejectedValue(deliveryRejection());
     emitToOriginMock.mockRejectedValue(new Error('tabs.query blew up'));
 
@@ -588,7 +590,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('fallback emit THROWS (invalid tab path) → handler still resolves, no responded, "not delivered" sagaError', async () => {
-    const { store, dispatch } = makeStore(undefined);
+    const { store, dispatch } = makeStore(OPEN_REQUEST);
     emitToOriginMock.mockRejectedValue(new Error('tabs.query blew up'));
 
     const result = await handleSdkResponseToTab(
@@ -641,7 +643,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('non-matching message.type → { handled: false } (passes to the next handler)', async () => {
-    const { store } = makeStore(undefined);
+    const { store } = makeStore(OPEN_REQUEST);
 
     const result = await handleSdkResponseToTab(
       { type: 'SomethingElse' } as unknown as SdkResponseToTabMessage,
@@ -654,7 +656,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('untrusted sender → dropped (handled, no delivery, no dispatch)', async () => {
-    const { store, dispatch } = makeStore(undefined);
+    const { store, dispatch } = makeStore(OPEN_REQUEST);
     const untrustedSender = {
       id: 'other-ext',
       url: 'https://evil.example/page'
@@ -669,5 +671,19 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(result).toEqual({ handled: true });
     expect(sendMessageMock).not.toHaveBeenCalled();
     expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('no descriptor (service worker restarted) → still delivers, dispatches nothing', async () => {
+    const { store, dispatch } = makeStore(undefined);
+
+    const result = await handleSdkResponseToTab(
+      makeMessage(),
+      UI_SENDER,
+      store
+    );
+
+    expect(sendMessageMock).toHaveBeenCalledTimes(1);
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: true, response: undefined });
   });
 });

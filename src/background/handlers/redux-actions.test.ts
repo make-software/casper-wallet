@@ -4,15 +4,20 @@ import { backgroundEvent } from '@background/background-events';
 import { enableOnboardingFlow } from '@background/open-onboarding-flow';
 import { dismissSagaError } from '@background/redux/app-events/actions';
 import { MainStore } from '@background/redux/get-main-store';
+import { closeLedgerFlowWindows } from '@background/redux/ledger/actions';
 import { lockVault, resetVault } from '@background/redux/sagas/actions';
 import { accountRenamed } from '@background/redux/vault/actions';
 import { windowRequestWindowAttached } from '@background/redux/windowManagement/actions';
 
+import { handleCloseLedgerFlowWindows } from './close-ledger-flow-windows';
 import { handleReduxAction } from './redux-actions';
 
 // enableOnboardingFlow touches webextension-polyfill; stub it and assert it runs.
 jest.mock('@background/open-onboarding-flow', () => ({
   enableOnboardingFlow: jest.fn().mockResolvedValue(undefined)
+}));
+jest.mock('./close-ledger-flow-windows', () => ({
+  handleCloseLedgerFlowWindows: jest.fn().mockResolvedValue(undefined)
 }));
 // attach-window-to-request reaches for `windows` directly. Stub the module so
 // the dedicated attach branch can be exercised without a browser.
@@ -27,9 +32,21 @@ const trustedSender = {
   url: 'chrome-extension://ext-id/popup.html'
 } as Runtime.MessageSender;
 
+// The same, displaying request `r1` — every window a dapp flow opens carries the
+// id in its query string, the approval window and the permission window alike.
+const trustedSenderForR1 = {
+  id: 'ext-id',
+  url: 'chrome-extension://ext-id/signature-request.html?requestId=r1&origin=https%3A%2F%2Fdapp.example#/sign-deploy'
+} as Runtime.MessageSender;
+
 const enableOnboardingFlowMock = enableOnboardingFlow as jest.MockedFunction<
   typeof enableOnboardingFlow
 >;
+
+const closeLedgerFlowWindowsMock =
+  handleCloseLedgerFlowWindows as jest.MockedFunction<
+    typeof handleCloseLedgerFlowWindows
+  >;
 
 function makeStore() {
   const dispatch = jest.fn();
@@ -42,6 +59,7 @@ beforeEach(() => {
   // `windows.get` is asserted on per test (the attach branch probes it), so its
   // call history must not leak between them.
   (windows.get as jest.Mock).mockClear();
+  closeLedgerFlowWindowsMock.mockClear();
 });
 
 describe('handleReduxAction forwarding gate (fail-closed)', () => {
@@ -186,5 +204,169 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
     expect(dispatch).not.toHaveBeenCalled();
     expect(enableOnboardingFlowMock).not.toHaveBeenCalled();
     expect(result).toEqual({ handled: false });
+  });
+
+  it('closeLedgerFlowWindows → routed to its handler, never dispatched into the store', async () => {
+    // It must NOT reach the forwarding set: there is no reducer case for it, and
+    // closing windows is a lifecycle decision that needs the requests map.
+    const { store, dispatch } = makeStore();
+    const action = closeLedgerFlowWindows({
+      requestId: 'r1',
+      permissionWindowId: 20
+    });
+
+    const result = await handleReduxAction(action, trustedSenderForR1, store);
+
+    expect(closeLedgerFlowWindowsMock).toHaveBeenCalledWith(store, {
+      requestId: 'r1',
+      permissionWindowId: 20
+    });
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('closeLedgerFlowWindows without a requestId is routed with undefined', async () => {
+    // The internal flows (import-account-from-ledger, sign-with-ledger-in-new-window)
+    // have no dapp request behind them and legitimately send no requestId — and
+    // their page URL carries none either, so the two still agree.
+    const { store } = makeStore();
+
+    await handleReduxAction(
+      closeLedgerFlowWindows({ permissionWindowId: 20 }),
+      trustedSender,
+      store
+    );
+
+    expect(closeLedgerFlowWindowsMock).toHaveBeenCalledWith(store, {
+      requestId: undefined,
+      permissionWindowId: 20
+    });
+  });
+
+  it('closeLedgerFlowWindows from an untrusted sender is dropped', async () => {
+    // Closing an approval window reaches cancel-on-close and cancels the request
+    // it displayed — a lifecycle-authority decision, gated like its siblings.
+    const { store } = makeStore();
+    const action = closeLedgerFlowWindows({
+      requestId: 'r1',
+      permissionWindowId: 20
+    });
+
+    const result = await handleReduxAction(
+      action,
+      { id: 'other-ext', url: 'https://evil.example' } as Runtime.MessageSender,
+      store
+    );
+
+    expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: true });
+  });
+
+  it('a trusted page naming a request it does not display is dropped', async () => {
+    // The sender gate admits every wallet page and stops there, so on its own it
+    // lets the export-keys window close a live dapp approval. The handler does
+    // not consult `method` either: connect / switchAccount / decryptMessage would
+    // be torn down exactly like a Ledger sign.
+    const { store } = makeStore();
+
+    const result = await handleReduxAction(
+      closeLedgerFlowWindows({ requestId: 'r1', permissionWindowId: 20 }),
+      trustedSender,
+      store
+    );
+
+    expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: true });
+  });
+
+  it('a trusted page omitting the id its own URL carries is dropped', async () => {
+    const { store } = makeStore();
+
+    await handleReduxAction(
+      closeLedgerFlowWindows({ permissionWindowId: 20 }),
+      trustedSenderForR1,
+      store
+    );
+
+    expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
+  });
+
+  it('an unparseable sender URL reads as "no request", so a named one is dropped', async () => {
+    const { store } = makeStore();
+
+    await handleReduxAction(
+      closeLedgerFlowWindows({ requestId: 'r1', permissionWindowId: 20 }),
+      { id: 'ext-id', url: undefined } as Runtime.MessageSender,
+      store
+    );
+
+    expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
+  });
+
+  it('a payload-less closeLedgerFlowWindows message is dropped, not thrown on', async () => {
+    // `.match` checks the type, not the payload; the message crosses
+    // runtime.sendMessage. Without a permissionWindowId there is no ownership
+    // proof, so nothing may be closed.
+    const consoleWarn = jest
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {});
+    const { store } = makeStore();
+
+    const result = await handleReduxAction(
+      { type: closeLedgerFlowWindows.type },
+      trustedSender,
+      store
+    );
+
+    expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: true });
+    consoleWarn.mockRestore();
+  });
+
+  it('a payload naming a request but no window is dropped', async () => {
+    const consoleWarn = jest
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {});
+    const { store } = makeStore();
+
+    await handleReduxAction(
+      {
+        type: closeLedgerFlowWindows.type,
+        payload: { requestId: 'r1' }
+      } as { type: string },
+      trustedSenderForR1,
+      store
+    );
+
+    expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
+    consoleWarn.mockRestore();
+  });
+
+  it('a synchronous throw from the handler is caught and logged, not left unhandled', async () => {
+    // `handleCloseLedgerFlowWindows` never rejects per its own contract, but the
+    // branch is fire-and-forget from a service worker, where an unhandled
+    // rejection is invisible — the `.catch` is the belt or a broken contract.
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    const { store } = makeStore();
+    const error = new Error('boom');
+    closeLedgerFlowWindowsMock.mockRejectedValueOnce(error);
+
+    const result = await handleReduxAction(
+      closeLedgerFlowWindows({ requestId: 'r1', permissionWindowId: 20 }),
+      trustedSenderForR1,
+      store
+    );
+    // The rejection is caught off the fire-and-forget promise, not awaited by
+    // the handler itself — let the microtask queue drain before asserting.
+    await new Promise(resolve => setImmediate(resolve));
+
+    expect(result).toEqual({ handled: true, response: undefined });
+    expect(consoleError).toHaveBeenCalledWith(
+      'closeLedgerFlowWindows: handler failed',
+      error
+    );
+    consoleError.mockRestore();
   });
 });
