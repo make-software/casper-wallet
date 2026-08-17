@@ -1,6 +1,8 @@
 import * as matchers from 'redux-saga-test-plan/matchers';
 import { combineReducers } from '@reduxjs/toolkit';
 import { expectSaga } from 'redux-saga-test-plan';
+import { throwError } from 'redux-saga-test-plan/providers';
+import { put } from 'redux-saga/effects';
 import { storage, tabs, windows } from 'webextension-polyfill';
 
 import {
@@ -17,6 +19,7 @@ import {
   LOGIN_RETRY_LOCKOUT_DEADLINE_KEY
 } from '@background/redux/storage-keys';
 
+import * as bip32Module from '@libs/crypto/bip32';
 import * as vaultCryptoModule from '@libs/crypto/vault';
 import { FIXED_ENCRYPTION_KEY_HASH } from '@libs/crypto/__fixtures';
 import { decryptVault, encryptVault } from '@libs/crypto/vault';
@@ -39,6 +42,7 @@ import { selectTimeoutDurationSetting } from '../settings/selectors';
 import { vaultCipherCreated } from '../vault-cipher/actions';
 import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
 import {
+  accountAdded,
   accountRenamed,
   deployPayloadReceived,
   vaultLoaded
@@ -46,15 +50,22 @@ import {
 import { MAX_STORED_PAYLOADS, reducer as vaultReducer } from '../vault/reducer';
 import {
   selectAccountNamesByOriginDict,
+  selectSecretPhrase,
   selectVault,
-  selectVaultActiveAccount
+  selectVaultActiveAccount,
+  selectVaultDerivedAccounts
 } from '../vault/selectors';
 import { VaultState } from '../vault/types';
 import { windowRequestResponded } from '../windowManagement/actions';
 import { reducer as windowManagementReducer } from '../windowManagement/reducer';
 import { selectOpenRequests } from '../windowManagement/selectors';
 import { WindowManagementState } from '../windowManagement/types';
-import { lockVault, startBackground, unlockVault } from './actions';
+import {
+  createAccount,
+  lockVault,
+  startBackground,
+  unlockVault
+} from './actions';
 import {
   VAULT_REENCRYPT_DEBOUNCE_MS,
   delay,
@@ -1053,4 +1064,183 @@ describe('unlockVaultSaga on a cipher written before a payload map existed', () 
       expect(vault.activeAccountName).toBe('Account 1');
     }
   );
+});
+
+// The collision loop is the whole point of this saga: a broken `i++` either
+// reuses a taken derivation index or never terminates, wedging the SW.
+describe('createAccountSaga', () => {
+  const keyPairAt = (index: number) => ({
+    publicKey: `01pub${index}`,
+    secretKey: `sec${index}`
+  });
+
+  const derived = (index: number) => ({
+    ...keyPairAt(index),
+    name: `account ${index}`,
+    hidden: false,
+    derivationIndex: index
+  });
+
+  const runCreate = (
+    derivedAccounts: ReturnType<typeof derived>[],
+    name: string
+  ) =>
+    expectSaga(vaultSagas)
+      .provide([
+        [matchers.select.selector(selectVaultDerivedAccounts), derivedAccounts],
+        [matchers.select.selector(selectSecretPhrase), ['word', 'word']]
+      ])
+      .dispatch(createAccount({ name }))
+      .silentRun(50);
+
+  beforeEach(() => {
+    jest
+      .spyOn(bip32Module, 'deriveKeyPair')
+      .mockImplementation((_phrase, index) => keyPairAt(index) as never);
+  });
+
+  it('derives at index 0 for an empty vault', async () => {
+    const { effects } = await runCreate([], 'first');
+
+    expect(effects.put).toContainEqual(
+      put(
+        accountAdded({
+          ...keyPairAt(0),
+          name: 'first',
+          hidden: false,
+          derivationIndex: 0
+        })
+      )
+    );
+  });
+
+  // Indices 0..2 are taken, so the new account must land on 3 — an assertion
+  // that merely "a put happened" would pass with a reused index.
+  it('skips past every taken derivation index', async () => {
+    const { effects } = await runCreate(
+      [derived(0), derived(1), derived(2)],
+      'fourth'
+    );
+
+    expect(effects.put).toContainEqual(
+      put(
+        accountAdded({
+          ...keyPairAt(3),
+          name: 'fourth',
+          hidden: false,
+          derivationIndex: 3
+        })
+      )
+    );
+  });
+
+  it('reports a duplicate account name and derives nothing', async () => {
+    const { effects } = await runCreate([derived(0)], 'account 0');
+
+    expect(effects.put).toContainEqual(
+      put(
+        sagaError({
+          source: 'createAccountSaga',
+          message: 'Account name exist'
+        })
+      )
+    );
+    expect(bip32Module.deriveKeyPair).not.toHaveBeenCalled();
+  });
+
+  it('reports a missing account name', async () => {
+    const { effects } = await runCreate([], null as unknown as string);
+
+    expect(effects.put).toContainEqual(
+      put(
+        sagaError({
+          source: 'createAccountSaga',
+          message: 'Account name missing'
+        })
+      )
+    );
+  });
+});
+
+// Every catch in this module funnels into the same broadcast error channel.
+// Each test forces exactly one of them and pins its `source` string — the
+// banner and the saga are wired together by that literal.
+describe('saga error channel', () => {
+  it('reports an encryption failure from updateVaultCipher', async () => {
+    jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockRejectedValue(Error('encrypt failed'));
+
+    const { effects } = await expectSaga(vaultSagas)
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
+        [matchers.select.selector(selectVault), EMPTY_VAULT]
+      ])
+      .dispatch(accountRenamed({ oldName: 'a', newName: 'b' }))
+      .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 200);
+
+    expect(effects.put).toContainEqual(
+      put(
+        sagaError({
+          source: 'updateVaultCipher',
+          message: 'encrypt failed'
+        })
+      )
+    );
+  });
+
+  it('reports a failed lock flush from lockVaultSaga', async () => {
+    mockStorageRemove.mockRejectedValue(Error('storage gone'));
+
+    const { effects } = await expectSaga(lockVaultSaga)
+      .provide([[matchers.select.selector(selectEncryptionKeyHash), null]])
+      .silentRun(50);
+
+    expect(effects.put).toContainEqual(
+      put(sagaError({ source: 'lockVaultSaga', message: 'storage gone' }))
+    );
+  });
+
+  it('reports a failure from unlockVaultSaga', async () => {
+    const { effects } = await expectSaga(
+      unlockVaultSaga,
+      unlockVault({
+        vault: EMPTY_VAULT,
+        newKeyDerivationSaltHash: 'salt',
+        newVaultCipher: 'cipher',
+        newEncryptionKeyHash: 'hash'
+      })
+    )
+      .provide([
+        [
+          matchers.select.selector(selectAccountNamesByOriginDict),
+          throwError(Error('unlock failed'))
+        ]
+      ])
+      .silentRun(50);
+
+    expect(effects.put).toContainEqual(
+      put(sagaError({ source: 'unlockVaultSaga', message: 'unlock failed' }))
+    );
+  });
+
+  it('reports a failure from timeoutCounterSaga', async () => {
+    mockStorageGet.mockRejectedValue(Error('read failed'));
+
+    const { effects } = await expectSaga(timeoutCounterSaga, startBackground())
+      .provide([
+        [matchers.select.selector(selectVaultCipherDoesExist), true],
+        [matchers.select.selector(selectVaultIsLocked), false],
+        [
+          matchers.select.selector(selectTimeoutDurationSetting),
+          TimeoutDurationSetting['5 min']
+        ],
+        [matchers.select.selector(selectVaultLastActivityTime), NOW]
+      ])
+      .silentRun(50);
+
+    expect(effects.put).toContainEqual(
+      put(sagaError({ source: 'timeoutCounterSaga', message: 'read failed' }))
+    );
+  });
 });
