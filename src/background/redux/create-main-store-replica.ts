@@ -22,8 +22,9 @@ import rootReducer from './root-reducer';
  * broadcast SDK events to dapp tabs — once per open replica.
  */
 export function createMainStoreReplica(state: PopupState) {
-  // Copy by allowlist, never by spread: a payload wider than PopupState would
-  // otherwise carry vaultCipher and the real password hashes into a page.
+  // The allowlist is over slices, not fields: each listed slice is copied
+  // wholesale, but a payload wider than PopupState would otherwise carry
+  // vaultCipher and the real password hashes into a page.
   const slices = POPUP_SLICES.reduce(
     (acc, key) => {
       acc[key] = state[key] as never;

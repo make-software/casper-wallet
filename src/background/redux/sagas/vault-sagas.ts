@@ -193,17 +193,19 @@ export function* lockVaultSaga() {
   }
 }
 
-// The page derives the new password material off-thread (argon2 cannot run in an
-// MV3 service worker) but never sees the vault: re-encryption happens here, against
-// the background's own state.
+// The page derives the new password material off-thread — not because scrypt
+// can't run in an MV3 service worker (it's plain JS and would run there fine),
+// but to keep several seconds of scrypt off the worker's single thread. Either
+// way it never sees the vault: re-encryption happens here, against the
+// background's own state.
 export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
   const isLocked = yield* sagaSelect(selectVaultIsLocked);
 
-  // The argon2 window is long enough for a manual lock, an idle timeout, or an MV3
-  // service-worker restart to land first. `lockVaultSaga` has already emptied the
-  // vault by then, and `encryptionKeyHashCreated` does not clear `isLocked`, so
-  // without this the new key would be stored and `updateVaultCipher` would persist
-  // an EMPTY vault over the real cipher. Fail closed: the old password keeps working.
+  // The scrypt window is long enough for a manual lock, an idle timeout, or an
+  // MV3 service-worker restart to land first. `lockVaultSaga` has already
+  // emptied the vault by then, and `encryptionKeyHashCreated` does not clear
+  // `isLocked`, so without this the new key would be stored and the vault
+  // re-encrypted empty. Fail closed: the old password keeps working.
   if (isLocked) {
     yield put(
       sagaError({
@@ -221,16 +223,55 @@ export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
     newEncryptionKeyHash
   } = action.payload;
 
-  yield put(
-    keysUpdated({ passwordHash, passwordSaltHash, keyDerivationSaltHash })
-  );
-  yield put(
-    encryptionKeyHashCreated({ encryptionKeyHash: newEncryptionKeyHash })
-  );
+  // Keep the MV3 service worker alive while the vault is re-encrypted —
+  // Chrome may otherwise kill it mid-saga during the heavy crypto work.
+  const releaseAnchor = anchorServiceWorker('encrypt');
 
-  // Not atomic — each put persists separately — but the window between "new key
-  // stored" and "cipher rewritten" shrinks from a page round trip to ~2ms.
-  yield* updateVaultCipher();
+  try {
+    // Encrypt BEFORE putting anything: if this throws (e.g. a malformed
+    // `newEncryptionKeyHash` — this action rides the sender-ungated forwarded
+    // path with no payload validation), nothing has been persisted yet and the
+    // old password stays fully intact. The alternative order — store the new
+    // keys, then encrypt — leaves new keys over an old-key cipher on failure,
+    // which the next unlock rejects under BOTH the old and the new password.
+    const vault = yield* sagaSelect(selectVault);
+    const vaultCipher = yield* sagaCall(
+      encryptVault,
+      newEncryptionKeyHash,
+      vault
+    );
+
+    // The encrypt above can take a while — long enough for a lock to land
+    // mid-flight. Re-check rather than trust the pre-check above: without this,
+    // a locked wallet would get a new session key planted on it, re-arming the
+    // exact empty-vault-overwrite hazard the pre-check exists to prevent.
+    if (yield* sagaSelect(selectVaultIsLocked)) {
+      yield put(
+        sagaError({
+          source: 'changePasswordSaga',
+          message: 'Password was not changed: the wallet locked. Try again.'
+        })
+      );
+      return;
+    }
+
+    // The remaining window is storage-write ordering between these three puts,
+    // not the crypto — the cipher already exists under the new key by now.
+    yield put(
+      keysUpdated({ passwordHash, passwordSaltHash, keyDerivationSaltHash })
+    );
+    yield put(
+      encryptionKeyHashCreated({ encryptionKeyHash: newEncryptionKeyHash })
+    );
+    yield put(vaultCipherCreated({ vaultCipher }));
+  } catch (err) {
+    console.error(err);
+    yield put(
+      sagaError({ source: 'changePasswordSaga', message: errorToMessage(err) })
+    );
+  } finally {
+    releaseAnchor();
+  }
 }
 
 /**

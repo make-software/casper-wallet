@@ -1,7 +1,7 @@
 import * as matchers from 'redux-saga-test-plan/matchers';
 import { combineReducers } from '@reduxjs/toolkit';
 import { expectSaga } from 'redux-saga-test-plan';
-import { throwError } from 'redux-saga-test-plan/providers';
+import { dynamic, throwError } from 'redux-saga-test-plan/providers';
 import { put } from 'redux-saga/effects';
 import { storage, tabs, windows } from 'webextension-polyfill';
 
@@ -70,6 +70,7 @@ import {
   startBackground,
   unlockVault
 } from './actions';
+import { errorToMessage } from './utils';
 import {
   VAULT_REENCRYPT_DEBOUNCE_MS,
   changePasswordSaga,
@@ -1346,5 +1347,68 @@ describe('changePasswordSaga', () => {
 
     // Fail closed: the old password still works, and the stored cipher is untouched.
     expect(encryptSpy).not.toHaveBeenCalled();
+  });
+
+  it('puts nothing but a sagaError when encryptVault throws', async () => {
+    const encryptSpy = jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockRejectedValue(new Error('malformed key'));
+
+    await expectSaga(changePasswordSaga, changePassword(payload))
+      .provide([
+        [matchers.select.selector(selectVaultIsLocked), false],
+        [matchers.select.selector(selectVault), SEEDED_VAULT]
+      ])
+      .not.put.actionType(keysUpdated.type)
+      .not.put.actionType(encryptionKeyHashCreated.type)
+      .not.put.actionType(vaultCipherCreated.type)
+      .put(
+        sagaError({
+          source: 'changePasswordSaga',
+          message: errorToMessage(new Error('malformed key'))
+        })
+      )
+      .run();
+
+    // Old keys and old cipher are both untouched — nothing was persisted
+    // between "encrypt failed" and "user finds out".
+    expect(encryptSpy).toHaveBeenCalledWith(
+      payload.newEncryptionKeyHash,
+      SEEDED_VAULT
+    );
+  });
+
+  it('bails without persisting when the vault locks mid-encrypt', async () => {
+    // First selectVaultIsLocked call is the pre-check (unlocked); the second is
+    // the post-encrypt re-check — simulates a lock landing while `encryptVault`
+    // (mocked here, real scrypt-backed work in production) is still in flight.
+    let isLockedCalls = 0;
+
+    const encryptSpy = jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockResolvedValue('cipher-under-new-key');
+
+    await expectSaga(changePasswordSaga, changePassword(payload))
+      .provide([
+        [
+          matchers.select.selector(selectVaultIsLocked),
+          dynamic(() => isLockedCalls++ > 0)
+        ],
+        [matchers.select.selector(selectVault), SEEDED_VAULT]
+      ])
+      .not.put.actionType(keysUpdated.type)
+      .not.put.actionType(encryptionKeyHashCreated.type)
+      .not.put.actionType(vaultCipherCreated.type)
+      .put(
+        sagaError({
+          source: 'changePasswordSaga',
+          message: 'Password was not changed: the wallet locked. Try again.'
+        })
+      )
+      .run();
+
+    // The encrypt itself was allowed to finish — only planting the result was
+    // aborted. A locked wallet must never receive a new session key.
+    expect(encryptSpy).toHaveBeenCalled();
   });
 });
