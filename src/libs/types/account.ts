@@ -11,6 +11,8 @@ export interface Account extends KeyPair {
   hidden: boolean;
   derivationIndex?: number;
   supports?: CasperWalletSupports[];
+  /** Set only on broadcast copies: the vault holds no signing key for this account. */
+  watching?: boolean;
 }
 
 export enum HardwareWalletType {

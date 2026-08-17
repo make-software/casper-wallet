@@ -15,6 +15,7 @@ import { useAccountManager } from '@popup/hooks/use-account-actions-with-events'
 import { useHomeTab } from '@popup/hooks/use-home-tab';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
+import { fetchAccountSecretKey } from '@background/handlers/vault-secrets';
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
 import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
 import {
@@ -217,10 +218,25 @@ export const TransferPage = () => {
       return;
     }
 
-    const KEYS = createAsymmetricKeys(
-      activeAccount.publicKey,
-      activeAccount.secretKey
-    );
+    const secretKey = await fetchAccountSecretKey(activeAccount.name);
+
+    // Ledger accounts legitimately have no secret key: `onSubmitSending` doubles
+    // as this page's `ledgerAction`, and signTx takes the hardware branch for them.
+    if (!secretKey && activeAccount.hardware == null) {
+      setIsSubmitButtonDisable(false);
+      navigate(
+        ErrorPath,
+        createErrorLocationState({
+          errorHeaderText: t(ErrorMessages.common.UNKNOWN_ERROR.message),
+          errorContentText: t(ErrorMessages.common.UNKNOWN_ERROR.description),
+          errorPrimaryButtonLabel: t('Close'),
+          errorRedirectPath: RouterPath.Home
+        })
+      );
+      return;
+    }
+
+    const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
 
     const timestamp = await getDateForDeploy(nodeUrl);
 

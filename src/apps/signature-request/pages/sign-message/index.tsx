@@ -10,6 +10,7 @@ import { useAccountManager } from '@popup/hooks/use-account-actions-with-events'
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
+import { fetchAccountSecretKey } from '@background/handlers/vault-secrets';
 import {
   selectConnectedAccountNamesByOrigin,
   selectVaultAccounts
@@ -146,10 +147,24 @@ export function SignMessagePage() {
 
       signature = resp.signature;
     } else {
+      const secretKey = await fetchAccountSecretKey(signingAccount.name);
+
+      if (!secretKey) {
+        const error = Error(
+          ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
+        );
+        sendSdkResponseToSpecificTab(
+          sdkMethod.signMessageError(error, { requestId }),
+          requestTabId
+        );
+        closeCurrentWindow();
+        return;
+      }
+
       signature = signMessageForProviderResponse(
         message,
         signingAccount.publicKey,
-        signingAccount.secretKey
+        secretKey
       );
     }
 
@@ -170,7 +185,7 @@ export function SignMessagePage() {
     signingAccount.hardware,
     signingAccount.derivationIndex,
     signingAccount.publicKey,
-    signingAccount.secretKey,
+    signingAccount.name,
     requestId,
     requestTabId
   ]);

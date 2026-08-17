@@ -4,7 +4,10 @@ import { shallowEqual, useSelector } from 'react-redux';
 import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { WalletQrCodePageContent } from '@popup/pages/wallet-qr-code/content';
 
-import { fetchSecretPhrase } from '@background/handlers/vault-secrets';
+import {
+  fetchAccountSecretKeys,
+  fetchSecretPhrase
+} from '@background/handlers/vault-secrets';
 import {
   selectVaultDerivedAccounts,
   selectVaultImportedAccounts
@@ -17,6 +20,7 @@ import {
   PrivateStateErrorPage
 } from '@libs/layout';
 import { requestWithRetry } from '@libs/messaging/request-with-retry';
+import { Account } from '@libs/types/account';
 
 interface GenerateWalletQrDataMessageEvent extends MessageEvent {
   data: {
@@ -31,7 +35,6 @@ export const WalletQrCodePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  // Account secret keys still come from the replica for now.
   const derivedAccounts = useSelector(selectVaultDerivedAccounts, shallowEqual);
   const importedAccounts = useSelector(
     selectVaultImportedAccounts,
@@ -55,6 +58,29 @@ export const WalletQrCodePage = () => {
       return;
     }
 
+    const secretKeys = await requestWithRetry(() =>
+      fetchAccountSecretKeys(
+        [...derivedAccounts, ...importedAccounts].map(a => a.name)
+      )
+    ).catch(() => null);
+
+    // A null/failed response must not turn into a partial payload: that would
+    // silently sync imported accounts to the phone without their keys.
+    if (!secretKeys) {
+      setIsLoading(false);
+      setHasError(true);
+      return;
+    }
+
+    // Strip down to what the worker actually reads: `watching` (added by the
+    // broadcast sanitizer) is not a field the mobile client expects.
+    const forSync = (accounts: Account[]) =>
+      accounts.map(({ name, publicKey }) => ({
+        name,
+        publicKey,
+        secretKey: secretKeys[name] ?? ''
+      }));
+
     const worker = new Worker(
       new URL(
         '@background/workers/generate-sync-wallet-qr-data-worker.ts',
@@ -65,8 +91,8 @@ export const WalletQrCodePage = () => {
     worker.postMessage({
       password,
       secretPhrase,
-      derivedAccounts,
-      importedAccounts
+      derivedAccounts: forSync(derivedAccounts),
+      importedAccounts: forSync(importedAccounts)
     });
 
     worker.onmessage = (event: GenerateWalletQrDataMessageEvent) => {

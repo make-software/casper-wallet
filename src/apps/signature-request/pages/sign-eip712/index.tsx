@@ -17,6 +17,7 @@ import { SignatureRequestLoading } from '@signature-request/pages/sign-transacti
 import { SignatureRequestRawJson } from '@signature-request/pages/sign-transaction/signature-request-raw-json';
 
 import { closeCurrentWindow } from '@background/close-current-window';
+import { fetchAccountSecretKey } from '@background/handlers/vault-secrets';
 import { getPayload } from '@background/redux/vault/payload-map';
 import {
   selectConnectedAccountNamesByOrigin,
@@ -138,8 +139,9 @@ export function SignEip712Page() {
     throw error;
   }
 
-  // Watch-only accounts have no secret key and cannot sign.
-  if (!signingAccount.secretKey) {
+  // `watching` is set by the broadcast sanitizer; the fallback keeps the guard alive
+  // in the commit before that lands.
+  if (signingAccount.watching ?? signingAccount.secretKey === '') {
     const error = Error(
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
@@ -197,8 +199,24 @@ export function SignEip712Page() {
     closeCurrentWindow();
   }, [requestId, requestTabId]);
 
-  const handleSign = useCallback(() => {
+  const handleSign = useCallback(async () => {
     if (!typedData) {
+      return;
+    }
+
+    const secretKey = await fetchAccountSecretKey(signingAccount.name);
+
+    if (!secretKey) {
+      sendSdkResponseToSpecificTab(
+        sdkMethod.signTypedDataError(
+          Error(
+            ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
+          ),
+          { requestId }
+        ),
+        requestTabId
+      );
+      closeCurrentWindow();
       return;
     }
 
@@ -206,9 +224,7 @@ export function SignEip712Page() {
       // EIP-712 supports software-key signing only; Ledger accounts are rejected earlier.
       const publicKey = PublicKey.fromHex(signingAccount.publicKey);
       const privateKey = PrivateKey.fromHex(
-        getPrivateKeyHexFromSecretKey(
-          Conversions.base64to16(signingAccount.secretKey)
-        ),
+        getPrivateKeyHexFromSecretKey(Conversions.base64to16(secretKey)),
         publicKey.cryptoAlg
       );
 
@@ -247,7 +263,7 @@ export function SignEip712Page() {
     typedData,
     options,
     signingAccount.publicKey,
-    signingAccount.secretKey,
+    signingAccount.name,
     requestId,
     requestTabId
   ]);

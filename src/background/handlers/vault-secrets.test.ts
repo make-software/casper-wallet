@@ -6,8 +6,11 @@ import { deriveKeyPair } from '@libs/crypto';
 import { FIXED_SECRET_PHRASE } from '@libs/crypto/__fixtures';
 
 import {
+  ACCOUNT_SECRET_KEYS_REQUEST_TYPE,
   SECRET_PHRASE_REQUEST_TYPE,
   SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE,
+  fetchAccountSecretKey,
+  fetchAccountSecretKeys,
   fetchSecretPhrase,
   fetchSuggestedAccountName,
   handleVaultSecrets
@@ -205,6 +208,111 @@ describe('handleVaultSecrets — SUGGESTED_ACCOUNT_NAME_REQUEST', () => {
       )
     ).toEqual({ handled: true, response: 'Account 1' });
   });
+});
+
+describe('handleVaultSecrets — ACCOUNT_SECRET_KEYS_REQUEST', () => {
+  const vault = {
+    secretPhrase: ['w1'],
+    accounts: [
+      { name: 'A', publicKey: 'pkA', secretKey: 'skA', hidden: false },
+      { name: 'Watch', publicKey: 'pkW', secretKey: '', hidden: false }
+    ]
+  };
+
+  const request = (accountNames: string[]) => ({
+    type: ACCOUNT_SECRET_KEYS_REQUEST_TYPE,
+    payload: { accountNames }
+  });
+
+  it('returns only the requested accounts that actually hold a key', () => {
+    const result = handleVaultSecrets(
+      request(['A', 'Watch', 'Nope']),
+      POPUP_SENDER,
+      storeWith({ session: { isLocked: false }, vault })
+    );
+
+    expect(result).toEqual({ handled: true, response: { A: 'skA' } });
+  });
+
+  it('answers the signature-request page too', () => {
+    const signSender = {
+      id: 'ext-id',
+      url: 'chrome-extension://ext-id/signature-request.html?requestId=1#/sign'
+    } as Runtime.MessageSender;
+
+    expect(
+      handleVaultSecrets(
+        request(['A']),
+        signSender,
+        storeWith({ session: { isLocked: false }, vault })
+      )
+    ).toEqual({ handled: true, response: { A: 'skA' } });
+  });
+
+  it('does not answer connect-to-app', () => {
+    expect(
+      handleVaultSecrets(
+        request(['A']),
+        CONNECT_SENDER,
+        storeWith({ session: { isLocked: false }, vault })
+      )
+    ).toEqual({ handled: true, response: null });
+  });
+
+  it('builds the response without a prototype, so a "__proto__" account name cannot poison it', () => {
+    const poisoned = {
+      session: { isLocked: false },
+      vault: {
+        secretPhrase: null,
+        accounts: [
+          { name: '__proto__', publicKey: 'pk', secretKey: 'sk', hidden: false }
+        ]
+      }
+    };
+
+    const result = handleVaultSecrets(
+      request(['__proto__']),
+      POPUP_SENDER,
+      storeWith(poisoned)
+    ) as { handled: true; response: Record<string, string> };
+
+    expect(Object.getPrototypeOf(result.response)).toBeNull();
+    expect(result.response['__proto__']).toBe('sk');
+  });
+});
+
+describe('fetchAccountSecretKeys', () => {
+  it('asks the background for the given accounts', async () => {
+    (runtime.sendMessage as jest.Mock).mockResolvedValue({ A: 'skA' });
+
+    await expect(fetchAccountSecretKeys(['A'])).resolves.toEqual({ A: 'skA' });
+    expect(runtime.sendMessage).toHaveBeenCalledWith({
+      type: ACCOUNT_SECRET_KEYS_REQUEST_TYPE,
+      payload: { accountNames: ['A'] }
+    });
+  });
+});
+
+describe('fetchAccountSecretKey', () => {
+  it('returns an empty string when the account holds no key', async () => {
+    (runtime.sendMessage as jest.Mock).mockResolvedValue({});
+
+    await expect(fetchAccountSecretKey('Watch')).resolves.toBe('');
+  });
+
+  it('returns an empty string when the request is refused', async () => {
+    (runtime.sendMessage as jest.Mock).mockResolvedValue(null);
+
+    await expect(fetchAccountSecretKey('A')).resolves.toBe('');
+  });
+
+  it('returns an empty string instead of throwing when sendMessage keeps rejecting', async () => {
+    (runtime.sendMessage as jest.Mock).mockRejectedValue(
+      new Error('background unreachable')
+    );
+
+    await expect(fetchAccountSecretKey('A')).resolves.toBe('');
+  }, 10000);
 });
 
 // The client fns live in this file, which is under the handlers coverage floor
