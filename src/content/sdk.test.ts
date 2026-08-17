@@ -3,6 +3,7 @@ import type {
   SignatureResponse
 } from './sdk';
 import { SDK_HANDSHAKE_TYPE } from './sdk-channel';
+import { sdkMethod } from './sdk-method';
 import { SdkErrorCode, SignTypedDataResult } from './sdk-types';
 
 // The project's jest config runs with `testEnvironment: 'node'` (no
@@ -244,6 +245,124 @@ describe('CasperWalletProvider pre-handshake queueing', () => {
     );
 
     expect(port.postMessage).toHaveBeenCalledTimes(1);
+  });
+});
+
+// A port that can answer, unlike `makeFakePort` above: `fetchFromBackground`
+// subscribes with addEventListener, so responses are delivered through the
+// captured listeners.
+const makeAnsweringPort = () => {
+  const listeners: ((e: { data: unknown }) => void)[] = [];
+  return {
+    sent: [] as { type: string; meta: { requestId: string } }[],
+    postMessage(msg: unknown) {
+      this.sent.push(msg as { type: string; meta: { requestId: string } });
+    },
+    addEventListener: (_t: string, cb: (e: { data: unknown }) => void) =>
+      listeners.push(cb),
+    removeEventListener: (_t: string, cb: (e: { data: unknown }) => void) => {
+      const i = listeners.indexOf(cb);
+      if (i !== -1) listeners.splice(i, 1);
+    },
+    start: () => undefined,
+    answer(data: unknown) {
+      listeners.slice().forEach(cb => cb({ data }));
+    },
+    get listenerCount() {
+      return listeners.length;
+    }
+  };
+};
+
+describe('fetchFromBackground response routing', () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
+  const handshake = (window: { messageListeners: Listener[] }, port: unknown) =>
+    window.messageListeners.forEach(cb =>
+      cb({
+        source: (global as { window: unknown }).window,
+        origin: ORIGIN,
+        data: { type: SDK_HANDSHAKE_TYPE },
+        ports: [port]
+      })
+    );
+
+  // Two concurrent sign() calls: a broken requestId filter hands dapp A the
+  // signature the wallet produced for dapp B's request.
+  it('routes each response to its own request, answered out of order', async () => {
+    const { CasperWalletProvider, window } = loadSdk();
+    const port = makeAnsweringPort();
+    handshake(window, port);
+
+    const provider = CasperWalletProvider({ timeout: 5000 });
+    // Attach via `allSettled` immediately: a floating promise that rejects would
+    // kill the Jest worker as an unhandled rejection instead of failing an assertion.
+    const first = provider.getVersion();
+    const second = provider.getVersion();
+    const settled = Promise.allSettled([first, second]);
+
+    const [idA, idB] = port.sent.map(m => m.meta.requestId);
+    expect(idA).not.toBe(idB);
+
+    port.answer(sdkMethod.getVersionResponse('B', { requestId: idB }));
+    port.answer(sdkMethod.getVersionResponse('A', { requestId: idA }));
+
+    expect(await settled).toEqual([
+      { status: 'fulfilled', value: 'A' },
+      { status: 'fulfilled', value: 'B' }
+    ]);
+  });
+
+  // `getVersion` has no dedicated error creator in `sdk-method.ts`, so this
+  // uses `isConnected`, which does, to keep the envelope a real wire shape.
+  it('rejects with the payload when the envelope is flagged as an error', async () => {
+    const { CasperWalletProvider, window } = loadSdk();
+    const port = makeAnsweringPort();
+    handshake(window, port);
+
+    const provider = CasperWalletProvider({ timeout: 5000 });
+    const pending = provider.isConnected();
+    const { requestId } = port.sent[0].meta;
+
+    port.answer(sdkMethod.isConnectedError(Error('nope'), { requestId }));
+
+    await expect(pending).rejects.toThrow('nope');
+  });
+
+  it('ignores a response carrying a foreign requestId', async () => {
+    const { CasperWalletProvider, window } = loadSdk();
+    const port = makeAnsweringPort();
+    handshake(window, port);
+
+    const settled = jest.fn();
+    const provider = CasperWalletProvider({ timeout: 5000 });
+    provider.getVersion().then(settled, settled);
+
+    port.answer(
+      sdkMethod.getVersionResponse('not yours', { requestId: 'someone-else' })
+    );
+    await Promise.resolve();
+
+    expect(settled).not.toHaveBeenCalled();
+  });
+
+  // A settled request must stop listening, or a late duplicate could re-settle
+  // it — and the listener would leak for the life of the page.
+  it('unsubscribes after settling', async () => {
+    const { CasperWalletProvider, window } = loadSdk();
+    const port = makeAnsweringPort();
+    handshake(window, port);
+
+    const provider = CasperWalletProvider({ timeout: 5000 });
+    const pending = provider.getVersion();
+    const { requestId } = port.sent[0].meta;
+
+    port.answer(sdkMethod.getVersionResponse('ok', { requestId }));
+    await pending;
+
+    expect(port.listenerCount).toBe(0);
   });
 });
 

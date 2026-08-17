@@ -186,6 +186,86 @@ describe('keep-alive idempotency guard', () => {
   });
 });
 
+describe('manageKeepAlive lock-state policy', () => {
+  const load = (
+    state: {
+      locked: boolean;
+      keys: boolean;
+      cipher: boolean;
+    },
+    subscribers: (() => void)[] = []
+  ) => {
+    jest.resetModules();
+    /* eslint-disable @typescript-eslint/no-require-imports */
+    const { alarms: freshAlarms } = require('webextension-polyfill');
+    const store = require('@background/redux/get-main-store');
+    const keys = require('@background/redux/keys/selectors');
+    const session = require('@background/redux/session/selectors');
+    const cipher = require('@background/redux/vault-cipher/selectors');
+    const keepAlive = require('@background/keep-alive');
+    /* eslint-enable @typescript-eslint/no-require-imports */
+
+    session.selectVaultIsLocked.mockReturnValue(state.locked);
+    keys.selectKeysDoesExist.mockReturnValue(state.keys);
+    cipher.selectVaultCipherDoesExist.mockReturnValue(state.cipher);
+    store.getExistingMainStoreSingletonOrInit.mockResolvedValue({
+      getState: () => ({}),
+      subscribe: (cb: () => void) => subscribers.push(cb)
+    });
+
+    return { freshAlarms, keepAlive };
+  };
+
+  // The only state in which the session is genuinely dormant: locked, with a
+  // vault on disk to come back to.
+  it('stops the alarm when the vault is locked and a cipher exists', async () => {
+    const { freshAlarms, keepAlive } = load({
+      locked: true,
+      keys: true,
+      cipher: true
+    });
+
+    await keepAlive.initKeepAlive();
+
+    expect(freshAlarms.clear).toHaveBeenCalledWith('casper-keep-alive');
+    expect(freshAlarms.create).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['unlocked', { locked: false, keys: true, cipher: true }],
+    ['no keys yet', { locked: true, keys: false, cipher: true }],
+    ['no cipher yet', { locked: true, keys: true, cipher: false }]
+  ])('keeps the alarm running when %s', async (_label, state) => {
+    const { freshAlarms, keepAlive } = load(state);
+
+    await keepAlive.initKeepAlive();
+
+    expect(freshAlarms.create).toHaveBeenCalledWith('casper-keep-alive', {
+      periodInMinutes: 0.5
+    });
+    expect(freshAlarms.clear).not.toHaveBeenCalled();
+  });
+
+  it('re-evaluates on every store update, not just at init', async () => {
+    const subscribers: (() => void)[] = [];
+    const { freshAlarms, keepAlive } = load(
+      { locked: false, keys: true, cipher: true },
+      subscribers
+    );
+
+    await keepAlive.initKeepAlive();
+    expect(freshAlarms.create).toHaveBeenCalledTimes(1);
+
+    /* eslint-disable-next-line @typescript-eslint/no-require-imports */
+    const session = require('@background/redux/session/selectors');
+    session.selectVaultIsLocked.mockReturnValue(true);
+    subscribers.forEach(cb => cb());
+    await flushPromises();
+
+    expect(freshAlarms.clear).toHaveBeenCalledWith('casper-keep-alive');
+  });
+});
+
 // This block resets the module registry, so it must stay the last describe in
 // the file — earlier tests rely on the module instance imported at the top.
 describe('keep-alive on non-Chrome builds', () => {

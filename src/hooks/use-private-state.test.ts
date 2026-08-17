@@ -1,7 +1,9 @@
+import { backgroundEvent } from '@background/background-events';
 import { fetchPrivateState } from '@background/handlers/private-state';
 
 import {
   PRIVATE_STATE_RETRY_DELAYS_MS,
+  createPrivateStateUpdatedListener,
   loadPrivateStateWithRetry
 } from './use-private-state';
 
@@ -105,5 +107,39 @@ describe('loadPrivateStateWithRetry', () => {
     expect(fetchMock).toHaveBeenCalledTimes(
       1 + PRIVATE_STATE_RETRY_DELAYS_MS.length
     );
+  });
+});
+
+describe('createPrivateStateUpdatedListener', () => {
+  // A renamed action type here silently leaves every replica holding the
+  // pre-change passwordHash after the user changes their password.
+  it('fires onUpdate for a real privateStateUpdated action', () => {
+    const onUpdate = jest.fn();
+
+    createPrivateStateUpdatedListener(onUpdate)(
+      backgroundEvent.privateStateUpdated()
+    );
+
+    expect(onUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores every other message', () => {
+    const onUpdate = jest.fn();
+    const listener = createPrivateStateUpdatedListener(onUpdate);
+
+    listener({ type: 'popupStateUpdated' });
+    listener({ type: 'privateStateUpdatedXYZ' });
+    listener('keepAlive');
+    listener(undefined);
+
+    expect(onUpdate).not.toHaveBeenCalled();
+  });
+
+  it('returns undefined so the runtime.onMessage channel stays synchronous', () => {
+    expect(
+      createPrivateStateUpdatedListener(jest.fn())(
+        backgroundEvent.privateStateUpdated()
+      )
+    ).toBeUndefined();
   });
 });
