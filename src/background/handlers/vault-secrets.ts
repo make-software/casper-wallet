@@ -35,6 +35,11 @@ const SIGNATURE_REQUEST_PAGE = '/signature-request.html';
 // renders dapp-controlled origin, favicon and site name — could simply ask for the
 // phrase. Same shape as the request-window allowlist in open-request-windows.ts.
 // The export-keys window is popup.html too (sagas/export-keys-window-saga.ts:28).
+//
+// Unlike PRIVATE_STATE_REQUEST (background/index.ts), a rejection here always
+// answers `{ handled: true, response: null }` rather than leaving the caller's
+// promise pending — every caller of the fetch* functions below already treats
+// a null/empty response as "cannot do this here" and surfaces that.
 const ALLOWED_PAGES: Record<string, readonly string[]> = {
   [SECRET_PHRASE_REQUEST_TYPE]: [POPUP_PAGE],
   [SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE]: [POPUP_PAGE],
@@ -62,7 +67,7 @@ export function handleVaultSecrets(
 
   if (!isTrustedUiSender(sender) || !isAllowedPage(action.type, sender)) {
     if (sender.id === runtime.id) {
-      // Origin only: a content-script sender's full URL could carry tokens.
+      // Origin only — see the same check in background/index.ts.
       const senderOrigin =
         sender.url != null ? new URL(sender.url).origin : undefined;
       console.warn(
@@ -70,7 +75,6 @@ export function handleVaultSecrets(
         senderOrigin
       );
     }
-    // An empty answer, not silence: a pending promise would hang a legitimate page.
     return { handled: true, response: null };
   }
 

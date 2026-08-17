@@ -2,6 +2,8 @@ import { selectPopupState } from '@background/redux/popup-state';
 import rootReducer from '@background/redux/root-reducer';
 import { RootState } from '@background/redux/store-types';
 
+import { HardwareWalletType } from '@libs/types/account';
+
 // A full, untouched RootState — every slice at its reducer's initial value.
 const fullState = rootReducer(undefined, { type: '@@INIT' }) as RootState;
 
@@ -69,7 +71,14 @@ const vaultWithSecrets = {
   secretPhrase: ['abandon', 'ability', 'able'],
   accounts: [
     { name: 'A', publicKey: 'pkA', secretKey: 'SECRET-KEY-A', hidden: false },
-    { name: 'Watch', publicKey: 'pkW', secretKey: '', hidden: false }
+    { name: 'Watch', publicKey: 'pkW', secretKey: '', hidden: false },
+    {
+      name: 'Ledger',
+      publicKey: 'pkL',
+      secretKey: '',
+      hidden: false,
+      hardware: HardwareWalletType.Ledger
+    }
   ]
 };
 
@@ -84,13 +93,17 @@ describe('selectPopupState — vault sanitization', () => {
   it('blanks every account secret key', () => {
     const payload = selectPopupState({ ...fullState, vault: vaultWithSecrets });
 
-    expect(payload.vault.accounts.map(a => a.secretKey)).toEqual(['', '']);
+    expect(payload.vault.accounts.map(a => a.secretKey)).toEqual(['', '', '']);
     expect(JSON.stringify(payload)).not.toContain('SECRET-KEY-A');
   });
 
-  it('marks accounts with no signing key in the vault (watch-only or Ledger) via `watching`', () => {
+  it('marks `watching` true only for watch-only accounts, not Ledger', () => {
     const payload = selectPopupState({ ...fullState, vault: vaultWithSecrets });
 
-    expect(payload.vault.accounts.map(a => a.watching)).toEqual([false, true]);
+    expect(payload.vault.accounts.map(a => a.watching)).toEqual([
+      false,
+      true,
+      false
+    ]);
   });
 });

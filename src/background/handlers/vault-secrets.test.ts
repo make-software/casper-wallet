@@ -181,6 +181,16 @@ describe('handleVaultSecrets — SUGGESTED_ACCOUNT_NAME_REQUEST', () => {
     ).toEqual({ handled: true, response: null });
   });
 
+  it('refuses while the vault is locked', () => {
+    expect(
+      handleVaultSecrets(
+        { type: SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE },
+        POPUP_SENDER,
+        storeWith({ ...unlocked, session: { isLocked: true } })
+      )
+    ).toEqual({ handled: true, response: null });
+  });
+
   it('ignores an imported account even when its public key matches a derived index', () => {
     // The account IS index 0's key pair, but imported: true — only a handler
     // wired to selectVaultDerivedAccounts (not selectVaultAccounts) sees index
@@ -255,6 +265,16 @@ describe('handleVaultSecrets — ACCOUNT_SECRET_KEYS_REQUEST', () => {
         request(['A']),
         CONNECT_SENDER,
         storeWith({ session: { isLocked: false }, vault })
+      )
+    ).toEqual({ handled: true, response: null });
+  });
+
+  it('refuses while the vault is locked', () => {
+    expect(
+      handleVaultSecrets(
+        request(['A']),
+        POPUP_SENDER,
+        storeWith({ session: { isLocked: true }, vault })
       )
     ).toEqual({ handled: true, response: null });
   });

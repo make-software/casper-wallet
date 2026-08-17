@@ -106,9 +106,10 @@ function popupVault(vault: VaultState): BroadcastVaultState {
     accounts: vault.accounts.map(({ secretKey, ...account }) => ({
       ...account,
       // The literal type is the enforcement: forgetting to blank a key is a
-      // compile error. `watching` carries the meaning the blanked key used to carry.
+      // compile error. `watching` means watch-only specifically — a Ledger
+      // account also has an empty secretKey but is excluded via `hardware`.
       secretKey: '' as const,
-      watching: secretKey === ''
+      watching: secretKey === '' && account.hardware == null
     })),
     accountNamesByOriginDict: vault.accountNamesByOriginDict,
     siteNameByOriginDict: vault.siteNameByOriginDict,

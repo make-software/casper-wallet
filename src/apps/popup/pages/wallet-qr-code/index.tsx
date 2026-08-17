@@ -58,10 +58,9 @@ export const WalletQrCodePage = () => {
       return;
     }
 
+    // The worker sends only derived accounts' names — the mobile client re-derives their keys from the phrase.
     const secretKeys = await requestWithRetry(() =>
-      fetchAccountSecretKeys(
-        [...derivedAccounts, ...importedAccounts].map(a => a.name)
-      )
+      fetchAccountSecretKeys(importedAccounts.map(a => a.name))
     ).catch(() => null);
 
     // A null/failed response must not turn into a partial payload: that would
