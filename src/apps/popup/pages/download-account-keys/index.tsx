@@ -1,4 +1,3 @@
-import JSZip from 'jszip';
 import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -6,7 +5,6 @@ import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 
 import { closeExportKeysSurface } from '@background/open-export-keys-surface';
 
-import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 import {
   FooterButtonsContainer,
   HeaderPopup,
@@ -19,8 +17,9 @@ import { Button } from '@libs/ui/components';
 import { Download } from './download';
 import { Failure } from './failure';
 import { Instruction } from './instruction';
+import { runKeysDownload } from './run-keys-download';
 import { Success } from './success';
-import { DownloadAccountKeysSteps, downloadFile } from './utils';
+import { DownloadAccountKeysSteps } from './utils';
 
 export const DownloadAccountKeysPage = () => {
   const [isPasswordConfirmed, setIsPasswordConfirmed] =
@@ -47,38 +46,8 @@ export const DownloadAccountKeysPage = () => {
     );
   }
 
-  const downloadKeys = async () => {
-    try {
-      const zip = new JSZip();
-
-      for (const account of selectedAccounts) {
-        const asymmetricKey = createAsymmetricKeys(
-          account.publicKey,
-          account.secretKey
-        );
-
-        if (asymmetricKey.secretKey) {
-          const file = asymmetricKey.secretKey.toPem();
-          zip.file(`${account.name}_secret_key.pem`, file);
-        }
-      }
-
-      const content = await zip.generateAsync({ type: 'blob' });
-      downloadFile(new Blob([content]), 'casper-wallet-secret_keys.zip');
-
-      setDownloadAccountKeysStep(DownloadAccountKeysSteps.Success);
-    } catch (error) {
-      // Only the error name is logged — the thrown value is built from key
-      // material and must not reach the console. Nothing collects these logs
-      // (the project has no Sentry or equivalent), so the Failure step below is
-      // the only way this reaches anyone.
-      console.error(
-        'downloadKeys: failed to build or download the keys archive',
-        error instanceof Error ? error.name : 'unknown error'
-      );
-      setDownloadAccountKeysStep(DownloadAccountKeysSteps.Failure);
-    }
-  };
+  const downloadKeys = () =>
+    runKeysDownload(selectedAccounts, setDownloadAccountKeysStep);
 
   const content = {
     [DownloadAccountKeysSteps.Instruction]: <Instruction />,

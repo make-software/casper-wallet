@@ -61,6 +61,15 @@ export async function loadPrivateStateWithRetry(): Promise<PrivateState> {
   throw lastError;
 }
 
+export function createPrivateStateUpdatedListener(onUpdate: () => void) {
+  return function listener(message: unknown) {
+    if (backgroundEvent.privateStateUpdated.match(message)) {
+      onUpdate();
+    }
+    return undefined;
+  };
+}
+
 export function usePrivateState(): UsePrivateStateResult {
   const [privateState, setPrivateState] = useState<PrivateState | null>(null);
   const [error, setError] = useState(false);
@@ -89,12 +98,9 @@ export function usePrivateState(): UsePrivateStateResult {
   }, [fetchAttemptId]);
 
   useEffect(() => {
-    function listener(message: unknown) {
-      if (backgroundEvent.privateStateUpdated.match(message)) {
-        setFetchAttemptId(id => id + 1);
-      }
-      return undefined;
-    }
+    const listener = createPrivateStateUpdatedListener(() =>
+      setFetchAttemptId(id => id + 1)
+    );
 
     runtime.onMessage.addListener(listener);
 

@@ -72,14 +72,14 @@ module.exports = {
       lines: 95,
       statements: 95
     },
-    // Sagas — vault-sagas is partly tested (Task 8.1); onboarding/network/
-    // trusted-wasm sagas remain untested for now. Floor set to achieved (~48%
-    // stmts/lines, ~47% branch, ~37% funcs) so the gate is real, not fiction.
+    // Sagas — vault-sagas is now broadly covered (account-derivation collision loop
+    // and all sagaError paths); onboarding/check-casper2-network/trusted-wasm remain untested.
+    // Floor set to achieved.
     './src/background/redux/sagas/': {
-      branches: 45,
-      functions: 35,
-      lines: 45,
-      statements: 45
+      branches: 74,
+      functions: 63,
+      lines: 79,
+      statements: 79
     }
   },
   testPathIgnorePatterns: ['e2e-tests/']
