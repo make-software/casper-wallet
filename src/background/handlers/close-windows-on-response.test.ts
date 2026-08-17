@@ -130,7 +130,11 @@ describe('markRequestResponded', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
 
     expect(markRequestResponded(store, 'r1')).toEqual({
@@ -147,7 +151,11 @@ describe('markRequestResponded', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 99, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 99,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
 
     expect(markRequestResponded(store, 'r1')).toEqual({
@@ -189,7 +197,11 @@ describe('markRequestResponded', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
 
     markRequestResponded(store, 'r1');
@@ -207,7 +219,11 @@ describe('closeLedgerWindowsAfterResponse', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     const displays = markRequestResponded(store, 'r1');
     order = [];
@@ -240,7 +256,11 @@ describe('closeLedgerWindowsAfterResponse', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     const displays = markRequestResponded(store, 'r1');
     openWith(store, 'r2', [10]);
@@ -257,7 +277,11 @@ describe('closeLedgerWindowsAfterResponse', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     const displays = markRequestResponded(store, 'r1');
     openWith(store, 'r2', [11]);
@@ -275,11 +299,19 @@ describe('closeLedgerWindowsAfterResponse', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     const displays = markRequestResponded(store, 'r1');
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 99, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 99,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     order = [];
 
@@ -336,7 +368,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
 
     await handleSdkResponseToTab(makeMessage('r1'), UI_SENDER, store);
@@ -349,7 +385,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     order = [];
 
@@ -382,7 +422,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 99, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 99,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     store.dispatch(ledgerDeployChanged('deploy-json'));
     store.dispatch(ledgerTransactionChanged('transaction-json'));
@@ -400,7 +444,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     order = [];
 
@@ -421,7 +469,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     order = [];
 
@@ -437,7 +489,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     store.dispatch(windowRequestResponded({ requestId: 'r1' }));
     order = [];
@@ -452,7 +508,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('after an MV3 restart it delivers and closes nothing', async () => {
     const store = makeRealStore();
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     store.dispatch(windowIdChanged(10));
     order = [];
@@ -468,7 +528,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     emitToOriginMock.mockResolvedValue(0);
     order = [];
@@ -490,7 +554,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     emitToOriginMock.mockResolvedValue(1);
     order = [];
@@ -509,7 +577,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     order = [];
 
@@ -525,7 +597,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     order = [];
 
@@ -542,14 +618,22 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     order = [];
 
     sendMessageMock.mockImplementation(() => {
       order.push('tabs.sendMessage');
       store.dispatch(
-        ledgerNewWindowIdChanged({ windowId: 77, openerWindowId: null })
+        ledgerNewWindowIdChanged({
+          windowId: 77,
+          openerWindowId: null,
+          openerRequestId: null
+        })
       );
       return Promise.resolve(undefined);
     });
@@ -565,7 +649,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     order = [];
 
@@ -591,7 +679,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
     order = [];
 
@@ -617,7 +709,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
       const store = makeRealStore();
       openWith(store, 'r1', [10, 11]);
       store.dispatch(
-        ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+        ledgerNewWindowIdChanged({
+          windowId: 11,
+          openerWindowId: null,
+          openerRequestId: null
+        })
       );
 
       await handleSdkResponseToTab(
@@ -652,7 +748,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
-      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
     );
 
     await cancelRequestsDisplacedBy(store, 10, 'cancel-on-close');

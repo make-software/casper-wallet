@@ -5,6 +5,7 @@ import { LedgerState } from './types';
 const initialState: LedgerState = {
   windowId: null,
   openerWindowId: null,
+  openerRequestId: null,
   deploy: null,
   transaction: null,
   recipientToSaveOnSuccess: null
@@ -18,11 +19,16 @@ const slice = createSlice({
       state,
       {
         payload
-      }: PayloadAction<{ windowId: number; openerWindowId: number | null }>
+      }: PayloadAction<{
+        windowId: number;
+        openerWindowId: number | null;
+        openerRequestId: string | null;
+      }>
     ) => ({
       ...state,
       windowId: payload.windowId,
-      openerWindowId: payload.openerWindowId
+      openerWindowId: payload.openerWindowId,
+      openerRequestId: payload.openerRequestId
     }),
     ledgerStateCleared: () => initialState,
     ledgerDeployChanged: (state, { payload }: PayloadAction<string>) => ({

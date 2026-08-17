@@ -3,8 +3,10 @@ import { resolveOwnPermissionWindowId } from './ledger-window-ownership';
 const none = {
   slotWindowId: null,
   openerWindowId: null,
+  openerRequestId: null,
   openedWindowId: null,
-  hostWindowId: null
+  hostWindowId: null,
+  ownRequestId: null
 };
 
 describe('resolveOwnPermissionWindowId', () => {
@@ -40,9 +42,10 @@ describe('resolveOwnPermissionWindowId', () => {
     ).toBe(20);
   });
 
-  it('a remounted instance in the opener window owns it (popup torn down and reopened)', () => {
+  it('a remounted internal flow in the opener window owns it (popup torn down and reopened)', () => {
     // Neither `openedWindowId` (a fresh ref) nor `hostWindowId` (the browser
     // window, not the permission window) matches — only the persisted opener.
+    // Both request ids are null: the internal flows have no dapp request.
     expect(
       resolveOwnPermissionWindowId({
         ...none,
@@ -51,6 +54,48 @@ describe('resolveOwnPermissionWindowId', () => {
         hostWindowId: 3
       })
     ).toBe(20);
+  });
+
+  it('a remounted dapp flow in the opener window owns it when the request matches', () => {
+    expect(
+      resolveOwnPermissionWindowId({
+        ...none,
+        slotWindowId: 20,
+        openerWindowId: 100,
+        openerRequestId: 'r1',
+        hostWindowId: 100,
+        ownRequestId: 'r1'
+      })
+    ).toBe(20);
+  });
+
+  it('a second dapp request reusing the approval window does NOT inherit the first one’s claim', () => {
+    // The approval window is one tracked slot the next request reuses in place,
+    // so window 100 hosts r2's fresh document while the slice still names r1's
+    // permission window. Owning it here closes window 100 on the back arrow and
+    // cancels r2 — the collateral cancel WALLET-1416 is about.
+    expect(
+      resolveOwnPermissionWindowId({
+        ...none,
+        slotWindowId: 20,
+        openerWindowId: 100,
+        openerRequestId: 'r1',
+        hostWindowId: 100,
+        ownRequestId: 'r2'
+      })
+    ).toBeNull();
+  });
+
+  it('an internal flow does not inherit a dapp flow’s claim on the same window', () => {
+    expect(
+      resolveOwnPermissionWindowId({
+        ...none,
+        slotWindowId: 20,
+        openerWindowId: 100,
+        openerRequestId: 'r1',
+        hostWindowId: 100
+      })
+    ).toBeNull();
   });
 
   it('a foreign flow holding the slot reads as no window of mine', () => {
@@ -65,20 +110,6 @@ describe('resolveOwnPermissionWindowId', () => {
     ).toBeNull();
   });
 
-  it('the opener witness is per window, not per instance: a sibling in the opener window owns the slot', () => {
-    // The popup renders one document per browser window, so this is the
-    // remount case again, not a leak to a foreign flow.
-    expect(
-      resolveOwnPermissionWindowId({
-        ...none,
-        slotWindowId: 99,
-        openerWindowId: 3,
-        openedWindowId: 20,
-        hostWindowId: 3
-      })
-    ).toBe(99);
-  });
-
   it('with no opener recorded, a stranger in the same browser window is not an owner', () => {
     expect(
       resolveOwnPermissionWindowId({
@@ -86,6 +117,17 @@ describe('resolveOwnPermissionWindowId', () => {
         slotWindowId: 20,
         hostWindowId: 3
       })
+    ).toBeNull();
+  });
+
+  it('two unknowns are not a match: no opener recorded and no host window yet → null', () => {
+    // The state the mount race produces — the slice's opener is whatever
+    // `windows.getCurrent()` had resolved to at open time (null if it had not),
+    // and the reading side is null until its own call lands. Without the
+    // `openerWindowId != null` guard both sides compare equal and this instance,
+    // which witnessed nothing, would own a foreign flow's window.
+    expect(
+      resolveOwnPermissionWindowId({ ...none, slotWindowId: 20 })
     ).toBeNull();
   });
 

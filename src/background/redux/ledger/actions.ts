@@ -23,11 +23,15 @@ export {
  * `sign-with-ledger-in-new-window`), which have no dapp request behind them;
  * those own the permission window and nothing else.
  *
- * `permissionWindowId` is the dispatcher's own window — one it opened, or the
- * one it renders in. `state.ledger.windowId` is a single global slot that a
- * second flow can take over, so it is not evidence of whose window it names.
- * Required: without it the message is not an ownership proof, and the
- * background drops it.
+ * `permissionWindowId` is the dispatcher's own window, on any of the three
+ * witnesses `resolveOwnPermissionWindowId` weighs: one it opened, the one it
+ * renders in, or — for the same flow remounted — the slot recorded against its
+ * own browser window AND its own requestId. That third witness is why the
+ * window id alone is not the test: a browser window outlives the document that
+ * recorded it, and approval windows are one reused slot.
+ * `state.ledger.windowId` is a single global slot that a second flow can take
+ * over, so it is not evidence of whose window it names. Required: without it
+ * the message is not an ownership proof, and the background drops it.
  */
 export const closeLedgerFlowWindows = createAction<{
   requestId?: string;

@@ -11,6 +11,7 @@ import {
 } from '@background/redux/ledger/actions';
 import {
   selectLedgerNewWindowId,
+  selectLedgerOpenerRequestId,
   selectLedgerOpenerWindowId
 } from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -83,6 +84,7 @@ export const useLedger = ({
     useState<ILedgerEvent>(initialEventToRender);
   const windowId = useSelector(selectLedgerNewWindowId);
   const openerWindowId = useSelector(selectLedgerOpenerWindowId);
+  const openerRequestId = useSelector(selectLedgerOpenerRequestId);
   const shouldTrySignAfterConnectRef = useRef<boolean>(false);
   const selectedTransportRef = useRef<SelectedTransport>(undefined);
   const isFirstEventRef = useRef<boolean>(true);
@@ -208,8 +210,8 @@ export const useLedger = ({
 
   // The witnesses `resolveOwnPermissionWindowId` weighs: the window this
   // instance opened, and the window it renders in. Both are per-document; the
-  // third (`openerWindowId`) rides in the slice so a remounted popup still owns
-  // the window its predecessor opened.
+  // third (`openerWindowId` qualified by `openerRequestId`) rides in the slice
+  // so a remounted popup still owns the window its predecessor opened.
   const openedPermissionWindowIdRef = useRef<number | null>(null);
   const [hostWindowId, setHostWindowId] = useState<number | null>(null);
   // Mirror for the open effect below, which must not re-run when the state lands.
@@ -244,8 +246,10 @@ export const useLedger = ({
   const ownPermissionWindowId = resolveOwnPermissionWindowId({
     slotWindowId: windowId,
     openerWindowId,
+    openerRequestId,
     openedWindowId: openedPermissionWindowIdRef.current,
-    hostWindowId
+    hostWindowId,
+    ownRequestId: askPermissionUrlData.params?.requestId ?? null
   });
 
   /** We have to open new browser window to handle device permission */
@@ -277,7 +281,8 @@ export const useLedger = ({
         dispatchToMainStore(
           ledgerNewWindowIdChanged({
             windowId: w.id,
-            openerWindowId: hostWindowIdRef.current
+            openerWindowId: hostWindowIdRef.current,
+            openerRequestId: askPermissionUrlData.params?.requestId ?? null
           })
         );
 

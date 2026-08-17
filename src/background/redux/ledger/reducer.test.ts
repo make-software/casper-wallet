@@ -11,6 +11,7 @@ describe('ledger reducer', () => {
   const initialState = {
     windowId: null,
     openerWindowId: null,
+    openerRequestId: null,
     deploy: null,
     transaction: null,
     recipientToSaveOnSuccess: null
@@ -20,23 +21,46 @@ describe('ledger reducer', () => {
     expect(reducer(undefined, { type: '@@INIT' } as any)).toEqual(initialState);
   });
 
-  it('sets windowId and openerWindowId together on ledgerNewWindowIdChanged', () => {
+  it('sets windowId and both opener witnesses together on ledgerNewWindowIdChanged', () => {
     expect(
       reducer(
         initialState,
-        ledgerNewWindowIdChanged({ windowId: 7, openerWindowId: 3 })
+        ledgerNewWindowIdChanged({
+          windowId: 7,
+          openerWindowId: 3,
+          openerRequestId: 'r1'
+        })
       )
-    ).toEqual({ ...initialState, windowId: 7, openerWindowId: 3 });
+    ).toEqual({
+      ...initialState,
+      windowId: 7,
+      openerWindowId: 3,
+      openerRequestId: 'r1'
+    });
   });
 
-  it('a new slot without a known opener clears the previous opener', () => {
-    const withOpener = { ...initialState, windowId: 7, openerWindowId: 3 };
+  it('a new slot without a known opener clears the previous opener, request id included', () => {
+    const withOpener = {
+      ...initialState,
+      windowId: 7,
+      openerWindowId: 3,
+      openerRequestId: 'r1'
+    };
     expect(
       reducer(
         withOpener,
-        ledgerNewWindowIdChanged({ windowId: 8, openerWindowId: null })
+        ledgerNewWindowIdChanged({
+          windowId: 8,
+          openerWindowId: null,
+          openerRequestId: null
+        })
       )
-    ).toEqual({ ...initialState, windowId: 8, openerWindowId: null });
+    ).toEqual({
+      ...initialState,
+      windowId: 8,
+      openerWindowId: null,
+      openerRequestId: null
+    });
   });
 
   it('sets deploy on ledgerDeployChanged', () => {
@@ -61,6 +85,7 @@ describe('ledger reducer', () => {
     const populated = {
       windowId: 7,
       openerWindowId: 3,
+      openerRequestId: 'r1',
       deploy: 'deploy-payload',
       transaction: 'tx-payload',
       recipientToSaveOnSuccess: '01deadbeef'

@@ -180,7 +180,11 @@ describe('three independent try blocks', () => {
 it('the clear is the whole-slice reset', async () => {
   const testStore = configureStore({ reducer: { ledger, windowManagement } });
   testStore.dispatch(
-    ledgerNewWindowIdChanged({ windowId: 7, openerWindowId: null })
+    ledgerNewWindowIdChanged({
+      windowId: 7,
+      openerWindowId: 3,
+      openerRequestId: 'r1'
+    })
   );
   testStore.dispatch(ledgerDeployChanged('d'));
   testStore.dispatch(ledgerTransactionChanged('t'));
@@ -191,6 +195,7 @@ it('the clear is the whole-slice reset', async () => {
   expect(testStore.getState().ledger).toEqual({
     windowId: null,
     openerWindowId: null,
+    openerRequestId: null,
     deploy: null,
     transaction: null,
     recipientToSaveOnSuccess: null
