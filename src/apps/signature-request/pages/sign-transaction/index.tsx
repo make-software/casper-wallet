@@ -19,7 +19,10 @@ import { getSigningAccount, isEqualCaseInsensitive } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
-import { decideLedgerFlowControl } from '@signature-request/ledger-flow-controls';
+import {
+  assertNever,
+  decideLedgerFlowControl
+} from '@signature-request/ledger-flow-controls';
 import { SignatureRequestContent } from '@signature-request/pages/sign-transaction/signature-request-content';
 import { SignatureRequestLoading } from '@signature-request/pages/sign-transaction/signature-request-loading';
 import { SignatureRequestRawJson } from '@signature-request/pages/sign-transaction/signature-request-raw-json';
@@ -336,15 +339,22 @@ export function SignTransactionPage() {
     // nothing, and either one used to leave the user on a dead error screen.
     setSigningPageState(SigningPageState.MainContent);
 
-    if (decision === 'end-flow') {
-      closeNewLedgerWindowsAndClearState();
-      return;
-    }
-
-    if (decision === 'dismiss-this-window') {
-      closeCurrentWindow().catch(error =>
-        console.error('sign-transaction: dismissing this window failed', error)
-      );
+    switch (decision) {
+      case 'end-flow':
+        closeNewLedgerWindowsAndClearState();
+        return;
+      case 'dismiss-this-window':
+        closeCurrentWindow().catch(error =>
+          console.error(
+            'sign-transaction: dismissing this window failed',
+            error
+          )
+        );
+        return;
+      case 'return-to-main':
+        return;
+      default:
+        return assertNever(decision);
     }
   };
 

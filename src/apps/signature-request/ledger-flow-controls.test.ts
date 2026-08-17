@@ -1,4 +1,4 @@
-import { decideLedgerFlowControl } from './ledger-flow-controls';
+import { assertNever, decideLedgerFlowControl } from './ledger-flow-controls';
 
 describe('decideLedgerFlowControl', () => {
   it('the permission window never dismisses itself', () => {
@@ -26,6 +26,14 @@ describe('decideLedgerFlowControl', () => {
 
     expect(decideLedgerFlowControl(false, ownPermissionWindowId)).toBe(
       'return-to-main'
+    );
+  });
+});
+
+describe('assertNever', () => {
+  it('throws for a value that escaped the union at runtime', () => {
+    expect(() => assertNever('stray' as never)).toThrow(
+      'Unhandled ledger flow decision: stray'
     );
   });
 });

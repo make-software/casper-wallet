@@ -26,8 +26,10 @@ export {
  * `permissionWindowId` is the dispatcher's own window — one it opened, or the
  * one it renders in. `state.ledger.windowId` is a single global slot that a
  * second flow can take over, so it is not evidence of whose window it names.
+ * Required: without it the message is not an ownership proof, and the
+ * background drops it.
  */
 export const closeLedgerFlowWindows = createAction<{
   requestId?: string;
-  permissionWindowId?: number;
+  permissionWindowId: number;
 }>('CLOSE_LEDGER_FLOW_WINDOWS');

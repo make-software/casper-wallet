@@ -247,7 +247,10 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
     // Closing an approval window reaches cancel-on-close and cancels the request
     // it displayed — a lifecycle-authority decision, gated like its siblings.
     const { store } = makeStore();
-    const action = closeLedgerFlowWindows({ requestId: 'r1' });
+    const action = closeLedgerFlowWindows({
+      requestId: 'r1',
+      permissionWindowId: 20
+    });
 
     const result = await handleReduxAction(
       action,
@@ -267,7 +270,7 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
     const { store } = makeStore();
 
     const result = await handleReduxAction(
-      closeLedgerFlowWindows({ requestId: 'r1' }),
+      closeLedgerFlowWindows({ requestId: 'r1', permissionWindowId: 20 }),
       trustedSender,
       store
     );
@@ -292,7 +295,7 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
     const { store } = makeStore();
 
     await handleReduxAction(
-      closeLedgerFlowWindows({ requestId: 'r1' }),
+      closeLedgerFlowWindows({ requestId: 'r1', permissionWindowId: 20 }),
       { id: 'ext-id', url: undefined } as Runtime.MessageSender,
       store
     );
@@ -300,8 +303,13 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
     expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
   });
 
-  it('a payload-less closeLedgerFlowWindows message does not throw', async () => {
-    // `.match` checks the type, not the payload; the message crosses runtime.sendMessage.
+  it('a payload-less closeLedgerFlowWindows message is dropped, not thrown on', async () => {
+    // `.match` checks the type, not the payload; the message crosses
+    // runtime.sendMessage. Without a permissionWindowId there is no ownership
+    // proof, so nothing may be closed.
+    const consoleWarn = jest
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {});
     const { store } = makeStore();
 
     const result = await handleReduxAction(
@@ -310,11 +318,28 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
       store
     );
 
-    expect(closeLedgerFlowWindowsMock).toHaveBeenCalledWith(store, {
-      requestId: undefined,
-      permissionWindowId: undefined
-    });
-    expect(result).toEqual({ handled: true, response: undefined });
+    expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: true });
+    consoleWarn.mockRestore();
+  });
+
+  it('a payload naming a request but no window is dropped', async () => {
+    const consoleWarn = jest
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {});
+    const { store } = makeStore();
+
+    await handleReduxAction(
+      {
+        type: closeLedgerFlowWindows.type,
+        payload: { requestId: 'r1' }
+      } as { type: string },
+      trustedSenderForR1,
+      store
+    );
+
+    expect(closeLedgerFlowWindowsMock).not.toHaveBeenCalled();
+    consoleWarn.mockRestore();
   });
 
   it('a synchronous throw from the handler is caught and logged, not left unhandled', async () => {
@@ -329,7 +354,7 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
     closeLedgerFlowWindowsMock.mockRejectedValueOnce(error);
 
     const result = await handleReduxAction(
-      closeLedgerFlowWindows({ requestId: 'r1' }),
+      closeLedgerFlowWindows({ requestId: 'r1', permissionWindowId: 20 }),
       trustedSenderForR1,
       store
     );

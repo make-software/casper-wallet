@@ -9,10 +9,14 @@ import {
   closeLedgerFlowWindows,
   ledgerNewWindowIdChanged
 } from '@background/redux/ledger/actions';
-import { selectLedgerNewWindowId } from '@background/redux/ledger/selectors';
+import {
+  selectLedgerNewWindowId,
+  selectLedgerOpenerWindowId
+} from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { createLedgerWindowCloseTracker } from '@hooks/ledger-window-close-listener';
+import { resolveOwnPermissionWindowId } from '@hooks/ledger-window-ownership';
 import { registerLedgerPermissionWindow } from '@hooks/register-ledger-permission-window';
 
 import {
@@ -78,6 +82,7 @@ export const useLedger = ({
   const [ledgerEventStatusToRender, setLedgerEventStatusToRender] =
     useState<ILedgerEvent>(initialEventToRender);
   const windowId = useSelector(selectLedgerNewWindowId);
+  const openerWindowId = useSelector(selectLedgerOpenerWindowId);
   const shouldTrySignAfterConnectRef = useRef<boolean>(false);
   const selectedTransportRef = useRef<SelectedTransport>(undefined);
   const isFirstEventRef = useRef<boolean>(true);
@@ -201,12 +206,14 @@ export const useLedger = ({
   // the two effects after it are the only things that take it back down.
   const closeTracker = useMemo(() => createLedgerWindowCloseTracker(), []);
 
-  // The two ways an instance can own the permission window: it opened one, or it
-  // IS one (`sign-with-ledger-in-new-window`, `import-account-from-ledger` and
-  // both signature-request pages render inside it). `state.ledger.windowId`
-  // alone cannot tell either apart from a foreign flow holding the same slot.
+  // The witnesses `resolveOwnPermissionWindowId` weighs: the window this
+  // instance opened, and the window it renders in. Both are per-document; the
+  // third (`openerWindowId`) rides in the slice so a remounted popup still owns
+  // the window its predecessor opened.
   const openedPermissionWindowIdRef = useRef<number | null>(null);
   const [hostWindowId, setHostWindowId] = useState<number | null>(null);
+  // Mirror for the open effect below, which must not re-run when the state lands.
+  const hostWindowIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -215,6 +222,7 @@ export const useLedger = ({
       .getCurrent()
       .then(current => {
         if (!cancelled && current.id != null) {
+          hostWindowIdRef.current = current.id;
           setHostWindowId(current.id);
         }
       })
@@ -233,12 +241,12 @@ export const useLedger = ({
   // the two flows reads as "no permission window of mine" rather than as someone
   // else's. Still derived from the slot, so a window this instance opened and
   // then lost stops counting once the background clears the stale id.
-  const ownPermissionWindowId =
-    windowId != null &&
-    (windowId === openedPermissionWindowIdRef.current ||
-      windowId === hostWindowId)
-      ? windowId
-      : null;
+  const ownPermissionWindowId = resolveOwnPermissionWindowId({
+    slotWindowId: windowId,
+    openerWindowId,
+    openedWindowId: openedPermissionWindowIdRef.current,
+    hostWindowId
+  });
 
   /** We have to open new browser window to handle device permission */
   useEffect(() => {
@@ -266,7 +274,12 @@ export const useLedger = ({
 
         openedPermissionWindowIdRef.current = w.id;
 
-        dispatchToMainStore(ledgerNewWindowIdChanged(w.id));
+        dispatchToMainStore(
+          ledgerNewWindowIdChanged({
+            windowId: w.id,
+            openerWindowId: hostWindowIdRef.current
+          })
+        );
 
         registerLedgerPermissionWindow({
           domain: askPermissionUrlData.domain,
@@ -347,7 +360,8 @@ export const useLedger = ({
     if (ownPermissionWindowId == null) {
       // A control the user pressed did nothing. Reachable two ways: the slot was
       // released or taken over, and — briefly, on mount — before
-      // `windows.getCurrent` resolves for a page that IS the permission window.
+      // `windows.getCurrent` resolves for a page that IS (or shares a browser
+      // window with the opener of) the permission window.
       console.warn('useLedger: no permission window of this flow to close');
       return;
     }

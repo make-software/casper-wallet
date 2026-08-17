@@ -9,7 +9,7 @@ export interface CloseLedgerFlowWindowsTarget {
   /** Absent for the internal flows, which have no dapp request behind them. */
   requestId?: string;
   /** The dispatcher's own Ledger window — see the action's docblock. */
-  permissionWindowId?: number;
+  permissionWindowId: number;
 }
 
 /**
@@ -29,9 +29,7 @@ export async function handleCloseLedgerFlowWindows(
   // Never `state.ledger.windowId`: one global slot that a second flow can take
   // over, so reading it here removed that flow's window mid-confirmation and
   // wiped the deploy it was signing. The caller proves ownership instead.
-  if (permissionWindowId != null) {
-    targets.add(permissionWindowId);
-  }
+  targets.add(permissionWindowId);
 
   const hasRequestId = typeof requestId === 'string' && requestId !== '';
 
@@ -72,7 +70,6 @@ export async function handleCloseLedgerFlowWindows(
   // names a window we are about to take down — clearing it otherwise wipes the
   // `deploy`/`transaction` a flow that took the slot over is signing.
   if (
-    permissionWindowId != null &&
     state.ledger.windowId === permissionWindowId &&
     removals.includes(permissionWindowId)
   ) {

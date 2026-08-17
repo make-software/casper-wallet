@@ -129,7 +129,9 @@ describe('markRequestResponded', () => {
   it('snapshots the windowIds and marks the request responded', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
 
     expect(markRequestResponded(store, 'r1')).toEqual({
       windowIds: [10, 11],
@@ -144,7 +146,9 @@ describe('markRequestResponded', () => {
   it('isLedgerFlow is false when the slot names a window this request does not display', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10]);
-    store.dispatch(ledgerNewWindowIdChanged(99));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 99, openerWindowId: null })
+    );
 
     expect(markRequestResponded(store, 'r1')).toEqual({
       windowIds: [10],
@@ -184,7 +188,9 @@ describe('markRequestResponded', () => {
   it('a tombstone snapshots nothing and dispatches nothing', () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
 
     markRequestResponded(store, 'r1');
     order = [];
@@ -200,7 +206,9 @@ describe('closeLedgerWindowsAfterResponse', () => {
   it('clears the ledger slice BEFORE the first removal, and one failed removal does not skip the others', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     const displays = markRequestResponded(store, 'r1');
     order = [];
 
@@ -231,7 +239,9 @@ describe('closeLedgerWindowsAfterResponse', () => {
   it('everything was taken over: nothing is removed and the slice is not cleared', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     const displays = markRequestResponded(store, 'r1');
     openWith(store, 'r2', [10]);
     openWith(store, 'r3', [11]);
@@ -246,7 +256,9 @@ describe('closeLedgerWindowsAfterResponse', () => {
   it('only the permission window was taken over: removes 10 only and leaves the slot alone', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     const displays = markRequestResponded(store, 'r1');
     openWith(store, 'r2', [11]);
     order = [];
@@ -262,9 +274,13 @@ describe('closeLedgerWindowsAfterResponse', () => {
   it('does not clear the slice when another flow already claimed ledger.windowId', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     const displays = markRequestResponded(store, 'r1');
-    store.dispatch(ledgerNewWindowIdChanged(99));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 99, openerWindowId: null })
+    );
     order = [];
 
     await closeLedgerWindowsAfterResponse(store, displays);
@@ -319,7 +335,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     // dispatches windowRequestResponded.
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
 
     await handleSdkResponseToTab(makeMessage('r1'), UI_SENDER, store);
     await flushMicrotasks();
@@ -330,7 +348,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('removes the windows only AFTER the response has been delivered', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     order = [];
 
     await handleSdkResponseToTab(makeMessage('r1'), UI_SENDER, store);
@@ -361,7 +381,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it("a foreign flow's permission window is neither closed nor cleared", async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10]);
-    store.dispatch(ledgerNewWindowIdChanged(99));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 99, openerWindowId: null })
+    );
     store.dispatch(ledgerDeployChanged('deploy-json'));
     store.dispatch(ledgerTransactionChanged('transaction-json'));
     store.dispatch(ledgerRecipientToSaveOnSuccessChanged('recipient'));
@@ -377,7 +399,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('subtracts a window a second request claimed during delivery', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     order = [];
 
     sendMessageMock.mockImplementation(() => {
@@ -396,7 +420,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('closes exactly once for two identical responses', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     order = [];
 
     await handleSdkResponseToTab(makeMessage('r1'), UI_SENDER, store);
@@ -410,7 +436,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('a deduped response closes nothing', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     store.dispatch(windowRequestResponded({ requestId: 'r1' }));
     order = [];
 
@@ -423,7 +451,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
 
   it('after an MV3 restart it delivers and closes nothing', async () => {
     const store = makeRealStore();
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     store.dispatch(windowIdChanged(10));
     order = [];
 
@@ -437,7 +467,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('the same-origin fallback that delivered nothing does not mark responded', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     emitToOriginMock.mockResolvedValue(0);
     order = [];
 
@@ -457,7 +489,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('the same-origin fallback that DID deliver closes the flow', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     emitToOriginMock.mockResolvedValue(1);
     order = [];
 
@@ -474,7 +508,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('never enumerates the browser', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     order = [];
 
     await handleSdkResponseToTab(makeMessage('r1'), UI_SENDER, store);
@@ -488,7 +524,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('never detaches what it removes', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     order = [];
 
     await handleSdkResponseToTab(makeMessage('r1'), UI_SENDER, store);
@@ -503,12 +541,16 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('does not clear a slot another flow claimed during delivery', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     order = [];
 
     sendMessageMock.mockImplementation(() => {
       order.push('tabs.sendMessage');
-      store.dispatch(ledgerNewWindowIdChanged(77));
+      store.dispatch(
+        ledgerNewWindowIdChanged({ windowId: 77, openerWindowId: null })
+      );
       return Promise.resolve(undefined);
     });
 
@@ -522,7 +564,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('the handler resolves even when a removal never settles', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     order = [];
 
     removeMock.mockImplementation((id: number) => {
@@ -546,7 +590,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     // cannot remove it.
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
     order = [];
 
     await handleSdkResponseToTab(
@@ -570,7 +616,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     try {
       const store = makeRealStore();
       openWith(store, 'r1', [10, 11]);
-      store.dispatch(ledgerNewWindowIdChanged(11));
+      store.dispatch(
+        ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+      );
 
       await handleSdkResponseToTab(
         {
@@ -603,7 +651,9 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   it('a cancel that races its own window self-close still closes the permission window', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
-    store.dispatch(ledgerNewWindowIdChanged(11));
+    store.dispatch(
+      ledgerNewWindowIdChanged({ windowId: 11, openerWindowId: null })
+    );
 
     await cancelRequestsDisplacedBy(store, 10, 'cancel-on-close');
 

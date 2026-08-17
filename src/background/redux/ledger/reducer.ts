@@ -4,6 +4,7 @@ import { LedgerState } from './types';
 
 const initialState: LedgerState = {
   windowId: null,
+  openerWindowId: null,
   deploy: null,
   transaction: null,
   recipientToSaveOnSuccess: null
@@ -13,9 +14,15 @@ const slice = createSlice({
   name: 'ledger',
   initialState,
   reducers: {
-    ledgerNewWindowIdChanged: (state, { payload }: PayloadAction<number>) => ({
+    ledgerNewWindowIdChanged: (
+      state,
+      {
+        payload
+      }: PayloadAction<{ windowId: number; openerWindowId: number | null }>
+    ) => ({
       ...state,
-      windowId: payload
+      windowId: payload.windowId,
+      openerWindowId: payload.openerWindowId
     }),
     ledgerStateCleared: () => initialState,
     ledgerDeployChanged: (state, { payload }: PayloadAction<string>) => ({

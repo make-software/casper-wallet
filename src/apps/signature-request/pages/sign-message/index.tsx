@@ -7,7 +7,10 @@ import { getSigningAccount } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
-import { decideLedgerFlowControl } from '@signature-request/ledger-flow-controls';
+import {
+  assertNever,
+  decideLedgerFlowControl
+} from '@signature-request/ledger-flow-controls';
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
@@ -210,15 +213,19 @@ export function SignMessagePage() {
     // nothing, and either one used to leave the user on a dead error screen.
     setShowLedgerConfirm(false);
 
-    if (decision === 'end-flow') {
-      closeNewLedgerWindowsAndClearState();
-      return;
-    }
-
-    if (decision === 'dismiss-this-window') {
-      closeCurrentWindow().catch(error =>
-        console.error('sign-message: dismissing this window failed', error)
-      );
+    switch (decision) {
+      case 'end-flow':
+        closeNewLedgerWindowsAndClearState();
+        return;
+      case 'dismiss-this-window':
+        closeCurrentWindow().catch(error =>
+          console.error('sign-message: dismissing this window failed', error)
+        );
+        return;
+      case 'return-to-main':
+        return;
+      default:
+        return assertNever(decision);
     }
   };
 

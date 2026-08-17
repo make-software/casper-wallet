@@ -188,12 +188,12 @@ it('never rejects, and one failed removal does not skip the others', async () =>
   );
 });
 
-it('does nothing when the caller owns no window and names no request', async () => {
+it("closes the caller's window but leaves the slice when the slot already moved on", async () => {
   const { store, dispatch } = makeStore(null);
 
-  await handleCloseLedgerFlowWindows(store, {});
+  await handleCloseLedgerFlowWindows(store, { permissionWindowId: 20 });
 
-  expect(removeMock).not.toHaveBeenCalled();
+  expect(removedIds()).toEqual([20]);
   expect(dispatch).not.toHaveBeenCalled();
 });
 

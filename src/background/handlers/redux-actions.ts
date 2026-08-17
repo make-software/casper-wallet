@@ -276,6 +276,15 @@ export async function handleReduxAction(
       return { handled: true };
     }
 
+    // The window id is the ownership proof; a message without one names
+    // nothing the handler may close, so it is dropped rather than guessed at.
+    if (typeof payload.permissionWindowId !== 'number') {
+      console.warn(
+        'closeLedgerFlowWindows: dropped — no permissionWindowId in the payload'
+      );
+      return { handled: true };
+    }
+
     // Fire-and-forget: the dispatcher's document is one of the windows being
     // closed. `handleCloseLedgerFlowWindows` never rejects; the `.catch` is the
     // belt for a synchronous throw before its first await.

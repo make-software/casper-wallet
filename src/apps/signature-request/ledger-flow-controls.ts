@@ -22,3 +22,9 @@ export function decideLedgerFlowControl(
     ? 'dismiss-this-window'
     : 'return-to-main';
 }
+
+// For the pages' `switch (decision)`: a new member of the union without a case
+// is then a compile error at each call site, not a silent fall-through.
+export function assertNever(decision: never): never {
+  throw new Error(`Unhandled ledger flow decision: ${String(decision)}`);
+}
