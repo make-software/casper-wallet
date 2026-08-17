@@ -9,6 +9,7 @@ import {
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { sdkMethod } from '@content/sdk-method';
+import { unknownSdkMessageError } from '@content/unknown-message-errors';
 
 import { handleSdkResponseToTab } from './sdk-response-to-tab';
 
@@ -124,6 +125,17 @@ function makeMessage(tabId: number = TAB_ID): SdkResponseToTabMessage {
   };
 }
 
+// What a rejecting `tabs.sendMessage` actually hands back: `webextension-polyfill`
+// relays the content-script listener's `Error.message` verbatim into this
+// promise (`sendPromisedResult` → `__mozWebExtensionPolyfillReject__` →
+// `new Error(reply.message)`), and that text is the one part of the logs below
+// this file does not control. Built by the real constructor rather than pinned
+// as a literal, so reverting the content-script redaction fails the no-payload
+// assertions here too, not only the content-script's own test.
+function deliveryRejection(): Error {
+  return unknownSdkMessageError(makeMessage().action);
+}
+
 function makeCancelMessage(tabId: number = TAB_ID): SdkResponseToTabMessage {
   return {
     type: SDK_RESPONSE_TO_TAB,
@@ -135,6 +147,17 @@ function makeCancelMessage(tabId: number = TAB_ID): SdkResponseToTabMessage {
   };
 }
 
+// Everything a spy actually wrote, as text. `JSON.stringify` alone cannot see an
+// Error's `message` (non-enumerable), and the third log argument IS an Error —
+// so stringifying the raw call list would vet nothing about the channel these
+// logs newly opened.
+function loggedText(spy: jest.SpyInstance) {
+  return spy.mock.calls
+    .flat()
+    .map(arg => (arg instanceof Error ? arg.message : JSON.stringify(arg)))
+    .join(' ');
+}
+
 // Find the single `sagaError` dispatch (source === 'sdk-response-to-tab').
 function findSagaError(dispatch: jest.Mock) {
   return dispatch.mock.calls.find(
@@ -143,12 +166,26 @@ function findSagaError(dispatch: jest.Mock) {
 }
 
 describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
+  // The delivery paths below log their cause. The nested `describe` installs its
+  // own spies on top of this one and restores them first, so both coexist.
+  let outerConsoleError: jest.SpyInstance;
+  let outerConsoleWarn: jest.SpyInstance;
+
   beforeEach(() => {
     sendMessageMock.mockReset();
     sendMessageMock.mockResolvedValue(undefined);
     emitToOriginMock.mockReset();
     // Default: fallback delivers to one tab. Individual tests override with 0.
     emitToOriginMock.mockResolvedValue(1);
+    outerConsoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    outerConsoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    outerConsoleError.mockRestore();
+    outerConsoleWarn.mockRestore();
   });
 
   it('an open request → delivers to the tab AND marks responded', async () => {
@@ -387,7 +424,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
   it('valid tabId, delivery rejects, origin present, fallback delivers (1) → optimistic responded + "delivered" sagaError', async () => {
     const { store, dispatch } = makeStore(OPEN_REQUEST);
-    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    sendMessageMock.mockRejectedValue(deliveryRejection());
     emitToOriginMock.mockResolvedValue(1);
 
     const result = await handleSdkResponseToTab(
@@ -398,6 +435,22 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     // Direct delivery was attempted (and rejected).
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
+    // Recovered elsewhere → warn, and the log says so. Before, this was byte
+    // identical to the case where the signature was destroyed.
+    expect(outerConsoleWarn).toHaveBeenCalledWith(
+      'sdk-response-to-tab: delivery to tab failed; recovered via same-origin fallback',
+      {
+        requestId: REQUEST_ID,
+        tabId: TAB_ID,
+        type: sdkMethod.signResponse.type,
+        delivered: 1
+      },
+      expect.any(Error)
+    );
+    expect(outerConsoleError).not.toHaveBeenCalled();
+    // SECURITY: the Error argument included — this is the branch that fires
+    // whenever another same-origin tab is open, i.e. the common outcome.
+    expect(loggedText(outerConsoleWarn)).not.toContain('deadbeef');
     expect(sendMessageMock).toHaveBeenCalledWith(TAB_ID, makeMessage().action);
 
     // Fallback broadcast to the same-origin active tab.
@@ -424,7 +477,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
   it('valid tabId, delivery rejects, origin present, fallback delivers ZERO → optimistic responded + "not delivered" sagaError', async () => {
     const { store, dispatch } = makeStore(OPEN_REQUEST);
-    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    sendMessageMock.mockRejectedValue(deliveryRejection());
     emitToOriginMock.mockResolvedValue(0);
 
     const result = await handleSdkResponseToTab(
@@ -435,6 +488,16 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
     expect(emitToOriginMock).toHaveBeenCalledTimes(1);
+    expect(outerConsoleError).toHaveBeenCalledWith(
+      'sdk-response-to-tab: delivery to tab failed; response not delivered',
+      {
+        requestId: REQUEST_ID,
+        tabId: TAB_ID,
+        type: sdkMethod.signResponse.type,
+        delivered: 0
+      },
+      expect.any(Error)
+    );
 
     // The optimistic mark is load-bearing: still dispatched before the await.
     expect(dispatch).toHaveBeenCalledWith(
@@ -450,7 +513,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
   it('valid tabId, delivery rejects, sender has NO origin → "not delivered" sagaError but no fallback', async () => {
     const { store, dispatch } = makeStore(OPEN_REQUEST);
-    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    sendMessageMock.mockRejectedValue(deliveryRejection());
 
     const result = await handleSdkResponseToTab(
       makeMessage(),
@@ -459,6 +522,16 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     );
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
+    expect(outerConsoleError).toHaveBeenCalledWith(
+      'sdk-response-to-tab: delivery to tab failed; response not delivered',
+      {
+        requestId: REQUEST_ID,
+        tabId: TAB_ID,
+        type: sdkMethod.signResponse.type,
+        delivered: 0
+      },
+      expect.any(Error)
+    );
     // No origin recoverable → no fallback broadcast.
     expect(emitToOriginMock).not.toHaveBeenCalled();
 
@@ -469,9 +542,27 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(result.handled).toBe(true);
   });
 
+  it('never puts the response payload in the delivery-failure log', async () => {
+    const { store } = makeStore(undefined);
+    sendMessageMock.mockRejectedValue(deliveryRejection());
+
+    await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
+
+    // This log is the newest place that could leak the signed payload, and the
+    // check has to see inside the Error argument too — that is the part whose
+    // text this code does not control.
+    expect(loggedText(outerConsoleError)).not.toContain('deadbeef');
+    expect(outerConsoleError.mock.calls[0][1]).toEqual({
+      requestId: REQUEST_ID,
+      tabId: TAB_ID,
+      type: sdkMethod.signResponse.type,
+      delivered: 0
+    });
+  });
+
   it('fallback emit THROWS (valid tab path) → handler still resolves, "not delivered" sagaError, does not reject', async () => {
     const { store, dispatch } = makeStore(OPEN_REQUEST);
-    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    sendMessageMock.mockRejectedValue(deliveryRejection());
     emitToOriginMock.mockRejectedValue(new Error('tabs.query blew up'));
 
     const result = await handleSdkResponseToTab(
@@ -482,6 +573,14 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     // The emit rejection is swallowed → the error-surface dispatch still runs.
     expect(emitToOriginMock).toHaveBeenCalledTimes(1);
+    // ...but it is no longer indistinguishable from "no same-origin tab was
+    // open": both return 0, and the caller picks banner copy from that 0.
+    expect(outerConsoleError).toHaveBeenCalledWith(
+      'deliverViaOrigin: same-origin fallback failed',
+      { origin: DAPP_ORIGIN, type: sdkMethod.signResponse.type },
+      expect.any(Error)
+    );
+    expect(loggedText(outerConsoleError)).not.toContain('deadbeef');
     const sagaError = findSagaError(dispatch);
     expect(sagaError).toBeDefined();
     expect(sagaError.payload.message).toContain(NOT_DELIVERED_MSG);
@@ -501,6 +600,12 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     );
 
     expect(emitToOriginMock).toHaveBeenCalledTimes(1);
+    expect(outerConsoleError).toHaveBeenCalledWith(
+      'deliverViaOrigin: same-origin fallback failed',
+      { origin: DAPP_ORIGIN, type: sdkMethod.signResponse.type },
+      expect.any(Error)
+    );
+    expect(loggedText(outerConsoleError)).not.toContain('deadbeef');
     // Nothing delivered → NOT marked responded.
     expect(dispatch).not.toHaveBeenCalledWith(
       expect.objectContaining({ payload: { requestId: REQUEST_ID } })

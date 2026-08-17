@@ -202,12 +202,36 @@ export async function handleSdkResponseToTab(
 
   try {
     await tabs.sendMessage(tabId, action);
-  } catch {
+  } catch (error) {
     // Tab gone / no listener → try the same-origin fallback (if we can recover
     // the origin) and surface the non-fatal error, choosing the message based
     // on whether the fallback actually delivered. The optimistic mark above
     // already deduped any retry (delivery failure is terminal by design).
     const delivered = await deliverViaOrigin(origin, action);
+
+    // Cause AND outcome, because both were indistinguishable before: `Could not
+    // establish connection`, a `DataCloneError` and a Safari-specific rejection
+    // collapsed into one line, and so did "recovered via another same-origin
+    // tab" and "the signature the user produced is gone". The outcome otherwise
+    // lives only in the dispatched banner, which no support reader gets.
+    // Severity splits on it, the way the duplicate classifier above splits
+    // benign from lost. Identifiers only (see the SECURITY note above).
+    const identifiers = { requestId, tabId, type: action?.type, delivered };
+
+    if (delivered > 0) {
+      console.warn(
+        'sdk-response-to-tab: delivery to tab failed; recovered via same-origin fallback',
+        identifiers,
+        error
+      );
+    } else {
+      console.error(
+        'sdk-response-to-tab: delivery to tab failed; response not delivered',
+        identifiers,
+        error
+      );
+    }
+
     store.dispatch(deliveryFailedError(tabId, delivered > 0));
   }
 
