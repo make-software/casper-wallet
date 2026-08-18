@@ -73,6 +73,22 @@ describe('dispatchToMainStore', () => {
     );
   });
 
+  it('resolves false instead of throwing when the send throws synchronously', async () => {
+    // `Extension context invalidated` has this shape, and four app entries
+    // dispatch from a render body that sits ABOVE the ErrorBoundary — an
+    // escaping throw blanks the page instead of reaching the banner.
+    sendMessageMock.mockImplementation(() => {
+      throw new Error('Extension context invalidated');
+    });
+
+    await expect(dispatchToMainStore(lockVault())).resolves.toBe(false);
+
+    expect(reportUiErrorMock).toHaveBeenCalledWith(
+      'dispatch-failed',
+      lockVault().type
+    );
+  });
+
   it('logs but does not surface an action that is not allow-listed', async () => {
     // A dropped theme change is not worth a banner; the log still records it.
     sendMessageMock.mockRejectedValue(new Error('no receiving end'));

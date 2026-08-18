@@ -18,8 +18,13 @@ declare global {
 // send failed. NEVER rejects: ~105 call sites do not catch, so a rejection here
 // would become an unhandled rejection at each of them.
 export function dispatchToMainStore(action: ReduxAction): Promise<boolean> {
-  return runtime
-    .sendMessage(action)
+  // `sendMessage` is called inside a `then` so a SYNCHRONOUS throw lands in the
+  // same handler as a rejection. `Extension context invalidated` has that shape,
+  // and four app entries dispatch from a render body that sits ABOVE the
+  // ErrorBoundary (`popup/index.tsx:56` and three siblings) — there an escaping
+  // throw blanks the whole page instead of resolving `false`.
+  return Promise.resolve()
+    .then(() => runtime.sendMessage(action))
     .then(() => true)
     .catch((error: unknown) => {
       // A send to a sleeping or restarting MV3 service worker is a routine
