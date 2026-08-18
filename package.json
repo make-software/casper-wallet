@@ -97,7 +97,7 @@
     "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#d0f77e6bf86c51ef782a32c4940f86a461d974c3",
     "date-fns": "^4.1.0",
     "dotenv-webpack": "^9.0.0",
-    "i18next": "^26.3.3",
+    "i18next": "^26.3.6",
     "i18next-browser-languagedetector": "^8.2.1",
     "i18next-http-backend": "^4.0.0",
     "jszip": "^3.10.1",
