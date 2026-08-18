@@ -11,6 +11,7 @@ export async function runKeysDownload(
 ): Promise<void> {
   try {
     const zip = new JSZip();
+    let skipped = 0;
 
     for (const account of accounts) {
       const asymmetricKey = createAsymmetricKeys(
@@ -23,7 +24,20 @@ export async function runKeysDownload(
           `${account.name}_secret_key.pem`,
           asymmetricKey.secretKey.toPem()
         );
+      } else {
+        skipped++;
       }
+    }
+
+    if (skipped > 0) {
+      // Count only — an account name is user data, and a partial archive must
+      // never reach Success.
+      console.error(
+        'downloadKeys: selected accounts produced no key file',
+        skipped
+      );
+      setStep(DownloadAccountKeysSteps.Failure);
+      return;
     }
 
     const content = await zip.generateAsync({ type: 'blob' });

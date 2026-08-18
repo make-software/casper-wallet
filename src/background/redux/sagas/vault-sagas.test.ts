@@ -23,6 +23,7 @@ import * as bip32Module from '@libs/crypto/bip32';
 import * as vaultCryptoModule from '@libs/crypto/vault';
 import { FIXED_ENCRYPTION_KEY_HASH } from '@libs/crypto/__fixtures';
 import { decryptVault, encryptVault } from '@libs/crypto/vault';
+import { Account } from '@libs/types/account';
 
 import { keysUpdated } from '../keys/actions';
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
@@ -43,7 +44,10 @@ import { vaultCipherCreated } from '../vault-cipher/actions';
 import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
 import {
   accountAdded,
+  accountImported,
   accountRenamed,
+  accountsAdded,
+  accountsImported,
   deployPayloadReceived,
   vaultLoaded
 } from '../vault/actions';
@@ -1242,5 +1246,79 @@ describe('saga error channel', () => {
     expect(effects.put).toContainEqual(
       put(sagaError({ source: 'timeoutCounterSaga', message: 'read failed' }))
     );
+  });
+});
+
+const NEW_ACCOUNT: Account = {
+  name: 'imported one',
+  publicKey: '01aa',
+  secretKey: 'c2VjcmV0',
+  hidden: false,
+  derivationIndex: 0
+};
+
+const ACTION_BY_NAME = {
+  accountAdded: accountAdded(NEW_ACCOUNT),
+  accountImported: accountImported({ ...NEW_ACCOUNT, imported: true }),
+  accountsAdded: accountsAdded([NEW_ACCOUNT]),
+  accountsImported: accountsImported([{ ...NEW_ACCOUNT, imported: true }])
+};
+
+describe('account mutations bypass the debounce', () => {
+  // An imported secret key exists nowhere else; losing it to a crash inside the
+  // debounce window is unrecoverable, unlike a rename.
+  it.each([
+    'accountImported',
+    'accountAdded',
+    'accountsImported',
+    'accountsAdded'
+  ])('re-encrypts on %s without waiting out the window', async actionName => {
+    const encryptSpy = jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockResolvedValue('cipher-blob');
+
+    await expectSaga(vaultSagas)
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
+        [matchers.select.selector(selectVault), EMPTY_VAULT]
+      ])
+      .dispatch(ACTION_BY_NAME[actionName as keyof typeof ACTION_BY_NAME])
+      .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS - 100);
+
+    expect(encryptSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('still coalesces the debounced actions', async () => {
+    const encryptSpy = jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockResolvedValue('cipher-blob');
+
+    await expectSaga(vaultSagas)
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
+        [matchers.select.selector(selectVault), EMPTY_VAULT]
+      ])
+      .dispatch(accountRenamed({ oldName: 'a', newName: 'b' }))
+      .dispatch(accountRenamed({ oldName: 'b', newName: 'c' }))
+      .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 200);
+
+    expect(encryptSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('writes immediately for an import and once more for a coincident rename', async () => {
+    const encryptSpy = jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockResolvedValue('cipher-blob');
+
+    await expectSaga(vaultSagas)
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
+        [matchers.select.selector(selectVault), EMPTY_VAULT]
+      ])
+      .dispatch(ACTION_BY_NAME.accountImported)
+      .dispatch(accountRenamed({ oldName: 'a', newName: 'b' }))
+      .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 200);
+
+    expect(encryptSpy).toHaveBeenCalledTimes(2);
   });
 });

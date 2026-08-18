@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 
 import {
   selectConnectedAccountNamesWithActiveOrigin,
-  selectVaultAccountsExceptLedgersAccounts,
+  selectVaultAccountsAvailableForExport,
   selectVaultAccountsPublicKeys,
   selectVaultActiveAccountName
 } from '@background/redux/vault/selectors';
@@ -40,7 +40,7 @@ export const Download = ({
 
   const { t } = useTranslation();
 
-  const accounts = useSelector(selectVaultAccountsExceptLedgersAccounts);
+  const accounts = useSelector(selectVaultAccountsAvailableForExport);
   const connectedAccountNames =
     useSelector(selectConnectedAccountNamesWithActiveOrigin) || [];
   const activeAccountName = useSelector(selectVaultActiveAccountName);

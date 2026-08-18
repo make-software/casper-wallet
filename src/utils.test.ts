@@ -173,7 +173,7 @@ describe('getSafariCspContent', () => {
       'script-src': "'self' 'wasm-unsafe-eval'",
       'img-src': 'https: data:',
       'media-src': 'https: data:',
-      'style-src': "'unsafe-inline'",
+      'style-src': "'self' 'unsafe-inline'",
       'connect-src': [
         'https://event-store-api-clarity-testnet.make.services',
         'https://event-store-api-clarity-mainnet.make.services',

@@ -86,10 +86,10 @@ const getCSP = () => {
   // The latter is unavoidable: React applies every `style={{…}}` prop and lottie-web /
   // react-loading-skeleton / react-tiny-popover mutate element.style at runtime, all of
   // which the CSP treats as "applying inline style" — a nonce cannot cover them. Dev,
-  // Firefox and Safari keep the previous 'unsafe-inline' behaviour.
+  // Firefox and Safari keep 'unsafe-inline' plus 'self' so packaged stylesheets (fonts.css) still load.
   const styleDirectives = CSP_NONCE
     ? `style-src 'self' 'nonce-${CSP_NONCE}'; style-src-attr 'unsafe-inline'`
-    : "style-src 'unsafe-inline'";
+    : "style-src 'self' 'unsafe-inline'";
   // `baseDirectives` (which now also carries img-src/media-src) and `connectSrc`
   // are shared with the Safari runtime <meta> policy in src/utils.ts — see
   // src/csp.json. Only the style arm differs per target, so it stays here.
