@@ -70,6 +70,7 @@ export function handleVaultSecrets(
       // Origin only — see the same check in background/index.ts.
       const senderOrigin =
         sender.url != null ? new URL(sender.url).origin : undefined;
+      // nosemgrep: cw-logging-secrets — logs the sender origin only, never vault contents
       console.warn(
         'Background: vault-secrets request rejected for sender:',
         senderOrigin
