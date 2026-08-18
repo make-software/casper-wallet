@@ -63,7 +63,7 @@ export const selectPopupState = (state: RootState): PopupState => ({
     keyDerivationSaltHash: null,
     keysDoesExist: state.keys.keysDoesExist
   },
-  session: { ...state.session, encryptionKeyHash: null },
+  session: popupSession(state.session),
   loginRetryCount: state.loginRetryCount,
   vault: popupVault(state.vault),
   windowManagement: { windowId: state.windowManagement.windowId },
@@ -81,6 +81,19 @@ export const selectPopupState = (state: RootState): PopupState => ({
   trustedWasm: state.trustedWasm,
   csprNameExpirations: state.csprNameExpirations
 });
+
+// Field-by-field, not `{ ...session, encryptionKeyHash: null }`: a spread both
+// satisfies and widens the override type, so the next field added to
+// SessionState — the slice that holds session-secret material — would reach
+// every page with no compile error.
+function popupSession(session: SessionState): PopupSliceOverrides['session'] {
+  return {
+    encryptionKeyHash: null,
+    encryptionKeyDoesExist: session.encryptionKeyDoesExist,
+    isLocked: session.isLocked,
+    isContactEditingAllowed: session.isContactEditingAllowed
+  };
+}
 
 function popupVault(vault: VaultState): Omit<VaultState, 'payloadSeqById'> {
   return {
