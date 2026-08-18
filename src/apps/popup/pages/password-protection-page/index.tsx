@@ -155,6 +155,9 @@ export const PasswordProtectionPage = ({
               // The password is in scope but is deliberately not referenced
               // here — only a static message and the error object are logged.
               console.error('Password confirmation failed:', error);
+              setError('password', {
+                message: t('Something went wrong. Please try again.')
+              });
               setIsSubmitting(false);
             });
         } else {

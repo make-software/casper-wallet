@@ -9,6 +9,7 @@ import {
   selectVaultDerivedAccounts,
   selectVaultImportedAccounts
 } from '@background/redux/vault/selectors';
+import { WorkerResult, isWorkerError } from '@background/workers/types';
 
 import {
   HeaderPopup,
@@ -17,9 +18,9 @@ import {
 } from '@libs/layout';
 
 interface GenerateWalletQrDataMessageEvent extends MessageEvent {
-  data: {
+  data: WorkerResult<{
     result: string[];
-  };
+  }>;
 }
 
 export const WalletQrCodePage = () => {
@@ -39,8 +40,15 @@ export const WalletQrCodePage = () => {
     setIsPasswordConfirmed(true);
   }, []);
 
-  const generateQRCode = async (password: string) => {
-    if (secretPhrase) {
+  // resolves only once the QR data exists, so a worker failure rejects into the
+  // password page's catch instead of leaving it spinning forever
+  const generateQRCode = (password: string) =>
+    new Promise<void>((resolve, reject) => {
+      if (!secretPhrase) {
+        resolve();
+        return;
+      }
+
       setIsLoading(true);
 
       const worker = new Worker(
@@ -57,19 +65,31 @@ export const WalletQrCodePage = () => {
         importedAccounts
       });
 
+      const fail = (error: unknown) => {
+        worker.terminate();
+        setIsLoading(false);
+        reject(error);
+      };
+
       worker.onmessage = (event: GenerateWalletQrDataMessageEvent) => {
+        if (isWorkerError(event.data)) {
+          fail(new Error('Sync wallet QR generation failed'));
+          return;
+        }
+
         const { result } = event.data;
 
+        worker.terminate();
         setQrStrings(result);
+        setIsLoading(false);
         setPasswordConfirmed();
+        resolve();
       };
 
-      worker.onerror = error => {
-        console.error(error);
-        setIsLoading(false);
-      };
-    }
-  };
+      // only reached by a script load failure — a rejection inside the worker
+      // arrives through onmessage instead
+      worker.onerror = error => fail(error);
+    });
 
   if (!isPasswordConfirmed) {
     return (

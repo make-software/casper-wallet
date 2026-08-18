@@ -4,10 +4,15 @@ jest.mock('@libs/crypto/hashing', () => ({
   generateRandomSaltHex: jest.fn(() => 'salt'),
   encodePassword: jest.fn(async () => 'hash'),
   deriveEncryptionKey: jest.fn(async () => new Uint8Array([1])),
-  verifyPasswordAgainstHash: jest.fn(async () => true)
+  verifyPasswordAgainstHash: jest.fn(async () => true),
+  createScryptOptions: jest.fn(() => ({ N: 2, r: 8, p: 1, dkLen: 32 }))
+}));
+jest.mock('@noble/hashes/scrypt', () => ({
+  scryptAsync: jest.fn(async () => new Uint8Array(32))
 }));
 jest.mock('@libs/crypto/utils', () => ({
-  convertBytesToHex: jest.fn(() => 'key')
+  convertBytesToHex: jest.fn(() => 'key'),
+  convertBytesToBase64: jest.fn(() => 'base64')
 }));
 jest.mock('@libs/crypto/vault', () => ({
   encryptVault: jest.fn(async () => 'cipher'),
@@ -55,6 +60,20 @@ const WORKERS = [
       jest
         .requireMock('@libs/crypto/vault')
         .decryptVault.mockRejectedValueOnce(new Error('bad tag'))
+  },
+  {
+    name: 'generate-sync-wallet-qr-data-worker',
+    path: './generate-sync-wallet-qr-data-worker',
+    data: {
+      password: 'p',
+      secretPhrase: ['word'],
+      derivedAccounts: [],
+      importedAccounts: []
+    },
+    breakIt: () =>
+      jest
+        .requireMock('@noble/hashes/scrypt')
+        .scryptAsync.mockRejectedValueOnce(new Error('boom'))
   },
   {
     name: 'verify-password-worker',
