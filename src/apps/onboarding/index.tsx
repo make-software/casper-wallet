@@ -10,7 +10,7 @@ import { setCSPForSafari } from '@src/utils';
 import { AppRouter } from '@onboarding/app-router';
 
 import { createMainStoreReplica } from '@background/redux/create-main-store-replica';
-import { PopupState } from '@background/redux/types';
+import { PopupState } from '@background/redux/popup-state';
 import { onboardingAppInit } from '@background/redux/windowManagement/actions';
 
 import '@libs/i18n/i18n';

@@ -42,17 +42,6 @@ const runWorker = async (modulePath: string, data: unknown) => {
 
 const WORKERS = [
   {
-    name: 'create-password-worker',
-    path: './create-password-worker',
-    data: { password: 'p', vault: { accounts: [] } },
-    breakIt: () =>
-      jest
-        .requireMock('@libs/crypto/hashing')
-        .encodePassword.mockRejectedValueOnce(
-          new Error('encodePassword failed!')
-        )
-  },
-  {
     name: 'unlock-vault-worker',
     path: './unlock-vault-worker',
     data: { password: 'p', keyDerivationSaltHash: 'salt', vaultCipher: 'c' },

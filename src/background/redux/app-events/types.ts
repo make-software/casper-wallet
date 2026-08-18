@@ -20,6 +20,7 @@ export type SagaErrorSource =
   | 'reconcileStalePayloadsSaga'
   | 'createAccountSaga'
   | 'openExportKeysWindowSaga'
+  | 'changePasswordSaga'
   // approval-request lifecycle failures
   | 'cancel-on-close'
   | 'cancel-on-supersede'
