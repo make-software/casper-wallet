@@ -20,43 +20,50 @@ onmessage = async function (event: GenerateSyncWalletQrDataEvent) {
   const { password, secretPhrase, derivedAccounts, importedAccounts } =
     event.data;
 
-  const salt = randomBytes(16);
-  const iv = randomBytes(16);
+  try {
+    const salt = randomBytes(16);
+    const iv = randomBytes(16);
 
-  const key = await scryptAsync(password, salt, createScryptOptions());
+    const key = await scryptAsync(password, salt, createScryptOptions());
 
-  const qrDataString = JSON.stringify([
-    secretPhrase.join(' '),
-    derivedAccounts.map(da => da.name),
-    [
-      ...importedAccounts.map(acc => ({
-        secretKey: acc.secretKey,
-        label: acc.name,
-        publicKeyTag: PublicKey.fromHex(acc.publicKey).cryptoAlg
-      }))
-    ]
-  ]);
+    const qrDataString = JSON.stringify([
+      secretPhrase.join(' '),
+      derivedAccounts.map(da => da.name),
+      [
+        ...importedAccounts.map(acc => ({
+          secretKey: acc.secretKey,
+          label: acc.name,
+          publicKeyTag: PublicKey.fromHex(acc.publicKey).cryptoAlg
+        }))
+      ]
+    ]);
 
-  const data = Uint8Array.from(Buffer.from(qrDataString));
+    const data = Uint8Array.from(Buffer.from(qrDataString));
 
-  const stream = cbc(key, iv);
-  const cipher = stream.encrypt(data);
+    const stream = cbc(key, iv);
+    const cipher = stream.encrypt(data);
 
-  const qrString = JSON.stringify([
-    convertBytesToBase64(cipher),
-    convertBytesToBase64(salt),
-    convertBytesToBase64(iv)
-  ]);
+    const qrString = JSON.stringify([
+      convertBytesToBase64(cipher),
+      convertBytesToBase64(salt),
+      convertBytesToBase64(iv)
+    ]);
 
-  const qrBytes = Uint8Array.from(Buffer.from(qrString));
-  const qrData = convertBytesToBase64(qrBytes);
-  const qrDataArray = qrData.match(/.{1,200}/g);
+    const qrBytes = Uint8Array.from(Buffer.from(qrString));
+    const qrData = convertBytesToBase64(qrBytes);
+    const qrDataArray = qrData.match(/.{1,200}/g);
 
-  const result = (qrDataArray ?? [qrData]).map(
-    (qr, i, arr) => `${i + 1}$${arr.length}$${qr}`
-  );
+    const result = (qrDataArray ?? [qrData]).map(
+      (qr, i, arr) => `${i + 1}$${arr.length}$${qr}`
+    );
 
-  postMessage({
-    result
-  });
+    postMessage({
+      result
+    });
+  } catch (error) {
+    // a rejection inside an async onmessage raises no error event on the parent
+    // Worker, so the failure has to travel back as a message
+    console.error(error);
+    postMessage({ error: true });
+  }
 };

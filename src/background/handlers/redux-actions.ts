@@ -25,6 +25,7 @@ import {
 } from '@background/redux/cspr-name-expirations/actions';
 import { MainStore } from '@background/redux/get-main-store';
 import {
+  closeLedgerFlowWindows,
   ledgerDeployChanged,
   ledgerNewWindowIdChanged,
   ledgerRecipientToSaveOnSuccessChanged,
@@ -109,8 +110,23 @@ import {
 } from '../redux/settings/actions';
 import { vaultCipherReseted } from '../redux/vault-cipher/actions';
 import { attachWindowToRequest } from './attach-window-to-request';
+import { handleCloseLedgerFlowWindows } from './close-ledger-flow-windows';
 import { isTrustedUiSender } from './private-state';
 import { HandlerResult } from './types';
+
+// The request a sender page is displaying, read off its own URL — the same
+// recovery `handleSdkResponseToTab` does for the dapp origin. Null when the page
+// carries no id (the internal Ledger flows) or the URL will not parse.
+function recoverRequestId(url: string | undefined): string | null {
+  if (!url) {
+    return null;
+  }
+  try {
+    return new URL(url).searchParams.get('requestId');
+  } catch {
+    return null;
+  }
+}
 
 export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
   [
@@ -226,6 +242,56 @@ export async function handleReduxAction(
       payload.requestId as string,
       payload.windowId as number
     );
+    return { handled: true, response: undefined };
+  }
+
+  // Intercepted rather than forwarded: there is no reducer case for it, and the
+  // window set it closes is derived from `windowManagement.requests`, which no
+  // replica can see. Gated on `sender` for the same reason as the branch above —
+  // closing an approval window reaches `cancelOpenRequestsForClosedWindow`, so
+  // this decides a request's lifecycle.
+  if (closeLedgerFlowWindows.match(action)) {
+    if (!isTrustedUiSender(sender)) {
+      return { handled: true };
+    }
+
+    // `.match` says nothing about the payload, and this crosses
+    // `runtime.sendMessage`. Read it defensively so a payload-less message
+    // becomes the no-requestId (internal-flow) case instead of a TypeError the
+    // router reports as a generic sendError.
+    const payload: Partial<{ requestId: string; permissionWindowId: number }> =
+      action.payload ?? {};
+
+    // The sender gate admits every wallet page, so on its own it lets any of
+    // them name any request — and this branch decides that request's lifecycle.
+    // Every legitimate dispatcher runs in a window whose URL carries the id
+    // (`use-ledger` builds the permission window's URL from the same params),
+    // so binding the two costs nothing and drops the mismatch.
+    if ((payload.requestId ?? null) !== recoverRequestId(sender.url)) {
+      return { handled: true };
+    }
+
+    // The window id is the ownership proof; a message without one names
+    // nothing the handler may close, so it is dropped rather than guessed at.
+    if (typeof payload.permissionWindowId !== 'number') {
+      console.warn(
+        'closeLedgerFlowWindows: dropped — no permissionWindowId in the payload'
+      );
+      return { handled: true };
+    }
+
+    // Fire-and-forget: the dispatcher's document is one of the windows being
+    // closed. `handleCloseLedgerFlowWindows` never rejects; the `.catch` is the
+    // belt for a synchronous throw before its first await.
+    void Promise.resolve(
+      handleCloseLedgerFlowWindows(store, {
+        requestId: payload.requestId,
+        permissionWindowId: payload.permissionWindowId
+      })
+    ).catch(error =>
+      console.error('closeLedgerFlowWindows: handler failed', error)
+    );
+
     return { handled: true, response: undefined };
   }
 

@@ -142,6 +142,12 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // request whose set can never shrink to the window that went away is a
     // request nothing can ever cancel.
     windowManagementActions.windowRequestWindowAttached,
+    // UI-dispatched (use-ledger, when a Ledger flow ends), but intercepted by
+    // the dedicated `closeLedgerFlowWindows` branch in handleReduxAction —
+    // deliberately not in the forwarding set. It has no reducer case at all, so
+    // forwarding it would be a silent no-op, and the windows it closes are
+    // resolved from `windowManagement.requests`, which the background alone holds.
+    ledgerActions.closeLedgerFlowWindows,
     // Background-only: `yield put` inside vault-sagas on successful unlock.
     // Never dispatched from the UI.
     loginRetryLockoutTimeActions.loginRetryLockoutTimeReseted,
