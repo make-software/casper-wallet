@@ -121,7 +121,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
               openWindow({
                 windowApp: WindowApp.ImportAccount,
                 isNewWindow: true
-              }).catch(e => console.error(e));
+              });
             }}
           >
             <Trans t={t}>Import account</Trans>

@@ -128,9 +128,11 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
         : undefined
     }));
 
-    dispatchToMainStore(accountsImported(accounts)).then(() => {
-      onClose();
-      navigate(RouterPath.Home);
+    dispatchToMainStore(accountsImported(accounts)).then(dispatched => {
+      if (dispatched) {
+        onClose();
+        navigate(RouterPath.Home);
+      }
     });
   };
 

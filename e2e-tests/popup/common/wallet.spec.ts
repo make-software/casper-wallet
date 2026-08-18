@@ -1,4 +1,5 @@
 import { ACCOUNT_NAMES } from '../../constants';
+import { DISPATCH_FAILED, breakTransport } from '../../error-surface';
 import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: lock/unlock/reset wallet', () => {
@@ -57,6 +58,29 @@ popup.describe('Popup UI: lock/unlock/reset wallet', () => {
       })
     ).toBeVisible();
   });
+
+  popup(
+    'should keep the user on the confirmation page when the reset dispatch is dropped',
+    async ({ popupPage }) => {
+      // Without the guard on the verdict, `closeWindowByReloadExtension` runs
+      // regardless: the extension reloads into onboarding and tells the user
+      // their wallet was reset while the vault cipher is still on disk — and
+      // takes the banner down with the page.
+      await popupPage.getByRole('button', { name: 'Reset wallet' }).click();
+      await popupPage.getByText('I’ve read and understand the above').click();
+
+      await breakTransport(popupPage);
+
+      await popupPage.getByRole('button', { name: 'Reset wallet' }).click();
+
+      await popupExpect(popupPage.getByText(DISPATCH_FAILED)).toBeVisible();
+      await popupExpect(
+        popupPage.getByRole('heading', {
+          name: 'Are you sure you want to reset your wallet?'
+        })
+      ).toBeVisible();
+    }
+  );
 
   popup(
     'should lock wallet for 5 minutes when user types wrong password 5 times',

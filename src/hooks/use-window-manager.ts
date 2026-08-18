@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 
 import { createOpenWindow } from '@background/create-open-window';
 
+import { createReportingOpenWindow } from './create-reporting-open-window';
+
 /**
  * Opens a deliberately separate window from a UI page (the import-account
  * flows). It passes NO tracking inputs: both consumers pass `isNewWindow: true`,
@@ -10,9 +12,16 @@ import { createOpenWindow } from '@background/create-open-window';
  * the background store, i.e. retargeting the shared approval-window slot the
  * request lifecycle depends on. That slot is background-only, and the two
  * actions are excluded from the forwarding set accordingly.
+ *
+ * The returned `openWindow` never rejects: `createReportingOpenWindow` reports
+ * the failure to the error banner itself, so no call site can go back to
+ * discarding it.
  */
 export function useWindowManager() {
-  const openWindow = useMemo(() => createOpenWindow(), []);
+  const openWindow = useMemo(
+    () => createReportingOpenWindow(createOpenWindow()),
+    []
+  );
 
   return { openWindow };
 }

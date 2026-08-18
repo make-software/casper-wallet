@@ -2,9 +2,10 @@ import isPropValid from '@emotion/is-prop-valid';
 import React, { forwardRef } from 'react';
 import styled, { CSSObject, DefaultTheme } from 'styled-components';
 
-import { Skeleton } from '@libs/ui/components';
 import { BaseProps } from '@libs/ui/types';
 import { ContentColor, getColorFromTheme } from '@libs/ui/utils';
+
+import { Skeleton } from '../skeleton/skeleton';
 
 type Ref = HTMLSpanElement | HTMLHeadingElement;
 

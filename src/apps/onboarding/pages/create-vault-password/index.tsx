@@ -35,6 +35,7 @@ export function CreateVaultPasswordPage({
   saveIsLoggedIn
 }: CreateVaultPasswordPageProps) {
   const [isChecked, setIsChecked] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
   const keysDoesExist = useSelector(selectKeysDoesExist);
@@ -42,7 +43,7 @@ export function CreateVaultPasswordPage({
   const {
     register,
     handleSubmit,
-    formState: { isDirty, isSubmitSuccessful, errors },
+    formState: { isDirty, isSubmitting, errors },
     control
   } = useCreatePasswordForm();
 
@@ -58,8 +59,13 @@ export function CreateVaultPasswordPage({
   }, [navigate, keysDoesExist]);
 
   async function onSubmit(data: CreatePasswordFormValues) {
-    dispatchToMainStore(initKeys({ password: data.password }));
-    saveIsLoggedIn(true);
+    // A dropped `initKeys` leaves `keysDoesExist` false, so the router keeps
+    // rendering this page — and `isSubmitSuccessful` used to disable the only
+    // button on it for good, leaving the banner with nothing to retry.
+    if (await dispatchToMainStore(initKeys({ password: data.password }))) {
+      setIsSubmitted(true);
+      saveIsLoggedIn(true);
+    }
   }
 
   const terms = (
@@ -117,7 +123,9 @@ export function CreateVaultPasswordPage({
               label={terms}
               dataTestId="terms-checkbox"
             />
-            <Button disabled={!isChecked || !isDirty || isSubmitSuccessful}>
+            <Button
+              disabled={!isChecked || !isDirty || isSubmitting || isSubmitted}
+            >
               <Trans t={t}>Create password</Trans>
             </Button>
           </TabFooterContainer>

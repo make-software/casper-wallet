@@ -17,8 +17,10 @@ export function WelcomePage() {
   const { t } = useTranslation();
 
   const handleClick = () => {
-    dispatchToMainStore(resetVault()).then(() => {
-      navigate(RouterPath.CreateVaultPassword);
+    dispatchToMainStore(resetVault()).then(dispatched => {
+      if (dispatched) {
+        navigate(RouterPath.CreateVaultPassword);
+      }
     });
   };
 

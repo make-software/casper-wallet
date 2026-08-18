@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -8,8 +8,22 @@ import { selectSagaErrors } from '@background/redux/app-events/selectors';
 import { SagaError } from '@background/redux/app-events/types';
 import { dispatchToMainStore } from '@background/redux/utils';
 
-import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
-import { SvgIcon, Typography } from '@libs/ui/components';
+import {
+  AlignedFlexRow,
+  FlexColumn,
+  SpacingSize
+} from '@libs/layout/containers';
+import { SvgIcon } from '@libs/ui/components/svg-icon/svg-icon';
+import { Typography } from '@libs/ui/components/typography/typography';
+
+import {
+  UiError,
+  UiErrorKind,
+  dismissUiError,
+  getUiErrorsServerSnapshot,
+  getUiErrorsSnapshot,
+  subscribeToUiErrors
+} from './ui-error-channel';
 
 const BannerContainer = styled(FlexColumn)`
   position: fixed;
@@ -57,17 +71,55 @@ const DismissButton = styled.button`
   cursor: pointer;
 `;
 
+// The channel carries a `kind`, not a string, so the copy lives here where `t`
+// does. Unlike `SagaError.message` — produced in the background and rendered
+// verbatim and untranslated — these lines are ours to write.
+//
+// Literal `<Trans>` per kind rather than a lookup keyed on `kind`: a dynamic key
+// is invisible to i18next-parser, so these two strings would never reach any
+// catalog.
+//
+// The dispatch copy claims neither that nothing changed nor that retrying helps.
+// Both would be false somewhere: `handleReduxAction` dispatches `resetVault`
+// before awaiting `enableOnboardingFlow`, so a rejection can arrive with the
+// vault already wiped, and `use-ledger` sets `triggeredRef` right after its
+// dispatch, so that effect cannot re-run.
+const UiErrorMessage = ({ kind }: { kind: UiErrorKind }) => {
+  const { t } = useTranslation();
+
+  if (kind === 'dispatch-failed') {
+    return (
+      <Trans t={t}>
+        The wallet didn&apos;t respond. Your last action may not have been
+        applied.
+      </Trans>
+    );
+  }
+
+  return <Trans t={t}>Couldn&apos;t open the window. Please try again.</Trans>;
+};
+
 export const SagaErrorBanner = () => {
   const { t } = useTranslation();
 
   const errors = useSelector(selectSagaErrors);
+  const uiErrors = useSyncExternalStore(
+    subscribeToUiErrors,
+    getUiErrorsSnapshot,
+    // Required: this component is rendered with `renderToStaticMarkup` in tests.
+    getUiErrorsServerSnapshot
+  );
 
-  if (errors.length === 0) {
+  if (errors.length === 0 && uiErrors.length === 0) {
     return null;
   }
 
   const handleDismiss = (id: SagaError['id']) => {
     dispatchToMainStore(dismissSagaError(id));
+  };
+
+  const handleDismissUiError = (id: UiError['id']) => {
+    dismissUiError(id);
   };
 
   return (
@@ -92,6 +144,31 @@ export const SagaErrorBanner = () => {
             aria-label={t('Dismiss')}
             title={t('Dismiss')}
             onClick={() => handleDismiss(error.id)}
+          >
+            <SvgIcon src="assets/icons/close.svg" size={16} />
+          </DismissButton>
+        </ErrorRow>
+      ))}
+      {uiErrors.map(uiError => (
+        <ErrorRow key={`ui-${uiError.id}`} gap={SpacingSize.Small}>
+          <SvgIcon
+            src="assets/icons/error.svg"
+            size={20}
+            color="contentActionCritical"
+          />
+          <ErrorTextContainer gap={SpacingSize.Tiny}>
+            <Typography type="bodySemiBold">
+              <Trans t={t}>Something went wrong</Trans>
+            </Typography>
+            <Typography type="captionRegular" color="contentSecondary">
+              <UiErrorMessage kind={uiError.kind} />
+            </Typography>
+          </ErrorTextContainer>
+          <DismissButton
+            type="button"
+            aria-label={t('Dismiss')}
+            title={t('Dismiss')}
+            onClick={() => handleDismissUiError(uiError.id)}
           >
             <SvgIcon src="assets/icons/close.svg" size={16} />
           </DismissButton>
