@@ -6,13 +6,18 @@ import { RouterPath } from '@popup/router';
 
 import { openNewSeparateWindow } from '@background/create-open-window';
 import {
-  ledgerNewWindowIdChanged,
-  ledgerStateCleared
+  closeLedgerFlowWindows,
+  ledgerNewWindowIdChanged
 } from '@background/redux/ledger/actions';
-import { selectLedgerNewWindowId } from '@background/redux/ledger/selectors';
+import {
+  selectLedgerNewWindowId,
+  selectLedgerOpenerRequestId,
+  selectLedgerOpenerWindowId
+} from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { createLedgerWindowCloseTracker } from '@hooks/ledger-window-close-listener';
+import { resolveOwnPermissionWindowId } from '@hooks/ledger-window-ownership';
 import { registerLedgerPermissionWindow } from '@hooks/register-ledger-permission-window';
 
 import {
@@ -78,6 +83,8 @@ export const useLedger = ({
   const [ledgerEventStatusToRender, setLedgerEventStatusToRender] =
     useState<ILedgerEvent>(initialEventToRender);
   const windowId = useSelector(selectLedgerNewWindowId);
+  const openerWindowId = useSelector(selectLedgerOpenerWindowId);
+  const openerRequestId = useSelector(selectLedgerOpenerRequestId);
   const shouldTrySignAfterConnectRef = useRef<boolean>(false);
   const selectedTransportRef = useRef<SelectedTransport>(undefined);
   const isFirstEventRef = useRef<boolean>(true);
@@ -201,6 +208,50 @@ export const useLedger = ({
   // the two effects after it are the only things that take it back down.
   const closeTracker = useMemo(() => createLedgerWindowCloseTracker(), []);
 
+  // The witnesses `resolveOwnPermissionWindowId` weighs: the window this
+  // instance opened, and the window it renders in. Both are per-document; the
+  // third (`openerWindowId` qualified by `openerRequestId`) rides in the slice
+  // so a remounted popup still owns the window its predecessor opened.
+  const openedPermissionWindowIdRef = useRef<number | null>(null);
+  const [hostWindowId, setHostWindowId] = useState<number | null>(null);
+  // Mirror for the open effect below, which must not re-run when the state lands.
+  const hostWindowIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    windows
+      .getCurrent()
+      .then(current => {
+        if (!cancelled && current.id != null) {
+          hostWindowIdRef.current = current.id;
+          setHostWindowId(current.id);
+        }
+      })
+      .catch(error =>
+        console.error('useLedger: reading the host window failed', {
+          errorName: (error as Error)?.name
+        })
+      );
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Null until the slot names a window this instance owns, so a takeover between
+  // the two flows reads as "no permission window of mine" rather than as someone
+  // else's. Still derived from the slot, so a window this instance opened and
+  // then lost stops counting once the background clears the stale id.
+  const ownPermissionWindowId = resolveOwnPermissionWindowId({
+    slotWindowId: windowId,
+    openerWindowId,
+    openerRequestId,
+    openedWindowId: openedPermissionWindowIdRef.current,
+    hostWindowId,
+    ownRequestId: askPermissionUrlData.params?.requestId ?? null
+  });
+
   /** We have to open new browser window to handle device permission */
   useEffect(() => {
     (async () => {
@@ -225,7 +276,15 @@ export const useLedger = ({
           return;
         }
 
-        dispatchToMainStore(ledgerNewWindowIdChanged(w.id));
+        openedPermissionWindowIdRef.current = w.id;
+
+        dispatchToMainStore(
+          ledgerNewWindowIdChanged({
+            windowId: w.id,
+            openerWindowId: hostWindowIdRef.current,
+            openerRequestId: askPermissionUrlData.params?.requestId ?? null
+          })
+        );
 
         registerLedgerPermissionWindow({
           domain: askPermissionUrlData.domain,
@@ -282,14 +341,43 @@ export const useLedger = ({
     closeTracker.detach();
   }, [closeTracker, windowId]);
 
-  const closeNewLedgerWindowsAndClearState = useCallback(async () => {
-    if (windowId) {
-      const all = await windows.getAll({ windowTypes: ['popup'] });
-      all.forEach(w => w.id && windows.remove(w.id));
-      dispatchToMainStore(ledgerStateCleared());
-      await windows.remove(windowId);
+  // Asks the background to close the windows THIS flow owns — the tracked
+  // permission window plus every window still displaying this flow's request —
+  // and to clear the ledger slice.
+  //
+  // The decision cannot be made here. The owning window ids live in
+  // `windowManagement.requests`, which `selectPopupState` strips from every
+  // replica on purpose (it maps requestIds to dapp origins and tab ids). What
+  // this replaced asked `windows.getAll({ windowTypes: ['popup'] })` instead
+  // and removed every popup window in the profile: other dapps' approval
+  // windows, the secret-key export window, and popup windows belonging to
+  // ordinary web pages. It never closed its own permission window either —
+  // `openNewSeparateWindow` creates that one `type: 'normal'`. WALLET-1416.
+  //
+  // Synchronous by design: `dispatchToMainStore` is fire-and-forget, and every
+  // call site is unawaited — the previous `async` body handed each of them a
+  // promise that rejected on a stale windowId with nothing to catch it.
+  //
+  // `permissionWindowId` is the proof of ownership the background cannot derive:
+  // the slot is global, so without it the handler can only guess whether the
+  // window it is about to remove belongs to the caller's flow.
+  const closeNewLedgerWindowsAndClearState = useCallback(() => {
+    if (ownPermissionWindowId == null) {
+      // A control the user pressed did nothing. Reachable two ways: the slot was
+      // released or taken over, and — briefly, on mount — before
+      // `windows.getCurrent` resolves for a page that IS (or shares a browser
+      // window with the opener of) the permission window.
+      console.warn('useLedger: no permission window of this flow to close');
+      return;
     }
-  }, [windowId]);
+
+    dispatchToMainStore(
+      closeLedgerFlowWindows({
+        requestId: askPermissionUrlData.params?.requestId,
+        permissionWindowId: ownPermissionWindowId
+      })
+    );
+  }, [askPermissionUrlData.params?.requestId, ownPermissionWindowId]);
 
   useEffect(() => {
     if (windowId && askPermissionUrlData?.domain !== 'popup.html') {
@@ -315,6 +403,8 @@ export const useLedger = ({
     isLedgerConnected,
     makeSubmitLedgerAction,
     closeNewLedgerWindowsAndClearState,
-    windowId
+    // Deliberately not the raw slot: a page that branches on "is there a
+    // permission window" must not see a foreign flow's.
+    ownPermissionWindowId
   };
 };

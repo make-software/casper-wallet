@@ -81,6 +81,8 @@ export const initialStateForPopupTests: RootState = {
   },
   ledger: {
     windowId: null,
+    openerWindowId: null,
+    openerRequestId: null,
     deploy: null,
     transaction: null,
     recipientToSaveOnSuccess: null
