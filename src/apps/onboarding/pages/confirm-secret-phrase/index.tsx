@@ -44,8 +44,16 @@ export function ConfirmSecretPhrasePage({
   function handleSubmit() {
     try {
       if (isConfirmationSuccess && phrase) {
-        dispatchToMainStore(initVault({ secretPhrase: phrase }));
-        navigate(RouterPath.ConfirmSecretPhraseSuccess);
+        // Only navigate once the vault actually exists: keys and encryption key
+        // are already in place here, so the success page renders regardless of
+        // whether this dispatch arrived.
+        dispatchToMainStore(initVault({ secretPhrase: phrase })).then(
+          dispatched => {
+            if (dispatched) {
+              navigate(RouterPath.ConfirmSecretPhraseSuccess);
+            }
+          }
+        );
       } else {
         throw Error(ErrorMessages.secretPhrase.INVALID_SECRET_PHRASE.message);
       }

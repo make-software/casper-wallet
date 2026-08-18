@@ -1,7 +1,14 @@
 import { dismissSagaError } from './app-events/actions';
 import { ledgerNewWindowIdChanged } from './ledger/actions';
-import { lockVault, openExportKeysWindow, resetVault } from './sagas/actions';
+import {
+  initKeys,
+  initVault,
+  lockVault,
+  openExportKeysWindow,
+  resetVault
+} from './sagas/actions';
 import { accountImported, accountsImported } from './vault/actions';
+import { windowRequestWindowAttached } from './windowManagement/actions';
 
 // Which dropped dispatches the user is told about.
 //
@@ -19,11 +26,21 @@ export const SURFACED_DISPATCH_ACTIONS: ReadonlySet<string> = new Set([
   // The user pressed Lock and the wallet stayed unlocked — a security outcome,
   // not an inconvenience.
   lockVault.type,
-  // The Ledger window never attaches to the request, which then hangs until the
-  // dapp's own timeout (see attach-window-to-request.ts).
+  // The Ledger permission window never attaches to the request, which then hangs
+  // until the dapp's own timeout (see attach-window-to-request.ts).
+  windowRequestWindowAttached.type,
+  // Its sibling, and a separate send: without it `windowId` stays null, the
+  // close tracker detaches and the permission window is never closed when the
+  // signature completes. `triggeredRef` is set regardless of either outcome, so
+  // neither has a retry path.
   ledgerNewWindowIdChanged.type,
   // Without this the reload presents an unperformed reset as done.
   resetVault.type,
+  // Onboarding's two writes. Without `initKeys` the password screen keeps
+  // rendering and nothing happens; without `initVault` the success screen
+  // renders over a vault that was never created.
+  initKeys.type,
+  initVault.type,
   // Without these the navigation presents an unperformed import as done —
   // `accountsImported` from the Ledger flow, `accountImported` from the
   // secret-key-file and Torus flows.
