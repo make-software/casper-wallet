@@ -81,7 +81,7 @@
     "@ledgerhq/devices": "^8.15.1",
     "@ledgerhq/hw-transport": "^6.35.4",
     "@ledgerhq/hw-transport-web-ble": "^6.34.4",
-    "@ledgerhq/hw-transport-webhid": "^6.35.4",
+    "@ledgerhq/hw-transport-webhid": "^6.36.0",
     "@ledgerhq/hw-transport-webusb": "^6.34.4",
     "@noble/ciphers": "^2.2.0",
     "@reduxjs/toolkit": "^2.12.0",
