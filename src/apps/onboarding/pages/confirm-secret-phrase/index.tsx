@@ -36,6 +36,7 @@ export function ConfirmSecretPhrasePage({
 
   const [isConfirmationSuccess, setIsConfirmationSuccess] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (phrase == null) {
     return <Navigate to={RouterPath.Any} />;
@@ -47,10 +48,19 @@ export function ConfirmSecretPhrasePage({
         // Only navigate once the vault actually exists: keys and encryption key
         // are already in place here, so the success page renders regardless of
         // whether this dispatch arrived.
+        //
+        // `isSubmitting` closes the window that awaiting the verdict opens:
+        // nothing else disables the button, `initVaultSaga` runs to completion
+        // inside one delivery, and `accountAdded` appends without a dedupe — so
+        // a second click would leave the new wallet with two identical
+        // "Account 1" entries on one key pair.
+        setIsSubmitting(true);
         dispatchToMainStore(initVault({ secretPhrase: phrase })).then(
           dispatched => {
             if (dispatched) {
               navigate(RouterPath.ConfirmSecretPhraseSuccess);
+            } else {
+              setIsSubmitting(false);
             }
           }
         );
@@ -93,7 +103,10 @@ export function ConfirmSecretPhrasePage({
       )}
       renderFooter={() => (
         <TabFooterContainer style={{ marginTop: '28px' }}>
-          <Button disabled={!isFormValid} onClick={handleSubmit}>
+          <Button
+            disabled={!isFormValid || isSubmitting}
+            onClick={handleSubmit}
+          >
             <Trans t={t}>Confirm</Trans>
           </Button>
         </TabFooterContainer>
