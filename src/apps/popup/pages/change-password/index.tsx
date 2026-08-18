@@ -22,18 +22,13 @@ import {
 } from '@libs/ui/forms/create-password';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 
-interface CreatePasswordWorkerMessageEvent extends MessageEvent {
-  data: {
-    passwordHash: string;
-    passwordSaltHash: string;
-    newEncryptionKeyHash: string;
-    keyDerivationSaltHash: string;
-  };
-}
-
 export const ChangePasswordPage = () => {
   const [isPasswordConfirmed, setIsPasswordConfirmed] =
     useState<boolean>(false);
+  // The saga re-verifies it before re-keying, so the plaintext has to survive
+  // the confirmation screen — the stored hash it is checked against is
+  // readable by any extension page, and so replayable, while this is not.
+  const [currentPassword, setCurrentPassword] = useState<string | null>(null);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -54,45 +49,30 @@ export const ChangePasswordPage = () => {
     setIsPasswordConfirmed(true);
   }, []);
 
+  const holdCurrentPassword = useCallback(async (password: string) => {
+    setCurrentPassword(password);
+  }, []);
+
   const isSubmitButtonDisabled = calculateSubmitButtonDisabled({
     isDirty
   });
 
   const onSubmit = (data: CreatePasswordFormValues) => {
-    const worker = new Worker(
-      new URL('@background/workers/create-password-worker.ts', import.meta.url)
+    if (currentPassword == null) return;
+
+    dispatchToMainStore(
+      changePassword({ currentPassword, password: data.password })
     );
-
-    worker.postMessage({ password: data.password });
-
-    worker.onmessage = (event: CreatePasswordWorkerMessageEvent) => {
-      const {
-        passwordHash,
-        passwordSaltHash,
-        newEncryptionKeyHash,
-        keyDerivationSaltHash
-      } = event.data;
-
-      dispatchToMainStore(
-        changePassword({
-          passwordHash,
-          passwordSaltHash,
-          keyDerivationSaltHash,
-          newEncryptionKeyHash
-        })
-      );
-    };
-
-    worker.onerror = error => {
-      console.error(error);
-    };
 
     navigate(RouterPath.Home);
   };
 
   if (!isPasswordConfirmed) {
     return (
-      <PasswordProtectionPage setPasswordConfirmed={setPasswordConfirmed} />
+      <PasswordProtectionPage
+        setPasswordConfirmed={setPasswordConfirmed}
+        onClick={holdCurrentPassword}
+      />
     );
   }
 

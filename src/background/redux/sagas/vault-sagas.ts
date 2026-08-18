@@ -9,7 +9,10 @@ import {
 } from '@popup/constants';
 
 import { collectRequestIdsFromOpenWindows } from '@background/open-request-windows';
-import { sagaError } from '@background/redux/app-events/actions';
+import {
+  dismissSagaErrorsBySource,
+  sagaError
+} from '@background/redux/app-events/actions';
 import {
   loginRetryLockoutTimeReseted,
   loginRetryLockoutTimeSet
@@ -25,10 +28,18 @@ import { emitSdkEventToActiveTabs } from '@background/utils';
 import { sdkEvent } from '@content/sdk-event';
 
 import { deriveKeyPair } from '@libs/crypto';
+import {
+  deriveEncryptionKey,
+  encodePassword,
+  generateRandomSaltHex,
+  verifyPasswordAgainstHash
+} from '@libs/crypto/hashing';
+import { convertBytesToHex } from '@libs/crypto/utils';
 import { encryptVault } from '@libs/crypto/vault';
 
 import { accountInfoReset } from '../account-info/actions';
 import { keysUpdated } from '../keys/actions';
+import { selectPasswordHash, selectPasswordSaltHash } from '../keys/selectors';
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
 import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
 import { loginRetryCountReseted } from '../login-retry-count/actions';
@@ -193,47 +204,109 @@ export function* lockVaultSaga() {
   }
 }
 
-// The page derives the new password material off-thread — not because scrypt
-// can't run in an MV3 service worker (it's plain JS and would run there fine),
-// but to keep several seconds of scrypt off the worker's single thread. Either
-// way it never sees the vault: re-encryption happens here, against the
-// background's own state.
+function isChangePasswordPayload(
+  payload: unknown
+): payload is ReturnType<typeof changePassword>['payload'] {
+  const p = payload as Partial<ReturnType<typeof changePassword>['payload']>;
+
+  // Non-empty, not just a string: the form enforces a minimum length, but this
+  // action does not come from the form on the forwarded path, and an empty one
+  // would re-key the vault under scrypt('').
+  return (
+    typeof p?.currentPassword === 'string' &&
+    typeof p?.password === 'string' &&
+    p.password.length > 0
+  );
+}
+
+// Both halves of the re-key happen here, against the background's own state:
+// the current password is verified, and the new material is derived from a
+// plaintext password exactly as `initKeysSage` does it. This action rides the
+// sender-ungated forwarded path, so a caller that could hand in
+// `newEncryptionKeyHash` would be choosing the key the vault is re-encrypted
+// under — and `fetchPrivateState` hands `vaultCipher` to any extension page,
+// which makes a chosen key an offline decrypt. Verifying page-side only is not
+// enough either: the page-side check reads `passwordHash` from that same
+// handler, so it is replayable, while the plaintext password demanded here is
+// not derivable from anything an extension page can read.
+// `scryptAsync` yields to the event loop between blocks, so the three
+// derivations do not wedge the worker the way synchronous ones would.
 export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
-  const isLocked = yield* sagaSelect(selectVaultIsLocked);
-
-  // The scrypt window is long enough for a manual lock, an idle timeout, or an
-  // MV3 service-worker restart to land first. `lockVaultSaga` has already
-  // emptied the vault by then, and `encryptionKeyHashCreated` does not clear
-  // `isLocked`, so without this the new key would be stored and the vault
-  // re-encrypted empty. Fail closed: the old password keeps working.
-  if (isLocked) {
-    yield put(
-      sagaError({
-        source: 'changePasswordSaga',
-        message: 'Password was not changed: the wallet locked. Try again.'
-      })
-    );
-    return;
-  }
-
-  const {
-    passwordHash,
-    passwordSaltHash,
-    keyDerivationSaltHash,
-    newEncryptionKeyHash
-  } = action.payload;
+  // Errors are append-only and SagaErrorBanner is mounted route-independently,
+  // so without this a previous attempt's "the wallet locked" banner outlives
+  // the retry that succeeded.
+  yield put(dismissSagaErrorsBySource('changePasswordSaga'));
 
   // Keep the MV3 service worker alive while the vault is re-encrypted —
   // Chrome may otherwise kill it mid-saga during the heavy crypto work.
   const releaseAnchor = anchorServiceWorker('encrypt');
 
   try {
-    // Encrypt BEFORE putting anything: if this throws (e.g. a malformed
-    // `newEncryptionKeyHash` — this action rides the sender-ungated forwarded
-    // path with no payload validation), nothing has been persisted yet and the
-    // old password stays fully intact. The alternative order — store the new
-    // keys, then encrypt — leaves new keys over an old-key cipher on failure,
-    // which the next unlock rejects under BOTH the old and the new password.
+    // Validated inside the `try`, and destructured only after: this action
+    // rides the sender-ungated forwarded path, so `{ type }` with no payload
+    // reaches `store.dispatch` unchanged, and a destructure above would throw
+    // past every catch here into `rootSaga`'s boundary-less `all([...])`,
+    // cancelling every watcher in the tree — auto-lock included.
+    if (!isChangePasswordPayload(action.payload)) {
+      throw Error('Malformed changePassword payload');
+    }
+
+    const { currentPassword, password } = action.payload;
+
+    // Fail fast before burning three scrypt derivations on a vault that is
+    // already locked. The window either side of them is covered by the
+    // re-check after the encrypt below.
+    if (yield* sagaSelect(selectVaultIsLocked)) {
+      yield put(
+        sagaError({
+          source: 'changePasswordSaga',
+          message: 'Password was not changed: the wallet locked. Try again.'
+        })
+      );
+      return;
+    }
+
+    const storedPasswordHash = yield* sagaSelect(selectPasswordHash);
+    const storedPasswordSaltHash = yield* sagaSelect(selectPasswordSaltHash);
+
+    if (storedPasswordHash == null || storedPasswordSaltHash == null) {
+      throw Error('No password is set');
+    }
+
+    const isCurrentPasswordCorrect = yield* sagaCall(() =>
+      verifyPasswordAgainstHash(
+        storedPasswordHash,
+        storedPasswordSaltHash,
+        currentPassword
+      )
+    );
+
+    if (!isCurrentPasswordCorrect) {
+      yield put(
+        sagaError({
+          source: 'changePasswordSaga',
+          message: 'Password was not changed: the current password is wrong.'
+        })
+      );
+      return;
+    }
+
+    const passwordSaltHash = generateRandomSaltHex();
+    const passwordHash = yield* sagaCall(() =>
+      encodePassword(password, passwordSaltHash)
+    );
+    const keyDerivationSaltHash = generateRandomSaltHex();
+    const newEncryptionKeyHash = convertBytesToHex(
+      yield* sagaCall(() =>
+        deriveEncryptionKey(password, keyDerivationSaltHash)
+      )
+    );
+
+    // Encrypt BEFORE putting anything: if this throws, nothing has been
+    // persisted yet and the old password stays fully intact. The alternative
+    // order — store the new keys, then encrypt — leaves new keys over an
+    // old-key cipher on failure, which the next unlock rejects under BOTH the
+    // old and the new password.
     const vault = yield* sagaSelect(selectVault);
     const vaultCipher = yield* sagaCall(
       encryptVault,
@@ -241,8 +314,10 @@ export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
       vault
     );
 
-    // The encrypt above can take a while — long enough for a lock to land
-    // mid-flight. Re-check rather than trust the pre-check above: without this,
+    // The derivation and encrypt above take seconds — long enough for a manual
+    // lock, an idle timeout or a service-worker restart to land mid-flight. By
+    // then `lockVaultSaga` has emptied the vault, and `encryptionKeyHashCreated`
+    // does not clear `isLocked`. Re-check rather than trust the pre-check: without this,
     // a locked wallet would get a new session key planted on it, re-arming the
     // exact empty-vault-overwrite hazard the pre-check exists to prevent.
     if (yield* sagaSelect(selectVaultIsLocked)) {

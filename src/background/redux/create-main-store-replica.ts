@@ -23,8 +23,9 @@ import rootReducer from './root-reducer';
  */
 export function createMainStoreReplica(state: PopupState) {
   // The allowlist is over slices, not fields: each listed slice is copied
-  // wholesale, but a payload wider than PopupState would otherwise carry
-  // vaultCipher and the real password hashes into a page.
+  // wholesale, so what a listed slice carries is `selectPopupState`'s business.
+  // What this stops is an unlisted top-level slice — `vaultCipher` above all —
+  // which a payload wider than PopupState would otherwise carry into a page.
   const slices = POPUP_SLICES.reduce(
     (acc, key) => {
       acc[key] = state[key] as never;

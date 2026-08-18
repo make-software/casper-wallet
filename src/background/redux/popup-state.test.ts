@@ -56,6 +56,14 @@ describe('selectPopupState', () => {
       keysDoesExist: true
     });
     expect(payload.session.encryptionKeyHash).toBeNull();
+    // Exact keys, not just the nulled one: a spread-built override would ship
+    // any newly added SessionState field without a compile error.
+    expect(Object.keys(payload.session).sort()).toEqual([
+      'encryptionKeyDoesExist',
+      'encryptionKeyHash',
+      'isContactEditingAllowed',
+      'isLocked'
+    ]);
     expect(Object.keys(payload.windowManagement)).toEqual(['windowId']);
   });
 
