@@ -1,11 +1,8 @@
 import { useMemo } from 'react';
 
-import {
-  OpenWindowProps,
-  createOpenWindow
-} from '@background/create-open-window';
+import { createOpenWindow } from '@background/create-open-window';
 
-import { reportUiError } from '@libs/ui/components/saga-error-banner/ui-error-channel';
+import { createReportingOpenWindow } from './create-reporting-open-window';
 
 /**
  * Opens a deliberately separate window from a UI page (the import-account
@@ -16,29 +13,15 @@ import { reportUiError } from '@libs/ui/components/saga-error-banner/ui-error-ch
  * request lifecycle depends on. That slot is background-only, and the two
  * actions are excluded from the forwarding set accordingly.
  *
- * The returned `openWindow` never rejects: it reports the failure to the error
- * banner itself, so no call site can go back to discarding it.
+ * The returned `openWindow` never rejects: `createReportingOpenWindow` reports
+ * the failure to the error banner itself, so no call site can go back to
+ * discarding it.
  */
 export function useWindowManager() {
-  const openWindow = useMemo(() => {
-    const open = createOpenWindow();
-
-    return async (props: OpenWindowProps) => {
-      try {
-        await open(props);
-      } catch (error) {
-        // Name only, not the rejection: `searchParams` is embedded in the URL
-        // `windows.create` was given, and a sign-message plaintext can ride
-        // there. `use-ledger.ts` logs `error.name` for the same reason.
-        console.error(
-          'openWindow failed',
-          props.windowApp,
-          (error as Error)?.name
-        );
-        reportUiError('window-open-failed', props.windowApp);
-      }
-    };
-  }, []);
+  const openWindow = useMemo(
+    () => createReportingOpenWindow(createOpenWindow()),
+    []
+  );
 
   return { openWindow };
 }
