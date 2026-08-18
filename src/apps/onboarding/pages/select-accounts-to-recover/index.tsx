@@ -38,6 +38,7 @@ export const SelectAccountsToRecoverPage = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [maxItemsToRender, setMaxItemsToRender] = useState(5);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -108,12 +109,24 @@ export const SelectAccountsToRecoverPage = () => {
       derivationIndex: account.derivationIndex
     }));
 
+    // `.finally` closed the onboarding tab on a dropped send too, presenting an
+    // empty vault as recovered and taking the banner down with the tab it is
+    // mounted in. `isSubmitting` covers the round trip the verdict adds:
+    // `accountsAdded` appends without a dedupe, so a second click would double
+    // every recovered account.
+    setIsSubmitting(true);
     dispatchToMainStore(
       recoverVault({
         secretPhrase: location.state.secretPhrase,
         accounts
       })
-    ).finally(closeActiveTab);
+    ).then(dispatched => {
+      if (dispatched) {
+        closeActiveTab();
+      } else {
+        setIsSubmitting(false);
+      }
+    });
   };
 
   return (
@@ -147,7 +160,9 @@ export const SelectAccountsToRecoverPage = () => {
       renderFooter={() => (
         <TabFooterContainer>
           <Button
-            disabled={!selectedAccounts.length || isButtonDisabled}
+            disabled={
+              !selectedAccounts.length || isButtonDisabled || isSubmitting
+            }
             onClick={onSubmit}
           >
             <Trans t={t}>Recover selected accounts</Trans>

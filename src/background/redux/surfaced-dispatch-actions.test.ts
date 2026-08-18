@@ -5,6 +5,7 @@ import {
   initVault,
   lockVault,
   openExportKeysWindow,
+  recoverVault,
   resetVault
 } from './sagas/actions';
 import { SURFACED_DISPATCH_ACTIONS } from './surfaced-dispatch-actions';
@@ -25,6 +26,7 @@ describe('SURFACED_DISPATCH_ACTIONS', () => {
         resetVault.type,
         initKeys.type,
         initVault.type,
+        recoverVault.type,
         accountsImported.type,
         accountImported.type,
         dismissSagaError.type
@@ -45,6 +47,7 @@ describe('SURFACED_DISPATCH_ACTIONS', () => {
         'RESET_VAULT_SAGA',
         'INIT_KEYS_SAGA',
         'INIT_VAULT_SAGA',
+        'RECOVER_VAULT_SAGA',
         'vault/accountsImported',
         'vault/accountImported',
         'appEvents/dismissSagaError'

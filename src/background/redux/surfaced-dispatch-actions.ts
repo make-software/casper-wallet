@@ -5,6 +5,7 @@ import {
   initVault,
   lockVault,
   openExportKeysWindow,
+  recoverVault,
   resetVault
 } from './sagas/actions';
 import { accountImported, accountsImported } from './vault/actions';
@@ -36,11 +37,13 @@ export const SURFACED_DISPATCH_ACTIONS: ReadonlySet<string> = new Set([
   ledgerNewWindowIdChanged.type,
   // Without this the reload presents an unperformed reset as done.
   resetVault.type,
-  // Onboarding's two writes. Without `initKeys` the password screen keeps
+  // Onboarding's three writes. Without `initKeys` the password screen keeps
   // rendering and nothing happens; without `initVault` the success screen
-  // renders over a vault that was never created.
+  // renders over a vault that was never created; without `recoverVault` the
+  // onboarding tab used to close on an empty vault as though it had worked.
   initKeys.type,
   initVault.type,
+  recoverVault.type,
   // Without these the navigation presents an unperformed import as done —
   // `accountsImported` from the Ledger flow, `accountImported` from the
   // secret-key-file and Torus flows.
