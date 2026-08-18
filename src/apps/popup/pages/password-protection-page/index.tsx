@@ -17,6 +17,7 @@ import {
 } from '@background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
+import { WorkerResult, isWorkerError } from '@background/workers/types';
 
 import { usePrivateState } from '@hooks/use-private-state';
 
@@ -43,9 +44,9 @@ interface BackupSecretPhrasePasswordPageType {
 }
 
 interface VerifyPasswordMessageEvent extends MessageEvent {
-  data: {
+  data: WorkerResult<{
     isPasswordCorrect: boolean;
-  };
+  }>;
 }
 
 export const PasswordProtectionPage = ({
@@ -109,8 +110,25 @@ export const PasswordProtectionPage = ({
       password
     });
 
+    const handleWorkerFailure = () => {
+      worker.terminate();
+      setError('password', {
+        message: t('Something went wrong. Please try again.')
+      });
+      setIsSubmitting(false);
+    };
+
     worker.onmessage = (event: VerifyPasswordMessageEvent) => {
+      // a worker failure must not be read as a wrong password: that would burn
+      // a login attempt and eventually lock the wallet
+      if (isWorkerError(event.data)) {
+        handleWorkerFailure();
+        return;
+      }
+
       const { isPasswordCorrect } = event.data;
+
+      worker.terminate();
 
       if (!isPasswordCorrect) {
         dispatchToMainStore(loginRetryCountIncremented());
@@ -137,6 +155,9 @@ export const PasswordProtectionPage = ({
               // The password is in scope but is deliberately not referenced
               // here — only a static message and the error object are logged.
               console.error('Password confirmation failed:', error);
+              setError('password', {
+                message: t('Something went wrong. Please try again.')
+              });
               setIsSubmitting(false);
             });
         } else {
@@ -148,9 +169,11 @@ export const PasswordProtectionPage = ({
       }
     };
 
+    // only reached by a script load failure — a rejection inside the worker
+    // arrives through onmessage instead
     worker.onerror = error => {
       console.error(error);
-      setIsSubmitting(false);
+      handleWorkerFailure();
     };
   };
 

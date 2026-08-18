@@ -7,6 +7,10 @@ import { getSigningAccount } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
+import {
+  assertNever,
+  decideLedgerFlowControl
+} from '@signature-request/ledger-flow-controls';
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
@@ -193,7 +197,8 @@ export function SignMessagePage() {
   const {
     ledgerEventStatusToRender,
     makeSubmitLedgerAction,
-    closeNewLedgerWindowsAndClearState
+    closeNewLedgerWindowsAndClearState,
+    ownPermissionWindowId
   } = useLedger({
     ledgerAction: handleSign,
     beforeLedgerActionCb: async () => setShowLedgerConfirm(true),
@@ -213,8 +218,30 @@ export function SignMessagePage() {
   });
 
   const onErrorCtaPressed = () => {
+    const decision = decideLedgerFlowControl(
+      isLedgerNewWindow,
+      ownPermissionWindowId
+    );
+
+    // Unconditional, as it was before the window-ownership work: `closeCurrentWindow`
+    // both rejects and — on a window that is not a popup — resolves having done
+    // nothing, and either one used to leave the user on a dead error screen.
     setShowLedgerConfirm(false);
-    closeNewLedgerWindowsAndClearState();
+
+    switch (decision) {
+      case 'end-flow':
+        closeNewLedgerWindowsAndClearState();
+        return;
+      case 'dismiss-this-window':
+        closeCurrentWindow().catch(error =>
+          console.error('sign-message: dismissing this window failed', error)
+        );
+        return;
+      case 'return-to-main':
+        return;
+      default:
+        return assertNever(decision);
+    }
   };
 
   const renderFooter = () => {

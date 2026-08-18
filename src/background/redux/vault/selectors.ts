@@ -24,9 +24,16 @@ export const selectVaultAccountsPublicKeys = createSelector(
   accounts => accounts.map(account => account.publicKey)
 );
 
-export const selectVaultAccountsExceptLedgersAccounts = createSelector(
+const selectVaultAccountsExceptLedgersAccounts = createSelector(
   selectVaultAccounts,
   accounts => accounts.filter(account => !account.hardware)
+);
+
+// Watch accounts are stored with `secretKey: ''` and no `hardware` flag, so
+// they pass selectVaultAccountsExceptLedgersAccounts but have nothing to export.
+export const selectVaultAccountsAvailableForExport = createSelector(
+  selectVaultAccountsExceptLedgersAccounts,
+  accounts => accounts.filter(account => Boolean(account.secretKey))
 );
 
 export const selectVaultCountsOfAccounts = createSelector(

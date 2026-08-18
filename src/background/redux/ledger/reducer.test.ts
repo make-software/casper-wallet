@@ -10,6 +10,8 @@ import { reducer } from './reducer';
 describe('ledger reducer', () => {
   const initialState = {
     windowId: null,
+    openerWindowId: null,
+    openerRequestId: null,
     deploy: null,
     transaction: null,
     recipientToSaveOnSuccess: null
@@ -19,10 +21,45 @@ describe('ledger reducer', () => {
     expect(reducer(undefined, { type: '@@INIT' } as any)).toEqual(initialState);
   });
 
-  it('sets windowId on ledgerNewWindowIdChanged', () => {
-    expect(reducer(initialState, ledgerNewWindowIdChanged(7))).toEqual({
+  it('sets windowId and both opener witnesses together on ledgerNewWindowIdChanged', () => {
+    expect(
+      reducer(
+        initialState,
+        ledgerNewWindowIdChanged({
+          windowId: 7,
+          openerWindowId: 3,
+          openerRequestId: 'r1'
+        })
+      )
+    ).toEqual({
       ...initialState,
-      windowId: 7
+      windowId: 7,
+      openerWindowId: 3,
+      openerRequestId: 'r1'
+    });
+  });
+
+  it('a new slot without a known opener clears the previous opener, request id included', () => {
+    const withOpener = {
+      ...initialState,
+      windowId: 7,
+      openerWindowId: 3,
+      openerRequestId: 'r1'
+    };
+    expect(
+      reducer(
+        withOpener,
+        ledgerNewWindowIdChanged({
+          windowId: 8,
+          openerWindowId: null,
+          openerRequestId: null
+        })
+      )
+    ).toEqual({
+      ...initialState,
+      windowId: 8,
+      openerWindowId: null,
+      openerRequestId: null
     });
   });
 
@@ -47,6 +84,8 @@ describe('ledger reducer', () => {
   it('resets to initial state on ledgerStateCleared', () => {
     const populated = {
       windowId: 7,
+      openerWindowId: 3,
+      openerRequestId: 'r1',
       deploy: 'deploy-payload',
       transaction: 'tx-payload',
       recipientToSaveOnSuccess: '01deadbeef'

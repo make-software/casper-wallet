@@ -114,3 +114,28 @@ it('logs the error name only, never the error itself', async () => {
   expect(logged).toContain('PemEncodeError');
   expect(JSON.stringify(logged)).not.toContain('0123456789abcdef');
 });
+
+// A partial archive presented as a complete one is the bug: the user walks away
+// believing every selected key is backed up.
+it('routes to Failure when a selected account produced no key file', async () => {
+  mockCreateKeys
+    .mockImplementationOnce(() => ({ secretKey: { toPem: () => 'PEM' } }))
+    .mockImplementationOnce(() => ({ secretKey: null }));
+  const setStep = jest.fn();
+
+  await runKeysDownload([account('alice'), account('watch-only')], setStep);
+
+  expect(setStep).toHaveBeenCalledWith(DownloadAccountKeysSteps.Failure);
+  expect(setStep).not.toHaveBeenCalledWith(DownloadAccountKeysSteps.Success);
+  expect(mockDownloadFile).not.toHaveBeenCalled();
+});
+
+it('never names the skipped account in the log', async () => {
+  mockCreateKeys.mockImplementation(() => ({ secretKey: null }));
+
+  await runKeysDownload([account('watch-only')], jest.fn());
+
+  expect(JSON.stringify((console.error as jest.Mock).mock.calls)).not.toContain(
+    'watch-only'
+  );
+});

@@ -12,6 +12,7 @@ import {
   selectVaultDerivedAccounts,
   selectVaultImportedAccounts
 } from '@background/redux/vault/selectors';
+import { WorkerResult, isWorkerError } from '@background/workers/types';
 
 import {
   HeaderPopup,
@@ -23,9 +24,9 @@ import { requestWithRetry } from '@libs/messaging/request-with-retry';
 import { Account } from '@libs/types/account';
 
 interface GenerateWalletQrDataMessageEvent extends MessageEvent {
-  data: {
+  data: WorkerResult<{
     result: string[];
-  };
+  }>;
 }
 
 export const WalletQrCodePage = () => {
@@ -87,25 +88,41 @@ export const WalletQrCodePage = () => {
       )
     );
 
-    worker.postMessage({
-      password,
-      secretPhrase,
-      derivedAccounts: forSync(derivedAccounts),
-      importedAccounts: forSync(importedAccounts)
+    // settles only once the QR data exists, so a worker failure rejects into
+    // the password page's catch instead of leaving it spinning forever
+    return new Promise<void>((resolve, reject) => {
+      worker.postMessage({
+        password,
+        secretPhrase,
+        derivedAccounts: forSync(derivedAccounts),
+        importedAccounts: forSync(importedAccounts)
+      });
+
+      const fail = (error: unknown) => {
+        worker.terminate();
+        setIsLoading(false);
+        reject(error);
+      };
+
+      worker.onmessage = (event: GenerateWalletQrDataMessageEvent) => {
+        if (isWorkerError(event.data)) {
+          fail(new Error('Sync wallet QR generation failed'));
+          return;
+        }
+
+        const { result } = event.data;
+
+        worker.terminate();
+        setQrStrings(result);
+        setIsLoading(false);
+        setPasswordConfirmed();
+        resolve();
+      };
+
+      // only reached by a script load failure — a rejection inside the worker
+      // arrives through onmessage instead
+      worker.onerror = error => fail(error);
     });
-
-    worker.onmessage = (event: GenerateWalletQrDataMessageEvent) => {
-      const { result } = event.data;
-
-      setQrStrings(result);
-      setPasswordConfirmed();
-    };
-
-    worker.onerror = error => {
-      console.error(error);
-      setIsLoading(false);
-      setHasError(true);
-    };
   };
 
   if (hasError) {

@@ -19,6 +19,10 @@ import { getSigningAccount, isEqualCaseInsensitive } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
+import {
+  assertNever,
+  decideLedgerFlowControl
+} from '@signature-request/ledger-flow-controls';
 import { SignatureRequestContent } from '@signature-request/pages/sign-transaction/signature-request-content';
 import { SignatureRequestLoading } from '@signature-request/pages/sign-transaction/signature-request-loading';
 import { SignatureRequestRawJson } from '@signature-request/pages/sign-transaction/signature-request-raw-json';
@@ -319,7 +323,8 @@ export function SignTransactionPage() {
   const {
     ledgerEventStatusToRender,
     makeSubmitLedgerAction,
-    closeNewLedgerWindowsAndClearState
+    closeNewLedgerWindowsAndClearState,
+    ownPermissionWindowId
   } = useLedger({
     ledgerAction: handleSign,
     beforeLedgerActionCb: async () =>
@@ -339,9 +344,37 @@ export function SignTransactionPage() {
   });
 
   const onErrorCtaPressed = () => {
+    const decision = decideLedgerFlowControl(
+      isLedgerNewWindow,
+      ownPermissionWindowId
+    );
+
+    // Unconditional, as it was before the window-ownership work: `closeCurrentWindow`
+    // both rejects and — on a window that is not a popup — resolves having done
+    // nothing, and either one used to leave the user on a dead error screen.
     setSigningPageState(SigningPageState.MainContent);
-    closeNewLedgerWindowsAndClearState();
+
+    switch (decision) {
+      case 'end-flow':
+        closeNewLedgerWindowsAndClearState();
+        return;
+      case 'dismiss-this-window':
+        closeCurrentWindow().catch(error =>
+          console.error(
+            'sign-transaction: dismissing this window failed',
+            error
+          )
+        );
+        return;
+      case 'return-to-main':
+        return;
+      default:
+        return assertNever(decision);
+    }
   };
+
+  const onBackFromRawData = () =>
+    setSigningPageState(SigningPageState.MainContent);
 
   const maybeRequireApproval = Boolean(
     signatureRequest &&
@@ -479,7 +512,13 @@ export function SignTransactionPage() {
               ? () => (
                   <HeaderSubmenuBarNavLink
                     linkType="back"
-                    onClick={onErrorCtaPressed}
+                    // Backing out of the raw JSON is a page-state move and nothing
+                    // more; only the Ledger screen's arrow is a flow control.
+                    onClick={
+                      signingPageState === SigningPageState.RowDataContent
+                        ? onBackFromRawData
+                        : onErrorCtaPressed
+                    }
                   />
                 )
               : undefined

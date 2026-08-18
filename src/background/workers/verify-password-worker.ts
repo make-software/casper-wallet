@@ -10,13 +10,21 @@ interface VerifyPasswordEvent extends MessageEvent {
 
 onmessage = async (event: VerifyPasswordEvent) => {
   const { passwordHash, passwordSaltHash, password } = event.data;
-  const isPasswordCorrect = await verifyPasswordAgainstHash(
-    passwordHash,
-    passwordSaltHash,
-    password
-  );
 
-  postMessage({
-    isPasswordCorrect
-  });
+  try {
+    const isPasswordCorrect = await verifyPasswordAgainstHash(
+      passwordHash,
+      passwordSaltHash,
+      password
+    );
+
+    postMessage({
+      isPasswordCorrect
+    });
+  } catch (error) {
+    // a rejection inside an async onmessage raises no error event on the parent
+    // Worker, so the failure has to travel back as a message
+    console.error(error);
+    postMessage({ error: true });
+  }
 };
