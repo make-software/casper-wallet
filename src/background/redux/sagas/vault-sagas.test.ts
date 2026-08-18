@@ -11,7 +11,10 @@ import {
   TimeoutDurationSetting
 } from '@popup/constants';
 
-import { sagaError } from '@background/redux/app-events/actions';
+import {
+  dismissSagaErrorsBySource,
+  sagaError
+} from '@background/redux/app-events/actions';
 import { loginRetryLockoutTimeReseted } from '@background/redux/login-retry-lockout-time/actions';
 import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 import {
@@ -20,12 +23,14 @@ import {
 } from '@background/redux/storage-keys';
 
 import * as bip32Module from '@libs/crypto/bip32';
+import * as hashingModule from '@libs/crypto/hashing';
 import * as vaultCryptoModule from '@libs/crypto/vault';
 import { FIXED_ENCRYPTION_KEY_HASH } from '@libs/crypto/__fixtures';
 import { decryptVault, encryptVault } from '@libs/crypto/vault';
 
 import { keysUpdated } from '../keys/actions';
 import { reducer as keysReducer } from '../keys/reducer';
+import { selectPasswordHash, selectPasswordSaltHash } from '../keys/selectors';
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
 import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
 import { loginRetryCountReseted } from '../login-retry-count/actions';
@@ -1253,10 +1258,8 @@ describe('saga error channel', () => {
 
 describe('changePasswordSaga', () => {
   const payload = {
-    passwordHash: 'new-password-hash',
-    passwordSaltHash: 'new-password-salt',
-    keyDerivationSaltHash: 'new-derivation-salt',
-    newEncryptionKeyHash: 'new-encryption-key'
+    currentPassword: 'old-password',
+    password: 'new-password'
   };
 
   const SEEDED_VAULT: VaultState = {
@@ -1265,7 +1268,37 @@ describe('changePasswordSaga', () => {
     accounts: [{ name: 'A', publicKey: 'pk', secretKey: 'sk', hidden: false }]
   };
 
-  it('re-encrypts the background vault with the new key and stores the new material', async () => {
+  // The two scrypt derivations the saga now runs itself; the real ones are
+  // N = 2 ** 18 and would take seconds each.
+  const KEYS_WITH_PASSWORD = {
+    passwordHash: 'stored-password-hash',
+    passwordSaltHash: 'stored-password-salt',
+    keyDerivationSaltHash: 'stored-derivation-salt',
+    keysDoesExist: true
+  };
+
+  const stubDerivation = () => {
+    jest
+      .spyOn(hashingModule, 'verifyPasswordAgainstHash')
+      .mockResolvedValue(true);
+    jest
+      .spyOn(hashingModule, 'generateRandomSaltHex')
+      .mockReturnValueOnce('password-salt')
+      .mockReturnValueOnce('derivation-salt');
+    jest
+      .spyOn(hashingModule, 'encodePassword')
+      .mockResolvedValue('new-password-hash');
+    jest
+      .spyOn(hashingModule, 'deriveEncryptionKey')
+      .mockResolvedValue(Uint8Array.from([0xab, 0xcd]));
+  };
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('derives the new material itself and re-encrypts the background vault', async () => {
+    stubDerivation();
     const encryptSpy = jest
       .spyOn(vaultCryptoModule, 'encryptVault')
       .mockResolvedValue('cipher-under-new-key');
@@ -1280,6 +1313,7 @@ describe('changePasswordSaga', () => {
         }) as never,
         {
           vault: SEEDED_VAULT,
+          keys: KEYS_WITH_PASSWORD,
           session: {
             encryptionKeyHash: 'old-key',
             encryptionKeyDoesExist: true,
@@ -1290,27 +1324,155 @@ describe('changePasswordSaga', () => {
       )
       .put(
         keysUpdated({
-          passwordHash: payload.passwordHash,
-          passwordSaltHash: payload.passwordSaltHash,
-          keyDerivationSaltHash: payload.keyDerivationSaltHash
+          passwordHash: 'new-password-hash',
+          passwordSaltHash: 'password-salt',
+          keyDerivationSaltHash: 'derivation-salt'
         })
       )
-      .put(
-        encryptionKeyHashCreated({
-          encryptionKeyHash: payload.newEncryptionKeyHash
-        })
-      )
+      .put(encryptionKeyHashCreated({ encryptionKeyHash: 'abcd' }))
       .put(vaultCipherCreated({ vaultCipher: 'cipher-under-new-key' }))
       .run();
 
+    // The current password is checked in the background, against the stored
+    // hash — not taken on the page's word for it.
+    expect(hashingModule.verifyPasswordAgainstHash).toHaveBeenCalledWith(
+      'stored-password-hash',
+      'stored-password-salt',
+      'old-password'
+    );
+    // Both derivations run against the plaintext password from the payload —
+    // the caller never gets to name the key the vault is re-encrypted under.
+    expect(hashingModule.deriveEncryptionKey).toHaveBeenCalledWith(
+      'new-password',
+      'derivation-salt'
+    );
     // The key is the NEW one and the vault is the background's own, not a replica's.
     expect(encryptSpy).toHaveBeenCalledWith(
-      payload.newEncryptionKeyHash,
+      'abcd',
       expect.objectContaining({ secretPhrase: ['w1', 'w2'] })
     );
   });
 
-  it('does nothing at all when the vault locked while the page was deriving the key', async () => {
+  it('reports a malformed payload instead of throwing past its own catch', async () => {
+    // `{ type }` with no payload is what the sender-ungated forwarded path
+    // admits; a destructure above the `try` would take rootSaga down with it.
+    const encryptSpy = jest.spyOn(vaultCryptoModule, 'encryptVault');
+
+    await expectSaga(changePasswordSaga, {
+      type: changePassword.type
+    } as ReturnType<typeof changePassword>)
+      .provide([[matchers.select.selector(selectVaultIsLocked), false]])
+      .not.put.actionType(keysUpdated.type)
+      .not.put.actionType(encryptionKeyHashCreated.type)
+      .not.put.actionType(vaultCipherCreated.type)
+      .put(
+        sagaError({
+          source: 'changePasswordSaga',
+          message: errorToMessage(Error('Malformed changePassword payload'))
+        })
+      )
+      .run();
+
+    expect(encryptSpy).not.toHaveBeenCalled();
+  });
+
+  it('refuses an empty new password', async () => {
+    stubDerivation();
+
+    await expectSaga(
+      changePasswordSaga,
+      changePassword({ currentPassword: 'old-password', password: '' })
+    )
+      .provide([[matchers.select.selector(selectVaultIsLocked), false]])
+      .not.put.actionType(keysUpdated.type)
+      .put(
+        sagaError({
+          source: 'changePasswordSaga',
+          message: errorToMessage(Error('Malformed changePassword payload'))
+        })
+      )
+      .run();
+
+    expect(hashingModule.verifyPasswordAgainstHash).not.toHaveBeenCalled();
+  });
+
+  it('retracts what a previous attempt reported before re-attempting', async () => {
+    stubDerivation();
+    jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockResolvedValue('cipher-under-new-key');
+
+    await expectSaga(changePasswordSaga, changePassword(payload))
+      .provide([
+        [matchers.select.selector(selectVaultIsLocked), false],
+        [matchers.select.selector(selectVault), SEEDED_VAULT],
+        [matchers.select.selector(selectPasswordHash), 'stored-password-hash'],
+        [
+          matchers.select.selector(selectPasswordSaltHash),
+          'stored-password-salt'
+        ]
+      ])
+      .put(dismissSagaErrorsBySource('changePasswordSaga'))
+      .run();
+  });
+
+  it('refuses when the current password is wrong', async () => {
+    stubDerivation();
+    jest
+      .spyOn(hashingModule, 'verifyPasswordAgainstHash')
+      .mockResolvedValue(false);
+    const encryptSpy = jest.spyOn(vaultCryptoModule, 'encryptVault');
+
+    await expectSaga(changePasswordSaga, changePassword(payload))
+      .provide([
+        [matchers.select.selector(selectVaultIsLocked), false],
+        [matchers.select.selector(selectVault), SEEDED_VAULT],
+        [matchers.select.selector(selectPasswordHash), 'stored-password-hash'],
+        [
+          matchers.select.selector(selectPasswordSaltHash),
+          'stored-password-salt'
+        ]
+      ])
+      .not.put.actionType(keysUpdated.type)
+      .not.put.actionType(encryptionKeyHashCreated.type)
+      .not.put.actionType(vaultCipherCreated.type)
+      .put(
+        sagaError({
+          source: 'changePasswordSaga',
+          message: 'Password was not changed: the current password is wrong.'
+        })
+      )
+      .run();
+
+    // Rejected before the new material is derived, let alone stored.
+    expect(hashingModule.encodePassword).not.toHaveBeenCalled();
+    expect(encryptSpy).not.toHaveBeenCalled();
+  });
+
+  it('refuses when no password is set at all', async () => {
+    stubDerivation();
+
+    await expectSaga(changePasswordSaga, changePassword(payload))
+      .provide([
+        [matchers.select.selector(selectVaultIsLocked), false],
+        [matchers.select.selector(selectVault), SEEDED_VAULT],
+        [matchers.select.selector(selectPasswordHash), null],
+        [matchers.select.selector(selectPasswordSaltHash), null]
+      ])
+      .not.put.actionType(keysUpdated.type)
+      .put(
+        sagaError({
+          source: 'changePasswordSaga',
+          message: errorToMessage(Error('No password is set'))
+        })
+      )
+      .run();
+
+    expect(hashingModule.verifyPasswordAgainstHash).not.toHaveBeenCalled();
+  });
+
+  it('does nothing at all when the vault is already locked', async () => {
+    stubDerivation();
     const encryptSpy = jest.spyOn(vaultCryptoModule, 'encryptVault');
 
     await expectSaga(changePasswordSaga, changePassword(payload))
@@ -1324,6 +1486,7 @@ describe('changePasswordSaga', () => {
         {
           // Post-lock: session reset, vault emptied.
           vault: EMPTY_VAULT,
+          keys: KEYS_WITH_PASSWORD,
           session: {
             encryptionKeyHash: null,
             encryptionKeyDoesExist: false,
@@ -1345,11 +1508,13 @@ describe('changePasswordSaga', () => {
       )
       .run();
 
-    // Fail closed: the old password still works, and the stored cipher is untouched.
+    // Fail closed, and without burning two scrypt derivations first.
+    expect(hashingModule.encodePassword).not.toHaveBeenCalled();
     expect(encryptSpy).not.toHaveBeenCalled();
   });
 
   it('puts nothing but a sagaError when encryptVault throws', async () => {
+    stubDerivation();
     const encryptSpy = jest
       .spyOn(vaultCryptoModule, 'encryptVault')
       .mockRejectedValue(new Error('malformed key'));
@@ -1357,7 +1522,12 @@ describe('changePasswordSaga', () => {
     await expectSaga(changePasswordSaga, changePassword(payload))
       .provide([
         [matchers.select.selector(selectVaultIsLocked), false],
-        [matchers.select.selector(selectVault), SEEDED_VAULT]
+        [matchers.select.selector(selectVault), SEEDED_VAULT],
+        [matchers.select.selector(selectPasswordHash), 'stored-password-hash'],
+        [
+          matchers.select.selector(selectPasswordSaltHash),
+          'stored-password-salt'
+        ]
       ])
       .not.put.actionType(keysUpdated.type)
       .not.put.actionType(encryptionKeyHashCreated.type)
@@ -1372,18 +1542,16 @@ describe('changePasswordSaga', () => {
 
     // Old keys and old cipher are both untouched — nothing was persisted
     // between "encrypt failed" and "user finds out".
-    expect(encryptSpy).toHaveBeenCalledWith(
-      payload.newEncryptionKeyHash,
-      SEEDED_VAULT
-    );
+    expect(encryptSpy).toHaveBeenCalledWith('abcd', SEEDED_VAULT);
   });
 
-  it('bails without persisting when the vault locks mid-encrypt', async () => {
+  it('bails without persisting when the vault locks mid-derivation', async () => {
     // First selectVaultIsLocked call is the pre-check (unlocked); the second is
-    // the post-encrypt re-check — simulates a lock landing while `encryptVault`
-    // (mocked here, real scrypt-backed work in production) is still in flight.
+    // the post-encrypt re-check — a lock landing while the scrypt derivations
+    // and `encryptVault` are still in flight.
     let isLockedCalls = 0;
 
+    stubDerivation();
     const encryptSpy = jest
       .spyOn(vaultCryptoModule, 'encryptVault')
       .mockResolvedValue('cipher-under-new-key');
@@ -1394,7 +1562,12 @@ describe('changePasswordSaga', () => {
           matchers.select.selector(selectVaultIsLocked),
           dynamic(() => isLockedCalls++ > 0)
         ],
-        [matchers.select.selector(selectVault), SEEDED_VAULT]
+        [matchers.select.selector(selectVault), SEEDED_VAULT],
+        [matchers.select.selector(selectPasswordHash), 'stored-password-hash'],
+        [
+          matchers.select.selector(selectPasswordSaltHash),
+          'stored-password-salt'
+        ]
       ])
       .not.put.actionType(keysUpdated.type)
       .not.put.actionType(encryptionKeyHashCreated.type)
