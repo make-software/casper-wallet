@@ -84,5 +84,5 @@ module.exports = {
       statements: 79
     }
   },
-  testPathIgnorePatterns: ['e2e-tests/', '/\\.claude/']
+  testPathIgnorePatterns: ['e2e-tests/', '<rootDir>/\\.claude/']
 };
