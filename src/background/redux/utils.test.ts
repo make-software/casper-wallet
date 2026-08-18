@@ -1,6 +1,9 @@
 import { runtime } from 'webextension-polyfill';
 
-import { reportUiError } from '@libs/ui/components/saga-error-banner/ui-error-channel';
+import {
+  clearUiError,
+  reportUiError
+} from '@libs/ui/components/saga-error-banner/ui-error-channel';
 
 import { lockVault } from './sagas/actions';
 import { themeModeSettingChanged } from './settings/actions';
@@ -12,7 +15,8 @@ jest.mock('webextension-polyfill', () => ({
 }));
 
 jest.mock('@libs/ui/components/saga-error-banner/ui-error-channel', () => ({
-  reportUiError: jest.fn()
+  reportUiError: jest.fn(),
+  clearUiError: jest.fn()
 }));
 
 const sendMessageMock = runtime.sendMessage as jest.MockedFunction<
@@ -20,6 +24,9 @@ const sendMessageMock = runtime.sendMessage as jest.MockedFunction<
 >;
 const reportUiErrorMock = reportUiError as jest.MockedFunction<
   typeof reportUiError
+>;
+const clearUiErrorMock = clearUiError as jest.MockedFunction<
+  typeof clearUiError
 >;
 
 describe('dispatchToMainStore', () => {
@@ -84,6 +91,19 @@ describe('dispatchToMainStore', () => {
     await expect(dispatchToMainStore(lockVault())).resolves.toBe(false);
 
     expect(reportUiErrorMock).toHaveBeenCalledWith(
+      'dispatch-failed',
+      lockVault().type
+    );
+  });
+
+  it('takes down the row left by an earlier failure once the send succeeds', async () => {
+    // The guards keep the user on the page to retry, so the retry that works
+    // lands on the screen where the stale row is still showing.
+    sendMessageMock.mockResolvedValue(undefined);
+
+    await dispatchToMainStore(lockVault());
+
+    expect(clearUiErrorMock).toHaveBeenCalledWith(
       'dispatch-failed',
       lockVault().type
     );

@@ -3,7 +3,10 @@ import { runtime } from 'webextension-polyfill';
 
 import { RootState } from '@background/redux/store-types';
 
-import { reportUiError } from '@libs/ui/components/saga-error-banner/ui-error-channel';
+import {
+  clearUiError,
+  reportUiError
+} from '@libs/ui/components/saga-error-banner/ui-error-channel';
 
 import { ReduxAction } from './redux-action';
 import { SURFACED_DISPATCH_ACTIONS } from './surfaced-dispatch-actions';
@@ -25,7 +28,12 @@ export function dispatchToMainStore(action: ReduxAction): Promise<boolean> {
   // throw blanks the whole page instead of resolving `false`.
   return Promise.resolve()
     .then(() => runtime.sendMessage(action))
-    .then(() => true)
+    .then(() => {
+      // The row this action may have left behind describes a failure that has
+      // just stopped being true.
+      clearUiError('dispatch-failed', action.type);
+      return true;
+    })
     .catch((error: unknown) => {
       // A send to a sleeping or restarting MV3 service worker is a routine
       // failure, and some of these actions are load-bearing — the Ledger

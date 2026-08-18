@@ -33,6 +33,22 @@ export function reportUiError(kind: UiErrorKind, detail: string) {
   emit();
 }
 
+// The counterpart of `reportUiError`, called from the same callers' success
+// paths. Without it a row outlives the failure it describes: the guards keep the
+// user on the page to retry, and the retry that works renders the success screen
+// under a banner still saying the wallet didn't respond — the key dedupe means it
+// would not even be refreshed, just left.
+export function clearUiError(kind: UiErrorKind, detail: string) {
+  const key = `${kind}:${detail}`;
+
+  if (!errors.some(error => error.key === key)) {
+    return;
+  }
+
+  errors = errors.filter(error => error.key !== key);
+  emit();
+}
+
 export function dismissUiError(id: number) {
   const next = errors.filter(error => error.id !== id);
 

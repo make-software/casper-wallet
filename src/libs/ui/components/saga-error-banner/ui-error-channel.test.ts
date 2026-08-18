@@ -1,4 +1,5 @@
 import {
+  clearUiError,
   dismissUiError,
   getUiErrorsServerSnapshot,
   getUiErrorsSnapshot,
@@ -117,6 +118,36 @@ describe('ui-error-channel', () => {
     reportUiError('dispatch-failed', 'LOCK_VAULT_SAGA');
 
     expect(getUiErrorsSnapshot()).toHaveLength(1);
+  });
+
+  it('clears the row whose failure has stopped being true', () => {
+    reportUiError('dispatch-failed', 'INIT_VAULT_SAGA');
+    reportUiError('window-open-failed', 'ImportAccount');
+
+    clearUiError('dispatch-failed', 'INIT_VAULT_SAGA');
+
+    expect(getUiErrorsSnapshot().map(error => error.key)).toEqual([
+      'window-open-failed:ImportAccount'
+    ]);
+  });
+
+  it('notifies subscribers when a row is cleared, and not otherwise', () => {
+    reportUiError('dispatch-failed', 'INIT_VAULT_SAGA');
+    const onChange = jest.fn();
+    const unsubscribe = subscribeToUiErrors(onChange);
+
+    // The success path runs on all ~105 dispatches, almost always with nothing
+    // to clear: no allocation and no re-render for those.
+    const before = getUiErrorsSnapshot();
+    clearUiError('dispatch-failed', 'LOCK_VAULT_SAGA');
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(getUiErrorsSnapshot()).toBe(before);
+
+    clearUiError('dispatch-failed', 'INIT_VAULT_SAGA');
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    unsubscribe();
   });
 
   it('gives the same snapshot to the server renderer', () => {
