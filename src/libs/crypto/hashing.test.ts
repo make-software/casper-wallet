@@ -22,6 +22,15 @@ describe('crypto.hashing', () => {
     expect(result).toBeTruthy();
   });
 
+  it('routes through the constant-time comparison, not ===: an upper-case hash still verifies', async () => {
+    const result = await verifyPasswordAgainstHash(
+      FIXED_PASSWORD_HASH.toUpperCase(),
+      FIXED_PASSWORD_SALT,
+      FIXED_PASSWORD_TEXT
+    );
+    expect(result).toBe(true);
+  });
+
   it('should match password text that created it', async () => {
     const passwordHash = await encodePassword(
       FIXED_PASSWORD_TEXT,
