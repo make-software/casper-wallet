@@ -73,7 +73,7 @@
   },
   "//dependencyNotes": "@scure/bip32 and @scure/bip39 are intentionally held at v1 (1.7.0 / 1.6.0 — latest v1). As of casper-js-sdk@5.1.0 the SDK no longer depends on @scure/* directly, but it still pins @noble/curves ^1.9.7 and @noble/hashes ^1.8.0, which the @scure v1 line shares (~1.9.0 / ~1.8.0). Bumping @scure to v2 would pull @noble/curves@2/@noble/hashes@2 and run two copies of the curve/hash primitives side by side (wrong-address risk, no upside). Bump in lockstep only when the SDK/core move off @noble ^1. See WALLET-1330.",
   "dependencies": {
-    "@bringweb3/chrome-extension-kit": "1.7.0",
+    "@bringweb3/chrome-extension-kit": "1.8.0",
     "@emotion/is-prop-valid": "^1.4.0",
     "@formatjs/intl": "^4.1.18",
     "@hookform/resolvers": "^5.4.0",
