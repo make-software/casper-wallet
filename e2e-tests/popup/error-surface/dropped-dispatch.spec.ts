@@ -1,44 +1,12 @@
 import { Page } from '@playwright/test';
 
+import {
+  DISPATCH_FAILED,
+  WINDOW_FAILED,
+  breakTransport,
+  breakWindowCreation
+} from '../../error-surface';
 import { popup, popupExpect } from '../../fixtures';
-
-const DISPATCH_FAILED =
-  "The wallet didn't respond. Your last action may not have been applied.";
-const WINDOW_FAILED = "Couldn't open the window. Please try again.";
-
-// Breaks this page's transport to the background, and only this page's.
-//
-// A rejected promise, not a synchronous throw: current Chrome exposes `browser`
-// natively, so `webextension-polyfill` re-exports it instead of wrapping
-// `chrome`, and the app therefore calls this function directly. A `throw` here
-// escapes synchronously out of `dispatchToMainStore` and trips the ErrorBoundary
-// (verified — the whole popup renders "Something went wrong") rather than
-// producing the rejection this feature is about.
-//
-// Stopping the service worker would not reproduce it either: in MV3 an incoming
-// message is itself the event that cold-starts a stopped worker, and while the
-// vault is unlocked the keep-alive alarm wakes it within 30s anyway.
-async function breakTransport(page: Page) {
-  await page.evaluate(() => {
-    (
-      window as unknown as {
-        chrome: { runtime: { sendMessage: () => Promise<never> } };
-      }
-    ).chrome.runtime.sendMessage = () =>
-      Promise.reject(new Error('e2e: forced transport failure'));
-  });
-}
-
-async function breakWindowCreation(page: Page) {
-  await page.evaluate(() => {
-    (
-      window as unknown as {
-        chrome: { windows: { create: () => Promise<never> } };
-      }
-    ).chrome.windows.create = () =>
-      Promise.reject(new Error('e2e: forced window failure'));
-  });
-}
 
 async function clickMenuItem(page: Page, name: string) {
   await page.getByTestId('menu-open-icon').click();

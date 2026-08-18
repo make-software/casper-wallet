@@ -5,6 +5,7 @@ import {
   secretKeyPathForCER,
   secretKeyPathForPEM
 } from '../../constants';
+import { DISPATCH_FAILED, breakTransport } from '../../error-surface';
 import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: import account with file', () => {
@@ -62,6 +63,54 @@ popup.describe('Popup UI: import account with file', () => {
       ).toBeVisible();
     }
   );
+  popup(
+    'should not claim success when the import dispatch is dropped',
+    async ({ unlockVault, context, popupPage }) => {
+      await unlockVault();
+
+      await popupPage.getByTestId('menu-open-icon').click();
+
+      const [importAccountPage] = await Promise.all([
+        context.waitForEvent('page'),
+        popupPage.getByText('Import account').click()
+      ]);
+
+      const fileChooserPromise = importAccountPage.waitForEvent('filechooser');
+
+      await popupExpect(
+        importAccountPage.getByRole('heading', {
+          name: 'Import account from secret key file'
+        })
+      ).toBeVisible();
+
+      await importAccountPage
+        .getByRole('button', { name: 'Upload your file' })
+        .click();
+
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles(secretKeyPathForPEM);
+
+      await importAccountPage
+        .getByPlaceholder('Account name', { exact: true })
+        .fill(ACCOUNT_NAMES.importedPemAccountName);
+
+      // Broken only now: the page dispatches while it loads, and breaking it
+      // earlier would fail the flow before the button under test is reached.
+      await breakTransport(importAccountPage);
+
+      await importAccountPage.getByRole('button', { name: 'Import' }).click();
+
+      await popupExpect(
+        importAccountPage.getByText(DISPATCH_FAILED)
+      ).toBeVisible();
+      await popupExpect(
+        importAccountPage.getByRole('heading', {
+          name: 'Your account was successfully imported'
+        })
+      ).toHaveCount(0);
+    }
+  );
+
   popup(
     'should import account via .cer file',
     async ({ unlockVault, context, popupPage }) => {
