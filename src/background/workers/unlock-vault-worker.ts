@@ -24,30 +24,37 @@ interface UnlockVaultMessageEvent extends MessageEvent {
 onmessage = async function (event: UnlockVaultMessageEvent) {
   const { password, keyDerivationSaltHash, vaultCipher } = event.data;
 
-  const encryptionKeyBytes = await deriveEncryptionKey(
-    password,
-    keyDerivationSaltHash
-  );
+  try {
+    const encryptionKeyBytes = await deriveEncryptionKey(
+      password,
+      keyDerivationSaltHash
+    );
 
-  const encryptionKeyHash = convertBytesToHex(encryptionKeyBytes);
-  // decrypt cipher
-  const vault = await decryptVault(encryptionKeyHash, vaultCipher);
+    const encryptionKeyHash = convertBytesToHex(encryptionKeyBytes);
+    // decrypt cipher
+    const vault = await decryptVault(encryptionKeyHash, vaultCipher);
 
-  // derive a new random encryption key
-  const newKeyDerivationSaltHash = generateRandomSaltHex();
-  const newEncryptionKeyBytes = await deriveEncryptionKey(
-    password,
-    newKeyDerivationSaltHash
-  );
-  const newEncryptionKeyHash = convertBytesToHex(newEncryptionKeyBytes);
+    // derive a new random encryption key
+    const newKeyDerivationSaltHash = generateRandomSaltHex();
+    const newEncryptionKeyBytes = await deriveEncryptionKey(
+      password,
+      newKeyDerivationSaltHash
+    );
+    const newEncryptionKeyHash = convertBytesToHex(newEncryptionKeyBytes);
 
-  // encrypt cipher with the new key
-  const newVaultCipher = await encryptVault(newEncryptionKeyHash, vault);
+    // encrypt cipher with the new key
+    const newVaultCipher = await encryptVault(newEncryptionKeyHash, vault);
 
-  postMessage({
-    vault,
-    newVaultCipher,
-    newKeyDerivationSaltHash,
-    newEncryptionKeyHash
-  });
+    postMessage({
+      vault,
+      newVaultCipher,
+      newKeyDerivationSaltHash,
+      newEncryptionKeyHash
+    });
+  } catch (error) {
+    // a rejection inside an async onmessage raises no error event on the parent
+    // Worker, so the failure has to travel back as a message
+    console.error(error);
+    postMessage({ error: true });
+  }
 };

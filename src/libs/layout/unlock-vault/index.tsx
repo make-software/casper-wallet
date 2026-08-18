@@ -18,6 +18,7 @@ import { unlockVault } from '@background/redux/sagas/actions';
 import { UnlockVault } from '@background/redux/sagas/types';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { VaultState } from '@background/redux/vault/types';
+import { WorkerResult, isWorkerError } from '@background/workers/types';
 
 import { useLockWalletWhenNoMoreRetries } from '@hooks/use-lock-wallet-when-no-more-retries';
 import { usePrivateState } from '@hooks/use-private-state';
@@ -40,7 +41,7 @@ import { UnlockWalletFormValues } from '@libs/ui/forms/unlock-wallet';
 import { UnlockVaultPageContent } from './content';
 
 interface UnlockMessageEvent extends MessageEvent {
-  data: UnlockVault;
+  data: WorkerResult<UnlockVault>;
 }
 
 interface UnlockVaultPageProps {
@@ -48,9 +49,9 @@ interface UnlockVaultPageProps {
 }
 
 interface VerifyPasswordMessageEvent extends MessageEvent {
-  data: {
+  data: WorkerResult<{
     isPasswordCorrect: boolean;
-  };
+  }>;
 }
 
 export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
@@ -111,6 +112,19 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
       throw Error("Key derivation salt doesn't exist");
     }
 
+    const disposeWorkers = () => {
+      verifyPasswordWorker.terminate();
+      unlockVaultWorker.terminate();
+    };
+
+    const handleWorkerFailure = () => {
+      disposeWorkers();
+      setError('password', {
+        message: t('Something went wrong. Please try again.')
+      });
+      setIsLoading(false);
+    };
+
     verifyPasswordWorker.postMessage({
       passwordHash,
       passwordSaltHash,
@@ -118,16 +132,23 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
     });
 
     verifyPasswordWorker.onmessage = (event: VerifyPasswordMessageEvent) => {
+      if (isWorkerError(event.data)) {
+        handleWorkerFailure();
+        return;
+      }
+
       const { isPasswordCorrect } = event.data;
       const errorMessage = getErrorMessageForIncorrectPassword(attemptsLeft);
 
       if (!isPasswordCorrect) {
+        disposeWorkers();
         dispatchToMainStore(loginRetryCountIncremented());
         setError('password', {
           message: t(errorMessage)
         });
         setIsLoading(false);
       } else {
+        verifyPasswordWorker.terminate();
         unlockVaultWorker.postMessage({
           password,
           keyDerivationSaltHash,
@@ -137,12 +158,19 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
     };
 
     unlockVaultWorker.onmessage = (event: UnlockMessageEvent) => {
+      if (isWorkerError(event.data)) {
+        handleWorkerFailure();
+        return;
+      }
+
       const {
         vault,
         newKeyDerivationSaltHash,
         newVaultCipher,
         newEncryptionKeyHash
       } = event.data;
+
+      unlockVaultWorker.terminate();
 
       // We should not store checksummed public keys because of possible issues on connect apps
       // that does not migrate to the new casper SDK behavior
@@ -192,20 +220,16 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
       }
     };
 
+    // only reached by a script load failure — a rejection inside a worker
+    // arrives through onmessage instead
     verifyPasswordWorker.onerror = error => {
       console.error(error);
-      setError('password', {
-        message: t('Something went wrong. Please try again.')
-      });
-      setIsLoading(false);
+      handleWorkerFailure();
     };
 
     unlockVaultWorker.onerror = error => {
       console.error(error);
-      setError('password', {
-        message: t('Something went wrong. Please try again.')
-      });
-      setIsLoading(false);
+      handleWorkerFailure();
     };
   }
 
