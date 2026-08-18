@@ -111,7 +111,10 @@ import {
 import { vaultCipherReseted } from '../redux/vault-cipher/actions';
 import { attachWindowToRequest } from './attach-window-to-request';
 import { handleCloseLedgerFlowWindows } from './close-ledger-flow-windows';
-import { isTrustedUiSender } from './private-state';
+import {
+  isTrustedUiSender,
+  warnUntrustedSameExtensionSender
+} from './private-state';
 import { HandlerResult } from './types';
 
 // The request a sender page is displaying, read off its own URL — the same
@@ -293,6 +296,27 @@ export async function handleReduxAction(
     );
 
     return { handled: true, response: undefined };
+  }
+
+  // Both branches below re-dispatch into the real store: the set carries
+  // `unlockVault`, `initVault` and `keysReseted`, and `resetVault` reaches
+  // `storage.local.clear()`. Gated like the two branches above, and for the same
+  // reason — so this does not rest on the content script's request allowlist
+  // staying right. Scoped to those two branches on purpose: an unlisted type must
+  // keep falling through as `{ handled: false }`, which is how `handleBringWeb3`
+  // sees its content-script messages at all.
+  if (
+    action.type === resetVault.type ||
+    FORWARDED_ACTION_TYPES.has(action.type)
+  ) {
+    // Silently drop (no response), matching the sibling gates. Interpolating
+    // `action.type` into the warning is safe only because this branch is
+    // reached for a fixed vocabulary (resetVault plus FORWARDED_ACTION_TYPES) —
+    // widen the branch and it becomes attacker-chosen console text.
+    if (!isTrustedUiSender(sender)) {
+      warnUntrustedSameExtensionSender(sender, `redux action ${action.type}`);
+      return { handled: true };
+    }
   }
 
   if (action.type === resetVault.type) {
