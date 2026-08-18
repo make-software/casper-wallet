@@ -94,9 +94,12 @@ popup.describe('Popup UI: import account with file', () => {
         .getByPlaceholder('Account name', { exact: true })
         .fill(ACCOUNT_NAMES.importedPemAccountName);
 
-      // Broken only now: the page dispatches while it loads, and breaking it
-      // earlier would fail the flow before the button under test is reached.
-      await breakTransport(importAccountPage);
+      // Only the guarded dispatch: `checkAccountNameIsTaken` rides the same
+      // transport from submit-time validation, so breaking all of it stops
+      // `handleSubmit` before `onSubmit` runs and the page never gets as far as
+      // the action under test. The literal is pinned in
+      // `surfaced-dispatch-actions.test.ts`.
+      await breakTransport(importAccountPage, ['vault/accountImported']);
 
       await importAccountPage.getByRole('button', { name: 'Import' }).click();
 

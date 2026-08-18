@@ -16,15 +16,37 @@ export const WINDOW_FAILED = "Couldn't open the window. Please try again.";
 // Stopping the service worker would not reproduce it either: in MV3 an incoming
 // message is itself the event that cold-starts a stopped worker, and while the
 // vault is unlocked the keep-alive alarm wakes it within 30s anyway.
-export async function breakTransport(page: Page) {
-  await page.evaluate(() => {
-    (
+//
+// `onlyTypes` narrows the break to those action types and lets everything else
+// through. Some flows put non-redux sends on the same transport — the import
+// page's `checkAccountNameIsTaken` runs in submit-time validation and
+// `checkSecretKeyExist` inside the file reader, neither through
+// `dispatchToMainStore` — so breaking the whole transport stops the flow before
+// the dispatch under test is ever reached. Pass the type to aim at the seam.
+export async function breakTransport(page: Page, onlyTypes: string[] = []) {
+  await page.evaluate(types => {
+    const { runtime } = (
       window as unknown as {
-        chrome: { runtime: { sendMessage: () => Promise<never> } };
+        chrome: {
+          runtime: {
+            sendMessage: (...args: unknown[]) => Promise<unknown>;
+          };
+        };
       }
-    ).chrome.runtime.sendMessage = () =>
-      Promise.reject(new Error('e2e: forced transport failure'));
-  });
+    ).chrome;
+
+    const send = runtime.sendMessage.bind(runtime);
+
+    runtime.sendMessage = (...args: unknown[]) => {
+      const type = (args[0] as { type?: string } | undefined)?.type;
+
+      if (types.length > 0 && (type === undefined || !types.includes(type))) {
+        return send(...args);
+      }
+
+      return Promise.reject(new Error('e2e: forced transport failure'));
+    };
+  }, onlyTypes);
 }
 
 export async function breakWindowCreation(page: Page) {
