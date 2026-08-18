@@ -16,6 +16,7 @@ import {
 } from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
+import { runWithDeviceConfirmationReported } from '@hooks/ledger-device-confirmation';
 import { createLedgerWindowCloseTracker } from '@hooks/ledger-window-close-listener';
 import { resolveOwnPermissionWindowId } from '@hooks/ledger-window-ownership';
 import { registerLedgerPermissionWindow } from '@hooks/register-ledger-permission-window';
@@ -131,7 +132,13 @@ export const useLedger = ({
     await beforeLedgerActionCb();
 
     if (isLedgerConnected) {
-      ledgerAction();
+      // Fire-and-forget as before — the status below must render while the
+      // device is being read — but bracketed so the background knows this
+      // request is on the device and leaves the window it runs in alone.
+      void runWithDeviceConfirmationReported(
+        askPermissionUrlData.params?.requestId,
+        ledgerAction
+      );
 
       if (shouldLoadAccountList) {
         setLedgerEventStatusToRender({

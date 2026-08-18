@@ -142,6 +142,12 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // request whose set can never shrink to the window that went away is a
     // request nothing can ever cancel.
     windowManagementActions.windowRequestWindowAttached,
+    // UI-dispatched (use-ledger, around the device call), but intercepted by its
+    // own branch in handleReduxAction — deliberately not in the forwarding set,
+    // which checks no sender at all. It decides whether the shared approval
+    // window may be reused, so a page must only be able to set it on the request
+    // its own URL names.
+    windowManagementActions.windowRequestDeviceConfirmationChanged,
     // UI-dispatched (use-ledger, when a Ledger flow ends), but intercepted by
     // the dedicated `closeLedgerFlowWindows` branch in handleReduxAction —
     // deliberately not in the forwarding set. It has no reducer case at all, so

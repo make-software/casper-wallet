@@ -7,6 +7,7 @@ import {
   windowIdCleared,
   windowRequestWindowAttached
 } from '@background/redux/windowManagement/actions';
+import { Request } from '@background/redux/windowManagement/types';
 
 import {
   cancelRequestsDisplacedBy,
@@ -48,14 +49,28 @@ const createOpenWindowMock = createOpenWindow as jest.MockedFunction<
 
 const flush = () => new Promise(resolve => setImmediate(resolve));
 
-function makeStore(windowId: number | null) {
+function makeStore(
+  windowId: number | null,
+  requests: Record<string, Request> = {}
+) {
   const dispatch = jest.fn();
   const store = {
-    getState: () => ({ windowManagement: { windowId, requests: {} } }),
+    getState: () => ({ windowManagement: { windowId, requests } }),
     dispatch
   } as unknown as MainStore;
   return { store, dispatch };
 }
+
+const awaitingDeviceIn = (windowIds: number[]): Record<string, Request> => ({
+  ledger: {
+    status: 'open',
+    tabId: 1,
+    origin: 'https://dapp.example',
+    method: 'sign',
+    windowIds,
+    awaitingDeviceConfirmation: true
+  }
+});
 
 describe('openWindow (background store routing)', () => {
   beforeEach(() => {
@@ -79,6 +94,41 @@ describe('openWindow (background store routing)', () => {
     openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
     expect(createOpenWindowMock).toHaveBeenCalledTimes(1);
+    const config = createOpenWindowMock.mock.calls[0][0]!;
+    expect(config.windowId).toBe(42);
+  });
+
+  // WALLET-1394. Not the permission-window flow, which #1427/#1462 already
+  // cover: there the device call runs in a SECOND window and the request
+  // survives a reuse by still being displayed in it.
+  it('withholds the tracked window while a device confirmation runs in it', () => {
+    const { store } = makeStore(42, awaitingDeviceIn([42]));
+
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
+
+    const config = createOpenWindowMock.mock.calls[0][0]!;
+    expect(config.windowId).toBeNull();
+  });
+
+  it('still offers a tracked window whose device confirmation ended', () => {
+    const { store } = makeStore(42, {
+      ledger: {
+        ...awaitingDeviceIn([42]).ledger,
+        awaitingDeviceConfirmation: false
+      }
+    } as Record<string, Request>);
+
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
+
+    const config = createOpenWindowMock.mock.calls[0][0]!;
+    expect(config.windowId).toBe(42);
+  });
+
+  it('offers the tracked window when the device confirmation is in another one', () => {
+    const { store } = makeStore(42, awaitingDeviceIn([77]));
+
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
+
     const config = createOpenWindowMock.mock.calls[0][0]!;
     expect(config.windowId).toBe(42);
   });

@@ -32,7 +32,8 @@ const openRequest = (windowIds: number[]): Request => ({
   tabId: 1,
   origin: 'https://dapp.example',
   method: 'sign',
-  windowIds
+  windowIds,
+  awaitingDeviceConfirmation: false
 });
 
 const removedIds = () => removeMock.mock.calls.map(([id]) => id).sort();
