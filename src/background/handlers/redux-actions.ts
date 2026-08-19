@@ -70,6 +70,7 @@ import {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
+  windowRequestDeviceConfirmationChanged,
   windowRequestWindowAttached
 } from '@background/redux/windowManagement/actions';
 
@@ -111,7 +112,10 @@ import {
 import { vaultCipherReseted } from '../redux/vault-cipher/actions';
 import { attachWindowToRequest } from './attach-window-to-request';
 import { handleCloseLedgerFlowWindows } from './close-ledger-flow-windows';
-import { isTrustedUiSender } from './private-state';
+import {
+  isTrustedUiSender,
+  warnUntrustedSameExtensionSender
+} from './private-state';
 import { HandlerResult } from './types';
 
 // The request a sender page is displaying, read off its own URL — the same
@@ -245,6 +249,38 @@ export async function handleReduxAction(
     return { handled: true, response: undefined };
   }
 
+  // Intercepted rather than forwarded even though it HAS a reducer case: it
+  // decides whether the shared approval window may be reused while a Ledger
+  // call runs in it, and `FORWARDED_ACTION_TYPES` checks no sender at all. Held
+  // on a foreign request the flag withholds that request's window from reuse for
+  // as long as it stays open, so the same two gates as the branches around it.
+  if (windowRequestDeviceConfirmationChanged.match(action)) {
+    if (!isTrustedUiSender(sender)) {
+      return { handled: true };
+    }
+
+    // `.match` says nothing about the payload, and this crosses
+    // `runtime.sendMessage`.
+    const payload: Partial<{ requestId: string; awaiting: boolean }> =
+      action.payload ?? {};
+
+    // Bound to the sender's own URL exactly as `closeLedgerFlowWindows` is: the
+    // page that runs the device call is the page the request opened, so it
+    // carries the id in its query string. Unlike that one there is no
+    // internal-flow case to admit — `runWithDeviceConfirmationReported` sends
+    // nothing without a requestId.
+    if (
+      typeof payload.awaiting !== 'boolean' ||
+      typeof payload.requestId !== 'string' ||
+      payload.requestId !== recoverRequestId(sender.url)
+    ) {
+      return { handled: true };
+    }
+
+    store.dispatch(action as unknown as ReduxAction);
+    return { handled: true, response: undefined };
+  }
+
   // Intercepted rather than forwarded: there is no reducer case for it, and the
   // window set it closes is derived from `windowManagement.requests`, which no
   // replica can see. Gated on `sender` for the same reason as the branch above —
@@ -293,6 +329,27 @@ export async function handleReduxAction(
     );
 
     return { handled: true, response: undefined };
+  }
+
+  // Both branches below re-dispatch into the real store: the set carries
+  // `unlockVault`, `initVault` and `keysReseted`, and `resetVault` reaches
+  // `storage.local.clear()`. Gated like the two branches above, and for the same
+  // reason — so this does not rest on the content script's request allowlist
+  // staying right. Scoped to those two branches on purpose: an unlisted type must
+  // keep falling through as `{ handled: false }`, which is how `handleBringWeb3`
+  // sees its content-script messages at all.
+  if (
+    action.type === resetVault.type ||
+    FORWARDED_ACTION_TYPES.has(action.type)
+  ) {
+    // Silently drop (no response), matching the sibling gates. Interpolating
+    // `action.type` into the warning is safe only because this branch is
+    // reached for a fixed vocabulary (resetVault plus FORWARDED_ACTION_TYPES) —
+    // widen the branch and it becomes attacker-chosen console text.
+    if (!isTrustedUiSender(sender)) {
+      warnUntrustedSameExtensionSender(sender, `redux action ${action.type}`);
+      return { handled: true };
+    }
   }
 
   if (action.type === resetVault.type) {

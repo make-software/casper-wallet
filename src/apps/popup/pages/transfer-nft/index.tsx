@@ -19,6 +19,7 @@ import {
 } from '@popup/pages/transfer-nft/utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
+import { fetchAccountSecretKey } from '@background/handlers/vault-secrets';
 import {
   accountPendingDeployHashesChanged,
   accountTrackingIdOfSentNftTokensChanged
@@ -181,10 +182,24 @@ export const TransferNftPage = () => {
       const { recipientPublicKey } = recipientForm.getValues();
       const { paymentAmount } = amountForm.getValues();
 
-      const KEYS = createAsymmetricKeys(
-        activeAccount.publicKey,
-        activeAccount.secretKey
-      );
+      const secretKey = await fetchAccountSecretKey(activeAccount.name);
+
+      // Ledger accounts legitimately have no secret key here too (see transfer/index.tsx).
+      if (!secretKey && activeAccount.hardware == null) {
+        setIsSubmitButtonDisable(false);
+        navigate(
+          ErrorPath,
+          createErrorLocationState({
+            errorHeaderText: t(ErrorMessages.common.UNKNOWN_ERROR.message),
+            errorContentText: t(ErrorMessages.common.UNKNOWN_ERROR.description),
+            errorPrimaryButtonLabel: t('Close'),
+            errorRedirectPath: RouterPath.Home
+          })
+        );
+        return;
+      }
+
+      const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
 
       const timestamp = await getDateForDeploy(nodeUrl);
 
@@ -256,10 +271,10 @@ export const TransferNftPage = () => {
     if (haveReverseOwnerLookUp || !nftToken || !activeAccount || !tokenStandard)
       return;
 
-    const KEYS = createAsymmetricKeys(
-      activeAccount.publicKey,
-      activeAccount.secretKey
-    );
+    // Ledger-only path: this callback only runs ahead of the hardware flow, and
+    // KEYS is used here just for `publicKey` — the secret key is legitimately empty.
+    const secretKey = await fetchAccountSecretKey(activeAccount.name);
+    const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
 
     const timestamp = await getDateForDeploy(nodeUrl);
 

@@ -65,7 +65,36 @@ const slice = createSlice({
             tabId: action.payload.tabId,
             origin: action.payload.origin,
             method: action.payload.method,
-            windowIds: []
+            windowIds: [],
+            awaitingDeviceConfirmation: false
+          }
+        }
+      };
+    },
+    // A Ledger confirmation started or finished for this request. Guarded like
+    // its siblings: only a live 'open' descriptor can carry the flag, so a
+    // message that arrives after the request was answered cannot resurrect one.
+    windowRequestDeviceConfirmationChanged: (
+      state,
+      action: PayloadAction<{ requestId: string; awaiting: boolean }>
+    ) => {
+      const request = getRequest(state.requests, action.payload.requestId);
+
+      if (
+        request == null ||
+        request.status !== 'open' ||
+        request.awaitingDeviceConfirmation === action.payload.awaiting
+      ) {
+        return state;
+      }
+
+      return {
+        ...state,
+        requests: {
+          ...state.requests,
+          [action.payload.requestId]: {
+            ...request,
+            awaitingDeviceConfirmation: action.payload.awaiting
           }
         }
       };
@@ -188,6 +217,7 @@ export const {
   windowDetachedFromRequests,
   windowIdChanged,
   windowIdCleared,
+  windowRequestDeviceConfirmationChanged,
   windowRequestOpened,
   windowRequestResponded,
   windowRequestWindowAttached

@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
+import { fetchAccountSecretKey } from '@background/handlers/vault-secrets';
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
 import {
   selectLedgerDeploy,
@@ -42,10 +43,9 @@ export const SignWithLedgerInNewWindowPage = () => {
       return;
     }
 
-    const KEYS = createAsymmetricKeys(
-      activeAccount.publicKey,
-      activeAccount.secretKey
-    );
+    // This page only runs the hardware flow: the secret key is legitimately empty.
+    const secretKey = await fetchAccountSecretKey(activeAccount.name);
+    const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
 
     const tx = Transaction.fromJSON(txJson);
     const deployFallback = Deploy.fromJSON(deployJson);

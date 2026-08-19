@@ -1,6 +1,9 @@
 import JSZip from 'jszip';
 
+import { fetchAccountSecretKeys } from '@background/handlers/vault-secrets';
+
 import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
+import { requestWithRetry } from '@libs/messaging/request-with-retry';
 import { AccountListRows } from '@libs/types/account';
 
 import { DownloadAccountKeysSteps, downloadFile } from './utils';
@@ -13,10 +16,21 @@ export async function runKeysDownload(
     const zip = new JSZip();
     let skipped = 0;
 
+    const secretKeys = await requestWithRetry(() =>
+      fetchAccountSecretKeys(accounts.map(account => account.name))
+    );
+
+    // A refused/null response must not fall back to an empty map: every account
+    // would then be silently skipped below, producing an empty zip with a
+    // Success screen. Throwing routes it into the catch's Failure step.
+    if (secretKeys == null) {
+      throw new Error('fetchAccountSecretKeys returned null');
+    }
+
     for (const account of accounts) {
       const asymmetricKey = createAsymmetricKeys(
         account.publicKey,
-        account.secretKey
+        secretKeys[account.name] ?? ''
       );
 
       if (asymmetricKey.secretKey) {

@@ -22,7 +22,8 @@ import { handleLegacyImport } from '@background/handlers/legacy-import';
 import {
   isPrivateStateRequest,
   isTrustedUiSender,
-  selectPrivateState
+  selectPrivateState,
+  warnUntrustedSameExtensionSender
 } from '@background/handlers/private-state';
 import { handleReduxAction } from '@background/handlers/redux-actions';
 import { handleSdkMethod } from '@background/handlers/sdk-methods';
@@ -32,6 +33,7 @@ import {
   unknownReduxActionError,
   unknownSdkMessageError
 } from '@background/handlers/unknown-message-errors';
+import { handleVaultSecrets } from '@background/handlers/vault-secrets';
 import { handleWindowRemoved } from '@background/handlers/window-removed';
 import { initKeepAlive } from '@background/keep-alive';
 import {
@@ -235,19 +237,7 @@ runtime.onMessage.addListener(
         // and has to be captured (and rejected) by the SDK branch first
         if (isPrivateStateRequest(action)) {
           if (!isTrustedUiSender(sender)) {
-            if (sender.id === runtime.id) {
-              // Same-extension sender rejected by the URL-prefix check —
-              // distinguishes a legitimate-but-unrecognized UI origin
-              // (packaging variant, sandboxed frame) from a probing sender.
-              // Origin only: a content-script sender's full page URL could
-              // carry tokens in query strings
-              const senderOrigin =
-                sender.url != null ? new URL(sender.url).origin : undefined;
-              console.warn(
-                'Background: private-state request from same-extension sender rejected by URL check:',
-                senderOrigin
-              );
-            }
+            warnUntrustedSameExtensionSender(sender, 'private-state request');
             // No data (and no error detail) for untrusted senders
             return;
           }
@@ -291,6 +281,15 @@ runtime.onMessage.addListener(
           const legacyResult = handleLegacyImport(typedAction, sender, store);
           if (legacyResult.handled) {
             return respond(legacyResult);
+          }
+
+          const vaultSecretsResult = handleVaultSecrets(
+            typedAction,
+            sender,
+            store
+          );
+          if (vaultSecretsResult.handled) {
+            return respond(vaultSecretsResult);
           }
 
           throw unknownReduxActionError(typedAction);

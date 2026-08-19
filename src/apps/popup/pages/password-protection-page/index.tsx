@@ -27,6 +27,7 @@ import {
   HeaderSubmenuBarNavLink,
   PopupLayout,
   PrivateStateErrorPage,
+  PrivateStateLoadingPage,
   UnlockProtectedPageContent
 } from '@libs/layout';
 import { Button } from '@libs/ui/components';
@@ -177,40 +178,39 @@ export const PasswordProtectionPage = ({
     };
   };
 
+  const renderHeader = () =>
+    onCloseWindow ? (
+      <HeaderPopup
+        renderSubmenuBarItems={() => (
+          <HeaderSubmenuBarNavLink linkType="close" onClick={onCloseWindow} />
+        )}
+      />
+    ) : (
+      <HeaderPopup
+        withNetworkSwitcher
+        withMenu
+        withConnectionStatus
+        renderSubmenuBarItems={() => (
+          <HeaderSubmenuBarNavLink linkType="back" />
+        )}
+      />
+    );
+
   if (privateStateError) {
     return <PrivateStateErrorPage layout="popup" onRetry={retryPrivateState} />;
   }
 
-  // private state (hashes) arrives in ms; matches existing async-boot behavior
+  // The hashes come over requestWithRetry, so this wait has the same ~16s worst
+  // case as the pages behind it — not the "arrives in ms" it looks like.
   if (privateState == null) {
-    return null;
+    return <PrivateStateLoadingPage renderHeader={renderHeader} />;
   }
 
   return (
     <PopupLayout
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
-      renderHeader={() =>
-        onCloseWindow ? (
-          <HeaderPopup
-            renderSubmenuBarItems={() => (
-              <HeaderSubmenuBarNavLink
-                linkType="close"
-                onClick={onCloseWindow}
-              />
-            )}
-          />
-        ) : (
-          <HeaderPopup
-            withNetworkSwitcher
-            withMenu
-            withConnectionStatus
-            renderSubmenuBarItems={() => (
-              <HeaderSubmenuBarNavLink linkType="back" />
-            )}
-          />
-        )
-      }
+      renderHeader={renderHeader}
       renderContent={() => (
         <UnlockProtectedPageContent
           errors={errors}

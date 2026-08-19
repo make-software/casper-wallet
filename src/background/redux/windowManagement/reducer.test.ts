@@ -9,6 +9,7 @@ import {
   windowDetachedFromRequests,
   windowIdChanged,
   windowIdCleared,
+  windowRequestDeviceConfirmationChanged,
   windowRequestOpened,
   windowRequestResponded,
   windowRequestWindowAttached
@@ -106,7 +107,8 @@ describe('windowManagement reducer', () => {
       tabId: 9,
       origin: 'https://other.example',
       method: 'signMessage',
-      windowIds: []
+      windowIds: [],
+      awaitingDeviceConfirmation: false
     });
 
     // Responding twice must not throw or resurrect the dropped descriptor.
@@ -124,7 +126,8 @@ describe('windowManagement requests', () => {
       tabId: 3,
       origin: 'https://dapp',
       method: 'sign',
-      windowIds: []
+      windowIds: [],
+      awaitingDeviceConfirmation: false
     });
   });
 
@@ -378,5 +381,108 @@ describe('windowManagement requests', () => {
 
       expect(state.requests['still-open']).toMatchObject({ status: 'open' });
     });
+  });
+});
+
+describe('windowManagement device confirmation', () => {
+  it('opens a request that is not awaiting the device', () => {
+    const state = reducer(empty, opened('r1'));
+
+    expect(state.requests.r1).toMatchObject({
+      awaitingDeviceConfirmation: false
+    });
+  });
+
+  it('marks an open request as awaiting the device', () => {
+    let state = reducer(empty, opened('r1'));
+
+    state = reducer(
+      state,
+      windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: true
+      })
+    );
+
+    expect(state.requests.r1).toMatchObject({
+      awaitingDeviceConfirmation: true
+    });
+  });
+
+  it('clears the flag when the confirmation ends', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(
+      state,
+      windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: true
+      })
+    );
+
+    state = reducer(
+      state,
+      windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: false
+      })
+    );
+
+    expect(state.requests.r1).toMatchObject({
+      awaitingDeviceConfirmation: false
+    });
+  });
+
+  // The tombstone carries no descriptor to flag, and resurrecting one would
+  // hand `selectIsWindowBusyWithDevice` an answered request to protect.
+  it('leaves a tombstone alone', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
+
+    const next = reducer(
+      state,
+      windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: true
+      })
+    );
+
+    expect(next).toBe(state);
+  });
+
+  it('ignores a request the store never registered', () => {
+    const next = reducer(
+      empty,
+      windowRequestDeviceConfirmationChanged({
+        requestId: 'ghost',
+        awaiting: true
+      })
+    );
+
+    expect(next).toBe(empty);
+  });
+
+  // Identity, not just equality. The store subscriber does no state-change
+  // comparison, so every new object is a popupState broadcast to every replica
+  // plus a full storage.local rewrite — the same cost `windowDetachedFromRequests`
+  // gates its dispatch on. A repeated report must not pay it.
+  it('returns the same state when the flag already holds that value', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(
+      state,
+      windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: true
+      })
+    );
+
+    const next = reducer(
+      state,
+      windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: true
+      })
+    );
+
+    expect(next).toBe(state);
   });
 });

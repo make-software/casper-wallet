@@ -7,10 +7,13 @@ import { MainStore } from '@background/redux/get-main-store';
 import { closeLedgerFlowWindows } from '@background/redux/ledger/actions';
 import { lockVault, resetVault } from '@background/redux/sagas/actions';
 import { accountRenamed } from '@background/redux/vault/actions';
-import { windowRequestWindowAttached } from '@background/redux/windowManagement/actions';
+import {
+  windowRequestDeviceConfirmationChanged,
+  windowRequestWindowAttached
+} from '@background/redux/windowManagement/actions';
 
 import { handleCloseLedgerFlowWindows } from './close-ledger-flow-windows';
-import { handleReduxAction } from './redux-actions';
+import { FORWARDED_ACTION_TYPES, handleReduxAction } from './redux-actions';
 
 // enableOnboardingFlow touches webextension-polyfill; stub it and assert it runs.
 jest.mock('@background/open-onboarding-flow', () => ({
@@ -30,6 +33,13 @@ jest.mock('webextension-polyfill', () => ({
 const trustedSender = {
   id: 'ext-id',
   url: 'chrome-extension://ext-id/popup.html'
+} as Runtime.MessageSender;
+
+// A content script of this extension: our id, but a page URL — it fails the URL
+// half of the gate, which is the half that makes the gate meaningful.
+const untrustedSender = {
+  id: 'ext-id',
+  url: 'https://dapp.example/page'
 } as Runtime.MessageSender;
 
 // The same, displaying request `r1` — every window a dapp flow opens carries the
@@ -368,5 +378,172 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
       error
     );
     consoleError.mockRestore();
+  });
+
+  describe('windowRequestDeviceConfirmationChanged', () => {
+    // It decides whether the shared approval window may be reused, so it is
+    // gated like its two siblings rather than left in the forwarding set, which
+    // checks no sender at all.
+    it('reaches the store when the page names the request it displays', async () => {
+      const { store, dispatch } = makeStore();
+      const action = windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: true
+      });
+
+      const result = await handleReduxAction(action, trustedSenderForR1, store);
+
+      expect(dispatch).toHaveBeenCalledWith(action);
+      expect(result).toEqual({ handled: true, response: undefined });
+    });
+
+    it('is dropped from an untrusted sender', async () => {
+      const { store, dispatch } = makeStore();
+
+      const result = await handleReduxAction(
+        windowRequestDeviceConfirmationChanged({
+          requestId: 'r1',
+          awaiting: true
+        }),
+        {
+          id: 'other-ext',
+          url: 'https://evil.example'
+        } as Runtime.MessageSender,
+        store
+      );
+
+      expect(dispatch).not.toHaveBeenCalled();
+      expect(result).toEqual({ handled: true });
+    });
+
+    // Holding the flag on someone else's request withholds THAT request's
+    // window from reuse for as long as it stays open.
+    it('is dropped when the page names a request it does not display', async () => {
+      const { store, dispatch } = makeStore();
+
+      const result = await handleReduxAction(
+        windowRequestDeviceConfirmationChanged({
+          requestId: 'r1',
+          awaiting: true
+        }),
+        trustedSender,
+        store
+      );
+
+      expect(dispatch).not.toHaveBeenCalled();
+      expect(result).toEqual({ handled: true });
+    });
+
+    it('drops a payload-less message instead of throwing on it', async () => {
+      const { store, dispatch } = makeStore();
+
+      const result = await handleReduxAction(
+        { type: windowRequestDeviceConfirmationChanged.type },
+        trustedSenderForR1,
+        store
+      );
+
+      expect(dispatch).not.toHaveBeenCalled();
+      expect(result).toEqual({ handled: true });
+    });
+  });
+});
+
+describe('handleReduxAction sender-trust gate', () => {
+  let warnSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  it('resetVault from an untrusted sender never reaches the store', async () => {
+    // resetVaultSaga calls storage.local.clear() — this branch can wipe the wallet.
+    const { store, dispatch } = makeStore();
+
+    const result = await handleReduxAction(
+      { type: resetVault.type },
+      untrustedSender,
+      store
+    );
+
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(enableOnboardingFlowMock).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: true });
+    expect(result).not.toHaveProperty('response');
+  });
+
+  it('a forwarded action from an untrusted sender never reaches the store', async () => {
+    const { store, dispatch } = makeStore();
+
+    const result = await handleReduxAction(lockVault(), untrustedSender, store);
+
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: true });
+    // `toEqual` ignores undefined-valued keys, so the contract `respond()` reads
+    // (`index.ts:215` branches on `'response' in result`) needs its own assertion.
+    expect(result).not.toHaveProperty('response');
+  });
+
+  it('EVERY member of FORWARDED_ACTION_TYPES is gated, so a future addition is covered too', async () => {
+    // The point of iterating the live set rather than sampling it: there is no
+    // second list to keep in sync when a type is appended.
+    for (const type of FORWARDED_ACTION_TYPES) {
+      const { store, dispatch } = makeStore();
+
+      const result = await handleReduxAction({ type }, untrustedSender, store);
+
+      expect(dispatch).not.toHaveBeenCalled();
+      expect(result).toEqual({ handled: true });
+      expect(result).not.toHaveProperty('response');
+    }
+  });
+
+  it('warns once, with the origin only, when the rejected sender carries this extension id', async () => {
+    const { store } = makeStore();
+
+    await handleReduxAction(lockVault(), untrustedSender, store);
+
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(
+      `Background: redux action ${lockVault.type} from same-extension sender rejected by URL check:`,
+      'https://dapp.example'
+    );
+  });
+
+  it('a foreign extension id is dropped without a log', async () => {
+    const { store, dispatch } = makeStore();
+
+    const result = await handleReduxAction(
+      lockVault(),
+      {
+        id: 'other-ext',
+        url: 'chrome-extension://other-ext/page.html'
+      } as Runtime.MessageSender,
+      store
+    );
+
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(warnSpy).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: true });
+  });
+
+  it('an unlisted type from an untrusted sender still falls through — handleBringWeb3 depends on it', async () => {
+    // GET_ACTIVE_PUBLIC_KEY arrives from bring.ts, i.e. from a content script.
+    // If the gate were ever widened past the two re-dispatch types this would
+    // come back { handled: true } and the Bring integration would go dark.
+    const { store, dispatch } = makeStore();
+
+    const result = await handleReduxAction(
+      { type: 'GET_ACTIVE_PUBLIC_KEY' },
+      untrustedSender,
+      store
+    );
+
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: false });
   });
 });

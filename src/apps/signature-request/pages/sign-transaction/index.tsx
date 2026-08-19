@@ -30,6 +30,7 @@ import { SigningPageState } from '@signature-request/pages/sign-transaction/type
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
+import { fetchAccountSecretKey } from '@background/handlers/vault-secrets';
 import { selectIsCasper2Network } from '@background/redux/settings/selectors';
 import {
   addWasmToTrusted,
@@ -266,10 +267,24 @@ export function SignTransactionPage() {
 
       signature = resp.signature;
     } else {
+      const secretKey = await fetchAccountSecretKey(signingAccount.name);
+
+      if (!secretKey) {
+        const error = Error(
+          ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
+        );
+        sendSdkResponseToSpecificTab(
+          sdkMethod.signError(error, { requestId }),
+          requestTabId
+        );
+        closeCurrentWindow();
+        return;
+      }
+
       signature = signDeployForProviderResponse(
         transaction.hash.toBytes(),
         signingAccount.publicKey,
-        signingAccount.secretKey
+        secretKey
       );
     }
 
@@ -291,7 +306,7 @@ export function SignTransactionPage() {
     signingAccount.hardware,
     signingAccount.derivationIndex,
     signingAccount.publicKey,
-    signingAccount.secretKey,
+    signingAccount.name,
     requestId,
     requestTabId,
     changeActiveAccountSupportsWithEvent
