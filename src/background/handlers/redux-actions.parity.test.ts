@@ -32,12 +32,12 @@ jest.mock('webextension-polyfill', () => ({ windows: { get: jest.fn() } }));
 /**
  * Parity guard for `FORWARDED_ACTION_TYPES`.
  *
- * `handleReduxAction` (redux-actions.ts) only re-dispatches a UI-originated
- * Redux action into the background store when its `.type` is present in the
- * hand-maintained `FORWARDED_ACTION_TYPES` set. The set is fail-closed (an
- * unknown type is dropped and `{ handled: false }` is returned), so forgetting
- * to append a newly-added UI action produces NO compile-time signal — the
- * action is just silently dropped at runtime.
+ * `handleReduxAction` (redux-actions.ts) only re-dispatches via the generic
+ * forwarding path when the sender passes `isTrustedUiSender` AND the action's
+ * `.type` is present in the hand-maintained `FORWARDED_ACTION_TYPES` set. The
+ * set is fail-closed (an unknown type is dropped and `{ handled: false }` is
+ * returned), so forgetting to append a newly-added UI action produces NO
+ * compile-time signal — the action is just silently dropped at runtime.
  *
  * This test reconstructs the "creator universe" from the exact same action
  * modules `redux-actions.ts` imports and asserts BOTH directions of drift:
