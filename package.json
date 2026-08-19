@@ -173,7 +173,7 @@
     "geckodriver": "^6.1.1",
     "globals": "^15.15.0",
     "html-loader": "^5.1.0",
-    "html-webpack-plugin": "^5.6.7",
+    "html-webpack-plugin": "^5.6.8",
     "husky": "9.1.7",
     "i18next-conv": "^17.0.0",
     "i18next-parser": "^9.4.0",
