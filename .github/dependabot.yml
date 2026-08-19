@@ -14,3 +14,10 @@ updates:
     # Add reviewers
     reviewers:
       - "Comp0te"
+    ignore:
+      # @types/node must track the Node runtime we build and run on, which is 22
+      # everywhere (.nvmrc, engines.node, CI node-version). Bump it with the Node
+      # upgrade, not ahead of it — otherwise code typechecks against APIs that are
+      # not there at runtime.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
