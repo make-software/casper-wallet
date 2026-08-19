@@ -9,12 +9,14 @@ import { requestWithRetry } from '@libs/messaging/request-with-retry';
 
 interface UseSecretPhraseResult {
   secretPhrase: SecretPhrase | null;
+  isLoading: boolean;
   error: boolean;
   retry: () => void;
 }
 
 export function useSecretPhrase(enabled = true): UseSecretPhraseResult {
   const [secretPhrase, setSecretPhrase] = useState<SecretPhrase | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const [fetchAttemptId, setFetchAttemptId] = useState(0);
   const isLocked = useSelector(selectVaultIsLocked);
@@ -24,11 +26,13 @@ export function useSecretPhrase(enabled = true): UseSecretPhraseResult {
     // phrase on lock and don't fetch until the caller enables it.
     if (isLocked || !enabled) {
       setSecretPhrase(null);
+      setIsLoading(false);
       return;
     }
 
     let mounted = true;
     setError(false);
+    setIsLoading(true);
 
     requestWithRetry(fetchSecretPhrase)
       .then(phrase => {
@@ -45,6 +49,11 @@ export function useSecretPhrase(enabled = true): UseSecretPhraseResult {
         if (mounted) {
           setError(true);
         }
+      })
+      .finally(() => {
+        if (mounted) {
+          setIsLoading(false);
+        }
       });
 
     return () => {
@@ -54,5 +63,5 @@ export function useSecretPhrase(enabled = true): UseSecretPhraseResult {
 
   const retry = useCallback(() => setFetchAttemptId(id => id + 1), []);
 
-  return { secretPhrase, error, retry };
+  return { secretPhrase, isLoading, error, retry };
 }

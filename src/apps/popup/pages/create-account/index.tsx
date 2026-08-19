@@ -17,7 +17,8 @@ import {
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
-  PrivateStateErrorPage
+  PrivateStateErrorPage,
+  PrivateStateLoadingPage
 } from '@libs/layout';
 import { requestWithRetry } from '@libs/messaging/request-with-retry';
 import { Button } from '@libs/ui/components';
@@ -101,12 +102,14 @@ function CreateAccountForm({ suggestedName }: CreateAccountFormProps) {
 
 export function CreateAccountPage() {
   const [suggestedName, setSuggestedName] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [fetchAttemptId, setFetchAttemptId] = useState(0);
 
   useEffect(() => {
     let mounted = true;
     setError(false);
+    setIsLoading(true);
 
     requestWithRetry(fetchSuggestedAccountName)
       .then(name => {
@@ -116,7 +119,12 @@ export function CreateAccountPage() {
           name == null ? setError(true) : setSuggestedName(name);
         }
       })
-      .catch(() => mounted && setError(true));
+      .catch(() => mounted && setError(true))
+      .finally(() => {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      });
 
     return () => {
       mounted = false;
@@ -127,6 +135,10 @@ export function CreateAccountPage() {
 
   if (error) {
     return <PrivateStateErrorPage layout="popup" onRetry={retry} />;
+  }
+
+  if (isLoading) {
+    return <PrivateStateLoadingPage />;
   }
 
   if (suggestedName == null) {

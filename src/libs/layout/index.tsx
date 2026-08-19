@@ -4,6 +4,7 @@ export * from './popup-layout';
 export * from './layout-window';
 export * from './layout-tab';
 export * from './error';
+export * from './loading';
 export * from './locked-router';
 export * from './reset-vault';
 export * from './unlock-protected-page-content';

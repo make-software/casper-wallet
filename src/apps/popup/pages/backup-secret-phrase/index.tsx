@@ -11,7 +11,8 @@ import {
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
-  PrivateStateErrorPage
+  PrivateStateErrorPage,
+  PrivateStateLoadingPage
 } from '@libs/layout';
 import { Button } from '@libs/ui/components';
 
@@ -25,7 +26,8 @@ export function BackupSecretPhrasePage() {
   const { t } = useTranslation();
 
   // Fetch only after password re-confirmation
-  const { secretPhrase, error, retry } = useSecretPhrase(isPasswordConfirmed);
+  const { secretPhrase, isLoading, error, retry } =
+    useSecretPhrase(isPasswordConfirmed);
 
   const setPasswordConfirmed = useCallback(() => {
     setIsPasswordConfirmed(true);
@@ -39,6 +41,10 @@ export function BackupSecretPhrasePage() {
 
   if (error) {
     return <PrivateStateErrorPage layout="popup" onRetry={retry} />;
+  }
+
+  if (isLoading) {
+    return <PrivateStateLoadingPage />;
   }
 
   if (secretPhrase == null) {
