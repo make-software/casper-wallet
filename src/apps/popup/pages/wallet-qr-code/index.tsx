@@ -5,10 +5,6 @@ import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { WalletQrCodePageContent } from '@popup/pages/wallet-qr-code/content';
 
 import {
-  fetchAccountSecretKeys,
-  fetchSecretPhrase
-} from '@background/handlers/vault-secrets';
-import {
   selectVaultDerivedAccounts,
   selectVaultImportedAccounts
 } from '@background/redux/vault/selectors';
@@ -20,8 +16,8 @@ import {
   PopupLayout,
   PrivateStateErrorPage
 } from '@libs/layout';
-import { requestWithRetry } from '@libs/messaging/request-with-retry';
-import { Account } from '@libs/types/account';
+
+import { buildQrSyncPayload } from './build-qr-sync-payload';
 
 interface GenerateWalletQrDataMessageEvent extends MessageEvent {
   data: WorkerResult<{
@@ -49,37 +45,16 @@ export const WalletQrCodePage = () => {
   const generateQRCode = async (password: string) => {
     setIsLoading(true);
 
-    const secretPhrase = await requestWithRetry(fetchSecretPhrase).catch(
-      () => null
-    );
+    const payload = await buildQrSyncPayload(derivedAccounts, importedAccounts);
 
-    if (!secretPhrase) {
+    // A refused or incomplete payload must not reach the phone. Returning
+    // resolves the promise the password page awaits, so it renders no form
+    // error on top of the error page.
+    if (!payload) {
       setIsLoading(false);
       setHasError(true);
       return;
     }
-
-    // The worker sends only derived accounts' names — the mobile client re-derives their keys from the phrase.
-    const secretKeys = await requestWithRetry(() =>
-      fetchAccountSecretKeys(importedAccounts.map(a => a.name))
-    ).catch(() => null);
-
-    // A null/failed response must not turn into a partial payload: that would
-    // silently sync imported accounts to the phone without their keys.
-    if (!secretKeys) {
-      setIsLoading(false);
-      setHasError(true);
-      return;
-    }
-
-    // Strip down to what the worker actually reads: `watching` (added by the
-    // broadcast sanitizer) is not a field the mobile client expects.
-    const forSync = (accounts: Account[]) =>
-      accounts.map(({ name, publicKey }) => ({
-        name,
-        publicKey,
-        secretKey: secretKeys[name] ?? ''
-      }));
 
     const worker = new Worker(
       new URL(
@@ -91,12 +66,7 @@ export const WalletQrCodePage = () => {
     // settles only once the QR data exists, so a worker failure rejects into
     // the password page's catch instead of leaving it spinning forever
     return new Promise<void>((resolve, reject) => {
-      worker.postMessage({
-        password,
-        secretPhrase,
-        derivedAccounts: forSync(derivedAccounts),
-        importedAccounts: forSync(importedAccounts)
-      });
+      worker.postMessage({ password, ...payload });
 
       const fail = (error: unknown) => {
         worker.terminate();
