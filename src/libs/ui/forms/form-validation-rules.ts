@@ -26,7 +26,6 @@ import { selectLoginRetryCount } from '@background/redux/login-retry-count/selec
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { verifyPasswordAgainstHash } from '@libs/crypto/hashing';
-import { isValidSecretKeyHash } from '@libs/crypto/is-valid-secret-key-hash';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export const minPasswordLength = 16;
@@ -640,18 +639,6 @@ export const useContactPublicKeyRule = (
       t('You’ve already got a contact with this public key'),
       value => isPublicKeyAlreadyInContactsCallback(value)
     );
-};
-
-export const useTorusSecretKeyRule = () => {
-  const { t } = useTranslation();
-
-  return Yup.string()
-    .required(t('Secret key is required'))
-    .test({
-      name: 'secret key',
-      test: value => (value ? isValidSecretKeyHash(value) : false),
-      message: t('This secret key doesn’t look right')
-    });
 };
 
 export const useBuyCSPRKeyRule = () => {
