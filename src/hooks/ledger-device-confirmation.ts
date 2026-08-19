@@ -2,6 +2,47 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { windowRequestDeviceConfirmationChanged } from '@background/redux/windowManagement/actions';
 
 /**
+ * How many brackets currently hold each request, so overlapping ones report the
+ * flag once between them rather than each releasing it for the others.
+ *
+ * They do overlap: neither signing page disables its submit control while a
+ * call is in flight, and the page state that hides it is only flipped after
+ * `getPreferredTransport()` and `beforeLedgerActionCb()` resolve — so a second
+ * click lands, fails fast on the busy transport (`TransportRaceCondition`) and
+ * would otherwise unprotect the window while the first call is still on the
+ * device.
+ *
+ * Module scope is the right scope: a transport is per document, so brackets can
+ * only overlap within one, and the reducer's equality guard already absorbs a
+ * repeated `true` from anywhere else.
+ */
+const heldByRequest = new Map<string, number>();
+
+/** @returns whether this is the first holder, i.e. whether to report the start. */
+function acquire(requestId: string): boolean {
+  const held = (heldByRequest.get(requestId) ?? 0) + 1;
+  heldByRequest.set(requestId, held);
+
+  return held === 1;
+}
+
+/** @returns whether this was the last holder, i.e. whether to report the end. */
+function release(requestId: string): boolean {
+  const held = (heldByRequest.get(requestId) ?? 1) - 1;
+
+  if (held > 0) {
+    heldByRequest.set(requestId, held);
+    return false;
+  }
+
+  // Deleted rather than left at zero: `requestId` is dapp-controlled, and a page
+  // that signs repeatedly would otherwise grow this map for its whole life.
+  heldByRequest.delete(requestId);
+
+  return true;
+}
+
+/**
  * Runs a Ledger device call with the background told, for its whole duration,
  * that this request is on the device — which is what keeps the window it runs
  * in out of the reuse rotation (`awaitingDeviceConfirmation` in
@@ -25,6 +66,10 @@ export async function runWithDeviceConfirmationReported(
   // dapp request behind them, so there is no descriptor to flag.
   const report = (awaiting: boolean) => {
     if (requestId == null || requestId === '') {
+      return;
+    }
+
+    if (!(awaiting ? acquire(requestId) : release(requestId))) {
       return;
     }
 

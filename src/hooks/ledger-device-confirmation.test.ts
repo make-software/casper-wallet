@@ -81,3 +81,83 @@ it('treats an empty requestId as absent', async () => {
 
   expect(dispatchMock).not.toHaveBeenCalled();
 });
+
+// Two brackets can overlap in one document: the submit control is not disabled
+// while a call is in flight, and the page state that hides it is only flipped
+// after `getPreferredTransport()` and `beforeLedgerActionCb()` have resolved
+// (use-ledger.ts). The second call fails fast — the transport is busy, so it
+// throws TransportRaceCondition — and a bare release would then unprotect the
+// window while the first call is still on the device.
+describe('concurrent brackets', () => {
+  it('does not release the window until the last bracket settles', async () => {
+    let releaseFirst: () => void = () => {};
+    const first = runWithDeviceConfirmationReported(
+      'r1',
+      () =>
+        new Promise<void>(resolve => {
+          releaseFirst = resolve;
+        })
+    );
+
+    await runWithDeviceConfirmationReported('r1', async () => {
+      throw new Error('transport busy');
+    });
+
+    expect(dispatchMock).toHaveBeenCalledTimes(1);
+    expect(dispatchMock).toHaveBeenLastCalledWith(
+      windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: true
+      })
+    );
+
+    releaseFirst();
+    await first;
+
+    expect(dispatchMock).toHaveBeenLastCalledWith(
+      windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: false
+      })
+    );
+  });
+
+  it('counts each request separately', async () => {
+    let releaseOther: () => void = () => {};
+    const other = runWithDeviceConfirmationReported(
+      'r2',
+      () =>
+        new Promise<void>(resolve => {
+          releaseOther = resolve;
+        })
+    );
+
+    await runWithDeviceConfirmationReported('r1', async () => {});
+
+    expect(dispatchMock).toHaveBeenCalledWith(
+      windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: false
+      })
+    );
+
+    releaseOther();
+    await other;
+  });
+
+  // A leaked counter would make every later call for that id a silent no-op,
+  // which is the failure this guard must not introduce.
+  it('releases the count so a later call reports again', async () => {
+    await runWithDeviceConfirmationReported('r1', async () => {});
+    dispatchMock.mockClear();
+
+    await runWithDeviceConfirmationReported('r1', async () => {});
+
+    expect(dispatchMock).toHaveBeenCalledWith(
+      windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: true
+      })
+    );
+  });
+});
