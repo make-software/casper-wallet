@@ -128,6 +128,42 @@ describe('windowManagement requests', () => {
     });
   });
 
+  it('windowRequestOpened records the requesting frame', () => {
+    const state = reducer(
+      undefined,
+      windowRequestOpened({
+        requestId: 'r1',
+        tabId: 3,
+        frameId: 4,
+        origin: 'https://dapp.example',
+        method: 'sign'
+      })
+    );
+
+    expect(state.requests.r1).toEqual({
+      status: 'open',
+      tabId: 3,
+      frameId: 4,
+      origin: 'https://dapp.example',
+      method: 'sign',
+      windowIds: []
+    });
+  });
+
+  it('windowRequestOpened without a frame leaves the descriptor unscoped', () => {
+    const state = reducer(
+      undefined,
+      windowRequestOpened({
+        requestId: 'r1',
+        tabId: 3,
+        origin: 'https://dapp.example',
+        method: 'sign'
+      })
+    );
+
+    expect((state.requests.r1 as { frameId?: number }).frameId).toBeUndefined();
+  });
+
   it('attaches a window id to an open request', () => {
     let state = reducer(empty, opened('r1'));
     state = reducer(

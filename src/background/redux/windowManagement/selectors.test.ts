@@ -1,6 +1,10 @@
 import { RootState } from '@background/redux/store-types';
 
-import { selectOpenRequests, selectRequestStatus } from './selectors';
+import {
+  selectOpenRequest,
+  selectOpenRequests,
+  selectRequestStatus
+} from './selectors';
 import { Request } from './types';
 
 // Typed as `Record<string, Request>` (not `any`) so a future shape change to
@@ -38,4 +42,24 @@ it('selectOpenRequests joins open status with its descriptor, including windowId
       windowIds: [7]
     }
   ]);
+});
+
+it('selectOpenRequest returns the open descriptor with its id', () => {
+  expect(selectOpenRequest(state, 'a')).toEqual({
+    requestId: 'a',
+    status: 'open',
+    tabId: 1,
+    origin: 'o',
+    method: 'sign',
+    windowIds: [7]
+  });
+});
+
+it('selectOpenRequest returns undefined for a tombstone or an unknown id', () => {
+  expect(selectOpenRequest(state, 'b')).toBeUndefined();
+  expect(selectOpenRequest(state, 'z')).toBeUndefined();
+});
+
+it('selectOpenRequest does not read an inherited Object.prototype member', () => {
+  expect(selectOpenRequest(state, 'toString')).toBeUndefined();
 });

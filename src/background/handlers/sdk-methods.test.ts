@@ -122,7 +122,8 @@ function makeStore(requests: Record<string, unknown> = {}) {
 
 const SENDER = {
   url: 'https://dapp.example/page',
-  tab: { id: 9 }
+  tab: { id: 9 },
+  frameId: 3
 } as Runtime.MessageSender;
 
 // `reconcileStalePayloadsSaga` may resume at any `await`, and a payload that no
@@ -317,6 +318,7 @@ describe('connectRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'connect'
         }
@@ -380,6 +382,7 @@ describe('switchAccountRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'switchAccount'
         }
@@ -481,6 +484,7 @@ describe('signRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'sign'
         }
@@ -650,6 +654,7 @@ describe('signMessageRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'signMessage'
         }
@@ -702,6 +707,7 @@ describe('signTypedDataRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'signTypedData'
         }
@@ -895,6 +901,7 @@ describe('decryptMessageRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'decryptMessage'
         }

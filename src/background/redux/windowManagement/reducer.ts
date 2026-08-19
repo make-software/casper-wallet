@@ -45,6 +45,7 @@ const slice = createSlice({
       action: PayloadAction<{
         requestId: string;
         tabId: number;
+        frameId?: number;
         origin: string;
         method: CancellableMethod;
       }>
@@ -63,6 +64,7 @@ const slice = createSlice({
           [action.payload.requestId]: {
             status: 'open',
             tabId: action.payload.tabId,
+            frameId: action.payload.frameId,
             origin: action.payload.origin,
             method: action.payload.method,
             windowIds: []

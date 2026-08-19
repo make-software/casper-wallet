@@ -26,6 +26,13 @@ export type Request =
   | {
       readonly status: 'open';
       readonly tabId: number;
+      // The frame that made the request, so the response can be delivered to it
+      // alone. `all_frames: true` means a bare `tabs.sendMessage(tabId, …)`
+      // reaches EVERY frame of the tab, third-party iframes included.
+      // Optional, not defaulted to 0: `Runtime.MessageSender.frameId` is
+      // optional, and defaulting a sub-frame request to the top frame would
+      // mis-target it. Absent = today's unscoped send.
+      readonly frameId?: number;
       readonly origin: string;
       readonly method: CancellableMethod;
       readonly windowIds: readonly number[];

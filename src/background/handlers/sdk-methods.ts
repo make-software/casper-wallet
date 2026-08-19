@@ -135,6 +135,7 @@ export async function handleSdkMethod(
         windowRequestOpened({
           requestId: action.meta.requestId,
           tabId: senderTabId,
+          frameId: sender.frameId,
           origin,
           method: 'connect'
         })
@@ -172,6 +173,7 @@ export async function handleSdkMethod(
       windowRequestOpened({
         requestId: action.meta.requestId,
         tabId: senderTabId,
+        frameId: sender.frameId,
         origin,
         method: 'switchAccount'
       })
@@ -265,6 +267,7 @@ export async function handleSdkMethod(
       windowRequestOpened({
         requestId: action.meta.requestId,
         tabId: senderTabId,
+        frameId: sender.frameId,
         origin,
         method: 'sign'
       })
@@ -299,6 +302,7 @@ export async function handleSdkMethod(
       windowRequestOpened({
         requestId: action.meta.requestId,
         tabId: senderTabId,
+        frameId: sender.frameId,
         origin,
         method: 'signMessage'
       })
@@ -367,6 +371,7 @@ export async function handleSdkMethod(
       windowRequestOpened({
         requestId: action.meta.requestId,
         tabId: senderTabId,
+        frameId: sender.frameId,
         origin,
         method: 'signTypedData'
       })
@@ -402,6 +407,7 @@ export async function handleSdkMethod(
       windowRequestOpened({
         requestId: action.meta.requestId,
         tabId: senderTabId,
+        frameId: sender.frameId,
         origin,
         method: 'decryptMessage'
       })
