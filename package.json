@@ -146,7 +146,7 @@
     "@lavamoat/allow-scripts": "^5.1.0",
     "@lavamoat/preinstall-always-fail": "^3.0.0",
     "@playwright/test": "^1.62.1",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.1",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/big.js": "^7.0.0",
     "@types/chrome": "^0.2.0",
