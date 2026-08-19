@@ -7,9 +7,12 @@ import {
   fetchPrivateState
 } from '@background/handlers/private-state';
 
-const PRIVATE_STATE_FETCH_TIMEOUT_MS = 5000;
-/** Targets the MV3 SW-restart race: a rejected sendMessage usually succeeds on re-send */
-export const PRIVATE_STATE_RETRY_DELAYS_MS = [250, 500];
+import {
+  RETRY_DELAYS_MS,
+  requestWithRetry
+} from '@libs/messaging/request-with-retry';
+
+export const PRIVATE_STATE_RETRY_DELAYS_MS = RETRY_DELAYS_MS;
 
 interface UsePrivateStateResult {
   privateState: PrivateState | null;
@@ -17,48 +20,8 @@ interface UsePrivateStateResult {
   retry: () => void;
 }
 
-function fetchWithTimeout(): Promise<PrivateState> {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(
-      () => reject(new Error('Private state request timed out')),
-      PRIVATE_STATE_FETCH_TIMEOUT_MS
-    );
-
-    fetchPrivateState().then(
-      state => {
-        clearTimeout(timer);
-        resolve(state);
-      },
-      error => {
-        clearTimeout(timer);
-        reject(error);
-      }
-    );
-  });
-}
-
-export async function loadPrivateStateWithRetry(): Promise<PrivateState> {
-  let lastError: unknown;
-
-  for (
-    let attempt = 0;
-    attempt <= PRIVATE_STATE_RETRY_DELAYS_MS.length;
-    attempt++
-  ) {
-    if (attempt > 0) {
-      await new Promise(resolve =>
-        setTimeout(resolve, PRIVATE_STATE_RETRY_DELAYS_MS[attempt - 1])
-      );
-    }
-
-    try {
-      return await fetchWithTimeout();
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw lastError;
+export function loadPrivateStateWithRetry(): Promise<PrivateState> {
+  return requestWithRetry(fetchPrivateState);
 }
 
 export function createPrivateStateUpdatedListener(onUpdate: () => void) {

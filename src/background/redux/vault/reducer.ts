@@ -26,10 +26,9 @@ type State = VaultState;
  * and `vaultLoaded` restores the entry on the next unlock. No service-worker
  * death is involved — it reproduces on Firefox and Safari too, where the
  * background page is persistent. Nothing else in this reducer deletes a key, so
- * a leaked payload sits in `storage.local` — riding along in every popup-state
- * broadcast, since `selectPopupState` sends `vault` whole — until
- * `reconcileStalePayloadsSaga` reclaims its slot, or `mergePayloadMaps` drops
- * it as the oldest entry over the ceiling.
+ * a leaked payload sits in `storage.local` — the payload maps ride unfiltered
+ * in every broadcast — until `reconcileStalePayloadsSaga` reclaims its slot,
+ * or `mergePayloadMaps` drops it as the oldest entry over the ceiling.
  *
  * Ten is far above real concurrency (one approval window means 1-2 in-flight
  * requests) and far below anything that costs memory. See `storePayload` for

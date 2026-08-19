@@ -5,7 +5,6 @@ import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { WalletQrCodePageContent } from '@popup/pages/wallet-qr-code/content';
 
 import {
-  selectSecretPhrase,
   selectVaultDerivedAccounts,
   selectVaultImportedAccounts
 } from '@background/redux/vault/selectors';
@@ -14,8 +13,11 @@ import { WorkerResult, isWorkerError } from '@background/workers/types';
 import {
   HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupLayout
+  PopupLayout,
+  PrivateStateErrorPage
 } from '@libs/layout';
+
+import { buildQrSyncPayload } from './build-qr-sync-payload';
 
 interface GenerateWalletQrDataMessageEvent extends MessageEvent {
   data: WorkerResult<{
@@ -28,8 +30,8 @@ export const WalletQrCodePage = () => {
   const [isPasswordConfirmed, setIsPasswordConfirmed] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
-  const secretPhrase = useSelector(selectSecretPhrase);
   const derivedAccounts = useSelector(selectVaultDerivedAccounts, shallowEqual);
   const importedAccounts = useSelector(
     selectVaultImportedAccounts,
@@ -40,30 +42,31 @@ export const WalletQrCodePage = () => {
     setIsPasswordConfirmed(true);
   }, []);
 
-  // resolves only once the QR data exists, so a worker failure rejects into the
-  // password page's catch instead of leaving it spinning forever
-  const generateQRCode = (password: string) =>
-    new Promise<void>((resolve, reject) => {
-      if (!secretPhrase) {
-        resolve();
-        return;
-      }
+  const generateQRCode = async (password: string) => {
+    setIsLoading(true);
 
-      setIsLoading(true);
+    const payload = await buildQrSyncPayload(derivedAccounts, importedAccounts);
 
-      const worker = new Worker(
-        new URL(
-          '@background/workers/generate-sync-wallet-qr-data-worker.ts',
-          import.meta.url
-        )
-      );
+    // A refused or incomplete payload must not reach the phone. Returning
+    // resolves the promise the password page awaits, so it renders no form
+    // error on top of the error page.
+    if (!payload) {
+      setIsLoading(false);
+      setHasError(true);
+      return;
+    }
 
-      worker.postMessage({
-        password,
-        secretPhrase,
-        derivedAccounts,
-        importedAccounts
-      });
+    const worker = new Worker(
+      new URL(
+        '@background/workers/generate-sync-wallet-qr-data-worker.ts',
+        import.meta.url
+      )
+    );
+
+    // settles only once the QR data exists, so a worker failure rejects into
+    // the password page's catch instead of leaving it spinning forever
+    return new Promise<void>((resolve, reject) => {
+      worker.postMessage({ password, ...payload });
 
       const fail = (error: unknown) => {
         worker.terminate();
@@ -90,6 +93,16 @@ export const WalletQrCodePage = () => {
       // arrives through onmessage instead
       worker.onerror = error => fail(error);
     });
+  };
+
+  if (hasError) {
+    return (
+      <PrivateStateErrorPage
+        layout="popup"
+        onRetry={() => setHasError(false)}
+      />
+    );
+  }
 
   if (!isPasswordConfirmed) {
     return (

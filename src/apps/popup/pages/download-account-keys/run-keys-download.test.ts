@@ -1,3 +1,5 @@
+import { fetchAccountSecretKeys } from '@background/handlers/vault-secrets';
+
 import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 import { AccountListRows } from '@libs/types/account';
 
@@ -23,14 +25,18 @@ jest.mock('@libs/crypto/create-asymmetric-key', () => ({
   createAsymmetricKeys: jest.fn()
 }));
 
+jest.mock('@background/handlers/vault-secrets', () => ({
+  fetchAccountSecretKeys: jest.fn()
+}));
+
 const mockCreateKeys = createAsymmetricKeys as jest.Mock;
 const mockDownloadFile = downloadFile as jest.Mock;
+const mockFetchSecretKeys = fetchAccountSecretKeys as jest.Mock;
 
 const account = (name: string): AccountListRows =>
   ({
     name,
-    publicKey: `01${name}`,
-    secretKey: `sk-${name}`
+    publicKey: `01${name}`
   }) as AccountListRows;
 
 beforeEach(() => {
@@ -39,6 +45,10 @@ beforeEach(() => {
   mockCreateKeys.mockImplementation(() => ({
     secretKey: { toPem: () => 'PEM' }
   }));
+  mockFetchSecretKeys.mockResolvedValue({
+    alice: 'sk-alice',
+    bob: 'sk-bob'
+  });
   jest.spyOn(console, 'error').mockImplementation(() => undefined);
 });
 
@@ -51,6 +61,8 @@ it('writes one pem per account and reports Success', async () => {
 
   await runKeysDownload([account('alice'), account('bob')], setStep);
 
+  expect(mockFetchSecretKeys).toHaveBeenCalledWith(['alice', 'bob']);
+  expect(mockCreateKeys).toHaveBeenCalledWith('01alice', 'sk-alice');
   expect(zipFile).toHaveBeenCalledTimes(2);
   expect(zipFile).toHaveBeenCalledWith('alice_secret_key.pem', 'PEM');
   expect(mockDownloadFile).toHaveBeenCalledTimes(1);
@@ -64,6 +76,19 @@ it('writes one pem per account and reports Success', async () => {
 // archive never got built.
 it('routes a zip failure to Failure and never to Success', async () => {
   generateAsync.mockRejectedValue(new Error('boom'));
+  const setStep = jest.fn();
+
+  await runKeysDownload([account('alice')], setStep);
+
+  expect(setStep).toHaveBeenCalledWith(DownloadAccountKeysSteps.Failure);
+  expect(setStep).not.toHaveBeenCalledWith(DownloadAccountKeysSteps.Success);
+  expect(mockDownloadFile).not.toHaveBeenCalled();
+});
+
+// A refused request answers `null`. Treating that as "no keys" would hand the
+// user an empty zip and a Success screen.
+it('routes a refused secret-keys request to Failure, not an empty zip', async () => {
+  mockFetchSecretKeys.mockResolvedValue(null);
   const setStep = jest.fn();
 
   await runKeysDownload([account('alice')], setStep);
