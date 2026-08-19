@@ -70,6 +70,7 @@ import {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
+  windowRequestDeviceConfirmationChanged,
   windowRequestWindowAttached
 } from '@background/redux/windowManagement/actions';
 
@@ -242,6 +243,38 @@ export async function handleReduxAction(
       payload.requestId as string,
       payload.windowId as number
     );
+    return { handled: true, response: undefined };
+  }
+
+  // Intercepted rather than forwarded even though it HAS a reducer case: it
+  // decides whether the shared approval window may be reused while a Ledger
+  // call runs in it, and `FORWARDED_ACTION_TYPES` checks no sender at all. Held
+  // on a foreign request the flag withholds that request's window from reuse for
+  // as long as it stays open, so the same two gates as the branches around it.
+  if (windowRequestDeviceConfirmationChanged.match(action)) {
+    if (!isTrustedUiSender(sender)) {
+      return { handled: true };
+    }
+
+    // `.match` says nothing about the payload, and this crosses
+    // `runtime.sendMessage`.
+    const payload: Partial<{ requestId: string; awaiting: boolean }> =
+      action.payload ?? {};
+
+    // Bound to the sender's own URL exactly as `closeLedgerFlowWindows` is: the
+    // page that runs the device call is the page the request opened, so it
+    // carries the id in its query string. Unlike that one there is no
+    // internal-flow case to admit — `runWithDeviceConfirmationReported` sends
+    // nothing without a requestId.
+    if (
+      typeof payload.awaiting !== 'boolean' ||
+      typeof payload.requestId !== 'string' ||
+      payload.requestId !== recoverRequestId(sender.url)
+    ) {
+      return { handled: true };
+    }
+
+    store.dispatch(action as unknown as ReduxAction);
     return { handled: true, response: undefined };
   }
 

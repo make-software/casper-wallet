@@ -7,7 +7,10 @@ import { MainStore } from '@background/redux/get-main-store';
 import { closeLedgerFlowWindows } from '@background/redux/ledger/actions';
 import { lockVault, resetVault } from '@background/redux/sagas/actions';
 import { accountRenamed } from '@background/redux/vault/actions';
-import { windowRequestWindowAttached } from '@background/redux/windowManagement/actions';
+import {
+  windowRequestDeviceConfirmationChanged,
+  windowRequestWindowAttached
+} from '@background/redux/windowManagement/actions';
 
 import { handleCloseLedgerFlowWindows } from './close-ledger-flow-windows';
 import { handleReduxAction } from './redux-actions';
@@ -368,5 +371,73 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
       error
     );
     consoleError.mockRestore();
+  });
+
+  describe('windowRequestDeviceConfirmationChanged', () => {
+    // It decides whether the shared approval window may be reused, so it is
+    // gated like its two siblings rather than left in the forwarding set, which
+    // checks no sender at all.
+    it('reaches the store when the page names the request it displays', async () => {
+      const { store, dispatch } = makeStore();
+      const action = windowRequestDeviceConfirmationChanged({
+        requestId: 'r1',
+        awaiting: true
+      });
+
+      const result = await handleReduxAction(action, trustedSenderForR1, store);
+
+      expect(dispatch).toHaveBeenCalledWith(action);
+      expect(result).toEqual({ handled: true, response: undefined });
+    });
+
+    it('is dropped from an untrusted sender', async () => {
+      const { store, dispatch } = makeStore();
+
+      const result = await handleReduxAction(
+        windowRequestDeviceConfirmationChanged({
+          requestId: 'r1',
+          awaiting: true
+        }),
+        {
+          id: 'other-ext',
+          url: 'https://evil.example'
+        } as Runtime.MessageSender,
+        store
+      );
+
+      expect(dispatch).not.toHaveBeenCalled();
+      expect(result).toEqual({ handled: true });
+    });
+
+    // Holding the flag on someone else's request withholds THAT request's
+    // window from reuse for as long as it stays open.
+    it('is dropped when the page names a request it does not display', async () => {
+      const { store, dispatch } = makeStore();
+
+      const result = await handleReduxAction(
+        windowRequestDeviceConfirmationChanged({
+          requestId: 'r1',
+          awaiting: true
+        }),
+        trustedSender,
+        store
+      );
+
+      expect(dispatch).not.toHaveBeenCalled();
+      expect(result).toEqual({ handled: true });
+    });
+
+    it('drops a payload-less message instead of throwing on it', async () => {
+      const { store, dispatch } = makeStore();
+
+      const result = await handleReduxAction(
+        { type: windowRequestDeviceConfirmationChanged.type },
+        trustedSenderForR1,
+        store
+      );
+
+      expect(dispatch).not.toHaveBeenCalled();
+      expect(result).toEqual({ handled: true });
+    });
   });
 });

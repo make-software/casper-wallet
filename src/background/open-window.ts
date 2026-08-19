@@ -13,7 +13,10 @@ import {
   windowIdChanged,
   windowIdCleared
 } from '@background/redux/windowManagement/actions';
-import { selectWindowId } from '@background/redux/windowManagement/selectors';
+import {
+  selectIsWindowBusyWithDevice,
+  selectWindowId
+} from '@background/redux/windowManagement/selectors';
 
 export interface OpenApprovalWindowProps extends OpenWindowProps {
   /**
@@ -52,8 +55,21 @@ export function openWindow(
     );
   };
 
+  // Withheld while a Ledger confirmation is in flight in it — reuse navigates
+  // that window's tab out from under the device call (see
+  // `awaitingDeviceConfirmation` in windowManagement/types). `null` REDIRECTS
+  // the reuse rather than suppressing it: the new-window branch still runs
+  // `setWindowId`, so the slot retracks and only the protected window leaves
+  // the rotation. WALLET-1394.
+  const trackedWindowId = selectWindowId(store.getState());
+  const reusableWindowId =
+    trackedWindowId != null &&
+    selectIsWindowBusyWithDevice(store.getState(), trackedWindowId)
+      ? null
+      : trackedWindowId;
+
   const chain = createOpenWindow({
-    windowId: selectWindowId(store.getState()),
+    windowId: reusableWindowId,
     setWindowId: (id: number) => store.dispatch(windowIdChanged(id)),
     clearWindowId: () => store.dispatch(windowIdCleared())
   })(openWindowProps).then(
