@@ -74,7 +74,8 @@ const OPEN_REQUEST: Request = {
   tabId: TAB_ID,
   origin: DAPP_ORIGIN,
   method: 'sign',
-  windowIds: [7]
+  windowIds: [7],
+  awaitingDeviceConfirmation: false
 };
 
 // Build a fake store whose `requests` map carries the desired request entry

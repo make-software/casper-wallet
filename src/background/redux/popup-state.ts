@@ -4,6 +4,8 @@ import { RootState } from '@background/redux/store-types';
 import { VaultState } from '@background/redux/vault/types';
 import { WindowManagementState } from '@background/redux/windowManagement/types';
 
+import { Account } from '@libs/types/account';
+
 // The single definition of what leaves the background for UI replicas. A slice is
 // broadcast only by being listed here, and only in the shape the overrides below
 // pin — adding either is a deliberate, reviewable edit.
@@ -30,6 +32,21 @@ export const POPUP_SLICES = [
 
 export type PopupSlice = (typeof POPUP_SLICES)[number];
 
+type BroadcastAccount = Omit<Account, 'secretKey'> & {
+  /** Never broadcast — fetch with fetchAccountSecretKeys() at the point of use. */
+  secretKey: '';
+  /** Derived at the boundary: the vault holds no signing key for this account. */
+  watching: boolean;
+};
+
+type BroadcastVaultState = Omit<
+  VaultState,
+  'secretPhrase' | 'accounts' | 'payloadSeqById'
+> & {
+  secretPhrase: null;
+  accounts: BroadcastAccount[];
+};
+
 type PopupSliceOverrides = {
   // Cipher/hash material is served on demand — see handlers/private-state.ts.
   keys: Omit<
@@ -46,8 +63,9 @@ type PopupSliceOverrides = {
   // `requests` carries each in-flight request's dapp origin and tabId; no replica
   // reads it, and `exportKeysWindowId` is background-only.
   windowManagement: Pick<WindowManagementState, 'windowId'>;
-  // Write-order bookkeeping for the two payload maps — background-only.
-  vault: Omit<VaultState, 'payloadSeqById'>;
+  // Secret phrase and account secret keys are served on demand — see
+  // handlers/private-state.ts and fetchAccountSecretKeys().
+  vault: BroadcastVaultState;
 };
 
 export type PopupState = {
@@ -95,10 +113,17 @@ function popupSession(session: SessionState): PopupSliceOverrides['session'] {
   };
 }
 
-function popupVault(vault: VaultState): Omit<VaultState, 'payloadSeqById'> {
+function popupVault(vault: VaultState): BroadcastVaultState {
   return {
-    secretPhrase: vault.secretPhrase,
-    accounts: vault.accounts,
+    secretPhrase: null,
+    accounts: vault.accounts.map(({ secretKey, ...account }) => ({
+      ...account,
+      // The literal type is the enforcement: forgetting to blank a key is a
+      // compile error. `watching` means watch-only specifically — a Ledger
+      // account also has an empty secretKey but is excluded via `hardware`.
+      secretKey: '' as const,
+      watching: secretKey === '' && account.hardware == null
+    })),
     accountNamesByOriginDict: vault.accountNamesByOriginDict,
     siteNameByOriginDict: vault.siteNameByOriginDict,
     activeAccountName: vault.activeAccountName,

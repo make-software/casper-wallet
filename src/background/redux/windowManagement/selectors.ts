@@ -51,3 +51,15 @@ export const selectOpenRequests = createSelector(
       request?.status === 'open' ? [{ requestId, ...request }] : []
     )
 );
+
+// Is a Ledger confirmation in flight in this window? Composed from the request
+// side rather than stored per window — see `awaitingDeviceConfirmation` in
+// ./types for why. Read by `openWindow` before it reuses the shared slot.
+export const selectIsWindowBusyWithDevice = (
+  state: RootState,
+  windowId: number
+): boolean =>
+  selectOpenRequests(state).some(
+    request =>
+      request.awaitingDeviceConfirmation && request.windowIds.includes(windowId)
+  );

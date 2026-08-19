@@ -1,9 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
-import { selectSecretPhrase } from '@background/redux/vault/selectors';
-
+import { SecretPhrase } from '@libs/crypto';
 import {
   ContentContainer,
   ParagraphContainer,
@@ -17,14 +15,14 @@ import {
   Typography
 } from '@libs/ui/components';
 
-export function BackupSecretPhrasePageContent() {
+interface BackupSecretPhrasePageContentProps {
+  phrase: SecretPhrase;
+}
+
+export function BackupSecretPhrasePageContent({
+  phrase
+}: BackupSecretPhrasePageContentProps) {
   const { t } = useTranslation();
-
-  const secretPhrase = useSelector(selectSecretPhrase);
-
-  if (secretPhrase == null) {
-    throw Error("Secret Phrase doesn't exist");
-  }
 
   const items = [
     { key: 1, value: t('Save a backup in multiple secure locations.') },
@@ -65,7 +63,7 @@ export function BackupSecretPhrasePageContent() {
       </ParagraphContainer>
 
       <SecretPhraseWordsView
-        phrase={secretPhrase}
+        phrase={phrase}
         renderFooter={({ secretPhraseForCopy }) => (
           <CopySecretPhraseBar secretPhraseForCopy={secretPhraseForCopy} />
         )}

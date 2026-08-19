@@ -7,7 +7,8 @@ import {
   fetchPrivateState,
   isPrivateStateRequest,
   isTrustedUiSender,
-  selectPrivateState
+  selectPrivateState,
+  warnUntrustedSameExtensionSender
 } from './private-state';
 
 // `webextension-polyfill` throws outside an extension. Stub the identity +
@@ -111,6 +112,69 @@ describe('selectPrivateState', () => {
       keyDerivationSaltHash: null,
       vaultCipher: null
     });
+  });
+});
+
+describe('warnUntrustedSameExtensionSender', () => {
+  let warnSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  it('foreign extension id → silent (another extension probing is not our diagnostic)', () => {
+    const sender = {
+      id: 'other-ext',
+      url: 'chrome-extension://other-ext/page.html'
+    } as Runtime.MessageSender;
+
+    warnUntrustedSameExtensionSender(sender, 'private-state request');
+
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('same extension id → warns with the context and the ORIGIN, never the query string', () => {
+    // A content script of this extension carries our id and the host page URL,
+    // which is exactly why the full URL must not be logged.
+    const sender = {
+      id: 'ext-id',
+      url: 'https://dapp.example/page?session=secret'
+    } as Runtime.MessageSender;
+
+    warnUntrustedSameExtensionSender(sender, 'private-state request');
+
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Background: private-state request from same-extension sender rejected by URL check:',
+      'https://dapp.example'
+    );
+  });
+
+  it('unparseable url → warns with undefined instead of throwing out of the router', () => {
+    const sender = { id: 'ext-id', url: 'not a url' } as Runtime.MessageSender;
+
+    expect(() =>
+      warnUntrustedSameExtensionSender(sender, 'redux action LOCK_VAULT')
+    ).not.toThrow();
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Background: redux action LOCK_VAULT from same-extension sender rejected by URL check:',
+      undefined
+    );
+  });
+
+  it('absent url → warns with undefined', () => {
+    const sender = { id: 'ext-id', url: undefined } as Runtime.MessageSender;
+
+    warnUntrustedSameExtensionSender(sender, 'private-state request');
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Background: private-state request from same-extension sender rejected by URL check:',
+      undefined
+    );
   });
 });
 

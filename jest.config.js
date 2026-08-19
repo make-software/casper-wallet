@@ -17,7 +17,9 @@ module.exports = {
   coveragePathIgnorePatterns: ['/node_modules/'],
   testRegex: '(/tests?/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  modulePathIgnorePatterns: ['<rootDir>/e2e-tests'],
+  // `.claude/worktrees/` holds full checkouts of other branches, each with its
+  // own node_modules; without this jest crawls and compiles all of them.
+  modulePathIgnorePatterns: ['<rootDir>/e2e-tests', '<rootDir>/.claude'],
   moduleNameMapper: {
     '^@src/(.*)$': '<rootDir>/src/$1',
     '^@popup/(.*)$': '<rootDir>/src/apps/popup/$1',
@@ -82,5 +84,5 @@ module.exports = {
       statements: 79
     }
   },
-  testPathIgnorePatterns: ['e2e-tests/']
+  testPathIgnorePatterns: ['e2e-tests/', '<rootDir>/\\.claude/']
 };

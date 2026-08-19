@@ -68,8 +68,8 @@ function broadcastToReplicas(message: BackgroundEvent, source: string): void {
     if (text.includes('Receiving end does not exist')) {
       return;
     }
-    // The broadcast payload (which carries the decrypted vault) is never
-    // logged — only a static source label and the error object.
+    // The broadcast payload is sanitized but still carries account and session
+    // data, so it is never logged — only a static source label and the error object.
     console.error(`${source} broadcast failed:`, error);
   });
 }

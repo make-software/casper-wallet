@@ -30,6 +30,7 @@ import {
 import { ValidatorDropdownInput } from '@popup/pages/stakes/validator-dropdown-input';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
+import { fetchAccountSecretKey } from '@background/handlers/vault-secrets';
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
 import {
   ledgerDeployChanged,
@@ -174,10 +175,24 @@ export const StakesPage = () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
-      const KEYS = createAsymmetricKeys(
-        activeAccount.publicKey,
-        activeAccount.secretKey
-      );
+      const secretKey = await fetchAccountSecretKey(activeAccount.name);
+
+      // Ledger accounts legitimately have no secret key here too (see transfer/index.tsx).
+      if (!secretKey && activeAccount.hardware == null) {
+        setIsSubmitButtonDisable(false);
+        navigate(
+          ErrorPath,
+          createErrorLocationState({
+            errorHeaderText: t(ErrorMessages.common.UNKNOWN_ERROR.message),
+            errorContentText: t(ErrorMessages.common.UNKNOWN_ERROR.description),
+            errorPrimaryButtonLabel: t('Close'),
+            errorRedirectPath: RouterPath.Home
+          })
+        );
+        return;
+      }
+
+      const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
 
       const timestamp = await getDateForDeploy(nodeUrl);
 

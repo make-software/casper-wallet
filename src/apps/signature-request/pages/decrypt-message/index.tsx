@@ -8,6 +8,7 @@ import { getSigningAccount } from '@src/utils';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
 import { closeCurrentWindow } from '@background/close-current-window';
+import { fetchAccountSecretKey } from '@background/handlers/vault-secrets';
 import {
   selectConnectedAccountNamesByOrigin,
   selectVaultAccounts
@@ -128,10 +129,17 @@ export function DecryptMessagePage() {
         return;
       }
 
+      const secretKey = await fetchAccountSecretKey(signingAccount.name);
+
+      if (!secretKey) {
+        setHasDecryptionError(true);
+        return;
+      }
+
       const mdg = await decryptEncryptedBase64PrivateKey(
         message,
         signingAccount.publicKey,
-        signingAccount.secretKey
+        secretKey
       );
 
       setHasDecryptionError(false);
@@ -140,7 +148,7 @@ export function DecryptMessagePage() {
       setHasDecryptionError(true);
       console.error(e);
     }
-  }, [message, signingAccount.publicKey, signingAccount.secretKey]);
+  }, [message, signingAccount.publicKey, signingAccount.name]);
 
   const handleSendResponse = useCallback(async () => {
     if (!decryptedMessage) {

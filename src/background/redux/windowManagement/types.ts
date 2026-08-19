@@ -36,6 +36,15 @@ export type Request =
       readonly origin: string;
       readonly method: CancellableMethod;
       readonly windowIds: readonly number[];
+      // A Ledger confirmation is in flight for this request. The device call
+      // runs in the page that displays it, so reusing that page's window
+      // navigates the document away and takes the HID session and the pending
+      // signature with it — `openWindow` reads this to leave such a window
+      // alone. Lives on the descriptor rather than in a slice-level set so it
+      // cannot outlive what it describes: the tombstone replaces the whole
+      // entry, and a detach shrinks `windowIds`, which is the other half of the
+      // question. WALLET-1394.
+      readonly awaitingDeviceConfirmation: boolean;
     }
   | { readonly status: 'responded' };
 
