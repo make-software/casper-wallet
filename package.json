@@ -203,7 +203,7 @@
     "allowScripts": {
       "@lavamoat/preinstall-always-fail#3.0.0": false,
       "eslint-import-resolver-typescript>unrs-resolver#1.12.2": true,
-      "geckodriver#6.1.0": false,
+      "geckodriver#6.1.1": false,
       "i18next-parser>esbuild#0.25.12": true
     }
   }
