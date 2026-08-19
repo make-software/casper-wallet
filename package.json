@@ -178,7 +178,7 @@
     "i18next-conv": "^17.0.0",
     "i18next-parser": "^9.4.0",
     "jest": "^30.4.2",
-    "knip": "^6.32.0",
+    "knip": "^6.32.2",
     "lint-staged": "^17.3.0",
     "markdownlint-cli": "0.49.1",
     "playwright": "^1.61.0",
