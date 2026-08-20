@@ -18,8 +18,8 @@ interface PrivateStateErrorPageProps {
 }
 
 /**
- * Shown when the private-state fetch (P0.1) fails after timeout + retries —
- * replaces the silent blank render on the unlock/re-auth pages.
+ * Shown when a vault-secrets fetch fails after timeout + retries, on the
+ * backup-secret-phrase, create-account and wallet-qr-code pages.
  */
 export function PrivateStateErrorPage({
   layout,

@@ -8,12 +8,9 @@ export type UnlockWalletFormValues = {
   password: string;
 };
 
-export function useUnlockWalletForm(
-  passwordHash: string,
-  passwordSaltHash: string
-) {
+export function useUnlockWalletForm() {
   const formSchema = Yup.object().shape({
-    password: useVerifyPasswordAgainstHashRule(passwordHash, passwordSaltHash)
+    password: useVerifyPasswordAgainstHashRule()
   });
 
   const formOptions: UseFormProps<UnlockWalletFormValues> = {

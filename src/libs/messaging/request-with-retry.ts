@@ -1,6 +1,6 @@
 const FETCH_TIMEOUT_MS = 5000;
 /** Targets the MV3 SW-restart race: a rejected sendMessage usually succeeds on re-send */
-export const RETRY_DELAYS_MS = [250, 500];
+const RETRY_DELAYS_MS = [250, 500];
 
 function withTimeout<T>(send: () => Promise<T>): Promise<T> {
   return new Promise((resolve, reject) => {

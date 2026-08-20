@@ -1470,8 +1470,8 @@ describe('changePasswordSaga', () => {
   });
 
   it('reports a malformed payload instead of throwing past its own catch', async () => {
-    // `{ type }` with no payload is what the sender-ungated forwarded path
-    // admits; a destructure above the `try` would take rootSaga down with it.
+    // `{ type }` with no payload is a shape isChangePasswordPayload must reject
+    // gracefully; a destructure above the `try` would take rootSaga down with it.
     const encryptSpy = jest.spyOn(vaultCryptoModule, 'encryptVault');
 
     await expectSaga(changePasswordSaga, {

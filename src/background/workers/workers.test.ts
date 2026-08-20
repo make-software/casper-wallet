@@ -1,22 +1,13 @@
 import { isWorkerError } from './types';
 
 jest.mock('@libs/crypto/hashing', () => ({
-  generateRandomSaltHex: jest.fn(() => 'salt'),
-  encodePassword: jest.fn(async () => 'hash'),
-  deriveEncryptionKey: jest.fn(async () => new Uint8Array([1])),
-  verifyPasswordAgainstHash: jest.fn(async () => true),
   createScryptOptions: jest.fn(() => ({ N: 2, r: 8, p: 1, dkLen: 32 }))
 }));
 jest.mock('@noble/hashes/scrypt', () => ({
   scryptAsync: jest.fn(async () => new Uint8Array(32))
 }));
 jest.mock('@libs/crypto/utils', () => ({
-  convertBytesToHex: jest.fn(() => 'key'),
   convertBytesToBase64: jest.fn(() => 'base64')
-}));
-jest.mock('@libs/crypto/vault', () => ({
-  encryptVault: jest.fn(async () => 'cipher'),
-  decryptVault: jest.fn(async () => ({ accounts: [] }))
 }));
 
 type WorkerGlobals = {
@@ -42,15 +33,6 @@ const runWorker = async (modulePath: string, data: unknown) => {
 
 const WORKERS = [
   {
-    name: 'unlock-vault-worker',
-    path: './unlock-vault-worker',
-    data: { password: 'p', keyDerivationSaltHash: 'salt', vaultCipher: 'c' },
-    breakIt: () =>
-      jest
-        .requireMock('@libs/crypto/vault')
-        .decryptVault.mockRejectedValueOnce(new Error('bad tag'))
-  },
-  {
     name: 'generate-sync-wallet-qr-data-worker',
     path: './generate-sync-wallet-qr-data-worker',
     data: {
@@ -63,15 +45,6 @@ const WORKERS = [
       jest
         .requireMock('@noble/hashes/scrypt')
         .scryptAsync.mockRejectedValueOnce(new Error('boom'))
-  },
-  {
-    name: 'verify-password-worker',
-    path: './verify-password-worker',
-    data: { passwordHash: 'h', passwordSaltHash: 's', password: 'p' },
-    breakIt: () =>
-      jest
-        .requireMock('@libs/crypto/hashing')
-        .verifyPasswordAgainstHash.mockRejectedValueOnce(new Error('boom'))
   }
 ];
 

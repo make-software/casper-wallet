@@ -48,7 +48,9 @@ type BroadcastVaultState = Omit<
 };
 
 type PopupSliceOverrides = {
-  // Cipher/hash material is served on demand — see handlers/private-state.ts.
+  // Cipher/hash material stays background-only since WALLET-1424 — see
+  // handlers/unlock-requests.ts, which verifies passwords and unlocks the
+  // vault without ever sending this to a replica.
   keys: Omit<
     KeysState,
     'passwordHash' | 'passwordSaltHash' | 'keyDerivationSaltHash'
@@ -64,7 +66,7 @@ type PopupSliceOverrides = {
   // reads it, and `exportKeysWindowId` is background-only.
   windowManagement: Pick<WindowManagementState, 'windowId'>;
   // Secret phrase and account secret keys are served on demand — see
-  // handlers/private-state.ts and fetchAccountSecretKeys().
+  // handlers/vault-secrets.ts and fetchAccountSecretKeys().
   vault: BroadcastVaultState;
 };
 

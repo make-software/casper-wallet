@@ -78,10 +78,6 @@ import { enableOnboardingFlow } from '../open-onboarding-flow';
 import { keysReseted } from '../redux/keys/actions';
 import { lastActivityTimeRefreshed } from '../redux/last-activity-time/actions';
 import {
-  loginRetryCountIncremented,
-  loginRetryCountReseted
-} from '../redux/login-retry-count/actions';
-import {
   recipientPublicKeyAdded,
   recipientPublicKeyReseted
 } from '../redux/recent-recipient-public-keys/actions';
@@ -92,8 +88,7 @@ import {
   lockVault,
   openExportKeysWindow,
   recoverVault,
-  resetVault,
-  unlockVault
+  resetVault
 } from '../redux/sagas/actions';
 import {
   contactEditingPermissionChanged,
@@ -113,7 +108,7 @@ import { handleCloseLedgerFlowWindows } from './close-ledger-flow-windows';
 import {
   isTrustedUiSender,
   warnUntrustedSameExtensionSender
-} from './private-state';
+} from './trusted-sender';
 import { HandlerResult } from './types';
 
 // The request a sender page is displaying, read off its own URL — the same
@@ -133,7 +128,6 @@ function recoverRequestId(url: string | undefined): string | null {
 export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
   [
     lockVault,
-    unlockVault,
     openExportKeysWindow,
     initKeys,
     initVault,
@@ -170,8 +164,6 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     signWindowInit,
     vaultCipherReseted,
     keysReseted,
-    loginRetryCountReseted,
-    loginRetryCountIncremented,
     recipientPublicKeyAdded,
     recipientPublicKeyReseted,
     accountInfoReset,
@@ -328,12 +320,12 @@ export async function handleReduxAction(
   }
 
   // Both branches below re-dispatch into the real store: the set carries
-  // `unlockVault`, `initVault` and `keysReseted`, and `resetVault` reaches
-  // `storage.local.clear()`. Gated like the two branches above, and for the same
-  // reason — so this does not rest on the content script's request allowlist
-  // staying right. Scoped to those two branches on purpose: an unlisted type must
-  // keep falling through as `{ handled: false }`, which is how `handleBringWeb3`
-  // sees its content-script messages at all.
+  // `initVault` and `keysReseted`, and `resetVault` reaches `storage.local.clear()`.
+  // Gated like the two branches above, and for the same reason — so this does
+  // not rest on the content script's request allowlist staying right. Scoped to
+  // those two branches on purpose: an unlisted type must keep falling through
+  // as `{ handled: false }`, which is how `handleBringWeb3` sees its
+  // content-script messages at all.
   if (
     action.type === resetVault.type ||
     FORWARDED_ACTION_TYPES.has(action.type)

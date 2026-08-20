@@ -3,6 +3,7 @@ import { Runtime } from 'webextension-polyfill';
 import { MainStore } from '@background/redux/get-main-store';
 import { changePassword } from '@background/redux/sagas/actions';
 
+import * as unlockRequestsModule from './unlock-requests';
 import {
   ALLOWED_PAGES,
   CHANGE_PASSWORD_REQUEST_TYPE,
@@ -10,12 +11,21 @@ import {
   handlePrivilegedRequest,
   isAllowedPage
 } from './privileged-port';
+import {
+  UNLOCK_REQUEST_TYPE,
+  VERIFY_PASSWORD_REQUEST_TYPE
+} from './unlock-requests';
 
 jest.mock('webextension-polyfill', () => ({
   runtime: {
     id: 'ext-id',
     getURL: (path: string) => `chrome-extension://ext-id/${path}`
   }
+}));
+
+jest.mock('./unlock-requests', () => ({
+  ...jest.requireActual('./unlock-requests'),
+  handleUnlockRequest: jest.fn()
 }));
 
 const POPUP_SENDER = {
@@ -26,6 +36,11 @@ const POPUP_SENDER = {
 const CONNECT_SENDER = {
   id: 'ext-id',
   url: 'chrome-extension://ext-id/connect-to-app.html'
+} as Runtime.MessageSender;
+
+const ONBOARDING_SENDER = {
+  id: 'ext-id',
+  url: 'chrome-extension://ext-id/onboarding.html'
 } as Runtime.MessageSender;
 
 const WEB_PAGE_SENDER = {
@@ -245,6 +260,64 @@ describe('handlePrivilegedRequest — CHANGE_PASSWORD_REQUEST', () => {
     ).resolves.toBeNull();
 
     expect(dispatch).not.toHaveBeenCalled();
+  });
+});
+
+describe('handlePrivilegedRequest — unlock routing', () => {
+  const mockedHandleUnlockRequest =
+    unlockRequestsModule.handleUnlockRequest as jest.Mock;
+
+  beforeEach(() => {
+    mockedHandleUnlockRequest.mockReset();
+  });
+
+  it('routes an UNLOCK_REQUEST from an allowed page to handleUnlockRequest', async () => {
+    const { store } = storeWithDispatch();
+    mockedHandleUnlockRequest.mockResolvedValue({ status: 'ok' });
+
+    await expect(
+      handlePrivilegedRequest(
+        {
+          type: UNLOCK_REQUEST_TYPE,
+          payload: { password: 'x', attemptId: 'a' }
+        },
+        CONNECT_SENDER,
+        store
+      )
+    ).resolves.toEqual({ status: 'ok' });
+    expect(mockedHandleUnlockRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuses a VERIFY_PASSWORD_REQUEST from a web-page sender', async () => {
+    const { store } = storeWithDispatch();
+
+    await expect(
+      handlePrivilegedRequest(
+        {
+          type: VERIFY_PASSWORD_REQUEST_TYPE,
+          payload: { password: 'x', attemptId: 'a' }
+        },
+        WEB_PAGE_SENDER,
+        store
+      )
+    ).resolves.toBeNull();
+    expect(mockedHandleUnlockRequest).not.toHaveBeenCalled();
+  });
+
+  it('refuses an UNLOCK_REQUEST from the onboarding page (not on its allowlist)', async () => {
+    const { store } = storeWithDispatch();
+
+    await expect(
+      handlePrivilegedRequest(
+        {
+          type: UNLOCK_REQUEST_TYPE,
+          payload: { password: 'x', attemptId: 'a' }
+        },
+        ONBOARDING_SENDER,
+        store
+      )
+    ).resolves.toBeNull();
+    expect(mockedHandleUnlockRequest).not.toHaveBeenCalled();
   });
 });
 

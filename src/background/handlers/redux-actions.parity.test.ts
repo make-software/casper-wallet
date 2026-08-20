@@ -196,7 +196,16 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // Background-only since WALLET-1424: it carries two plaintext passwords, so
     // it travels over the privileged port instead of runtime.sendMessage, which
     // delivers to every open extension page.
-    sagasActions.changePassword
+    sagasActions.changePassword,
+    // Background-only since WALLET-1424: the background performs the unlock, so
+    // this action is produced by `unlock-requests.ts` and never by a page. It
+    // writes a caller-supplied cipher to storage, which is why forwarding it was
+    // a write sink.
+    sagasActions.unlockVault,
+    // Background-only since WALLET-1424: the background owns the retry counter,
+    // so a page can no longer forge attempts or clear the count.
+    loginRetryCountActions.loginRetryCountIncremented,
+    loginRetryCountActions.loginRetryCountReseted
   ].map(creator => creator.type)
 );
 
