@@ -6,8 +6,8 @@ import { ChangePasswordPageContent } from '@popup/pages/change-password/content'
 import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
+import { CHANGE_PASSWORD_REQUEST_TYPE } from '@background/handlers/privileged-port';
 import { changePassword } from '@background/redux/sagas/actions';
-import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
   FooterButtonsContainer,
@@ -15,7 +15,12 @@ import {
   HeaderSubmenuBarNavLink,
   PopupLayout
 } from '@libs/layout';
+import { requestOverPort } from '@libs/messaging/background-port';
 import { Button, PasswordInputs } from '@libs/ui/components';
+import {
+  clearUiError,
+  reportUiError
+} from '@libs/ui/components/saga-error-banner/ui-error-channel';
 import {
   CreatePasswordFormValues,
   useCreatePasswordForm
@@ -60,9 +65,17 @@ export const ChangePasswordPage = () => {
   const onSubmit = (data: CreatePasswordFormValues) => {
     if (currentPassword == null) return;
 
-    dispatchToMainStore(
-      changePassword({ currentPassword, password: data.password })
-    );
+    requestOverPort({
+      type: CHANGE_PASSWORD_REQUEST_TYPE,
+      payload: { currentPassword, password: data.password }
+    })
+      .then(() => {
+        clearUiError('dispatch-failed', changePassword.type);
+      })
+      .catch((error: unknown) => {
+        console.error('Password change request failed:', error);
+        reportUiError('dispatch-failed', changePassword.type);
+      });
 
     navigate(RouterPath.Home);
   };
