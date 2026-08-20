@@ -384,6 +384,33 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     expect(removeMock.mock.calls.map(([id]) => id).sort()).toEqual([10, 11]);
   });
 
+  it('a withheld response (origin mismatch) still tears down the Ledger permission window', async () => {
+    // Reaches the origin-mismatch withhold branch, not the tabId-mismatch one:
+    // the request's own tabId is used, but `tabs.get` reports a DIFFERENT live
+    // origin than the descriptor recorded. `displays` was already computed by
+    // the optimistic mark before this branch runs, so deleting the teardown
+    // call here strands the Ledger permission window with no way to close it.
+    const store = makeRealStore();
+    openWith(store, 'r1', [10, 11]);
+    store.dispatch(
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
+    );
+    (tabs.get as jest.Mock).mockResolvedValue({
+      url: 'https://evil.example/landing'
+    });
+    order = [];
+
+    await handleSdkResponseToTab(makeMessage('r1'), UI_SENDER, store);
+    await flushMicrotasks();
+
+    expect(sendMessageMock).not.toHaveBeenCalled();
+    expect(removeMock.mock.calls.map(([id]) => id).sort()).toEqual([10, 11]);
+  });
+
   it('removes the windows only AFTER the response has been delivered', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);

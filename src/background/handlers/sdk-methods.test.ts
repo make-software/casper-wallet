@@ -126,6 +126,15 @@ const SENDER = {
   frameId: 3
 } as Runtime.MessageSender;
 
+// Top-frame sender — the common case, and the one `sender.frameId || undefined`
+// would silently erase (0 is falsy). SENDER above pins only frameId 3 in every
+// assertion, so that slip would keep the suite green without this variant.
+const SENDER_TOP_FRAME = {
+  url: 'https://dapp.example/page',
+  tab: { id: 9 },
+  frameId: 0
+} as Runtime.MessageSender;
+
 // `reconcileStalePayloadsSaga` may resume at any `await`, and a payload that no
 // descriptor and no window claims is exactly what it purges — so the payload
 // write and `windowRequestOpened` have to land in one synchronous block. The
@@ -498,6 +507,32 @@ describe('signRequest', () => {
       })
     );
     expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('a top-frame sender (frameId 0) reaches the dispatch as frameId 0', async () => {
+    // jest's argument equality ignores an `undefined` value but not a `0`, so
+    // `frameId: 0` here is what discriminates against `sender.frameId ||
+    // undefined`.
+    isEqualCIMock.mockReturnValue(false);
+    const { store, dispatch } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signRequest({ deployJson, signingPublicKeyHex: 'PK-1' }, META),
+      SENDER_TOP_FRAME,
+      store
+    );
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          frameId: 0,
+          origin: ORIGIN,
+          method: 'sign'
+        }
+      })
+    );
   });
 
   it('dispatches the deploy payload and the descriptor in one synchronous block', async () => {

@@ -801,7 +801,31 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
 
     expect(sendMessageMock).not.toHaveBeenCalled();
+    // `deliverViaOrigin` returns 0 at its `if (!origin) return 0` guard —
+    // no fallback is even attempted.
+    expect(emitToOriginMock).not.toHaveBeenCalled();
     expect(findSagaError(dispatch)).toBeDefined();
+  });
+
+  it('the descriptor origin wins over the sender url origin when they differ', async () => {
+    // Both suites otherwise carry the same origin on the descriptor and the
+    // sender url, so an inverted `??` precedence would keep everything green
+    // elsewhere. Force a tab mismatch so the fallback runs, and give the
+    // sender a DIFFERENT origin than the descriptor.
+    const senderWithOtherOrigin = {
+      id: 'ext-id',
+      url: `chrome-extension://ext-id/signature-request.html?requestId=${REQUEST_ID}&origin=https://impostor.example&tabId=${TAB_ID}#/SignMessage`
+    } as Runtime.MessageSender;
+    const { store } = makeStore(OPEN_REQUEST);
+    emitToOriginMock.mockResolvedValue(1);
+
+    // tabId 3 !== OPEN_REQUEST.tabId (7) forces the tab-mismatch fallback path.
+    await handleSdkResponseToTab(makeMessage(3), senderWithOtherOrigin, store);
+
+    expect(emitToOriginMock).toHaveBeenCalledWith(
+      DAPP_ORIGIN,
+      makeMessage(3).action
+    );
   });
 
   it('a sub-frame request does not consult the tab origin', async () => {
@@ -857,16 +881,18 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     );
   });
 
-  it('the same-origin fallback for a sub-frame request stays unscoped', async () => {
-    // Frame ids are per-tab: a sub-frame id means nothing in another tab.
-    const { store } = makeStore({ ...OPEN_REQUEST, frameId: 4 });
+  it('the same-origin fallback is never attempted for a sub-frame request', async () => {
+    // Frame ids are per-tab: a sub-frame id means nothing in another tab, so
+    // broadcasting could deliver to a document that never asked. Only a top
+    // frame (0) or "no descriptor" may reach the emit.
+    const { store, dispatch } = makeStore({ ...OPEN_REQUEST, frameId: 4 });
     sendMessageMock.mockRejectedValue(deliveryRejection());
 
     await handleSdkResponseToTab(makeMessage(), UI_SENDER_WITH_ORIGIN, store);
 
-    expect(emitToOriginMock).toHaveBeenCalledWith(
-      DAPP_ORIGIN,
-      makeMessage().action
+    expect(emitToOriginMock).not.toHaveBeenCalled();
+    expect(findSagaError(dispatch).payload.message).toContain(
+      NOT_DELIVERED_MSG
     );
   });
 });
