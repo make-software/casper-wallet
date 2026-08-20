@@ -154,6 +154,33 @@ describe('windowManagement requests', () => {
     });
   });
 
+  it('windowRequestOpened records frameId 0 rather than erasing it', () => {
+    // `0` is the top-frame value and falsy, so `action.payload.frameId ||
+    // undefined` would erase exactly this case while leaving `frameId: 4`
+    // above untouched — assert the WHOLE descriptor so an erased `0` cannot
+    // pass as a `toEqual`-ignored `undefined` key.
+    const state = reducer(
+      undefined,
+      windowRequestOpened({
+        requestId: 'r1',
+        tabId: 3,
+        frameId: 0,
+        origin: 'https://dapp.example',
+        method: 'sign'
+      })
+    );
+
+    expect(state.requests.r1).toEqual({
+      status: 'open',
+      tabId: 3,
+      frameId: 0,
+      origin: 'https://dapp.example',
+      method: 'sign',
+      windowIds: [],
+      awaitingDeviceConfirmation: false
+    });
+  });
+
   it('windowRequestOpened without a frame leaves the descriptor unscoped', () => {
     const state = reducer(
       undefined,

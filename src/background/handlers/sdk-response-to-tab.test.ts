@@ -747,6 +747,18 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(findSagaError(dispatch).payload.message).toContain(DELIVERED_MSG);
   });
 
+  it('a tab-mismatch fallback for a sub-frame request is not broadcast', async () => {
+    // `deliverViaOrigin`'s sub-frame guard only fires if the descriptor's
+    // `frameId` actually reaches it — this pins that third argument at the
+    // tab-mismatch call site specifically (not the origin-mismatch or `catch`
+    // call sites, which are covered elsewhere).
+    const { store } = makeStore({ ...OPEN_REQUEST, frameId: 4 });
+
+    await handleSdkResponseToTab(makeMessage(3), UI_SENDER_WITH_ORIGIN, store);
+
+    expect(emitToOriginMock).not.toHaveBeenCalled();
+  });
+
   it('withholds the response when the tab navigated to another origin', async () => {
     const { store, dispatch } = makeStore(OPEN_REQUEST);
     getTabMock.mockResolvedValue({
