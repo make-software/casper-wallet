@@ -13,13 +13,13 @@ import { resetRateApp } from '@background/redux/rate-app/actions';
 import { recipientPublicKeyReseted } from '@background/redux/recent-recipient-public-keys/actions';
 import { vaultSettingsReseted } from '@background/redux/settings/actions';
 import { resetTrustedWasmState } from '@background/redux/trusted-wasm/actions';
+import {
+  deriveScryptKey,
+  encodePasswordOffThread
+} from '@background/workers/scrypt-off-thread';
 
 import { deriveKeyPair, validateSecretPhrase } from '@libs/crypto';
-import {
-  deriveEncryptionKey,
-  encodePassword,
-  generateRandomSaltHex
-} from '@libs/crypto/hashing';
+import { generateRandomSaltHex } from '@libs/crypto/hashing';
 import { convertBytesToHex } from '@libs/crypto/utils';
 
 import { keysReseted, keysUpdated } from '../keys/actions';
@@ -84,11 +84,11 @@ function* initKeysSage(action: ReturnType<typeof initKeys>) {
 
     const passwordSaltHash = generateRandomSaltHex();
     const passwordHash = yield* sagaCall(() =>
-      encodePassword(password, passwordSaltHash)
+      encodePasswordOffThread(password, passwordSaltHash)
     );
     const keyDerivationSaltHash = generateRandomSaltHex();
     const encryptionKeyBytes = yield* sagaCall(() =>
-      deriveEncryptionKey(password, keyDerivationSaltHash)
+      deriveScryptKey(password, keyDerivationSaltHash)
     );
     const encryptionKeyHash = convertBytesToHex(encryptionKeyBytes);
 

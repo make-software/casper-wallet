@@ -34,16 +34,16 @@ import {
 } from '@background/redux/storage-keys';
 import { anchorServiceWorker } from '@background/sw-keep-alive-anchor';
 import { emitSdkEventToActiveTabs } from '@background/utils';
+import {
+  deriveScryptKey,
+  encodePasswordOffThread,
+  verifyPasswordOffThread
+} from '@background/workers/scrypt-off-thread';
 
 import { sdkEvent } from '@content/sdk-event';
 
 import { deriveKeyPair } from '@libs/crypto';
-import {
-  deriveEncryptionKey,
-  encodePassword,
-  generateRandomSaltHex,
-  verifyPasswordAgainstHash
-} from '@libs/crypto/hashing';
+import { generateRandomSaltHex } from '@libs/crypto/hashing';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import { encryptVault } from '@libs/crypto/vault';
 
@@ -262,8 +262,6 @@ function isChangePasswordPayload(
 // page-side check reads `passwordHash` from that same handler, so it is
 // replayable, while the plaintext password demanded here is not derivable from
 // anything an extension page can read.
-// `scryptAsync` yields to the event loop between blocks, so the three
-// derivations do not wedge the worker the way synchronous ones would.
 export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
   // Errors are append-only and SagaErrorBanner is mounted route-independently,
   // so without this a previous attempt's "the wallet locked" banner outlives
@@ -307,7 +305,7 @@ export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
     }
 
     const isCurrentPasswordCorrect = yield* sagaCall(() =>
-      verifyPasswordAgainstHash(
+      verifyPasswordOffThread(
         storedPasswordHash,
         storedPasswordSaltHash,
         currentPassword
@@ -326,13 +324,11 @@ export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
 
     const passwordSaltHash = generateRandomSaltHex();
     const passwordHash = yield* sagaCall(() =>
-      encodePassword(password, passwordSaltHash)
+      encodePasswordOffThread(password, passwordSaltHash)
     );
     const keyDerivationSaltHash = generateRandomSaltHex();
     const newEncryptionKeyHash = convertBytesToHex(
-      yield* sagaCall(() =>
-        deriveEncryptionKey(password, keyDerivationSaltHash)
-      )
+      yield* sagaCall(() => deriveScryptKey(password, keyDerivationSaltHash))
     );
 
     // Encrypt BEFORE putting anything: if this throws, nothing has been

@@ -14,12 +14,12 @@ import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lo
 import { unlockVault } from '@background/redux/sagas/actions';
 import { selectVaultIsLocked } from '@background/redux/session/selectors';
 import { anchorServiceWorker } from '@background/sw-keep-alive-anchor';
-
 import {
-  deriveEncryptionKey,
-  generateRandomSaltHex,
-  verifyPasswordAgainstHash
-} from '@libs/crypto/hashing';
+  deriveScryptKey,
+  verifyPasswordOffThread
+} from '@background/workers/scrypt-off-thread';
+
+import { generateRandomSaltHex } from '@libs/crypto/hashing';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import { decryptVault, encryptVault } from '@libs/crypto/vault';
 
@@ -127,7 +127,7 @@ async function runUnlock(
       throw Error('No password is set');
     }
 
-    const isCorrect = await verifyPasswordAgainstHash(
+    const isCorrect = await verifyPasswordOffThread(
       passwordHash,
       passwordSaltHash,
       password
@@ -160,13 +160,13 @@ async function runUnlock(
       }
 
       const encryptionKeyHash = convertBytesToHex(
-        await deriveEncryptionKey(password, keys.keyDerivationSaltHash)
+        await deriveScryptKey(password, keys.keyDerivationSaltHash)
       );
       const vault = await decryptVault(encryptionKeyHash, vaultCipher);
 
       const newKeyDerivationSaltHash = generateRandomSaltHex();
       const newEncryptionKeyHash = convertBytesToHex(
-        await deriveEncryptionKey(password, newKeyDerivationSaltHash)
+        await deriveScryptKey(password, newKeyDerivationSaltHash)
       );
       const newVaultCipher = await encryptVault(newEncryptionKeyHash, vault);
 

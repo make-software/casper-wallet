@@ -1,3 +1,4 @@
+import * as scryptModule from '@background/workers/scrypt-off-thread';
 import { MainStore } from '@background/redux/get-main-store';
 import {
   loginRetryCountIncremented,
@@ -5,7 +6,6 @@ import {
 } from '@background/redux/login-retry-count/actions';
 import { unlockVault } from '@background/redux/sagas/actions';
 
-import * as hashingModule from '@libs/crypto/hashing';
 import * as vaultCryptoModule from '@libs/crypto/vault';
 
 import {
@@ -71,7 +71,7 @@ const verify = (
 });
 
 it('answers lockedOut while a lockout is active, without verifying', async () => {
-  const spy = jest.spyOn(hashingModule, 'verifyPasswordAgainstHash');
+  const spy = jest.spyOn(scryptModule, 'verifyPasswordOffThread');
   const { store } = storeAt(5, { loginRetryLockoutTime: 1 });
 
   await expect(handleUnlockRequest(verify('x'), store)).resolves.toEqual({
@@ -81,9 +81,7 @@ it('answers lockedOut while a lockout is active, without verifying', async () =>
 });
 
 it('increments and reports the exact attempts left on a wrong password', async () => {
-  jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
-    .mockResolvedValue(false);
+  jest.spyOn(scryptModule, 'verifyPasswordOffThread').mockResolvedValue(false);
   const { store, dispatch } = storeAt(0);
 
   await expect(handleUnlockRequest(verify('wrong'), store)).resolves.toEqual({
@@ -94,9 +92,7 @@ it('increments and reports the exact attempts left on a wrong password', async (
 });
 
 it('answers lockedOut when the wrong password reaches the limit', async () => {
-  jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
-    .mockResolvedValue(false);
+  jest.spyOn(scryptModule, 'verifyPasswordOffThread').mockResolvedValue(false);
   const { store } = storeAt(4);
 
   await expect(handleUnlockRequest(verify('wrong'), store)).resolves.toEqual({
@@ -105,9 +101,7 @@ it('answers lockedOut when the wrong password reaches the limit', async () => {
 });
 
 it('resets the counter on a correct password', async () => {
-  jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
-    .mockResolvedValue(true);
+  jest.spyOn(scryptModule, 'verifyPasswordOffThread').mockResolvedValue(true);
   const { store, dispatch } = storeAt(3);
 
   await expect(handleUnlockRequest(verify('right'), store)).resolves.toEqual({
@@ -118,7 +112,7 @@ it('resets the counter on a correct password', async () => {
 
 it('runs one derivation for a repeated attemptId still in flight', async () => {
   const spy = jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
+    .spyOn(scryptModule, 'verifyPasswordOffThread')
     .mockResolvedValue(false);
   const { store, dispatch } = storeAt(0);
 
@@ -138,7 +132,7 @@ it('runs one derivation for a repeated attemptId still in flight', async () => {
 
 it('re-verifies when the same attemptId arrives with a different password', async () => {
   const spy = jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
+    .spyOn(scryptModule, 'verifyPasswordOffThread')
     .mockResolvedValueOnce(false)
     .mockResolvedValueOnce(true);
   const { store } = storeAt(0);
@@ -152,7 +146,7 @@ it('re-verifies when the same attemptId arrives with a different password', asyn
 
 it('replays the settled verdict for a same-id, same-password retry (a response that was dropped and retried)', async () => {
   const spy = jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
+    .spyOn(scryptModule, 'verifyPasswordOffThread')
     .mockResolvedValue(false);
   const { store, dispatch } = storeAt(0);
   const request = verify('wrong', 'retry-after-settle');
@@ -171,7 +165,7 @@ it('replays the settled verdict for a same-id, same-password retry (a response t
 
 it('treats an expired memo entry as a miss and re-verifies', async () => {
   const spy = jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
+    .spyOn(scryptModule, 'verifyPasswordOffThread')
     .mockResolvedValue(false);
   jest
     .spyOn(Date, 'now')
@@ -192,7 +186,7 @@ it('treats an expired memo entry as a miss and re-verifies', async () => {
 });
 
 it('answers ok without touching the counter when the vault is already unlocked', async () => {
-  const spy = jest.spyOn(hashingModule, 'verifyPasswordAgainstHash');
+  const spy = jest.spyOn(scryptModule, 'verifyPasswordOffThread');
   const { store, dispatch } = storeAt(2, { session: { isLocked: false } });
 
   await expect(
@@ -209,7 +203,7 @@ it('serialises concurrent derivations', async () => {
   let concurrent = 0;
   let peak = 0;
   jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
+    .spyOn(scryptModule, 'verifyPasswordOffThread')
     .mockImplementation(async () => {
       concurrent += 1;
       peak = Math.max(peak, concurrent);
@@ -277,7 +271,7 @@ it('returns an error status for a payload missing the password', async () => {
 });
 
 it('rejects when no password hash has been set yet', async () => {
-  const spy = jest.spyOn(hashingModule, 'verifyPasswordAgainstHash');
+  const spy = jest.spyOn(scryptModule, 'verifyPasswordOffThread');
   const { store } = storeAt(0, { keys: { ...KEYS, passwordHash: null } });
 
   await expect(handleUnlockRequest(verify('x'), store)).rejects.toThrow(
@@ -287,9 +281,7 @@ it('rejects when no password hash has been set yet', async () => {
 });
 
 it('rejects an UNLOCK_REQUEST when there is no vault cipher to unlock', async () => {
-  jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
-    .mockResolvedValue(true);
+  jest.spyOn(scryptModule, 'verifyPasswordOffThread').mockResolvedValue(true);
   const { store } = storeAt(0, { vaultCipher: null });
 
   await expect(
@@ -304,11 +296,9 @@ it('rejects an UNLOCK_REQUEST when there is no vault cipher to unlock', async ()
 });
 
 it('derives, decrypts and re-encrypts the vault on a correct UNLOCK_REQUEST', async () => {
-  jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
-    .mockResolvedValue(true);
+  jest.spyOn(scryptModule, 'verifyPasswordOffThread').mockResolvedValue(true);
   const deriveSpy = jest
-    .spyOn(hashingModule, 'deriveEncryptionKey')
+    .spyOn(scryptModule, 'deriveScryptKey')
     .mockResolvedValueOnce(new Uint8Array([1, 2, 3, 4]))
     .mockResolvedValueOnce(new Uint8Array([5, 6, 7, 8]));
   const decryptedVault = {
@@ -359,7 +349,7 @@ it('derives, decrypts and re-encrypts the vault on a correct UNLOCK_REQUEST', as
 it('re-checks the lockout after a queued derivation, on the verify path, and does not reset', async () => {
   let lockoutArmedMidFlight = false;
   jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
+    .spyOn(scryptModule, 'verifyPasswordOffThread')
     .mockImplementation(async () => {
       // Simulates another window's failed attempts arming the lockout while
       // this derivation sat queued behind it.
@@ -387,11 +377,9 @@ it('re-checks the lockout after a queued derivation, on the verify path, and doe
 });
 
 it('does not replay a VERIFY verdict for an UNLOCK sharing the same id and password', async () => {
+  jest.spyOn(scryptModule, 'verifyPasswordOffThread').mockResolvedValue(true);
   jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
-    .mockResolvedValue(true);
-  jest
-    .spyOn(hashingModule, 'deriveEncryptionKey')
+    .spyOn(scryptModule, 'deriveScryptKey')
     .mockResolvedValue(new Uint8Array([1, 2, 3, 4]));
   jest.spyOn(vaultCryptoModule, 'decryptVault').mockResolvedValue({
     secretPhrase: null,
@@ -429,7 +417,7 @@ it('does not replay a VERIFY verdict for an UNLOCK sharing the same id and passw
 it('rejects a queued request without deriving once the lockout arms while the first request is still deriving', async () => {
   let lockoutArmed = false;
   const spy = jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
+    .spyOn(scryptModule, 'verifyPasswordOffThread')
     .mockImplementation(async () => {
       // Simulates another window's failed attempts arming the lockout while
       // this first request's derivation is still in flight.
@@ -460,9 +448,7 @@ it('rejects a queued request without deriving once the lockout arms while the fi
 });
 
 it('evicts the oldest in-flight entry once the memo is full', async () => {
-  jest
-    .spyOn(hashingModule, 'verifyPasswordAgainstHash')
-    .mockResolvedValue(false);
+  jest.spyOn(scryptModule, 'verifyPasswordOffThread').mockResolvedValue(false);
   const { store } = storeAt(0);
 
   const results = Array.from({ length: 9 }, (_, i) =>

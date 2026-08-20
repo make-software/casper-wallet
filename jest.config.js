@@ -21,6 +21,10 @@ module.exports = {
   // own node_modules; without this jest crawls and compiles all of them.
   modulePathIgnorePatterns: ['<rootDir>/e2e-tests', '<rootDir>/.claude'],
   moduleNameMapper: {
+    // ts-jest compiles to CommonJS, where the `import.meta.url` that webpack
+    // needs to emit the worker chunk is a syntax error.
+    '^(.*)/spawn-scrypt-worker$':
+      '<rootDir>/src/background/workers/spawn-scrypt-worker.stub.ts',
     '^@src/(.*)$': '<rootDir>/src/$1',
     '^@popup/(.*)$': '<rootDir>/src/apps/popup/$1',
     '^@import-account-with-file/(.*)$':
