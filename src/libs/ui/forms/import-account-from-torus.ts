@@ -2,10 +2,8 @@ import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { UseFormProps, useForm } from 'react-hook-form';
 
-import {
-  useAccountNameRule,
-  useTorusSecretKeyRule
-} from './form-validation-rules';
+import { useAccountNameRule } from './form-validation-rules';
+import { useTorusSecretKeyRule } from './torus-secret-key-rule';
 
 export type ImportAccountFromTorusFromValues = {
   name: string;
