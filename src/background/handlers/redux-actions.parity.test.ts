@@ -184,15 +184,19 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // the stored vault cipher with arbitrary bytes via `runtime.sendMessage`.
     // `yield put` only, from vault-sagas (unlock / recover / change-password)
     // and onboarding-sagas — never dispatched from the UI anymore now that
-    // change-password re-encrypts inside `changePasswordSaga` (which IS
-    // forwarded) instead of the page.
+    // change-password re-encrypts inside `changePasswordSaga` (dispatched via
+    // the privileged port, not the forwarding set) instead of the page.
     keysActions.keysUpdated,
     sessionActions.encryptionKeyHashCreated,
     vaultCipherActions.vaultCipherCreated,
     // Background-only since WALLET-1424: `armLockoutSaga` arms the lockout from
     // the background on every increment, so no page dispatches this. Forwarding
     // it would let any extension page set or clear a security control's clock.
-    loginRetryLockoutTimeActions.loginRetryLockoutTimeSet
+    loginRetryLockoutTimeActions.loginRetryLockoutTimeSet,
+    // Background-only since WALLET-1424: it carries two plaintext passwords, so
+    // it travels over the privileged port instead of runtime.sendMessage, which
+    // delivers to every open extension page.
+    sagasActions.changePassword
   ].map(creator => creator.type)
 );
 

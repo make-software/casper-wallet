@@ -253,14 +253,15 @@ function isChangePasswordPayload(
 
 // Both halves of the re-key happen here, against the background's own state:
 // the current password is verified, and the new material is derived from a
-// plaintext password exactly as `initKeysSage` does it. This action rides the
-// sender-ungated forwarded path, so a caller that could hand in
-// `newEncryptionKeyHash` would be choosing the key the vault is re-encrypted
-// under — and `fetchPrivateState` hands `vaultCipher` to any extension page,
-// which makes a chosen key an offline decrypt. Verifying page-side only is not
-// enough either: the page-side check reads `passwordHash` from that same
-// handler, so it is replayable, while the plaintext password demanded here is
-// not derivable from anything an extension page can read.
+// plaintext password exactly as `initKeysSage` does it. Since WALLET-1424 this
+// action arrives over the privileged port (`privileged-port.ts`), gated on
+// both sender and page — but a caller that could hand in `newEncryptionKeyHash`
+// would still be choosing the key the vault is re-encrypted under, and
+// `fetchPrivateState` hands `vaultCipher` to any extension page, which makes a
+// chosen key an offline decrypt. Verifying page-side only is not enough
+// either: the page-side check reads `passwordHash` from that same handler, so
+// it is replayable, while the plaintext password demanded here is not
+// derivable from anything an extension page can read.
 // `scryptAsync` yields to the event loop between blocks, so the three
 // derivations do not wedge the worker the way synchronous ones would.
 export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
@@ -274,11 +275,11 @@ export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
   const releaseAnchor = anchorServiceWorker('encrypt');
 
   try {
-    // Validated inside the `try`, and destructured only after: this action
-    // rides the sender-ungated forwarded path, so `{ type }` with no payload
-    // reaches `store.dispatch` unchanged, and a destructure above would throw
-    // past every catch here into `rootSaga`'s boundary-less `all([...])`,
-    // cancelling every watcher in the tree — auto-lock included.
+    // Validated inside the `try`, and destructured only after: the privileged
+    // port already validates payload shape before dispatching, but this saga
+    // has no static guarantee of that — a destructure above would throw past
+    // every catch here into `rootSaga`'s boundary-less `all([...])`, cancelling
+    // every watcher in the tree — auto-lock included.
     if (!isChangePasswordPayload(action.payload)) {
       throw Error('Malformed changePassword payload');
     }
