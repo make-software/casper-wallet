@@ -182,7 +182,7 @@
     "lint-staged": "^17.3.0",
     "markdownlint-cli": "0.49.1",
     "playwright": "^1.61.0",
-    "prettier": "^3.9.3",
+    "prettier": "^3.9.6",
     "redux-saga-test-plan": "^4.0.6",
     "selenium-webdriver": "^4.45.0",
     "style-loader": "^4.0.0",
