@@ -81,7 +81,6 @@ import {
   loginRetryCountIncremented,
   loginRetryCountReseted
 } from '../redux/login-retry-count/actions';
-import { loginRetryLockoutTimeSet } from '../redux/login-retry-lockout-time/actions';
 import {
   recipientPublicKeyAdded,
   recipientPublicKeyReseted
@@ -175,7 +174,6 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     keysReseted,
     loginRetryCountReseted,
     loginRetryCountIncremented,
-    loginRetryLockoutTimeSet,
     recipientPublicKeyAdded,
     recipientPublicKeyReseted,
     accountInfoReset,

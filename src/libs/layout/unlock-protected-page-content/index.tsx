@@ -5,8 +5,6 @@ import { useSelector } from 'react-redux';
 
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 
-import { useLockWalletWhenNoMoreRetries } from '@hooks/use-lock-wallet-when-no-more-retries';
-
 import {
   ContentContainer,
   IllustrationContainer,
@@ -48,8 +46,6 @@ export const UnlockProtectedPageContent = ({
   const { t } = useTranslation();
 
   const loginRetryCount = useSelector(selectLoginRetryCount);
-
-  useLockWalletWhenNoMoreRetries();
 
   const retryLeft = 5 - loginRetryCount;
 

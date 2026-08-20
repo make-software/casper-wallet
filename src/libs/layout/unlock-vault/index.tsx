@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -14,13 +14,13 @@ import { getErrorMessageForIncorrectPassword } from '@src/utils';
 import { selectKeysDoesExist } from '@background/redux/keys/selectors';
 import { loginRetryCountIncremented } from '@background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
+import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 import { unlockVault } from '@background/redux/sagas/actions';
 import { UnlockVault } from '@background/redux/sagas/types';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { VaultState } from '@background/redux/vault/types';
 import { WorkerResult, isWorkerError } from '@background/workers/types';
 
-import { useLockWalletWhenNoMoreRetries } from '@hooks/use-lock-wallet-when-no-more-retries';
 import { usePrivateState } from '@hooks/use-private-state';
 
 import unlockAnimation from '@libs/animations/unlock_animation.json';
@@ -88,6 +88,21 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
       password: ''
     }
   });
+
+  const hasLoginRetryLockoutTime = useSelector(selectHasLoginRetryLockoutTime);
+  const wasLockedOut = useRef(hasLoginRetryLockoutTime);
+
+  // Keyed on the transition, not on `count >= limit && !lockout`: the background
+  // arms the lockout in the same dispatch that increments, so that intermediate
+  // state may never reach a replica. The lockout screen unmounts this field and
+  // react-hook-form keeps values across unmount, so without this the wrong
+  // password is still there when the lockout expires.
+  useEffect(() => {
+    if (hasLoginRetryLockoutTime && !wasLockedOut.current) {
+      resetField('password');
+    }
+    wasLockedOut.current = hasLoginRetryLockoutTime;
+  }, [hasLoginRetryLockoutTime, resetField]);
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
     if (isLoading || privateState == null) return;
@@ -232,8 +247,6 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
       handleWorkerFailure();
     };
   }
-
-  useLockWalletWhenNoMoreRetries(resetField);
 
   if (privateStateError) {
     return (

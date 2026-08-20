@@ -188,7 +188,11 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // forwarded) instead of the page.
     keysActions.keysUpdated,
     sessionActions.encryptionKeyHashCreated,
-    vaultCipherActions.vaultCipherCreated
+    vaultCipherActions.vaultCipherCreated,
+    // Background-only since WALLET-1424: `armLockoutSaga` arms the lockout from
+    // the background on every increment, so no page dispatches this. Forwarding
+    // it would let any extension page set or clear a security control's clock.
+    loginRetryLockoutTimeActions.loginRetryLockoutTimeSet
   ].map(creator => creator.type)
 );
 
