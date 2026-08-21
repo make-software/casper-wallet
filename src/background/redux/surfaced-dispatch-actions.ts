@@ -1,6 +1,7 @@
 import { dismissSagaError } from './app-events/actions';
 import { ledgerNewWindowIdChanged } from './ledger/actions';
 import {
+  changePassword,
   initKeys,
   initVault,
   lockVault,
@@ -27,6 +28,12 @@ export const SURFACED_DISPATCH_ACTIONS: ReadonlySet<string> = new Set([
   // The user pressed Lock and the wallet stayed unlocked — a security outcome,
   // not an inconvenience.
   lockVault.type,
+  // Reported by the change-password page directly rather than through
+  // `dispatchToMainStore` — it travels over the privileged port. Listed anyway so
+  // this set describes every `dispatch-failed` banner rather than only the ones
+  // the helper raises: silently, the user is on Home believing the password
+  // changed while the old one still unlocks the vault.
+  changePassword.type,
   // The Ledger permission window never attaches to the request, which then hangs
   // until the dapp's own timeout (see attach-window-to-request.ts).
   windowRequestWindowAttached.type,
