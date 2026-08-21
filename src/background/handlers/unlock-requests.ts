@@ -4,6 +4,7 @@ import { randomBytes, utf8ToBytes } from '@noble/hashes/utils';
 
 import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';
 
+import { broadcastPopupState } from '@background/redux/broadcast-popup-state';
 import { MainStore } from '@background/redux/get-main-store';
 import {
   selectPasswordHash,
@@ -239,6 +240,11 @@ export async function handleUnlockRequest(
 
   // Nothing to unlock, and no password was verified — do NOT touch the counter.
   if (request.type === UNLOCK_REQUEST_TYPE && !selectVaultIsLocked(state)) {
+    // The page renders nothing locally on `ok`; the broadcast is what unmounts
+    // it, and delivery failures are swallowed. Without this a dropped broadcast
+    // is unrecoverable — the retry lands here, which dispatches nothing, so no
+    // further broadcast would ever be produced.
+    broadcastPopupState(state);
     return { status: 'ok' };
   }
 

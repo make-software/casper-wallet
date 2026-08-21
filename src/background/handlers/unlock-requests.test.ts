@@ -1,4 +1,5 @@
 import * as scryptModule from '@background/workers/scrypt-off-thread';
+import { broadcastPopupState } from '@background/redux/broadcast-popup-state';
 import { MainStore } from '@background/redux/get-main-store';
 import {
   loginRetryCountIncremented,
@@ -22,6 +23,9 @@ jest.mock('webextension-polyfill', () => ({
 }));
 jest.mock('@background/sw-keep-alive-anchor', () => ({
   anchorServiceWorker: () => () => undefined
+}));
+jest.mock('@background/redux/broadcast-popup-state', () => ({
+  broadcastPopupState: jest.fn()
 }));
 
 const KEYS = {
@@ -200,6 +204,22 @@ it('answers ok without touching the counter when the vault is already unlocked',
   ).resolves.toEqual({ status: 'ok' });
   expect(spy).not.toHaveBeenCalled();
   expect(dispatch).not.toHaveBeenCalled();
+});
+
+// The page does nothing locally on `ok` — the broadcast is what unmounts it,
+// and `broadcastToReplicas` swallows delivery failures. Without a re-broadcast
+// here a lost one is unrecoverable: the retry lands on this path, which answers
+// `ok` without dispatching, so no new broadcast is ever produced and only
+// reopening the popup helps.
+it('re-broadcasts state when the vault is already unlocked, so a lost broadcast heals', async () => {
+  const { store } = storeAt(2, { session: { isLocked: false } });
+
+  await handleUnlockRequest(
+    { type: UNLOCK_REQUEST_TYPE, payload: { password: 'x', attemptId: 'a' } },
+    store
+  );
+
+  expect(broadcastPopupState).toHaveBeenCalledWith(store.getState());
 });
 
 it('serialises concurrent derivations', async () => {

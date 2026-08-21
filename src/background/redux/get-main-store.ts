@@ -1,10 +1,7 @@
-import { runtime, storage } from 'webextension-polyfill';
+import { storage } from 'webextension-polyfill';
 
-import {
-  BackgroundEvent,
-  backgroundEvent
-} from '@background/background-events';
 import { AppEventsState } from '@background/redux/app-events/types';
+import { broadcastPopupState } from '@background/redux/broadcast-popup-state';
 import { ContactsState } from '@background/redux/contacts/types';
 import { CsprNameExpirationsState } from '@background/redux/cspr-name-expirations/types';
 import { createStore } from '@background/redux/index';
@@ -12,7 +9,6 @@ import { withDerivedFlag } from '@background/redux/keys/reducer';
 import { KeysState } from '@background/redux/keys/types';
 import { LoginRetryCountState } from '@background/redux/login-retry-count/reducer';
 import { LoginRetryLockoutTimeState } from '@background/redux/login-retry-lockout-time/types';
-import { selectPopupState } from '@background/redux/popup-state';
 import { RateAppState } from '@background/redux/rate-app/types';
 import { RecentRecipientPublicKeysState } from '@background/redux/recent-recipient-public-keys/types';
 import { startBackground } from '@background/redux/sagas/actions';
@@ -53,24 +49,6 @@ type StorageState = {
 };
 // this needs to be private
 let storeSingleton: ReturnType<typeof createStore>;
-
-// Only "no receiver" is expected: `runtime.sendMessage` delivers to every
-// extension context except the sender, so with no popup open Chrome rejects
-// with "Receiving end does not exist." Everything else — a structured-clone
-// failure, a throwing listener, a message-size limit — means an OPEN replica
-// just missed an update and is now silently stale, so it must be visible.
-// Same idiom as keep-alive.ts.
-function broadcastToReplicas(message: BackgroundEvent, source: string): void {
-  runtime.sendMessage(message).catch((error: unknown) => {
-    const text = error instanceof Error ? error.message : String(error);
-    if (text.includes('Receiving end does not exist')) {
-      return;
-    }
-    // The broadcast payload is sanitized but still carries account and session
-    // data, so it is never logged — only a static source label and the error object.
-    console.error(`${source} broadcast failed:`, error);
-  });
-}
 
 // If this flag is true, we initialize the initial state for the tests
 const isMockStateEnable = Boolean(process.env.MOCK_STATE);
@@ -146,11 +124,7 @@ export async function getExistingMainStoreSingletonOrInit() {
         const state = storeSingleton.getState();
 
         // propagate state to replicas
-        const popupState = selectPopupState(state);
-        broadcastToReplicas(
-          backgroundEvent.popupStateUpdated(popupState),
-          'popupStateUpdated'
-        );
+        broadcastPopupState(state);
 
         // persist selected state
         const {
