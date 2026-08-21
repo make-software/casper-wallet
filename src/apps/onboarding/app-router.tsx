@@ -31,6 +31,8 @@ import { selectEncryptionKeyDoesExist } from '@background/redux/session/selector
 
 import { ErrorPath, TabErrorPage } from '@libs/layout';
 
+import { resolveOnboardingRoute } from './resolve-route';
+
 export function AppRouter() {
   const { onboardingFormState, setFormState } = useOnboardingFormState();
 
@@ -40,17 +42,23 @@ export function AppRouter() {
   const keysDoesExist = useSelector(selectKeysDoesExist);
   const encryptionKeyDoesExist = useSelector(selectEncryptionKeyDoesExist);
 
-  if (keysDoesExist && encryptionKeyDoesExist) {
-    if (isLoggedIn) {
-      return (
-        <AuthorizedUserRoutes
-          onboardingFormState={onboardingFormState}
-          setFormState={setFormState}
-        />
-      );
-    } else {
-      return <UnlockUserRoutes saveIsLoggedIn={saveIsLoggedIn} />;
-    }
+  const route = resolveOnboardingRoute({
+    keysDoesExist,
+    encryptionKeyDoesExist,
+    isLoggedIn
+  });
+
+  if (route === 'authorized') {
+    return (
+      <AuthorizedUserRoutes
+        onboardingFormState={onboardingFormState}
+        setFormState={setFormState}
+      />
+    );
+  }
+
+  if (route === 'unlock') {
+    return <UnlockUserRoutes saveIsLoggedIn={saveIsLoggedIn} />;
   }
 
   return <NoVaultRoutes saveIsLoggedIn={saveIsLoggedIn} />;
