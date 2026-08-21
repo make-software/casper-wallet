@@ -6,8 +6,7 @@ import { ChangePasswordPageContent } from '@popup/pages/change-password/content'
 import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { changePassword } from '@background/redux/sagas/actions';
-import { dispatchToMainStore } from '@background/redux/utils';
+import { CHANGE_PASSWORD_REQUEST_TYPE } from '@background/handlers/privileged-port';
 
 import {
   FooterButtonsContainer,
@@ -15,12 +14,15 @@ import {
   HeaderSubmenuBarNavLink,
   PopupLayout
 } from '@libs/layout';
+import { requestOverPort } from '@libs/messaging/background-port';
 import { Button, PasswordInputs } from '@libs/ui/components';
 import {
   CreatePasswordFormValues,
   useCreatePasswordForm
 } from '@libs/ui/forms/create-password';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+
+import { submitPasswordChange } from './submit-password-change';
 
 export const ChangePasswordPage = () => {
   const [isPasswordConfirmed, setIsPasswordConfirmed] =
@@ -36,7 +38,7 @@ export const ChangePasswordPage = () => {
   const {
     register,
     handleSubmit,
-    formState: { isDirty, errors },
+    formState: { isDirty, isSubmitting, errors },
     control
   } = useCreatePasswordForm();
 
@@ -53,18 +55,20 @@ export const ChangePasswordPage = () => {
     setCurrentPassword(password);
   }, []);
 
-  const isSubmitButtonDisabled = calculateSubmitButtonDisabled({
-    isDirty
-  });
+  const isSubmitButtonDisabled =
+    calculateSubmitButtonDisabled({ isDirty }) || isSubmitting;
 
-  const onSubmit = (data: CreatePasswordFormValues) => {
+  const onSubmit = async (data: CreatePasswordFormValues) => {
     if (currentPassword == null) return;
 
-    dispatchToMainStore(
-      changePassword({ currentPassword, password: data.password })
+    await submitPasswordChange(
+      () =>
+        requestOverPort({
+          type: CHANGE_PASSWORD_REQUEST_TYPE,
+          payload: { currentPassword, password: data.password }
+        }),
+      () => navigate(RouterPath.Home)
     );
-
-    navigate(RouterPath.Home);
   };
 
   if (!isPasswordConfirmed) {

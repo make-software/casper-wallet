@@ -184,15 +184,19 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // the stored vault cipher with arbitrary bytes via `runtime.sendMessage`.
     // `yield put` only, from vault-sagas (unlock / recover / change-password)
     // and onboarding-sagas — never dispatched from the UI anymore now that
-    // change-password re-encrypts inside `changePasswordSaga` (which IS
-    // forwarded) instead of the page.
+    // change-password re-encrypts inside `changePasswordSaga` (dispatched via
+    // the privileged port, not the forwarding set) instead of the page.
     keysActions.keysUpdated,
     sessionActions.encryptionKeyHashCreated,
     vaultCipherActions.vaultCipherCreated,
     // Background-only since WALLET-1424: `armLockoutSaga` arms the lockout from
     // the background on every increment, so no page dispatches this. Forwarding
     // it would let any extension page set or clear a security control's clock.
-    loginRetryLockoutTimeActions.loginRetryLockoutTimeSet
+    loginRetryLockoutTimeActions.loginRetryLockoutTimeSet,
+    // Background-only since WALLET-1424: it carries two plaintext passwords, so
+    // it travels over the privileged port instead of runtime.sendMessage, which
+    // delivers to every open extension page.
+    sagasActions.changePassword
   ].map(creator => creator.type)
 );
 
@@ -237,6 +241,17 @@ describe('FORWARDED_ACTION_TYPES parity', () => {
   it('exact set equality: universe \\ EXCLUSIONS === FORWARDED_ACTION_TYPES', () => {
     const forwardable = new Set(difference(UNIVERSE_TYPES, EXCLUSIONS));
     expect(sorted(FORWARDED_ACTION_TYPES)).toEqual(sorted(forwardable));
+  });
+
+  it('changePassword is NOT forwarded — it travels over the privileged port', () => {
+    // The set-algebra assertions above all stay true when a type moves between
+    // the two sets, so a paired edit — re-adding it here while deleting its
+    // EXCLUSIONS entry — passes every one of them. Membership is what lets the
+    // background accept two plaintext passwords over the fan-out channel from
+    // any trusted-UI page, so it gets its own pin.
+    expect(FORWARDED_ACTION_TYPES.has(sagasActions.changePassword.type)).toBe(
+      false
+    );
   });
 
   it('windowRequestWindowAttached is NOT blindly forwarded — it has a dedicated branch', () => {

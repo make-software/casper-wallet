@@ -25,6 +25,7 @@ import {
   selectPrivateState,
   warnUntrustedSameExtensionSender
 } from '@background/handlers/private-state';
+import { attachPrivilegedPort } from '@background/handlers/privileged-port';
 import { handleReduxAction } from '@background/handlers/redux-actions';
 import { handleSdkMethod } from '@background/handlers/sdk-methods';
 import { handleSdkResponseToTab } from '@background/handlers/sdk-response-to-tab';
@@ -49,6 +50,8 @@ import {
 
 import { sdkEvent } from '@content/sdk-event';
 import { isSDKMethod } from '@content/sdk-method';
+
+import { BACKGROUND_PORT_NAME } from '@libs/messaging/background-port';
 
 import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectKeysDoesExist } from './redux/keys/selectors';
@@ -307,6 +310,14 @@ runtime.onMessage.addListener(
     });
   }
 );
+
+runtime.onConnect.addListener(port => {
+  if (port.name !== BACKGROUND_PORT_NAME) {
+    return;
+  }
+
+  attachPrivilegedPort(port, getExistingMainStoreSingletonOrInit);
+});
 
 initKeepAlive().catch(error => {
   console.error('Initialization of keep alive error:', error);
