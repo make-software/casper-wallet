@@ -39,6 +39,7 @@ import { LottiePlayer } from '@libs/ui/components/lottie-player';
 import { UnlockWalletFormValues } from '@libs/ui/forms/unlock-wallet';
 
 import { UnlockVaultPageContent } from './content';
+import { shouldClearPasswordField } from './should-clear-password-field';
 
 interface UnlockMessageEvent extends MessageEvent {
   data: WorkerResult<UnlockVault>;
@@ -92,13 +93,10 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   const hasLoginRetryLockoutTime = useSelector(selectHasLoginRetryLockoutTime);
   const wasLockedOut = useRef(hasLoginRetryLockoutTime);
 
-  // Keyed on the transition, not on `count >= limit && !lockout`: the background
-  // arms the lockout in the same dispatch that increments, so that intermediate
-  // state may never reach a replica. The lockout screen unmounts this field and
-  // react-hook-form keeps values across unmount, so without this the wrong
-  // password is still there when the lockout expires.
   useEffect(() => {
-    if (hasLoginRetryLockoutTime && !wasLockedOut.current) {
+    if (
+      shouldClearPasswordField(wasLockedOut.current, hasLoginRetryLockoutTime)
+    ) {
       resetField('password');
     }
     wasLockedOut.current = hasLoginRetryLockoutTime;

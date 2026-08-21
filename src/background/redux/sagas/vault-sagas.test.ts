@@ -37,7 +37,10 @@ import { reducer as keysReducer } from '../keys/reducer';
 import { selectPasswordHash, selectPasswordSaltHash } from '../keys/selectors';
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
 import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
-import { loginRetryCountReseted } from '../login-retry-count/actions';
+import {
+  loginRetryCountIncremented,
+  loginRetryCountReseted
+} from '../login-retry-count/actions';
 import { selectLoginRetryCount } from '../login-retry-count/selectors';
 import { loginRetryLockoutTimeSet } from '../login-retry-lockout-time/reducer';
 import {
@@ -249,6 +252,40 @@ describe('setDelayForLockoutVaultSaga', () => {
     expect(mockStorageRemove).toHaveBeenCalledWith(
       LOGIN_RETRY_LOCKOUT_DEADLINE_KEY
     );
+  });
+});
+
+describe('armLockoutSaga — root-saga wiring', () => {
+  // The four tests below invoke the saga directly, so replacing the trigger
+  // array in `vaultSagas` leaves them all green with the saga wired to nothing.
+  // These dispatch through the real root saga instead.
+  // `selectLoginRetryLockoutTime` is here because arming wakes
+  // `setDelayForLockoutVaultSaga`, which reads it; without it that saga runs
+  // against an undefined state and the failure looks like a wiring problem.
+  const armProviders = [
+    [matchers.select.selector(selectLoginRetryCount), 5],
+    [matchers.select.selector(selectHasLoginRetryLockoutTime), false],
+    [matchers.select.selector(selectVaultIsLocked), true],
+    [matchers.select.selector(selectLoginRetryLockoutTime), null]
+  ] as never[];
+
+  it('arms on a retry increment', async () => {
+    await expectSaga(vaultSagas)
+      .provide(armProviders)
+      .dispatch(loginRetryCountIncremented())
+      .put(loginRetryLockoutTimeSet(NOW))
+      .silentRun(50);
+  });
+
+  // The resume half: a count persisted past the limit with nothing armed. No
+  // test covered this trigger at all — every other `startBackground` in the
+  // suite invokes a saga directly, and no e2e restarts the worker.
+  it('arms on startBackground, for a stale count that survived a restart', async () => {
+    await expectSaga(vaultSagas)
+      .provide(armProviders)
+      .dispatch(startBackground())
+      .put(loginRetryLockoutTimeSet(NOW))
+      .silentRun(50);
   });
 });
 
