@@ -457,3 +457,39 @@ it('evicts the oldest in-flight entry once the memo is full', async () => {
 
   await expect(Promise.all(results)).resolves.toBeDefined();
 });
+
+describe('memo password digest', () => {
+  it('is stable for the same password within a process', async () => {
+    const { digestPassword } = await import('./unlock-requests');
+
+    expect(digestPassword('correct horse')).toBe(
+      digestPassword('correct horse')
+    );
+  });
+
+  it('separates two passwords', async () => {
+    const { digestPassword } = await import('./unlock-requests');
+
+    expect(digestPassword('a')).not.toBe(digestPassword('b'));
+  });
+
+  it('never contains the password', async () => {
+    const { digestPassword } = await import('./unlock-requests');
+
+    expect(digestPassword('hunter2')).not.toContain('hunter2');
+  });
+
+  // The digest must be keyed on a per-process secret. A bare hash of the
+  // password would be a brute-force oracle far cheaper than the scrypt-derived
+  // vault cipher it guards, so "same password, fresh process, same digest" is
+  // the failure this pins.
+  it('differs across processes for the same password', async () => {
+    const { digestPassword: first } = await import('./unlock-requests');
+    const before = first('same password');
+
+    jest.resetModules();
+    const { digestPassword: second } = await import('./unlock-requests');
+
+    expect(second('same password')).not.toBe(before);
+  });
+});

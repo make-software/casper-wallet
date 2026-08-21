@@ -1,3 +1,7 @@
+import { hmac } from '@noble/hashes/hmac';
+import { sha256 } from '@noble/hashes/sha256';
+import { randomBytes, utf8ToBytes } from '@noble/hashes/utils';
+
 import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';
 
 import { MainStore } from '@background/redux/get-main-store';
@@ -19,7 +23,10 @@ import {
   verifyPasswordOffThread
 } from '@background/workers/scrypt-off-thread';
 
-import { generateRandomSaltHex } from '@libs/crypto/hashing';
+import {
+  constantTimeEqualHex,
+  generateRandomSaltHex
+} from '@libs/crypto/hashing';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import { decryptVault, encryptVault } from '@libs/crypto/vault';
 
@@ -34,24 +41,37 @@ export type UnlockResult =
   | { status: 'lockedOut' }
   | { status: 'error' };
 
+/**
+ * Keyed on a secret generated for this process, so the stored digest is not a
+ * brute-force oracle for anyone who reads it without also reading this key. A
+ * bare hash of the password would be exactly that — and a far cheaper one than
+ * the scrypt-derived cipher it guards. Never persist this.
+ */
+const memoDigestKey = randomBytes(32);
+
+export function digestPassword(password: string): string {
+  return convertBytesToHex(hmac(sha256, memoDigestKey, utf8ToBytes(password)));
+}
+
 const MEMO_LIMIT = 8;
 
-// Bounds how long a verdict can be replayed — not how long an entry stays in
-// memory (only FIFO eviction or a lookup on that exact key does that). Must
-// outlive the page's own retry window for a dropped response
-// (background-port.ts retries at +250ms, then +500ms).
+// Bounds how long a verdict can be replayed. An entry itself is removed only by
+// FIFO eviction or a lookup on that exact key, so residency is longer than this
+// — which is why the entry holds a digest and never the password. Must outlive
+// the page's own retry window for a dropped response (background-port.ts retries
+// at +250ms, then +500ms).
 const MEMO_TTL_MS = 10_000;
 
 interface MemoEntry {
-  password: string;
+  passwordDigest: string;
   result: Promise<UnlockResult>;
   createdAt: number;
 }
 
 /**
- * Keyed on `${type}:${attemptId}` AND the password: the id is caller-chosen, so
- * replaying a verdict for a different password could answer a correct password
- * `wrong`, and replaying a VERIFY verdict for an UNLOCK with the same id would
+ * Keyed on `${type}:${attemptId}` AND a digest of the password: the id is
+ * caller-chosen, so replaying a verdict for a different password could answer a
+ * correct password `wrong`, and replaying a VERIFY verdict for an UNLOCK with the same id would
  * report `ok` without ever dispatching `unlockVault`. Holds the in-flight
  * promise, not just the settled value, so a reconnect awaits the first
  * derivation instead of starting a second one that counts again — and a retry
@@ -89,7 +109,7 @@ function isUnlockPayload(
 
 function remember(
   memoKey: string,
-  password: string,
+  passwordDigest: string,
   result: Promise<UnlockResult>
 ) {
   if (memo.size >= MEMO_LIMIT) {
@@ -100,7 +120,7 @@ function remember(
       break;
     }
   }
-  memo.set(memoKey, { password, result, createdAt: Date.now() });
+  memo.set(memoKey, { passwordDigest, result, createdAt: Date.now() });
 }
 
 async function runUnlock(
@@ -223,17 +243,18 @@ export async function handleUnlockRequest(
   // same caller-chosen id — an UNLOCK replayed from a VERIFY's `ok` would report
   // success without ever dispatching `unlockVault`.
   const memoKey = `${request.type}:${attemptId}`;
+  const passwordDigest = digestPassword(password);
   const cached = memo.get(memoKey);
   if (cached != null) {
     if (Date.now() - cached.createdAt > MEMO_TTL_MS) {
       memo.delete(memoKey);
-    } else if (cached.password === password) {
+    } else if (constantTimeEqualHex(cached.passwordDigest, passwordDigest)) {
       return cached.result;
     }
   }
 
   const result = serialise(() => runUnlock(request.type, password, store));
-  remember(memoKey, password, result);
+  remember(memoKey, passwordDigest, result);
 
   return result;
 }
