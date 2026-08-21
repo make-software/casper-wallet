@@ -243,6 +243,17 @@ describe('FORWARDED_ACTION_TYPES parity', () => {
     expect(sorted(FORWARDED_ACTION_TYPES)).toEqual(sorted(forwardable));
   });
 
+  it('changePassword is NOT forwarded — it travels over the privileged port', () => {
+    // The set-algebra assertions above all stay true when a type moves between
+    // the two sets, so a paired edit — re-adding it here while deleting its
+    // EXCLUSIONS entry — passes every one of them. Membership is what lets the
+    // background accept two plaintext passwords over the fan-out channel from
+    // any trusted-UI page, so it gets its own pin.
+    expect(FORWARDED_ACTION_TYPES.has(sagasActions.changePassword.type)).toBe(
+      false
+    );
+  });
+
   it('windowRequestWindowAttached is NOT blindly forwarded — it has a dedicated branch', () => {
     // The Ledger hook dispatches it from a UI page, so it must reach the
     // background; but it must arrive through `handleReduxAction`'s dedicated

@@ -33,6 +33,14 @@ const WEB_PAGE_SENDER = {
   url: 'https://evil.example/index.html'
 } as Runtime.MessageSender;
 
+// Same id and an allow-listed pathname, foreign origin. Every other fixture is
+// already rejected by `isAllowedPage` on pathname alone, so without this one the
+// `isTrustedUiSender` leg of the guard can be deleted with the suite still green.
+const SPOOFED_ORIGIN_SENDER = {
+  id: 'ext-id',
+  url: 'https://evil.example/popup.html'
+} as Runtime.MessageSender;
+
 const FOREIGN_EXTENSION_SENDER = {
   id: 'some-other-extension-id',
   url: 'chrome-extension://some-other-extension-id/page.html'
@@ -58,6 +66,20 @@ describe('handlePrivilegedRequest — CHANGE_PASSWORD_REQUEST', () => {
     ).resolves.toEqual({ accepted: true });
 
     expect(dispatch).toHaveBeenCalledWith(changePassword(validPayload));
+  });
+
+  it('refuses a sender whose origin is not this extension', async () => {
+    const { store, dispatch } = storeWithDispatch();
+
+    await expect(
+      handlePrivilegedRequest(
+        { type: CHANGE_PASSWORD_REQUEST_TYPE, payload: validPayload },
+        SPOOFED_ORIGIN_SENDER,
+        store
+      )
+    ).resolves.toBeNull();
+
+    expect(dispatch).not.toHaveBeenCalled();
   });
 
   it('refuses a web-page sender', async () => {
