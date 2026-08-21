@@ -2,6 +2,7 @@ import { RootState } from '@background/redux/store-types';
 
 import {
   selectIsWindowBusyWithDevice,
+  selectOpenRequest,
   selectOpenRequests,
   selectRequestStatus
 } from './selectors';
@@ -50,6 +51,27 @@ it('selectOpenRequests joins open status with its descriptor, including windowId
       awaitingDeviceConfirmation: false
     }
   ]);
+});
+
+it('selectOpenRequest returns the open descriptor with its id', () => {
+  expect(selectOpenRequest(state, 'a')).toEqual({
+    requestId: 'a',
+    status: 'open',
+    tabId: 1,
+    origin: 'o',
+    method: 'sign',
+    windowIds: [7],
+    awaitingDeviceConfirmation: false
+  });
+});
+
+it('selectOpenRequest returns undefined for a tombstone or an unknown id', () => {
+  expect(selectOpenRequest(state, 'b')).toBeUndefined();
+  expect(selectOpenRequest(state, 'z')).toBeUndefined();
+});
+
+it('selectOpenRequest does not read an inherited Object.prototype member', () => {
+  expect(selectOpenRequest(state, 'toString')).toBeUndefined();
 });
 
 describe('selectIsWindowBusyWithDevice', () => {

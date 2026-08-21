@@ -17,6 +17,20 @@ export const selectRequestStatus = (
 ): RequestStatus | undefined =>
   getRequest(state.windowManagement.requests, requestId)?.status;
 
+// One request's descriptor, or undefined when it is unknown or already a
+// tombstone. The delivery path needs the whole descriptor — the tab, the frame
+// and the origin that actually made the request — and must read it BEFORE the
+// tombstone replaces it. Reads through `getRequest`, so a dapp-chosen
+// `requestId` cannot resolve to an inherited `Object.prototype` member.
+export const selectOpenRequest = (
+  state: RootState,
+  requestId: string
+): OpenRequest | undefined => {
+  const request = getRequest(state.windowManagement.requests, requestId);
+
+  return request?.status === 'open' ? { requestId, ...request } : undefined;
+};
+
 const selectRequests = (state: RootState) => state.windowManagement.requests;
 
 // Every request still awaiting a response, with its descriptor. Memoized

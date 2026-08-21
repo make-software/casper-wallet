@@ -2,7 +2,10 @@ import { Runtime, tabs } from 'webextension-polyfill';
 
 import { sagaError } from '@background/redux/app-events/actions';
 import { MainStore } from '@background/redux/get-main-store';
-import { selectRequestStatus } from '@background/redux/windowManagement/selectors';
+import {
+  selectOpenRequest,
+  selectRequestStatus
+} from '@background/redux/windowManagement/selectors';
 import {
   SDK_RESPONSE_TO_TAB,
   SdkResponseToTabMessage
@@ -16,6 +19,7 @@ import {
 } from './close-windows-on-response';
 import { deliverViaOrigin } from './deliver-via-origin';
 import { isTrustedUiSender } from './private-state';
+import { getLiveTabOrigin } from './tab-origin';
 import { HandlerResult } from './types';
 
 // Recover the originating dapp origin from the sender page URL. The response
@@ -163,19 +167,56 @@ export async function handleSdkResponseToTab(
     return { handled: true, response: undefined };
   }
 
-  const origin = recoverDappOrigin(sender.url);
+  // The descriptor is the authoritative record of who asked; the message's
+  // `tabId` is UI-supplied. Read it BEFORE `markRequestResponded` — the
+  // tombstone that call writes is `{ status: 'responded' }`, so `tabId`,
+  // `frameId` and `origin` are gone the moment after.
+  const request =
+    requestId != null
+      ? selectOpenRequest(store.getState(), requestId)
+      : undefined;
+
+  // An MV3 service-worker restart empties the requests map while the approval
+  // window lives on, so a legitimate response can arrive with no descriptor at
+  // all. The window url still carries `?origin=`, so fall back to that rather
+  // than dropping a signature the user just produced.
+  const expectedOrigin = request?.origin ?? recoverDappOrigin(sender.url);
+  const frameId = request?.frameId;
+
   const validTab = Number.isInteger(tabId) && tabId >= 0;
+  // Synchronous, so it can run before the optimistic mark below — anything
+  // awaited there would reopen the double-delivery race. Both values come from
+  // `sender.tab.id` at request time, so a mismatch means a buggy or
+  // compromised UI page rather than an ordinary race; refusing is cheap and it
+  // is the only place that would notice.
+  const tabIdMatchesRequest = request == null || tabId === request.tabId;
 
   let displays: RespondedDisplays = NOTHING_DISPLAYS;
 
-  if (!validTab) {
-    // No usable tab. Attempt the same-origin fallback (broadcast to any active
-    // tab of the recovered dapp origin). Only mark responded when the fallback
-    // ACTUALLY delivered to at least one tab — we ARE delivering, so a later
-    // duplicate must dedupe. When nothing was delivered (no origin, or the
-    // broadcast matched zero tabs), do NOT mark responded: a valid retry must
-    // still be able to deliver. Either way surface the non-fatal error.
-    const delivered = await deliverViaOrigin(origin, action);
+  if (!validTab || !tabIdMatchesRequest) {
+    // No usable tab, or not the tab that made the request. Attempt the
+    // same-origin fallback (broadcast to any active tab of the dapp origin).
+    // Only mark responded when the fallback ACTUALLY delivered to at least one
+    // tab — we ARE delivering, so a later duplicate must dedupe. When nothing
+    // was delivered (no origin, or the broadcast matched zero tabs), do NOT
+    // mark responded: a valid retry must still be able to deliver. Either way
+    // surface the non-fatal error.
+    const delivered = await deliverViaOrigin(expectedOrigin, action, frameId);
+
+    if (validTab) {
+      // Identifiers only (see the SECURITY note above).
+      console.error(
+        'sdk-response-to-tab: response tab is not the requesting tab; response withheld',
+        {
+          requestId,
+          tabId,
+          expectedTabId: request?.tabId,
+          type: action?.type,
+          delivered
+        }
+      );
+    }
+
     if (delivered > 0 && requestId != null) {
       displays = markRequestResponded(store, requestId);
     }
@@ -200,14 +241,68 @@ export async function handleSdkResponseToTab(
     displays = markRequestResponded(store, requestId);
   }
 
+  // The tab may have navigated to another origin while the approval sat on
+  // screen. Tab ids survive navigation and the content script is injected on
+  // every http(s) origin, so the new document has a live receiver for a
+  // signature it never asked for.
+  //
+  // AFTER the optimistic mark, deliberately: this awaits, and any await placed
+  // before the mark reopens the double-delivery race described above. A
+  // withheld response therefore stays 'responded' — the same terminal-failure
+  // trade-off the mark already accepts.
+  //
+  // Only for a top-frame request. `tabs.get` reports the TOP document's url,
+  // while a sub-frame request's `origin` is the frame's own, so comparing them
+  // would refuse every legitimate iframe-embedded dapp. A sub-frame is covered
+  // by the frame scoping instead: a top-level navigation destroys the frame, so
+  // its `frameId` no longer resolves and the send fails into the fallback.
+  //
+  // Not a guarantee — the tab can still navigate between this read and the send
+  // below. It shrinks the window from the whole approval to one event-loop turn.
+  if (frameId == null || frameId === 0) {
+    const liveOrigin = await getLiveTabOrigin(tabId);
+
+    if (expectedOrigin == null || liveOrigin !== expectedOrigin) {
+      const delivered = await deliverViaOrigin(expectedOrigin, action, frameId);
+
+      // Identifiers and origins only (see the SECURITY note above).
+      console.error(
+        'sdk-response-to-tab: target tab no longer hosts the requesting origin; response withheld',
+        {
+          requestId,
+          tabId,
+          expectedOrigin,
+          liveOrigin,
+          type: action?.type,
+          delivered
+        }
+      );
+
+      store.dispatch(deliveryFailedError(tabId, delivered > 0));
+      void closeLedgerWindowsAfterResponse(store, displays);
+
+      return { handled: true, response: undefined };
+    }
+  }
+
   try {
-    await tabs.sendMessage(tabId, action);
+    // `all_frames: true` in every manifest, so a bare `tabs.sendMessage` is
+    // delivered to EVERY frame of the tab — a third-party iframe on the dapp's
+    // own page included. Target the frame that actually asked.
+    //
+    // Two call shapes rather than `{ frameId: undefined }`: an options object
+    // means "target this frame", and a descriptor with no recorded frame
+    // (pre-existing state, or a sender the browser gave no frameId) must keep
+    // today's behaviour rather than being retargeted at the top frame.
+    await (frameId == null
+      ? tabs.sendMessage(tabId, action)
+      : tabs.sendMessage(tabId, action, { frameId }));
   } catch (error) {
     // Tab gone / no listener → try the same-origin fallback (if we can recover
     // the origin) and surface the non-fatal error, choosing the message based
     // on whether the fallback actually delivered. The optimistic mark above
     // already deduped any retry (delivery failure is terminal by design).
-    const delivered = await deliverViaOrigin(origin, action);
+    const delivered = await deliverViaOrigin(expectedOrigin, action, frameId);
 
     // Cause AND outcome, because both were indistinguishable before: `Could not
     // establish connection`, a `DataCloneError` and a Safari-specific rejection
