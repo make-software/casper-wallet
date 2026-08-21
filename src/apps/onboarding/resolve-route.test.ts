@@ -23,9 +23,9 @@ describe('resolveOnboardingRoute', () => {
     ).toBe('authorized');
   });
 
-  it('asks a session-stale tab to unlock', () => {
+  it('asks a session-stale tab to re-authenticate', () => {
     expect(route({ keysDoesExist: true, encryptionKeyDoesExist: true })).toBe(
-      'unlock'
+      'reauth'
     );
   });
 
@@ -34,8 +34,16 @@ describe('resolveOnboardingRoute', () => {
   // unconfirmed click from `resetVault()` — in front of a wallet that exists.
   // Reachable since the background arms the lockout on any increment: five wrong
   // passwords on an onboarding tab lock the vault.
-  it('asks a locked vault to unlock rather than offering to create one', () => {
-    expect(route({ keysDoesExist: true, isLoggedIn: true })).toBe('unlock');
-    expect(route({ keysDoesExist: true })).toBe('unlock');
+  it('does not offer to create a wallet over a locked one', () => {
+    expect(route({ keysDoesExist: true, isLoggedIn: true })).toBe('locked');
+    expect(route({ keysDoesExist: true })).toBe('locked');
+  });
+
+  // The re-auth form only proves the password; it never emits
+  // `encryptionKeyHashCreated`, and onboarding is not on the unlock allowlist.
+  // Routing a locked vault there left a form that could not succeed.
+  it('keeps a locked vault away from the re-auth form, logged in or not', () => {
+    expect(route({ keysDoesExist: true, isLoggedIn: true })).not.toBe('reauth');
+    expect(route({ keysDoesExist: true })).not.toBe('reauth');
   });
 });
