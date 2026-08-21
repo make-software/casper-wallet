@@ -13,7 +13,7 @@ import {
 import { SecretPhrase } from '@libs/crypto';
 import { requestWithRetry } from '@libs/messaging/request-with-retry';
 
-import { isTrustedUiSender } from './private-state';
+import { isTrustedUiSender } from './trusted-sender';
 import { HandlerResult } from './types';
 
 export const SECRET_PHRASE_REQUEST_TYPE = 'SECRET_PHRASE_REQUEST' as const;
@@ -36,10 +36,10 @@ const SIGNATURE_REQUEST_PAGE = '/signature-request.html';
 // phrase. Same shape as the request-window allowlist in open-request-windows.ts.
 // The export-keys window is popup.html too (sagas/export-keys-window-saga.ts:28).
 //
-// Unlike PRIVATE_STATE_REQUEST (background/index.ts), a rejection here always
-// answers `{ handled: true, response: null }` rather than leaving the caller's
-// promise pending — every caller of the fetch* functions below already treats
-// a null/empty response as "cannot do this here" and surfaces that.
+// A rejection here always answers `{ handled: true, response: null }` rather
+// than leaving the caller's promise pending — every caller of the fetch*
+// functions below already treats a null/empty response as "cannot do this
+// here" and surfaces that.
 const ALLOWED_PAGES: Record<string, readonly string[]> = {
   [SECRET_PHRASE_REQUEST_TYPE]: [POPUP_PAGE],
   [SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE]: [POPUP_PAGE],

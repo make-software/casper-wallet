@@ -336,7 +336,7 @@ describe('fetchAccountSecretKey', () => {
 });
 
 // The client fns live in this file, which is under the handlers coverage floor
-// (functions 100%) — same reason private-state.test.ts covers fetchPrivateState.
+// (functions 100%), so they are exercised here too.
 describe('fetchSecretPhrase', () => {
   it('asks the background for the phrase', async () => {
     (runtime.sendMessage as jest.Mock).mockResolvedValue(['w1']);

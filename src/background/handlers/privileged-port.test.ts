@@ -3,6 +3,7 @@ import { Runtime } from 'webextension-polyfill';
 import { MainStore } from '@background/redux/get-main-store';
 import { changePassword } from '@background/redux/sagas/actions';
 
+import * as unlockRequestsModule from './unlock-requests';
 import {
   ALLOWED_PAGES,
   CHANGE_PASSWORD_REQUEST_TYPE,
@@ -10,12 +11,21 @@ import {
   handlePrivilegedRequest,
   isAllowedPage
 } from './privileged-port';
+import {
+  UNLOCK_REQUEST_TYPE,
+  VERIFY_PASSWORD_REQUEST_TYPE
+} from './unlock-requests';
 
 jest.mock('webextension-polyfill', () => ({
   runtime: {
     id: 'ext-id',
     getURL: (path: string) => `chrome-extension://ext-id/${path}`
   }
+}));
+
+jest.mock('./unlock-requests', () => ({
+  ...jest.requireActual('./unlock-requests'),
+  handleUnlockRequest: jest.fn()
 }));
 
 const POPUP_SENDER = {
@@ -26,6 +36,16 @@ const POPUP_SENDER = {
 const CONNECT_SENDER = {
   id: 'ext-id',
   url: 'chrome-extension://ext-id/connect-to-app.html'
+} as Runtime.MessageSender;
+
+const ONBOARDING_SENDER = {
+  id: 'ext-id',
+  url: 'chrome-extension://ext-id/onboarding.html'
+} as Runtime.MessageSender;
+
+const SIGNATURE_REQUEST_SENDER = {
+  id: 'ext-id',
+  url: 'chrome-extension://ext-id/signature-request.html'
 } as Runtime.MessageSender;
 
 const WEB_PAGE_SENDER = {
@@ -245,6 +265,105 @@ describe('handlePrivilegedRequest — CHANGE_PASSWORD_REQUEST', () => {
     ).resolves.toBeNull();
 
     expect(dispatch).not.toHaveBeenCalled();
+  });
+});
+
+describe('handlePrivilegedRequest — unlock routing', () => {
+  const mockedHandleUnlockRequest =
+    unlockRequestsModule.handleUnlockRequest as jest.Mock;
+
+  beforeEach(() => {
+    mockedHandleUnlockRequest.mockReset();
+  });
+
+  it('routes an UNLOCK_REQUEST from an allowed page to handleUnlockRequest', async () => {
+    const { store } = storeWithDispatch();
+    mockedHandleUnlockRequest.mockResolvedValue({ status: 'ok' });
+
+    await expect(
+      handlePrivilegedRequest(
+        {
+          type: UNLOCK_REQUEST_TYPE,
+          payload: { password: 'x', attemptId: 'a' }
+        },
+        CONNECT_SENDER,
+        store
+      )
+    ).resolves.toEqual({ status: 'ok' });
+    expect(mockedHandleUnlockRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuses a VERIFY_PASSWORD_REQUEST from a web-page sender', async () => {
+    const { store } = storeWithDispatch();
+
+    await expect(
+      handlePrivilegedRequest(
+        {
+          type: VERIFY_PASSWORD_REQUEST_TYPE,
+          payload: { password: 'x', attemptId: 'a' }
+        },
+        WEB_PAGE_SENDER,
+        store
+      )
+    ).resolves.toBeNull();
+    expect(mockedHandleUnlockRequest).not.toHaveBeenCalled();
+  });
+
+  it('refuses an UNLOCK_REQUEST from the onboarding page (not on its allowlist)', async () => {
+    const { store } = storeWithDispatch();
+
+    await expect(
+      handlePrivilegedRequest(
+        {
+          type: UNLOCK_REQUEST_TYPE,
+          payload: { password: 'x', attemptId: 'a' }
+        },
+        ONBOARDING_SENDER,
+        store
+      )
+    ).resolves.toBeNull();
+    expect(mockedHandleUnlockRequest).not.toHaveBeenCalled();
+  });
+});
+
+describe('ALLOWED_PAGES', () => {
+  // Of the eight entries only one was positively asserted, so removing any of
+  // the others left the suite green. Dropping SIGNATURE_REQUEST_PAGE from UNLOCK
+  // is the expensive one: a locked user who clicks Sign in a dapp could then
+  // never unlock — the refusal disconnects, both retries reject, and the generic
+  // error is all they see.
+  it('pins which page may send which request', () => {
+    expect(ALLOWED_PAGES).toEqual({
+      [CHANGE_PASSWORD_REQUEST_TYPE]: ['/popup.html'],
+      [UNLOCK_REQUEST_TYPE]: [
+        '/popup.html',
+        '/signature-request.html',
+        '/connect-to-app.html'
+      ],
+      [VERIFY_PASSWORD_REQUEST_TYPE]: [
+        '/popup.html',
+        '/signature-request.html',
+        '/connect-to-app.html',
+        '/onboarding.html'
+      ]
+    });
+  });
+
+  it('admits every page LockedRouter mounts the unlock screen on', () => {
+    for (const sender of [
+      POPUP_SENDER,
+      SIGNATURE_REQUEST_SENDER,
+      CONNECT_SENDER
+    ]) {
+      expect(isAllowedPage(UNLOCK_REQUEST_TYPE, sender)).toBe(true);
+    }
+  });
+
+  it('admits onboarding for verify but not for unlock', () => {
+    expect(isAllowedPage(VERIFY_PASSWORD_REQUEST_TYPE, ONBOARDING_SENDER)).toBe(
+      true
+    );
+    expect(isAllowedPage(UNLOCK_REQUEST_TYPE, ONBOARDING_SENDER)).toBe(false);
   });
 });
 

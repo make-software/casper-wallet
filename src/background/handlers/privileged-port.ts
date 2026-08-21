@@ -3,16 +3,39 @@ import { Runtime, runtime } from 'webextension-polyfill';
 import { MainStore } from '@background/redux/get-main-store';
 import { changePassword } from '@background/redux/sagas/actions';
 
-import { isTrustedUiSender } from './private-state';
+import { isTrustedUiSender } from './trusted-sender';
+import {
+  UNLOCK_REQUEST_TYPE,
+  VERIFY_PASSWORD_REQUEST_TYPE,
+  handleUnlockRequest
+} from './unlock-requests';
 
 export const CHANGE_PASSWORD_REQUEST_TYPE = 'CHANGE_PASSWORD_REQUEST' as const;
 
 const POPUP_PAGE = '/popup.html';
+const SIGNATURE_REQUEST_PAGE = '/signature-request.html';
+const CONNECT_TO_APP_PAGE = '/connect-to-app.html';
+const ONBOARDING_PAGE = '/onboarding.html';
 
 // isTrustedUiSender proves "an extension page"; it does not prove "a page that
 // needs this". Same shape and same reasoning as vault-secrets.ts.
 export const ALLOWED_PAGES: Record<string, readonly string[]> = {
-  [CHANGE_PASSWORD_REQUEST_TYPE]: [POPUP_PAGE]
+  [CHANGE_PASSWORD_REQUEST_TYPE]: [POPUP_PAGE],
+  // UnlockVaultPage is mounted by LockedRouter on all three of these. Admitting
+  // connect-to-app is safe here in a way it is not for vault-secrets: this
+  // request carries only a password and the background computes the cipher, so
+  // there is no caller-supplied value written to storage.
+  [UNLOCK_REQUEST_TYPE]: [
+    POPUP_PAGE,
+    SIGNATURE_REQUEST_PAGE,
+    CONNECT_TO_APP_PAGE
+  ],
+  [VERIFY_PASSWORD_REQUEST_TYPE]: [
+    POPUP_PAGE,
+    SIGNATURE_REQUEST_PAGE,
+    CONNECT_TO_APP_PAGE,
+    ONBOARDING_PAGE
+  ]
 };
 
 export function isAllowedPage(
@@ -62,13 +85,24 @@ export async function handlePrivilegedRequest(
     // Same-extension only, and origin only — a content script or web page can
     // connect to this port too, and its sender.url can carry a query string.
     if (sender.id === runtime.id) {
-      // nosemgrep: cw-logging-secrets — logs the sender origin only
+      // Logs the sender origin only.
       console.warn(
         'Background: privileged port request rejected for sender:',
         sender.url != null ? new URL(sender.url).origin : undefined
       );
     }
     return null;
+  }
+
+  // handleUnlockRequest's own `null` means "not my type", not "refused" —
+  // distinct from this function's `null`, which is already spent above on
+  // the sender/page gate. Routed by explicit type match, same as below, so a
+  // refusal from here can never fall through into changePassword.
+  if (
+    request.type === UNLOCK_REQUEST_TYPE ||
+    request.type === VERIFY_PASSWORD_REQUEST_TYPE
+  ) {
+    return handleUnlockRequest(request, store);
   }
 
   // Explicit type match, not just "the only key in ALLOWED_PAGES today": a

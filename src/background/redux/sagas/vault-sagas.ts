@@ -34,16 +34,16 @@ import {
 } from '@background/redux/storage-keys';
 import { anchorServiceWorker } from '@background/sw-keep-alive-anchor';
 import { emitSdkEventToActiveTabs } from '@background/utils';
+import {
+  deriveScryptKey,
+  encodePasswordOffThread,
+  verifyPasswordOffThread
+} from '@background/workers/scrypt-off-thread';
 
 import { sdkEvent } from '@content/sdk-event';
 
 import { deriveKeyPair } from '@libs/crypto';
-import {
-  deriveEncryptionKey,
-  encodePassword,
-  generateRandomSaltHex,
-  verifyPasswordAgainstHash
-} from '@libs/crypto/hashing';
+import { generateRandomSaltHex } from '@libs/crypto/hashing';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import { encryptVault } from '@libs/crypto/vault';
 
@@ -241,9 +241,9 @@ function isChangePasswordPayload(
 ): payload is ReturnType<typeof changePassword>['payload'] {
   const p = payload as Partial<ReturnType<typeof changePassword>['payload']>;
 
-  // Non-empty, not just a string: the form enforces a minimum length, but this
-  // action does not come from the form on the forwarded path, and an empty one
-  // would re-key the vault under scrypt('').
+  // Non-empty, not just a string: this arrives over the sender- and page-gated
+  // privileged port, not the form, so its own length isn't enforced there —
+  // and an empty one would re-key the vault under scrypt('').
   return (
     typeof p?.currentPassword === 'string' &&
     typeof p?.password === 'string' &&
@@ -256,14 +256,12 @@ function isChangePasswordPayload(
 // plaintext password exactly as `initKeysSage` does it. Since WALLET-1424 this
 // action arrives over the privileged port (`privileged-port.ts`), gated on
 // both sender and page — but a caller that could hand in `newEncryptionKeyHash`
-// would still be choosing the key the vault is re-encrypted under, and
-// `fetchPrivateState` hands `vaultCipher` to any extension page, which makes a
-// chosen key an offline decrypt. Verifying page-side only is not enough
-// either: the page-side check reads `passwordHash` from that same handler, so
-// it is replayable, while the plaintext password demanded here is not
-// derivable from anything an extension page can read.
-// `scryptAsync` yields to the event loop between blocks, so the three
-// derivations do not wedge the worker the way synchronous ones would.
+// would still be choosing the key the vault is re-encrypted under, and the
+// persisted `vaultCipher` blob turns a chosen key into an offline decrypt if it
+// were ever exfiltrated. Verifying page-side only is not enough either: the
+// page-side check reads `passwordHash` from that same handler, so it is
+// replayable, while the plaintext password demanded here is not derivable from
+// anything an extension page can read.
 export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
   // Errors are append-only and SagaErrorBanner is mounted route-independently,
   // so without this a previous attempt's "the wallet locked" banner outlives
@@ -307,7 +305,7 @@ export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
     }
 
     const isCurrentPasswordCorrect = yield* sagaCall(() =>
-      verifyPasswordAgainstHash(
+      verifyPasswordOffThread(
         storedPasswordHash,
         storedPasswordSaltHash,
         currentPassword
@@ -326,13 +324,11 @@ export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
 
     const passwordSaltHash = generateRandomSaltHex();
     const passwordHash = yield* sagaCall(() =>
-      encodePassword(password, passwordSaltHash)
+      encodePasswordOffThread(password, passwordSaltHash)
     );
     const keyDerivationSaltHash = generateRandomSaltHex();
     const newEncryptionKeyHash = convertBytesToHex(
-      yield* sagaCall(() =>
-        deriveEncryptionKey(password, keyDerivationSaltHash)
-      )
+      yield* sagaCall(() => deriveScryptKey(password, keyDerivationSaltHash))
     );
 
     // Encrypt BEFORE putting anything: if this throws, nothing has been

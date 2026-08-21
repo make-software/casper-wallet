@@ -13,9 +13,11 @@ jest.mock('@background/open-onboarding-flow', () => ({
   disableOnboardingFlow: jest.fn()
 }));
 jest.mock('@libs/crypto/hashing', () => ({
-  encodePassword: jest.fn().mockResolvedValue('password-hash'),
-  deriveEncryptionKey: jest.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),
   generateRandomSaltHex: jest.fn(() => 'salt')
+}));
+jest.mock('@background/workers/scrypt-off-thread', () => ({
+  encodePasswordOffThread: jest.fn().mockResolvedValue('password-hash'),
+  deriveScryptKey: jest.fn().mockResolvedValue(new Uint8Array([1, 2, 3]))
 }));
 
 const rootReducer = combineReducers({

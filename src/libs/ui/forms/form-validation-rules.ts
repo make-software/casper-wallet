@@ -3,13 +3,10 @@ import Big from 'big.js';
 import { CSPR_COIN } from 'casper-wallet-core/src/domain/constants/casperNetwork';
 import { formatTokenBalance } from 'casper-wallet-core/src/utils/common';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import {
   AuctionManagerEntryPoint,
   DELEGATION_MIN_AMOUNT_MOTES,
-  ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,
-  LOGIN_RETRY_ATTEMPTS_LIMIT,
   MAX_DELEGATORS,
   STAKE_COST_MOTES,
   TRANSFER_COST_MOTES,
@@ -21,11 +18,12 @@ import {
   isValidU64
 } from '@src/utils';
 
-import { loginRetryCountIncremented } from '@background/redux/login-retry-count/actions';
-import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
-import { dispatchToMainStore } from '@background/redux/utils';
+import {
+  UnlockResult,
+  VERIFY_PASSWORD_REQUEST_TYPE
+} from '@background/handlers/unlock-requests';
 
-import { verifyPasswordAgainstHash } from '@libs/crypto/hashing';
+import { requestOverPort } from '@libs/messaging/background-port';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export const minPasswordLength = 16;
@@ -42,35 +40,39 @@ export function useCreatePasswordRule() {
     .min(minPasswordLength, passwordAmountCharactersMessage);
 }
 
-export function useVerifyPasswordAgainstHashRule(
-  passwordHash: string,
-  passwordSaltHash: string
-) {
+export function useVerifyPasswordAgainstHashRule() {
   const { t } = useTranslation();
-  const loginRetryCount = useSelector(selectLoginRetryCount);
-
-  const attemptsLeft =
-    LOGIN_RETRY_ATTEMPTS_LIMIT -
-    loginRetryCount -
-    ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
-
-  const errorMessage = getErrorMessageForIncorrectPassword(attemptsLeft);
   const passwordIsRequiredMessage = t('Password is required');
+  const genericErrorMessage = t('Something went wrong. Please try again.');
 
   return Yup.string()
     .required(passwordIsRequiredMessage)
-    .test('authenticate', errorMessage, async password => {
-      const result = await verifyPasswordAgainstHash(
-        passwordHash,
-        passwordSaltHash,
-        password
-      );
+    .test('authenticate', genericErrorMessage, async function (password) {
+      try {
+        const result = await requestOverPort<UnlockResult>({
+          type: VERIFY_PASSWORD_REQUEST_TYPE,
+          payload: { password: password ?? '', attemptId: crypto.randomUUID() }
+        });
 
-      if (!result) {
-        dispatchToMainStore(loginRetryCountIncremented());
+        if (result.status === 'ok') {
+          return true;
+        }
+
+        if (result.status === 'wrong') {
+          return this.createError({
+            message: t(getErrorMessageForIncorrectPassword(result.attemptsLeft))
+          });
+        }
+
+        // 'lockedOut' and 'error' both fall through to the generic message —
+        // neither is a wrong password, and the onboarding page has no lockout
+        // screen of its own to route to.
+        return this.createError({ message: genericErrorMessage });
+      } catch (error) {
+        // The password is in scope and is deliberately not referenced.
+        console.error('Password verification failed:', error);
+        return this.createError({ message: genericErrorMessage });
       }
-
-      return result;
     });
 }
 

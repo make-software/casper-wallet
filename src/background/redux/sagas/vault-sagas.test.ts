@@ -11,6 +11,7 @@ import {
   TimeoutDurationSetting
 } from '@popup/constants';
 
+import * as scryptModule from '@background/workers/scrypt-off-thread';
 import {
   dismissSagaErrorsBySource,
   sagaError
@@ -1394,18 +1395,16 @@ describe('changePasswordSaga', () => {
   };
 
   const stubDerivation = () => {
-    jest
-      .spyOn(hashingModule, 'verifyPasswordAgainstHash')
-      .mockResolvedValue(true);
+    jest.spyOn(scryptModule, 'verifyPasswordOffThread').mockResolvedValue(true);
     jest
       .spyOn(hashingModule, 'generateRandomSaltHex')
       .mockReturnValueOnce('password-salt')
       .mockReturnValueOnce('derivation-salt');
     jest
-      .spyOn(hashingModule, 'encodePassword')
+      .spyOn(scryptModule, 'encodePasswordOffThread')
       .mockResolvedValue('new-password-hash');
     jest
-      .spyOn(hashingModule, 'deriveEncryptionKey')
+      .spyOn(scryptModule, 'deriveScryptKey')
       .mockResolvedValue(Uint8Array.from([0xab, 0xcd]));
   };
 
@@ -1451,14 +1450,14 @@ describe('changePasswordSaga', () => {
 
     // The current password is checked in the background, against the stored
     // hash — not taken on the page's word for it.
-    expect(hashingModule.verifyPasswordAgainstHash).toHaveBeenCalledWith(
+    expect(scryptModule.verifyPasswordOffThread).toHaveBeenCalledWith(
       'stored-password-hash',
       'stored-password-salt',
       'old-password'
     );
     // Both derivations run against the plaintext password from the payload —
     // the caller never gets to name the key the vault is re-encrypted under.
-    expect(hashingModule.deriveEncryptionKey).toHaveBeenCalledWith(
+    expect(scryptModule.deriveScryptKey).toHaveBeenCalledWith(
       'new-password',
       'derivation-salt'
     );
@@ -1470,8 +1469,8 @@ describe('changePasswordSaga', () => {
   });
 
   it('reports a malformed payload instead of throwing past its own catch', async () => {
-    // `{ type }` with no payload is what the sender-ungated forwarded path
-    // admits; a destructure above the `try` would take rootSaga down with it.
+    // `{ type }` with no payload is a shape isChangePasswordPayload must reject
+    // gracefully; a destructure above the `try` would take rootSaga down with it.
     const encryptSpy = jest.spyOn(vaultCryptoModule, 'encryptVault');
 
     await expectSaga(changePasswordSaga, {
@@ -1509,7 +1508,7 @@ describe('changePasswordSaga', () => {
       )
       .run();
 
-    expect(hashingModule.verifyPasswordAgainstHash).not.toHaveBeenCalled();
+    expect(scryptModule.verifyPasswordOffThread).not.toHaveBeenCalled();
   });
 
   it('retracts what a previous attempt reported before re-attempting', async () => {
@@ -1535,7 +1534,7 @@ describe('changePasswordSaga', () => {
   it('refuses when the current password is wrong', async () => {
     stubDerivation();
     jest
-      .spyOn(hashingModule, 'verifyPasswordAgainstHash')
+      .spyOn(scryptModule, 'verifyPasswordOffThread')
       .mockResolvedValue(false);
     const encryptSpy = jest.spyOn(vaultCryptoModule, 'encryptVault');
 
@@ -1561,7 +1560,7 @@ describe('changePasswordSaga', () => {
       .run();
 
     // Rejected before the new material is derived, let alone stored.
-    expect(hashingModule.encodePassword).not.toHaveBeenCalled();
+    expect(scryptModule.encodePasswordOffThread).not.toHaveBeenCalled();
     expect(encryptSpy).not.toHaveBeenCalled();
   });
 
@@ -1584,7 +1583,7 @@ describe('changePasswordSaga', () => {
       )
       .run();
 
-    expect(hashingModule.verifyPasswordAgainstHash).not.toHaveBeenCalled();
+    expect(scryptModule.verifyPasswordOffThread).not.toHaveBeenCalled();
   });
 
   it('does nothing at all when the vault is already locked', async () => {
@@ -1625,7 +1624,7 @@ describe('changePasswordSaga', () => {
       .run();
 
     // Fail closed, and without burning two scrypt derivations first.
-    expect(hashingModule.encodePassword).not.toHaveBeenCalled();
+    expect(scryptModule.encodePasswordOffThread).not.toHaveBeenCalled();
     expect(encryptSpy).not.toHaveBeenCalled();
   });
 

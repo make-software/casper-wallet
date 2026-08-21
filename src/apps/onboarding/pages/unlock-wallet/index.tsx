@@ -9,15 +9,10 @@ import { UnlockWalletPageContent } from '@onboarding/pages/unlock-wallet/content
 import { RouterPath, useTypedNavigate } from '@onboarding/router';
 
 import { selectKeysDoesExist } from '@background/redux/keys/selectors';
-import { loginRetryCountReseted } from '@background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
-import { dispatchToMainStore } from '@background/redux/utils';
-
-import { usePrivateState } from '@hooks/use-private-state';
 
 import {
   LayoutTab,
-  PrivateStateErrorPage,
   TabFooterContainer as TabFooterContainerBase
 } from '@libs/layout';
 import { Button } from '@libs/ui/components';
@@ -33,55 +28,14 @@ interface UnlockWalletPageProps {
 }
 
 export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
-  const {
-    privateState,
-    error: privateStateError,
-    retry: retryPrivateState
-  } = usePrivateState();
+  const navigate = useTypedNavigate();
+  const { t } = useTranslation();
+
   const keysDoesExist = useSelector(selectKeysDoesExist);
 
   if (!keysDoesExist) {
     throw new PasswordDoesNotExistError();
   }
-
-  if (privateStateError) {
-    return <PrivateStateErrorPage layout="tab" onRetry={retryPrivateState} />;
-  }
-
-  // private state (hashes) arrives in ms; matches existing async-boot behavior
-  if (privateState == null) {
-    return null;
-  }
-
-  const { passwordHash, passwordSaltHash } = privateState;
-
-  if (passwordHash == null || passwordSaltHash == null) {
-    throw new PasswordDoesNotExistError();
-  }
-
-  return (
-    <UnlockWalletForm
-      passwordHash={passwordHash}
-      passwordSaltHash={passwordSaltHash}
-      saveIsLoggedIn={saveIsLoggedIn}
-    />
-  );
-}
-
-interface UnlockWalletFormProps extends UnlockWalletPageProps {
-  passwordHash: string;
-  passwordSaltHash: string;
-}
-
-// Inner component: the form hook needs the hashes at render time, so it is
-// only mounted once the private state has arrived (keeps hook order legal)
-function UnlockWalletForm({
-  passwordHash,
-  passwordSaltHash,
-  saveIsLoggedIn
-}: UnlockWalletFormProps) {
-  const navigate = useTypedNavigate();
-  const { t } = useTranslation();
 
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
@@ -89,10 +43,9 @@ function UnlockWalletForm({
     register,
     handleSubmit,
     formState: { isDirty, errors }
-  } = useUnlockWalletForm(passwordHash, passwordSaltHash);
+  } = useUnlockWalletForm();
 
   function onSubmit() {
-    dispatchToMainStore(loginRetryCountReseted());
     saveIsLoggedIn(true);
   }
 

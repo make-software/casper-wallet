@@ -18,8 +18,8 @@ import {
   markRequestResponded
 } from './close-windows-on-response';
 import { deliverViaOrigin } from './deliver-via-origin';
-import { isTrustedUiSender } from './private-state';
 import { getLiveTabOrigin } from './tab-origin';
+import { isTrustedUiSender } from './trusted-sender';
 import { HandlerResult } from './types';
 
 // Recover the originating dapp origin from the sender page URL. The response
@@ -122,7 +122,7 @@ export async function handleSdkResponseToTab(
   // private MessageChannel transport + SDK_REQUEST_TYPES allowlist (P0.2) this
   // is already unreachable from a page, but gating on the sender guards against
   // a future allowlist regression or a content-script-world compromise.
-  // Silently drop (no response), matching the private-state / legacy-import gate.
+  // Silently drop (no response), matching the trusted-sender.ts / legacy-import gate.
   if (!isTrustedUiSender(sender)) {
     return { handled: true };
   }

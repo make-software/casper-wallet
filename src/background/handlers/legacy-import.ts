@@ -11,7 +11,7 @@ import {
 } from '@background/redux/vault/selectors';
 import { selectWindowId } from '@background/redux/windowManagement/selectors';
 
-import { isTrustedUiSender } from './private-state';
+import { isTrustedUiSender } from './trusted-sender';
 import { HandlerResult } from './types';
 
 // TODO: All below should be removed when Import Account is integrated with window
@@ -32,7 +32,7 @@ export function handleLegacyImport(
   // P0.1: these cases are a secret-key / account-name membership oracle and a
   // window-id disclosure — gate to trusted extension UI senders only (the
   // legitimate import-account-with-file window passes); silently ignore anyone
-  // else, matching the private-state gate's no-response shape.
+  // else, matching the no-response shape of the other `trusted-sender.ts` gates.
   if (!isTrustedUiSender(sender)) {
     return { handled: true };
   }

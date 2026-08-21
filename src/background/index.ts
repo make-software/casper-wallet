@@ -19,12 +19,6 @@ import {
 
 import { handleBringWeb3 } from '@background/handlers/bringweb3';
 import { handleLegacyImport } from '@background/handlers/legacy-import';
-import {
-  isPrivateStateRequest,
-  isTrustedUiSender,
-  selectPrivateState,
-  warnUntrustedSameExtensionSender
-} from '@background/handlers/private-state';
 import { attachPrivilegedPort } from '@background/handlers/privileged-port';
 import { handleReduxAction } from '@background/handlers/redux-actions';
 import { handleSdkMethod } from '@background/handlers/sdk-methods';
@@ -233,18 +227,6 @@ runtime.onMessage.addListener(
             return respond(result);
           }
           throw unknownSdkMessageError(action);
-        }
-
-        // Must stay AFTER the isSDKMethod branch: a page-crafted message with
-        // this type and meta.requestId passes the content-script relay filter
-        // and has to be captured (and rejected) by the SDK branch first
-        if (isPrivateStateRequest(action)) {
-          if (!isTrustedUiSender(sender)) {
-            warnUntrustedSameExtensionSender(sender, 'private-state request');
-            // No data (and no error detail) for untrusted senders
-            return;
-          }
-          return sendResponse(selectPrivateState(store.getState()));
         }
 
         if (typeof action.type === 'string') {
