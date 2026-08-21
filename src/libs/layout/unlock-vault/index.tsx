@@ -39,7 +39,7 @@ import { LottiePlayer } from '@libs/ui/components/lottie-player';
 import { UnlockWalletFormValues } from '@libs/ui/forms/unlock-wallet';
 
 import { UnlockVaultPageContent } from './content';
-import { shouldClearPasswordField } from './should-clear-password-field';
+import { didLockoutArm } from './lockout-armed-edge';
 
 interface UnlockMessageEvent extends MessageEvent {
   data: WorkerResult<UnlockVault>;
@@ -94,16 +94,17 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   const wasLockedOut = useRef(hasLoginRetryLockoutTime);
 
   useEffect(() => {
-    if (
-      shouldClearPasswordField(wasLockedOut.current, hasLoginRetryLockoutTime)
-    ) {
+    if (didLockoutArm(wasLockedOut.current, hasLoginRetryLockoutTime)) {
       resetField('password');
+      setIsLoading(false);
     }
     wasLockedOut.current = hasLoginRetryLockoutTime;
   }, [hasLoginRetryLockoutTime, resetField]);
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
-    if (isLoading || privateState == null) return;
+    // The saga refuses while a lockout is armed, and its refusal answers with a
+    // banner only — nothing that would clear the spinner this would have set.
+    if (isLoading || privateState == null || hasLoginRetryLockoutTime) return;
 
     const {
       passwordHash,
@@ -264,7 +265,9 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
     <FooterButtonsContainer>
       <Button
         type="submit"
-        style={{ pointerEvents: isLoading ? 'none' : 'auto' }}
+        style={{
+          pointerEvents: isLoading || hasLoginRetryLockoutTime ? 'none' : 'auto'
+        }}
       >
         {isLoading ? (
           <AlignedFlexRow gap={SpacingSize.Small}>
