@@ -122,7 +122,17 @@ function makeStore(requests: Record<string, unknown> = {}) {
 
 const SENDER = {
   url: 'https://dapp.example/page',
-  tab: { id: 9 }
+  tab: { id: 9 },
+  frameId: 3
+} as Runtime.MessageSender;
+
+// Top-frame sender — the common case, and the one `sender.frameId || undefined`
+// would silently erase (0 is falsy). SENDER above pins only frameId 3 in every
+// assertion, so that slip would keep the suite green without this variant.
+const SENDER_TOP_FRAME = {
+  url: 'https://dapp.example/page',
+  tab: { id: 9 },
+  frameId: 0
 } as Runtime.MessageSender;
 
 // `reconcileStalePayloadsSaga` may resume at any `await`, and a payload that no
@@ -317,6 +327,7 @@ describe('connectRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'connect'
         }
@@ -352,6 +363,29 @@ describe('connectRequest', () => {
       expect.objectContaining({ requestId: 'req-1' })
     );
   });
+
+  it('a top-frame sender (frameId 0) reaches the dispatch as frameId 0', async () => {
+    selectIsConnectedMock.mockReturnValue(false);
+    const { store, dispatch } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.connectRequest({ title: 't' }, META),
+      SENDER_TOP_FRAME,
+      store
+    );
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          frameId: 0,
+          origin: ORIGIN,
+          method: 'connect'
+        }
+      })
+    );
+  });
 });
 
 describe('switchAccountRequest', () => {
@@ -380,6 +414,7 @@ describe('switchAccountRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'switchAccount'
         }
@@ -404,6 +439,28 @@ describe('switchAccountRequest', () => {
     expect(openWindowMock).toHaveBeenCalledWith(
       store,
       expect.objectContaining({ requestId: 'req-1' })
+    );
+  });
+
+  it('a top-frame sender (frameId 0) reaches the dispatch as frameId 0', async () => {
+    const { store, dispatch } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.switchAccountRequest({ title: 't' }, META),
+      SENDER_TOP_FRAME,
+      store
+    );
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          frameId: 0,
+          origin: ORIGIN,
+          method: 'switchAccount'
+        }
+      })
     );
   });
 });
@@ -481,6 +538,7 @@ describe('signRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'sign'
         }
@@ -494,6 +552,32 @@ describe('signRequest', () => {
       })
     );
     expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('a top-frame sender (frameId 0) reaches the dispatch as frameId 0', async () => {
+    // jest's argument equality ignores an `undefined` value but not a `0`, so
+    // `frameId: 0` here is what discriminates against `sender.frameId ||
+    // undefined`.
+    isEqualCIMock.mockReturnValue(false);
+    const { store, dispatch } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signRequest({ deployJson, signingPublicKeyHex: 'PK-1' }, META),
+      SENDER_TOP_FRAME,
+      store
+    );
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          frameId: 0,
+          origin: ORIGIN,
+          method: 'sign'
+        }
+      })
+    );
   });
 
   it('dispatches the deploy payload and the descriptor in one synchronous block', async () => {
@@ -650,6 +734,7 @@ describe('signMessageRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'signMessage'
         }
@@ -679,6 +764,31 @@ describe('signMessageRequest', () => {
       expect.objectContaining({ requestId: 'req-1' })
     );
   });
+
+  it('a top-frame sender (frameId 0) reaches the dispatch as frameId 0', async () => {
+    const { store, dispatch } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signMessageRequest(
+        { message: 'hi', signingPublicKeyHex: 'PK-1' },
+        META
+      ),
+      SENDER_TOP_FRAME,
+      store
+    );
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          frameId: 0,
+          origin: ORIGIN,
+          method: 'signMessage'
+        }
+      })
+    );
+  });
 });
 
 describe('signTypedDataRequest', () => {
@@ -702,6 +812,7 @@ describe('signTypedDataRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'signTypedData'
         }
@@ -876,6 +987,35 @@ describe('signTypedDataRequest', () => {
       expect.objectContaining({ requestId: 'req-1' })
     );
   });
+
+  it('a top-frame sender (frameId 0) reaches the dispatch as frameId 0', async () => {
+    const { store, dispatch } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signTypedDataRequest(
+        {
+          typedData: { foo: 'bar' } as any,
+          options: undefined,
+          signingPublicKeyHex: 'PK-1'
+        },
+        META
+      ),
+      SENDER_TOP_FRAME,
+      store
+    );
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          frameId: 0,
+          origin: ORIGIN,
+          method: 'signTypedData'
+        }
+      })
+    );
+  });
 });
 
 describe('decryptMessageRequest', () => {
@@ -895,6 +1035,7 @@ describe('decryptMessageRequest', () => {
         payload: {
           requestId: 'req-1',
           tabId: 9,
+          frameId: 3,
           origin: ORIGIN,
           method: 'decryptMessage'
         }
@@ -922,6 +1063,31 @@ describe('decryptMessageRequest', () => {
     expect(openWindowMock).toHaveBeenCalledWith(
       store,
       expect.objectContaining({ requestId: 'req-1' })
+    );
+  });
+
+  it('a top-frame sender (frameId 0) reaches the dispatch as frameId 0', async () => {
+    const { store, dispatch } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.decryptMessageRequest(
+        { message: 'enc', signingPublicKeyHex: 'PK-1' },
+        META
+      ),
+      SENDER_TOP_FRAME,
+      store
+    );
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          frameId: 0,
+          origin: ORIGIN,
+          method: 'decryptMessage'
+        }
+      })
     );
   });
 });

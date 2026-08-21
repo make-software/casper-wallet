@@ -31,7 +31,7 @@ import { handleSdkResponseToTab } from './sdk-response-to-tab';
 import { handleWindowRemoved } from './window-removed';
 
 jest.mock('webextension-polyfill', () => ({
-  tabs: { sendMessage: jest.fn() },
+  tabs: { sendMessage: jest.fn(), get: jest.fn() },
   windows: { remove: jest.fn(), getAll: jest.fn(), get: jest.fn() },
   runtime: {
     id: 'ext-id',
@@ -55,9 +55,9 @@ const UI_SENDER = {
   url: 'chrome-extension://ext-id/signature-request.html'
 } as Runtime.MessageSender;
 
-// deliverViaOrigin is `if (!origin) return 0` (deliver-via-origin.ts:14) and origin is
-// recoverDappOrigin(sender.url) (sdk-response-to-tab.ts:161-177), so only a sender carrying
-// ?origin= ever reaches the emit mock. Mirrors UI_SENDER_WITH_ORIGIN at
+// deliverViaOrigin is `if (!origin) return 0` (deliver-via-origin.ts:14) and the origin it
+// receives prefers the request descriptor's `origin`, falling back to
+// recoverDappOrigin(sender.url) only when there is no descriptor. Mirrors UI_SENDER_WITH_ORIGIN at
 // sdk-response-to-tab.test.ts:63.
 const UI_SENDER_WITH_ORIGIN = {
   id: 'ext-id',
@@ -119,6 +119,9 @@ beforeEach(() => {
     return Promise.resolve(undefined);
   });
   emitToOriginMock.mockResolvedValue(1);
+  (tabs.get as jest.Mock).mockResolvedValue({
+    url: 'https://dapp.example/app'
+  });
 });
 
 afterEach(() => {
@@ -381,6 +384,33 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     expect(removeMock.mock.calls.map(([id]) => id).sort()).toEqual([10, 11]);
   });
 
+  it('a withheld response (origin mismatch) still tears down the Ledger permission window', async () => {
+    // Reaches the origin-mismatch withhold branch, not the tabId-mismatch one:
+    // the request's own tabId is used, but `tabs.get` reports a DIFFERENT live
+    // origin than the descriptor recorded. `displays` was already computed by
+    // the optimistic mark before this branch runs, so deleting the teardown
+    // call here strands the Ledger permission window with no way to close it.
+    const store = makeRealStore();
+    openWith(store, 'r1', [10, 11]);
+    store.dispatch(
+      ledgerNewWindowIdChanged({
+        windowId: 11,
+        openerWindowId: null,
+        openerRequestId: null
+      })
+    );
+    (tabs.get as jest.Mock).mockResolvedValue({
+      url: 'https://evil.example/landing'
+    });
+    order = [];
+
+    await handleSdkResponseToTab(makeMessage('r1'), UI_SENDER, store);
+    await flushMicrotasks();
+
+    expect(sendMessageMock).not.toHaveBeenCalled();
+    expect(removeMock.mock.calls.map(([id]) => id).sort()).toEqual([10, 11]);
+  });
+
   it('removes the windows only AFTER the response has been delivered', async () => {
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
@@ -517,7 +547,11 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     store.dispatch(windowIdChanged(10));
     order = [];
 
-    await handleSdkResponseToTab(makeMessage('r1'), UI_SENDER, store);
+    await handleSdkResponseToTab(
+      makeMessage('r1'),
+      UI_SENDER_WITH_ORIGIN,
+      store
+    );
     await flushMicrotasks();
 
     expect(sendMessageMock).toHaveBeenCalled();

@@ -92,15 +92,21 @@ function* initKeysSage(action: ReturnType<typeof initKeys>) {
     );
     const encryptionKeyHash = convertBytesToHex(encryptionKeyBytes);
 
+    // Session first, keys second, and the order is load-bearing: the store
+    // subscriber broadcasts after every dispatch, so the state between these two
+    // puts really does reach the onboarding tab. `keys && !session` is what a
+    // locked vault looks like, which would flash the locked screen mid-signup;
+    // `session && !keys` reads as a fresh install, whose routes still include
+    // the create-password page this runs from.
+    yield put(
+      encryptionKeyHashCreated({ encryptionKeyHash: encryptionKeyHash })
+    );
     yield put(
       keysUpdated({
         passwordHash,
         passwordSaltHash,
         keyDerivationSaltHash
       })
-    );
-    yield put(
-      encryptionKeyHashCreated({ encryptionKeyHash: encryptionKeyHash })
     );
   } catch (err) {
     console.error(err);

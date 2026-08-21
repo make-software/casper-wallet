@@ -30,7 +30,7 @@ import { LottiePlayer } from '@libs/ui/components/lottie-player';
 import { UnlockWalletFormValues } from '@libs/ui/forms/unlock-wallet';
 
 import { UnlockVaultPageContent } from './content';
-import { shouldClearPasswordField } from './should-clear-password-field';
+import { didLockoutArm } from './lockout-armed-edge';
 
 interface UnlockVaultPageProps {
   popupLayout?: boolean;
@@ -64,16 +64,17 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   const wasLockedOut = useRef(hasLoginRetryLockoutTime);
 
   useEffect(() => {
-    if (
-      shouldClearPasswordField(wasLockedOut.current, hasLoginRetryLockoutTime)
-    ) {
+    if (didLockoutArm(wasLockedOut.current, hasLoginRetryLockoutTime)) {
       resetField('password');
+      setIsLoading(false);
     }
     wasLockedOut.current = hasLoginRetryLockoutTime;
   }, [hasLoginRetryLockoutTime, resetField]);
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
-    if (isLoading) return;
+    // The background refuses while a lockout is armed, so there is no request
+    // here worth starting — the submit button is inert for the duration anyway.
+    if (isLoading || hasLoginRetryLockoutTime) return;
 
     setIsLoading(true);
 
@@ -116,7 +117,9 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
     <FooterButtonsContainer>
       <Button
         type="submit"
-        style={{ pointerEvents: isLoading ? 'none' : 'auto' }}
+        style={{
+          pointerEvents: isLoading || hasLoginRetryLockoutTime ? 'none' : 'auto'
+        }}
       >
         {isLoading ? (
           <AlignedFlexRow gap={SpacingSize.Small}>

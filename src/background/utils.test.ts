@@ -194,4 +194,32 @@ describe('emitSdkEventToActiveTabsWithOrigin', () => {
     expect(sendMessageMock).toHaveBeenCalledWith(2, testAction);
     expect(errorSpy).toHaveBeenCalled();
   });
+
+  // Response delivery (`handleSdkResponseToTab`) passes `frameId` to scope the
+  // send to the requesting frame — frame 0 is the top frame, exactly what the
+  // security fix targets, so a falsy check (`frameId ? … : …`) instead of a
+  // null check would silently drop scoping for it.
+  it('scopes delivery to frame 0 when frameId is 0', async () => {
+    const tab = makeTab({ id: 1, url: 'https://foo.com/page' });
+    queryMock.mockResolvedValue([tab]);
+    sendMessageMock.mockResolvedValue(undefined);
+
+    await emitSdkEventToActiveTabsWithOrigin('https://foo.com', testAction, 0);
+
+    expect(sendMessageMock).toHaveBeenCalledWith(1, testAction, {
+      frameId: 0
+    });
+  });
+
+  // `toHaveBeenCalledWith(a, b)` fails against a call made as `f(a, b, undefined)`,
+  // so this pins the two-argument shape used when no frameId is passed.
+  it('sends without a frame option when frameId is omitted', async () => {
+    const tab = makeTab({ id: 1, url: 'https://foo.com/page' });
+    queryMock.mockResolvedValue([tab]);
+    sendMessageMock.mockResolvedValue(undefined);
+
+    await emitSdkEventToActiveTabsWithOrigin('https://foo.com', testAction);
+
+    expect(sendMessageMock).toHaveBeenCalledWith(1, testAction);
+  });
 });
