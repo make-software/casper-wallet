@@ -43,6 +43,11 @@ const ONBOARDING_SENDER = {
   url: 'chrome-extension://ext-id/onboarding.html'
 } as Runtime.MessageSender;
 
+const SIGNATURE_REQUEST_SENDER = {
+  id: 'ext-id',
+  url: 'chrome-extension://ext-id/signature-request.html'
+} as Runtime.MessageSender;
+
 const WEB_PAGE_SENDER = {
   id: 'ext-id',
   url: 'https://evil.example/index.html'
@@ -318,6 +323,47 @@ describe('handlePrivilegedRequest — unlock routing', () => {
       )
     ).resolves.toBeNull();
     expect(mockedHandleUnlockRequest).not.toHaveBeenCalled();
+  });
+});
+
+describe('ALLOWED_PAGES', () => {
+  // Of the eight entries only one was positively asserted, so removing any of
+  // the others left the suite green. Dropping SIGNATURE_REQUEST_PAGE from UNLOCK
+  // is the expensive one: a locked user who clicks Sign in a dapp could then
+  // never unlock — the refusal disconnects, both retries reject, and the generic
+  // error is all they see.
+  it('pins which page may send which request', () => {
+    expect(ALLOWED_PAGES).toEqual({
+      [CHANGE_PASSWORD_REQUEST_TYPE]: ['/popup.html'],
+      [UNLOCK_REQUEST_TYPE]: [
+        '/popup.html',
+        '/signature-request.html',
+        '/connect-to-app.html'
+      ],
+      [VERIFY_PASSWORD_REQUEST_TYPE]: [
+        '/popup.html',
+        '/signature-request.html',
+        '/connect-to-app.html',
+        '/onboarding.html'
+      ]
+    });
+  });
+
+  it('admits every page LockedRouter mounts the unlock screen on', () => {
+    for (const sender of [
+      POPUP_SENDER,
+      SIGNATURE_REQUEST_SENDER,
+      CONNECT_SENDER
+    ]) {
+      expect(isAllowedPage(UNLOCK_REQUEST_TYPE, sender)).toBe(true);
+    }
+  });
+
+  it('admits onboarding for verify but not for unlock', () => {
+    expect(isAllowedPage(VERIFY_PASSWORD_REQUEST_TYPE, ONBOARDING_SENDER)).toBe(
+      true
+    );
+    expect(isAllowedPage(UNLOCK_REQUEST_TYPE, ONBOARDING_SENDER)).toBe(false);
   });
 });
 

@@ -6,6 +6,7 @@ import {
   loginRetryCountReseted
 } from '@background/redux/login-retry-count/actions';
 import { unlockVault } from '@background/redux/sagas/actions';
+import { anchorServiceWorker } from '@background/sw-keep-alive-anchor';
 
 import * as vaultCryptoModule from '@libs/crypto/vault';
 
@@ -22,7 +23,7 @@ jest.mock('webextension-polyfill', () => ({
   }
 }));
 jest.mock('@background/sw-keep-alive-anchor', () => ({
-  anchorServiceWorker: () => () => undefined
+  anchorServiceWorker: jest.fn(() => jest.fn())
 }));
 jest.mock('@background/redux/broadcast-popup-state', () => ({
   broadcastPopupState: jest.fn()
@@ -471,14 +472,53 @@ it('rejects a queued request without deriving once the lockout arms while the fi
 });
 
 it('evicts the oldest in-flight entry once the memo is full', async () => {
-  jest.spyOn(scryptModule, 'verifyPasswordOffThread').mockResolvedValue(false);
+  const spy = jest
+    .spyOn(scryptModule, 'verifyPasswordOffThread')
+    .mockResolvedValue(false);
   const { store } = storeAt(0);
 
   const results = Array.from({ length: 9 }, (_, i) =>
     handleUnlockRequest(verify(`p${i}`, `evict-${i}`), store)
   );
+  await Promise.all(results);
+  const afterFirstRound = spy.mock.calls.length;
 
-  await expect(Promise.all(results)).resolves.toBeDefined();
+  // The oldest was pushed out by the ninth, so its retry has to derive again...
+  await handleUnlockRequest(verify('p0', 'evict-0'), store);
+  expect(spy.mock.calls.length).toBe(afterFirstRound + 1);
+
+  // ...while the newest is still memoised and replays without deriving.
+  await handleUnlockRequest(verify('p8', 'evict-8'), store);
+  expect(spy.mock.calls.length).toBe(afterFirstRound + 1);
+});
+
+// The mutation this pins: `.catch(() => false)` on the derivation. A transport
+// or worker failure would then be indistinguishable from a wrong password and
+// would eat one of the five attempts.
+it('does not count a failed derivation as a wrong password', async () => {
+  jest
+    .spyOn(scryptModule, 'verifyPasswordOffThread')
+    .mockRejectedValue(new Error('Key derivation timed out'));
+  const { store, dispatch } = storeAt(0);
+
+  await expect(
+    handleUnlockRequest(verify('p', 'derivation-fails'), store)
+  ).rejects.toThrow('Key derivation timed out');
+
+  expect(dispatch).not.toHaveBeenCalled();
+});
+
+// A leaked anchor leaves `anchorCount` above zero, so the 20s keep-alive
+// heartbeat outlives every unlock instead of being cleared.
+it('releases the service-worker anchor on the way out', async () => {
+  jest.spyOn(scryptModule, 'verifyPasswordOffThread').mockResolvedValue(false);
+  const { store } = storeAt(0);
+
+  await handleUnlockRequest(verify('p', 'anchor'), store);
+
+  const anchor = anchorServiceWorker as jest.Mock;
+  expect(anchor).toHaveBeenCalledWith('unlock');
+  expect(anchor.mock.results.at(-1)?.value).toHaveBeenCalled();
 });
 
 // Derivations are serialised, so a request can spend most of the TTL waiting for
