@@ -119,7 +119,7 @@
     "react-router-dom": "^7.18.2",
     "react-tiny-popover": "^8.1.6",
     "redux": "^5.0.1",
-    "redux-saga": "^1.5.0",
+    "redux-saga": "^1.5.1",
     "reselect": "^5.2.0",
     "rxjs": "^7.8.2",
     "styled-components": "6.4.3",
