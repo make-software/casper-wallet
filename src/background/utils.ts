@@ -42,7 +42,10 @@ export async function emitSdkEventToActiveTabsWithOrigin(
   origin: string,
   // A method **response** may also be broadcast through here as a same-origin
   // delivery fallback (see `handleSdkResponseToTab`), hence `SdkEvent | SdkMethod`.
-  action: SdkEvent | SdkMethod
+  action: SdkEvent | SdkMethod,
+  // Response delivery passes the frame that made the request; SDK events pass
+  // nothing and keep reaching every frame, which is what an event is for.
+  frameId?: number
 ): Promise<number> {
   if (!origin) {
     return 0;
@@ -64,7 +67,9 @@ export async function emitSdkEventToActiveTabsWithOrigin(
           getUrlOrigin(tab.url) === origin
         ) {
           try {
-            await tabs.sendMessage(tab.id, action);
+            await (frameId == null
+              ? tabs.sendMessage(tab.id, action)
+              : tabs.sendMessage(tab.id, action, { frameId }));
             delivered += 1;
           } catch (error) {
             console.warn('Failed to send SDK event to tab: ' + tab.id, error);
