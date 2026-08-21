@@ -1,6 +1,7 @@
 import { dismissSagaError } from './app-events/actions';
 import { ledgerNewWindowIdChanged } from './ledger/actions';
 import {
+  changePassword,
   initKeys,
   initVault,
   lockVault,
@@ -21,6 +22,7 @@ describe('SURFACED_DISPATCH_ACTIONS', () => {
       [
         openExportKeysWindow.type,
         lockVault.type,
+        changePassword.type,
         windowRequestWindowAttached.type,
         ledgerNewWindowIdChanged.type,
         resetVault.type,
@@ -42,6 +44,7 @@ describe('SURFACED_DISPATCH_ACTIONS', () => {
       [
         'OPEN_EXPORT_KEYS_WINDOW_SAGA',
         'LOCK_VAULT_SAGA',
+        'CHANGE_PASSWORD_SAGA',
         'windowManagement/windowRequestWindowAttached',
         'ledger/ledgerNewWindowIdChanged',
         'RESET_VAULT_SAGA',
