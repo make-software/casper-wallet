@@ -167,14 +167,17 @@ it('treats an expired memo entry as a miss and re-verifies', async () => {
   const spy = jest
     .spyOn(scryptModule, 'verifyPasswordOffThread')
     .mockResolvedValue(false);
-  jest
-    .spyOn(Date, 'now')
-    .mockReturnValueOnce(1_000_000) // createdAt for the first request
-    .mockReturnValue(1_000_000 + 10_001); // lookup on the second, past MEMO_TTL_MS
+  const T0 = 1_000_000;
+  let now = T0;
+  jest.spyOn(Date, 'now').mockImplementation(() => now);
   const { store, dispatch } = storeAt(0);
   const request = verify('wrong', 'expiring');
 
   await handleUnlockRequest(request, store);
+
+  // Past MEMO_TTL_MS measured from the verdict, which is when the entry is
+  // stamped.
+  now = T0 + 10_001;
   await handleUnlockRequest(request, store);
 
   expect(spy).toHaveBeenCalledTimes(2);
@@ -456,6 +459,45 @@ it('evicts the oldest in-flight entry once the memo is full', async () => {
   );
 
   await expect(Promise.all(results)).resolves.toBeDefined();
+});
+
+// Derivations are serialised, so a request can spend most of the TTL waiting for
+// the ones ahead of it. Stamping the entry at enqueue spends the replay window
+// on that wait: the caller's retry then misses the memo, re-derives, and counts
+// one user attempt twice — locking them out early.
+it('measures the replay window from the verdict, not from enqueue', async () => {
+  const T0 = 1_000_000;
+  let now = T0;
+  jest.spyOn(Date, 'now').mockImplementation(() => now);
+
+  let releaseVerify!: (correct: boolean) => void;
+  const verdict = new Promise<boolean>(resolve => {
+    releaseVerify = resolve;
+  });
+  const spy = jest
+    .spyOn(scryptModule, 'verifyPasswordOffThread')
+    .mockReturnValue(verdict);
+
+  const { store, dispatch } = storeAt(0);
+  const request = verify('wrong', 'queued-behind-others');
+
+  const first = handleUnlockRequest(request, store);
+
+  // The request sat in the queue for longer than the whole replay window.
+  now = T0 + 11_000;
+  releaseVerify(false);
+  await first;
+
+  // The caller's retry lands a moment after the verdict existed.
+  now = T0 + 11_100;
+  await handleUnlockRequest(request, store);
+
+  expect(spy).toHaveBeenCalledTimes(1);
+  expect(
+    dispatch.mock.calls.filter(
+      ([action]) => action.type === loginRetryCountIncremented.type
+    )
+  ).toHaveLength(1);
 });
 
 describe('memo password digest', () => {

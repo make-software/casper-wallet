@@ -120,7 +120,16 @@ function remember(
       break;
     }
   }
-  memo.set(memoKey, { passwordDigest, result, createdAt: Date.now() });
+  const entry: MemoEntry = { passwordDigest, result, createdAt: Date.now() };
+  memo.set(memoKey, entry);
+
+  // Re-stamp once the verdict exists. Derivations are serialised, so a request
+  // can spend most of the window queued behind others; measured from enqueue,
+  // the caller's retry would miss, re-derive, and count one attempt twice.
+  const stamp = () => {
+    entry.createdAt = Date.now();
+  };
+  result.then(stamp, stamp);
 }
 
 async function runUnlock(
