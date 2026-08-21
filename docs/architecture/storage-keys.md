@@ -54,6 +54,39 @@ exist.
 | `LOGIN_RETRY_LOCKOUT_DEADLINE_KEY` | `q9Tf3Lm4pRxVne` | Absolute timestamp (`Date.now() + remaining`, ms) when the login-retry lockout ends | No      | Yes                |
 | `AUTO_LOCK_DEADLINE_KEY`           | `r3Wj7Nc8vBhQyD` | Absolute timestamp (`Date.now() + remaining`, ms) when auto-lock inactivity fires   | No      | Yes                |
 
+## The session area — not part of the inventory above
+
+Everything above is `storage.local`. One key lives in **`storage.session`**
+instead, and it deliberately obeys none of the rules in this document:
+
+| Constant              | Obfuscated key  | Stores                                                                                                                                      | Secret?                                                                | Plaintext at rest?                   |
+| --------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------ |
+| `REQUEST_SESSION_KEY` | `q7Rk2vHs4nTbX` | `{ requests, windowId }` from the `windowManagement` slice — every in-flight/recently answered request's dapp origin, tab id and window ids | **Sensitive** — dapp origins and live request ids, never dapp-readable | Never at rest: the area is in-memory |
+
+Defined in
+[`src/background/redux/windowManagement/session-store.ts`](../../src/background/redux/windowManagement/session-store.ts)
+and hydrated by the `get-main-store.ts` preload (WALLET-1419). It exists
+because `windowManagement.requests` lives only in the MV3 service worker's
+memory: a worker restart destroyed every request descriptor while the approval
+windows they describe were still on screen and still signable, which broke
+cancel-on-close, response dedup and supersede. It is written only on
+ephemeral-background builds (`isEphemeralBackgroundBuild`, i.e. Chrome/Edge);
+Firefox and Safari have persistent background pages and lose nothing.
+
+Three properties that follow from the area, not from the rules above:
+
+- **No purge is needed.** `storage.session` is in-memory and is cleared when
+  the browser closes and when the extension is reloaded or updated. No
+  `runtime.onStartup` purge, no session marker, no TTL — and nothing reaches
+  disk, so the plaintext-at-rest question does not arise.
+- **The key name is _not_ immutable.** Because no data crosses a version
+  boundary, renaming it would strand nothing. It follows the obfuscated
+  convention for consistency only.
+- **The area must stay at Chrome's default `TRUSTED_CONTEXTS`.** Nothing calls
+  `storage.session.setAccessLevel` and nothing should: raising it to
+  `TRUSTED_AND_UNTRUSTED_CONTEXTS` would expose every pending request's origin
+  and tab id to content scripts, i.e. to the dapps themselves.
+
 ## Immutability
 
 Once a key string ships, it is permanent. Two failure modes if that rule is

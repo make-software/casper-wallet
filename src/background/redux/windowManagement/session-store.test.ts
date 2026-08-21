@@ -1,0 +1,405 @@
+import { MAX_RESPONDED_TOMBSTONES } from './reducer';
+import {
+  REQUEST_SESSION_KEY,
+  SessionRecord,
+  readRequestSession,
+  writeRequestSession
+} from './session-store';
+import { Request } from './types';
+
+// `isEphemeralBackgroundBuild` is FALSE under jest: `npm test` sets no BROWSER
+// and DefinePlugin is webpack-only. Without this mock every case below would
+// exercise the disabled path and pass while asserting nothing.
+let mockIsEphemeralBackgroundBuild = true;
+
+jest.mock('@src/utils', () => ({
+  get isEphemeralBackgroundBuild() {
+    return mockIsEphemeralBackgroundBuild;
+  }
+}));
+
+const sessionGet = jest.fn<Promise<Record<string, unknown>>, [unknown]>();
+const sessionSet = jest.fn<Promise<void>, [unknown]>();
+const sessionRemove = jest.fn<Promise<void>, [unknown]>();
+
+// The area itself is swappable: `@types/webextension-polyfill` declares
+// `session` non-optional, so "the browser has no session area" is a state only
+// the runtime can be in.
+let mockSessionArea: unknown = {
+  get: (...args: unknown[]) => sessionGet(...(args as [unknown])),
+  set: (...args: unknown[]) => sessionSet(...(args as [unknown])),
+  remove: (...args: unknown[]) => sessionRemove(...(args as [unknown]))
+};
+
+jest.mock('webextension-polyfill', () => ({
+  storage: {
+    get session() {
+      return mockSessionArea;
+    }
+  }
+}));
+
+const openRow = (overrides: Record<string, unknown> = {}) => ({
+  status: 'open',
+  tabId: 7,
+  origin: 'https://dapp.example',
+  method: 'sign',
+  windowIds: [11],
+  awaitingDeviceConfirmation: false,
+  seq: 0,
+  ...overrides
+});
+
+const storedRecord = (record: unknown) => ({ [REQUEST_SESSION_KEY]: record });
+
+const lastWrittenRecord = (): SessionRecord => {
+  const [written] = sessionSet.mock.calls[sessionSet.mock.calls.length - 1];
+
+  return (written as Record<string, SessionRecord>)[REQUEST_SESSION_KEY];
+};
+
+let consoleErrorSpy: jest.SpyInstance;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockIsEphemeralBackgroundBuild = true;
+  mockSessionArea = {
+    get: (...args: unknown[]) => sessionGet(...(args as [unknown])),
+    set: (...args: unknown[]) => sessionSet(...(args as [unknown])),
+    remove: (...args: unknown[]) => sessionRemove(...(args as [unknown]))
+  };
+  sessionGet.mockResolvedValue({});
+  sessionSet.mockResolvedValue(undefined);
+  sessionRemove.mockResolvedValue(undefined);
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  consoleErrorSpy.mockRestore();
+});
+
+describe('session-store — the gate', () => {
+  it('reads and writes nothing on a persistent-background build', async () => {
+    mockIsEphemeralBackgroundBuild = false;
+
+    await expect(readRequestSession()).resolves.toEqual({
+      requests: {},
+      windowId: null
+    });
+    await writeRequestSession({
+      requests: { a: openRow() as Request },
+      windowId: 3
+    });
+
+    expect(sessionGet).not.toHaveBeenCalled();
+    expect(sessionSet).not.toHaveBeenCalled();
+  });
+
+  it('reads and writes nothing when the runtime has no session area', async () => {
+    mockSessionArea = undefined;
+
+    await expect(readRequestSession()).resolves.toEqual({
+      requests: {},
+      windowId: null
+    });
+    await writeRequestSession({ requests: {}, windowId: 3 });
+
+    expect(sessionSet).not.toHaveBeenCalled();
+  });
+
+  it('reads and writes when the build is ephemeral and the area exists', async () => {
+    sessionGet.mockResolvedValue(
+      storedRecord({ requests: { 'req-1': openRow() }, windowId: 3 })
+    );
+
+    await expect(readRequestSession()).resolves.toEqual({
+      requests: { 'req-1': openRow() },
+      windowId: 3
+    });
+
+    await writeRequestSession({ requests: {}, windowId: 3 });
+
+    expect(sessionSet).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('session-store — read path', () => {
+  it('returns the empty record when the key is absent', async () => {
+    sessionGet.mockResolvedValue({});
+
+    await expect(readRequestSession()).resolves.toEqual({
+      requests: {},
+      windowId: null
+    });
+  });
+
+  it('returns the empty record, and never throws, when the read rejects', async () => {
+    sessionGet.mockRejectedValue('not an Error — the area is not polyfilled');
+
+    await expect(readRequestSession()).resolves.toEqual({
+      requests: {},
+      windowId: null
+    });
+  });
+
+  it.each([
+    ['a non-object payload', 'nope'],
+    ['null', null],
+    ['an array', ['a']]
+  ])('drops %s wholesale', async (_label, record) => {
+    sessionGet.mockResolvedValue(storedRecord(record));
+
+    await expect(readRequestSession()).resolves.toEqual({
+      requests: {},
+      windowId: null
+    });
+  });
+
+  it('drops a non-object requests map to {} without touching windowId', async () => {
+    sessionGet.mockResolvedValue(
+      storedRecord({ requests: ['not', 'a', 'map'], windowId: 4 })
+    );
+
+    await expect(readRequestSession()).resolves.toEqual({
+      requests: {},
+      windowId: 4
+    });
+  });
+
+  it.each([
+    ['a non-integer', 1.5],
+    ['a string', '4'],
+    ['undefined', undefined]
+  ])('nulls a windowId that is %s', async (_label, windowId) => {
+    sessionGet.mockResolvedValue(storedRecord({ requests: {}, windowId }));
+
+    expect((await readRequestSession()).windowId).toBeNull();
+  });
+
+  it('keeps a tombstone row', async () => {
+    sessionGet.mockResolvedValue(
+      storedRecord({
+        requests: { 'req-1': { status: 'responded', seq: 4 } },
+        windowId: null
+      })
+    );
+
+    expect((await readRequestSession()).requests).toEqual({
+      'req-1': { status: 'responded', seq: 4 }
+    });
+  });
+});
+
+describe('session-store — the sanitizer drops only the row it cannot vouch for', () => {
+  const survivingRow = openRow({ seq: 9 });
+
+  const cases: [string, Record<string, unknown>][] = [
+    ['a bogus status', openRow({ status: 'pending' })],
+    ['a missing seq', openRow({ seq: undefined })],
+    ['a fractional seq', openRow({ seq: 1.5 })],
+    ['a stringified seq', openRow({ seq: '1' })],
+    ['a negative tabId', openRow({ tabId: -1 })],
+    ['a fractional tabId', openRow({ tabId: 1.5 })],
+    ['a stringified tabId', openRow({ tabId: '7' })],
+    ['a null tabId', openRow({ tabId: null })],
+    ['a non-http origin', openRow({ origin: 'chrome-extension://abc/x.html' })],
+    // Interpolated so eslint's `no-script-url` does not flag the literal.
+    ['a script-url origin', openRow({ origin: `javascript:${'alert(1)'}` })],
+    ['an unparseable origin', openRow({ origin: 'not a url' })],
+    [
+      'an over-long origin',
+      openRow({ origin: `https://${'a'.repeat(300)}.example` })
+    ],
+    ['an unknown method', openRow({ method: 'transfer' })],
+    ['a non-array windowIds', openRow({ windowIds: 11 })],
+    ['a non-integer windowIds member', openRow({ windowIds: [11, '12'] })],
+    [
+      'an over-long windowIds',
+      openRow({ windowIds: Array.from({ length: 17 }, (_, i) => i) })
+    ],
+    [
+      'a truthy non-boolean awaitingDeviceConfirmation',
+      openRow({ awaitingDeviceConfirmation: 1 })
+    ],
+    ['a non-object row', 'nope' as unknown as Record<string, unknown>]
+  ];
+
+  it.each(cases)('drops a row with %s', async (_label, row) => {
+    sessionGet.mockResolvedValue(
+      storedRecord({
+        requests: { bad: row, good: survivingRow },
+        windowId: null
+      })
+    );
+
+    expect((await readRequestSession()).requests).toEqual({
+      good: survivingRow
+    });
+  });
+
+  it('drops a __proto__ key and an over-long key, keeping the rest', async () => {
+    sessionGet.mockResolvedValue(
+      storedRecord({
+        // Computed keys, so `__proto__` is an OWN property rather than the
+        // literal's prototype setter.
+        requests: {
+          ['__proto__']: openRow(),
+          ['x'.repeat(257)]: openRow(),
+          good: survivingRow
+        },
+        windowId: null
+      })
+    );
+
+    const { requests } = await readRequestSession();
+
+    expect(requests).toEqual({ good: survivingRow });
+    expect(Object.keys(requests)).toEqual(['good']);
+  });
+
+  it('keeps awaitingDeviceConfirmation: true and an empty windowIds', async () => {
+    const row = openRow({ awaitingDeviceConfirmation: true, windowIds: [] });
+    sessionGet.mockResolvedValue(
+      storedRecord({ requests: { 'req-1': row }, windowId: null })
+    );
+
+    expect((await readRequestSession()).requests).toEqual({ 'req-1': row });
+  });
+});
+
+describe('session-store — write path', () => {
+  it('writes the record under the session key', async () => {
+    await writeRequestSession({
+      requests: { 'req-1': openRow() as Request },
+      windowId: 3
+    });
+
+    expect(sessionSet).toHaveBeenCalledWith({
+      [REQUEST_SESSION_KEY]: {
+        requests: { 'req-1': openRow() },
+        windowId: 3
+      }
+    });
+  });
+
+  it('removes the key when the write rejects, so the mirror degrades to absent', async () => {
+    sessionSet.mockRejectedValue(new Error('QuotaExceeded'));
+
+    await writeRequestSession({ requests: {}, windowId: 1 });
+
+    expect(sessionRemove).toHaveBeenCalledWith(REQUEST_SESSION_KEY);
+  });
+
+  it('swallows a rejecting remove', async () => {
+    sessionSet.mockRejectedValue('context invalidated');
+    sessionRemove.mockRejectedValue('context invalidated');
+
+    await expect(
+      writeRequestSession({ requests: {}, windowId: 1 })
+    ).resolves.toBeUndefined();
+  });
+
+  it('still lands a write issued after a rejected one — the chain is never poisoned', async () => {
+    sessionSet.mockRejectedValueOnce(new Error('QuotaExceeded'));
+
+    await writeRequestSession({ requests: {}, windowId: 1 });
+    await writeRequestSession({ requests: {}, windowId: 2 });
+
+    expect(sessionSet).toHaveBeenCalledTimes(2);
+    expect(lastWrittenRecord()).toEqual({ requests: {}, windowId: 2 });
+  });
+
+  it('lands two rapid writes in order', async () => {
+    const first = writeRequestSession({ requests: {}, windowId: 1 });
+    await first;
+    const second = writeRequestSession({ requests: {}, windowId: 2 });
+    await second;
+
+    expect(
+      sessionSet.mock.calls.map(
+        ([written]) =>
+          (written as Record<string, SessionRecord>)[REQUEST_SESSION_KEY]
+            .windowId
+      )
+    ).toEqual([1, 2]);
+  });
+
+  it('coalesces same-tick writes onto the newest snapshot', async () => {
+    void writeRequestSession({ requests: {}, windowId: 1 });
+    await writeRequestSession({ requests: {}, windowId: 2 });
+
+    expect(sessionSet).toHaveBeenCalledTimes(1);
+    expect(lastWrittenRecord().windowId).toBe(2);
+  });
+
+  it('caps rows on the write side, dropping tombstones before open rows and oldest first', async () => {
+    const requests: Record<string, Request> = {};
+    // Two over the cap, with the two oldest tombstones expected to go.
+    const rowCount = MAX_RESPONDED_TOMBSTONES + 22;
+
+    for (let seq = 0; seq < rowCount; seq += 1) {
+      requests[`req-${seq}`] =
+        seq < 30
+          ? ({ status: 'responded', seq } as Request)
+          : (openRow({ seq }) as Request);
+    }
+
+    await writeRequestSession({ requests, windowId: null });
+
+    const written = lastWrittenRecord().requests;
+
+    expect(Object.keys(written)).toHaveLength(MAX_RESPONDED_TOMBSTONES + 20);
+    expect(written['req-0']).toBeUndefined();
+    expect(written['req-1']).toBeUndefined();
+    expect(written['req-2']).toBeDefined();
+    // Every open row survives: a dropped one is a live approval window.
+    for (let seq = 30; seq < rowCount; seq += 1) {
+      expect(written[`req-${seq}`]).toBeDefined();
+    }
+  });
+
+  it('ranks the write cap by seq, not by key hoisting', async () => {
+    const requests: Record<string, Request> = {};
+
+    for (let seq = 0; seq < MAX_RESPONDED_TOMBSTONES + 21; seq += 1) {
+      // `"42"` enumerates ahead of every string key; its ordinal is the newest.
+      const requestId =
+        seq === MAX_RESPONDED_TOMBSTONES + 20 ? '42' : `req-${seq}`;
+      requests[requestId] = { status: 'responded', seq } as Request;
+    }
+
+    await writeRequestSession({ requests, windowId: null });
+
+    const written = lastWrittenRecord().requests;
+
+    expect(written['42']).toBeDefined();
+    expect(written['req-0']).toBeUndefined();
+  });
+});
+
+describe('session-store — logging discipline', () => {
+  it('never logs a raw URL query or the sanitizer input', async () => {
+    sessionGet.mockRejectedValue(
+      new Error(
+        'chrome-extension://abc/signature-request.html?message=secret failed'
+      )
+    );
+    sessionSet.mockRejectedValue(
+      new Error(
+        'chrome-extension://abc/signature-request.html?signingPublicKeyHex=01ab failed'
+      )
+    );
+
+    await readRequestSession();
+    await writeRequestSession({
+      requests: { 'req-1': openRow() as Request },
+      windowId: 1
+    });
+
+    const logged = consoleErrorSpy.mock.calls.flat().join(' ');
+
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    expect(logged).not.toContain('?');
+    expect(logged).not.toContain('dapp.example');
+  });
+});

@@ -1,5 +1,6 @@
 import { storage } from 'webextension-polyfill';
 
+import { redactUrlQuery } from '@background/redact-url-query';
 import { AppEventsState } from '@background/redux/app-events/types';
 import { broadcastPopupState } from '@background/redux/broadcast-popup-state';
 import { ContactsState } from '@background/redux/contacts/types';
@@ -14,6 +15,11 @@ import { RecentRecipientPublicKeysState } from '@background/redux/recent-recipie
 import { startBackground } from '@background/redux/sagas/actions';
 import { SettingsState } from '@background/redux/settings/types';
 import { TrustedWasmState } from '@background/redux/trusted-wasm/types';
+import {
+  SessionRecord,
+  readRequestSession,
+  writeRequestSession
+} from '@background/redux/windowManagement/session-store';
 
 // `storage.local` key names below are immutable and append-only: renaming or
 // repurposing one strands/drops the persisted data under the old name on
@@ -56,33 +62,44 @@ const isMockStateEnable = Boolean(process.env.MOCK_STATE);
 export async function getExistingMainStoreSingletonOrInit() {
   try {
     // load selected state
-    const {
-      [VAULT_CIPHER_KEY]: vaultCipher,
-      [KEYS_KEY]: keys,
-      [LOGIN_RETRY_KEY]: loginRetryCount,
-      [LOGIN_RETRY_LOCKOUT_KEY]: loginRetryLockoutTime,
-      [LAST_ACTIVITY_TIME]: lastActivityTime,
-      [VAULT_SETTINGS]: settings,
-      [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys,
-      [CONTACTS_KEY]: contacts,
-      [RATE_APP]: rateApp,
-      [APP_EVENTS]: appEvents,
-      [TRUSTED_WASM]: trustedWasm,
-      [CSPR_NAME_EXPIRATIONS]: csprNameExpirations
-    } = (await storage.local.get([
-      VAULT_CIPHER_KEY,
-      KEYS_KEY,
-      LOGIN_RETRY_KEY,
-      LOGIN_RETRY_LOCKOUT_KEY,
-      LAST_ACTIVITY_TIME,
-      VAULT_SETTINGS,
-      RECENT_RECIPIENT_PUBLIC_KEYS,
-      CONTACTS_KEY,
-      RATE_APP,
-      APP_EVENTS,
-      TRUSTED_WASM,
-      CSPR_NAME_EXPIRATIONS
-    ])) as StorageState;
+    // In parallel, never sequentially: both reads run on EVERY invocation, i.e.
+    // on every `runtime.onMessage`, to serve data consumed only when the
+    // singleton is null.
+    const [
+      {
+        [VAULT_CIPHER_KEY]: vaultCipher,
+        [KEYS_KEY]: keys,
+        [LOGIN_RETRY_KEY]: loginRetryCount,
+        [LOGIN_RETRY_LOCKOUT_KEY]: loginRetryLockoutTime,
+        [LAST_ACTIVITY_TIME]: lastActivityTime,
+        [VAULT_SETTINGS]: settings,
+        [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys,
+        [CONTACTS_KEY]: contacts,
+        [RATE_APP]: rateApp,
+        [APP_EVENTS]: appEvents,
+        [TRUSTED_WASM]: trustedWasm,
+        [CSPR_NAME_EXPIRATIONS]: csprNameExpirations
+      },
+      requestSession
+    ] = await Promise.all([
+      storage.local.get([
+        VAULT_CIPHER_KEY,
+        KEYS_KEY,
+        LOGIN_RETRY_KEY,
+        LOGIN_RETRY_LOCKOUT_KEY,
+        LAST_ACTIVITY_TIME,
+        VAULT_SETTINGS,
+        RECENT_RECIPIENT_PUBLIC_KEYS,
+        CONTACTS_KEY,
+        RATE_APP,
+        APP_EVENTS,
+        TRUSTED_WASM,
+        CSPR_NAME_EXPIRATIONS
+      ]) as Promise<StorageState>,
+      isMockStateEnable
+        ? Promise.resolve<SessionRecord>({ requests: {}, windowId: null })
+        : readRequestSession()
+    ]);
 
     if (storeSingleton == null) {
       if (isMockStateEnable) {
@@ -114,11 +131,25 @@ export async function getExistingMainStoreSingletonOrInit() {
               }
             : undefined,
           trustedWasm,
-          csprNameExpirations
+          csprNameExpirations,
+          // Present before any handler can run: `windowManagement.requests`
+          // lives only in the worker's memory, and an MV3 restart destroys it
+          // while the approval windows it describes are still on screen.
+          windowManagement: {
+            windowId: requestSession.windowId,
+            exportKeysWindowId: null,
+            requests: requestSession.requests
+          }
         });
       }
       // send start action
       storeSingleton.dispatch(startBackground());
+      // The PAIR, not the slice reference: the four window-id case reducers
+      // return a fresh slice for a value-equal write. Baselined from the
+      // hydrated pair, so a sanitizer-trimmed record is not written back until
+      // the first genuine change — deliberate, not a missing write-on-init.
+      let { requests: previousRequests, windowId: previousRequestWindowId } =
+        storeSingleton.getState().windowManagement;
       // on updates propagate new state to replicas and also persist encrypted vault
       storeSingleton.subscribe(() => {
         const state = storeSingleton.getState();
@@ -160,6 +191,20 @@ export async function getExistingMainStoreSingletonOrInit() {
             // nosemgrep: cw-logging-secrets — static message + error object, no key material
             console.error('Persist encrypted vault failed: ', e);
           });
+
+        // A separate call to a separate area with its own catch: a dapp-chosen
+        // oversized `requestId` must never be able to fail the vault write.
+        const { requests, windowId } = state.windowManagement;
+        if (
+          requests !== previousRequests ||
+          windowId !== previousRequestWindowId
+        ) {
+          previousRequests = requests;
+          previousRequestWindowId = windowId;
+          writeRequestSession({ requests, windowId }).catch(e => {
+            console.error('Persist request mirror failed: ', redactUrlQuery(e));
+          });
+        }
       });
     }
   } catch (e) {
