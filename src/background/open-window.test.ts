@@ -68,7 +68,8 @@ const awaitingDeviceIn = (windowIds: number[]): Record<string, Request> => ({
     origin: 'https://dapp.example',
     method: 'sign',
     windowIds,
-    awaitingDeviceConfirmation: true
+    awaitingDeviceConfirmation: true,
+    seq: 0
   }
 });
 

@@ -75,7 +75,8 @@ const OPEN_REQUEST: Request = {
   origin: DAPP_ORIGIN,
   method: 'sign',
   windowIds: [7],
-  awaitingDeviceConfirmation: false
+  awaitingDeviceConfirmation: false,
+  seq: 0
 };
 
 // Build a fake store whose `requests` map carries the desired request entry
@@ -104,7 +105,7 @@ function makeStatefulStore() {
   const dispatch = jest.fn((action: { payload?: { requestId?: string } }) => {
     const id = action?.payload?.requestId;
     if (id != null) {
-      requests[id] = { status: 'responded' };
+      requests[id] = { status: 'responded', seq: 0 };
     }
   });
   const store = {
@@ -211,7 +212,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it("already 'responded' → drops a duplicate CANCEL with no send and no dispatch", async () => {
-    const { store, dispatch } = makeStore({ status: 'responded' });
+    const { store, dispatch } = makeStore({ status: 'responded', seq: 0 });
 
     const result = await handleSdkResponseToTab(
       makeCancelMessage(),
@@ -255,7 +256,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     });
 
     it('escalates a dropped completed response to error severity', async () => {
-      const { store, dispatch } = makeStore({ status: 'responded' });
+      const { store, dispatch } = makeStore({ status: 'responded', seq: 0 });
 
       await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
 
@@ -277,7 +278,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     });
 
     it('only warns about a duplicate cancel, and does not bother the user', async () => {
-      const { store, dispatch } = makeStore({ status: 'responded' });
+      const { store, dispatch } = makeStore({ status: 'responded', seq: 0 });
 
       await handleSdkResponseToTab(makeCancelMessage(), UI_SENDER, store);
 
@@ -294,7 +295,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       // plain boolean, so a branch on `payload.cancelled` does not generalise
       // across the union. `false` is what `buildCancelResponse` and the reject
       // buttons send — nothing is lost by dropping it.
-      const { store } = makeStore({ status: 'responded' });
+      const { store } = makeStore({ status: 'responded', seq: 0 });
 
       await handleSdkResponseToTab(
         {
@@ -317,7 +318,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       // the wallet listing the site as connected while the dapp was told the
       // user rejected. Classifying it as a cancel logs the exact opposite of
       // what happened.
-      const { store } = makeStore({ status: 'responded' });
+      const { store } = makeStore({ status: 'responded', seq: 0 });
 
       await handleSdkResponseToTab(
         {

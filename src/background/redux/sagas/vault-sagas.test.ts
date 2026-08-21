@@ -718,7 +718,8 @@ describe('reconcileStalePayloadsSaga', () => {
     origin: 'https://dapp.example',
     method: 'sign',
     windowIds: [1],
-    awaitingDeviceConfirmation: false
+    awaitingDeviceConfirmation: false,
+    seq: 0
   } as const;
 
   const combinedReducer = () =>

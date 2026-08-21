@@ -9,6 +9,17 @@ import { CancellableMethod, WindowManagementState } from './types';
 // background page never restarts.
 export const MAX_RESPONDED_TOMBSTONES = 50;
 
+// Derived from the map rather than kept in a counter field: a counter is state
+// the session record does not carry, so after a service-worker restart it would
+// resume at zero and re-issue ordinals the restored map still holds.
+const nextSeq = (requests: WindowManagementState['requests']): number => {
+  const stamped = Object.values(requests).flatMap(request =>
+    request == null ? [] : [request.seq]
+  );
+
+  return stamped.length === 0 ? 0 : Math.max(...stamped) + 1;
+};
+
 const initialState: WindowManagementState = {
   windowId: null,
   exportKeysWindowId: null,
@@ -68,7 +79,8 @@ const slice = createSlice({
             origin: action.payload.origin,
             method: action.payload.method,
             windowIds: [],
-            awaitingDeviceConfirmation: false
+            awaitingDeviceConfirmation: false,
+            seq: nextSeq(state.requests)
           }
         }
       };
@@ -179,22 +191,26 @@ const slice = createSlice({
       // id the store no longer holds (an MV3 restart between registration and
       // the response) wrote an orphan tombstone that consumed a slot in the cap
       // below and made the SDK entry guard reject that id as a duplicate.
-      if (
-        getRequest(state.requests, action.payload.requestId)?.status !== 'open'
-      ) {
+      const request = getRequest(state.requests, action.payload.requestId);
+
+      if (request?.status !== 'open') {
         return state;
       }
 
       const requests: WindowManagementState['requests'] = {
         ...state.requests,
-        [action.payload.requestId]: { status: 'responded' }
+        [action.payload.requestId]: { status: 'responded', seq: request.seq }
       };
 
-      // Insertion order = the order requests were first registered, since
-      // re-writing an existing key keeps its original position.
-      const respondedIds = Object.keys(requests).filter(
-        requestId => getRequest(requests, requestId)?.status === 'responded'
-      );
+      // Oldest first by stamped ordinal, not by key order: enumeration hoists
+      // an integer-like dapp-chosen key ahead of every string key, so `"42"`
+      // would be evicted first however recently it was registered.
+      const respondedIds = Object.entries(requests)
+        .flatMap(([requestId, entry]) =>
+          entry?.status === 'responded' ? [[requestId, entry.seq] as const] : []
+        )
+        .sort(([, a], [, b]) => a - b)
+        .map(([requestId]) => requestId);
 
       const overflow = respondedIds.length - MAX_RESPONDED_TOMBSTONES;
       if (overflow > 0) {

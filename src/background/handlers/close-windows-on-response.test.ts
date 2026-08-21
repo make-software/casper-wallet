@@ -146,7 +146,8 @@ describe('markRequestResponded', () => {
       permissionWindowId: 11
     });
     expect(store.getState().windowManagement.requests.r1).toEqual({
-      status: 'responded'
+      status: 'responded',
+      seq: 0
     });
   });
 
@@ -443,7 +444,8 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
 
     expect(sendMessageMock).toHaveBeenCalled();
     expect(store.getState().windowManagement.requests.r1).toEqual({
-      status: 'responded'
+      status: 'responded',
+      seq: 0
     });
     expect(removeMock).not.toHaveBeenCalled();
   });

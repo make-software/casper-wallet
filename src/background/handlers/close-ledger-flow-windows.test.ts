@@ -33,7 +33,8 @@ const openRequest = (windowIds: number[]): Request => ({
   origin: 'https://dapp.example',
   method: 'sign',
   windowIds,
-  awaitingDeviceConfirmation: false
+  awaitingDeviceConfirmation: false,
+  seq: 0
 });
 
 const removedIds = () => removeMock.mock.calls.map(([id]) => id).sort();
@@ -122,7 +123,7 @@ it("closes only the caller's permission window for an internal flow with no requ
 it('closes only the permission window when the response path already collapsed the descriptor', async () => {
   // After close-windows-on-response.ts runs, the descriptor is already
   // { status: 'responded' } (dropping windowIds); this is the normal residue.
-  const { store } = makeStore(20, { r1: { status: 'responded' } });
+  const { store } = makeStore(20, { r1: { status: 'responded', seq: 0 } });
 
   await handleCloseLedgerFlowWindows(store, {
     requestId: 'r1',
