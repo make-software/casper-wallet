@@ -18,6 +18,7 @@ import { RecoverFromSecretPhrasePage } from '@onboarding/pages/recover-from-secr
 import { ResetWalletPage } from '@onboarding/pages/reset-wallet';
 import { SelectAccountsToRecoverPage } from '@onboarding/pages/select-accounts-to-recover';
 import { UnlockWalletPage } from '@onboarding/pages/unlock-wallet';
+import { VaultLockedPage } from '@onboarding/pages/vault-locked';
 import { WelcomePage } from '@onboarding/pages/welcome';
 import { WriteDownSecretPhrasePage } from '@onboarding/pages/write-down-secret-phrase';
 import {
@@ -31,6 +32,8 @@ import { selectEncryptionKeyDoesExist } from '@background/redux/session/selector
 
 import { ErrorPath, TabErrorPage } from '@libs/layout';
 
+import { resolveOnboardingRoute } from './resolve-route';
+
 export function AppRouter() {
   const { onboardingFormState, setFormState } = useOnboardingFormState();
 
@@ -40,17 +43,27 @@ export function AppRouter() {
   const keysDoesExist = useSelector(selectKeysDoesExist);
   const encryptionKeyDoesExist = useSelector(selectEncryptionKeyDoesExist);
 
-  if (keysDoesExist && encryptionKeyDoesExist) {
-    if (isLoggedIn) {
-      return (
-        <AuthorizedUserRoutes
-          onboardingFormState={onboardingFormState}
-          setFormState={setFormState}
-        />
-      );
-    } else {
-      return <UnlockUserRoutes saveIsLoggedIn={saveIsLoggedIn} />;
-    }
+  const route = resolveOnboardingRoute({
+    keysDoesExist,
+    encryptionKeyDoesExist,
+    isLoggedIn
+  });
+
+  if (route === 'authorized') {
+    return (
+      <AuthorizedUserRoutes
+        onboardingFormState={onboardingFormState}
+        setFormState={setFormState}
+      />
+    );
+  }
+
+  if (route === 'locked') {
+    return <LockedVaultRoutes />;
+  }
+
+  if (route === 'reauth') {
+    return <ReauthUserRoutes saveIsLoggedIn={saveIsLoggedIn} />;
   }
 
   return <NoVaultRoutes saveIsLoggedIn={saveIsLoggedIn} />;
@@ -74,7 +87,18 @@ function NoVaultRoutes({ saveIsLoggedIn }: UnauthorizedRouterProps) {
   );
 }
 
-function UnlockUserRoutes({ saveIsLoggedIn }: UnauthorizedRouterProps) {
+function LockedVaultRoutes() {
+  return (
+    <HashRouter>
+      <Routes>
+        <Route path={RouterPath.Any} element={<VaultLockedPage />} />
+        <Route path={RouterPath.ResetWallet} element={<ResetWalletPage />} />
+      </Routes>
+    </HashRouter>
+  );
+}
+
+function ReauthUserRoutes({ saveIsLoggedIn }: UnauthorizedRouterProps) {
   return (
     <HashRouter>
       <Routes>

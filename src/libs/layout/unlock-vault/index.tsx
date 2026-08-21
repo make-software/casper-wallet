@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -14,13 +14,13 @@ import { getErrorMessageForIncorrectPassword } from '@src/utils';
 import { selectKeysDoesExist } from '@background/redux/keys/selectors';
 import { loginRetryCountIncremented } from '@background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
+import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 import { unlockVault } from '@background/redux/sagas/actions';
 import { UnlockVault } from '@background/redux/sagas/types';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { VaultState } from '@background/redux/vault/types';
 import { WorkerResult, isWorkerError } from '@background/workers/types';
 
-import { useLockWalletWhenNoMoreRetries } from '@hooks/use-lock-wallet-when-no-more-retries';
 import { usePrivateState } from '@hooks/use-private-state';
 
 import unlockAnimation from '@libs/animations/unlock_animation.json';
@@ -39,6 +39,7 @@ import { LottiePlayer } from '@libs/ui/components/lottie-player';
 import { UnlockWalletFormValues } from '@libs/ui/forms/unlock-wallet';
 
 import { UnlockVaultPageContent } from './content';
+import { didLockoutArm } from './lockout-armed-edge';
 
 interface UnlockMessageEvent extends MessageEvent {
   data: WorkerResult<UnlockVault>;
@@ -89,8 +90,21 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
     }
   });
 
+  const hasLoginRetryLockoutTime = useSelector(selectHasLoginRetryLockoutTime);
+  const wasLockedOut = useRef(hasLoginRetryLockoutTime);
+
+  useEffect(() => {
+    if (didLockoutArm(wasLockedOut.current, hasLoginRetryLockoutTime)) {
+      resetField('password');
+      setIsLoading(false);
+    }
+    wasLockedOut.current = hasLoginRetryLockoutTime;
+  }, [hasLoginRetryLockoutTime, resetField]);
+
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
-    if (isLoading || privateState == null) return;
+    // The saga refuses while a lockout is armed, and its refusal answers with a
+    // banner only — nothing that would clear the spinner this would have set.
+    if (isLoading || privateState == null || hasLoginRetryLockoutTime) return;
 
     const {
       passwordHash,
@@ -233,8 +247,6 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
     };
   }
 
-  useLockWalletWhenNoMoreRetries(resetField);
-
   if (privateStateError) {
     return (
       <PrivateStateErrorPage
@@ -253,7 +265,9 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
     <FooterButtonsContainer>
       <Button
         type="submit"
-        style={{ pointerEvents: isLoading ? 'none' : 'auto' }}
+        style={{
+          pointerEvents: isLoading || hasLoginRetryLockoutTime ? 'none' : 'auto'
+        }}
       >
         {isLoading ? (
           <AlignedFlexRow gap={SpacingSize.Small}>

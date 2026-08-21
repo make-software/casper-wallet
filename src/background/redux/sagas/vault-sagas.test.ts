@@ -16,7 +16,10 @@ import {
   sagaError
 } from '@background/redux/app-events/actions';
 import { loginRetryLockoutTimeReseted } from '@background/redux/login-retry-lockout-time/actions';
-import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import {
+  selectHasLoginRetryLockoutTime,
+  selectLoginRetryLockoutTime
+} from '@background/redux/login-retry-lockout-time/selectors';
 import {
   AUTO_LOCK_DEADLINE_KEY,
   LOGIN_RETRY_LOCKOUT_DEADLINE_KEY
@@ -34,7 +37,11 @@ import { reducer as keysReducer } from '../keys/reducer';
 import { selectPasswordHash, selectPasswordSaltHash } from '../keys/selectors';
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
 import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
-import { loginRetryCountReseted } from '../login-retry-count/actions';
+import {
+  loginRetryCountIncremented,
+  loginRetryCountReseted
+} from '../login-retry-count/actions';
+import { selectLoginRetryCount } from '../login-retry-count/selectors';
 import { loginRetryLockoutTimeSet } from '../login-retry-lockout-time/reducer';
 import {
   encryptionKeyHashCreated,
@@ -82,6 +89,7 @@ import {
 import { errorToMessage } from './utils';
 import {
   VAULT_REENCRYPT_DEBOUNCE_MS,
+  armLockoutSaga,
   changePasswordSaga,
   delay,
   lockVaultSaga,
@@ -247,6 +255,89 @@ describe('setDelayForLockoutVaultSaga', () => {
   });
 });
 
+describe('armLockoutSaga — root-saga wiring', () => {
+  // The four tests below invoke the saga directly, so replacing the trigger
+  // array in `vaultSagas` leaves them all green with the saga wired to nothing.
+  // These dispatch through the real root saga instead.
+  // `selectLoginRetryLockoutTime` is here because arming wakes
+  // `setDelayForLockoutVaultSaga`, which reads it; without it that saga runs
+  // against an undefined state and the failure looks like a wiring problem.
+  const armProviders = [
+    [matchers.select.selector(selectLoginRetryCount), 5],
+    [matchers.select.selector(selectHasLoginRetryLockoutTime), false],
+    [matchers.select.selector(selectVaultIsLocked), true],
+    [matchers.select.selector(selectLoginRetryLockoutTime), null]
+  ] as never[];
+
+  it('arms on a retry increment', async () => {
+    await expectSaga(vaultSagas)
+      .provide(armProviders)
+      .dispatch(loginRetryCountIncremented())
+      .put(loginRetryLockoutTimeSet(NOW))
+      .silentRun(50);
+  });
+
+  // The resume half: a count persisted past the limit with nothing armed. No
+  // test covered this trigger at all — every other `startBackground` in the
+  // suite invokes a saga directly, and no e2e restarts the worker.
+  it('arms on startBackground, for a stale count that survived a restart', async () => {
+    await expectSaga(vaultSagas)
+      .provide(armProviders)
+      .dispatch(startBackground())
+      .put(loginRetryLockoutTimeSet(NOW))
+      .silentRun(50);
+  });
+});
+
+describe('armLockoutSaga', () => {
+  it('does nothing below the attempts limit', async () => {
+    await expectSaga(armLockoutSaga)
+      .provide([
+        [matchers.select.selector(selectLoginRetryCount), 4],
+        [matchers.select.selector(selectHasLoginRetryLockoutTime), false],
+        [matchers.select.selector(selectVaultIsLocked), true]
+      ])
+      .not.put(loginRetryLockoutTimeSet(NOW))
+      .not.put(lockVault())
+      .run();
+  });
+
+  it('arms the lockout when the limit is reached', async () => {
+    await expectSaga(armLockoutSaga)
+      .provide([
+        [matchers.select.selector(selectLoginRetryCount), 5],
+        [matchers.select.selector(selectHasLoginRetryLockoutTime), false],
+        [matchers.select.selector(selectVaultIsLocked), true]
+      ])
+      .put(loginRetryLockoutTimeSet(NOW))
+      .not.put(lockVault())
+      .run();
+  });
+
+  it('does not re-arm an already-armed lockout, so a resume cannot restart the clock', async () => {
+    await expectSaga(armLockoutSaga)
+      .provide([
+        [matchers.select.selector(selectLoginRetryCount), 7],
+        [matchers.select.selector(selectHasLoginRetryLockoutTime), true],
+        [matchers.select.selector(selectVaultIsLocked), true]
+      ])
+      .not.put(loginRetryLockoutTimeSet(NOW))
+      .run();
+  });
+
+  it('also locks the vault when it is still unlocked (the protected-page case)', async () => {
+    await expectSaga(armLockoutSaga)
+      .provide([
+        [matchers.select.selector(selectLoginRetryCount), 5],
+        [matchers.select.selector(selectHasLoginRetryLockoutTime), false],
+        [matchers.select.selector(selectVaultIsLocked), false]
+      ])
+      .put(loginRetryLockoutTimeSet(NOW))
+      .put(lockVault())
+      .run();
+  });
+});
+
 describe('timeoutCounterSaga', () => {
   const unlockedVaultProvides = (
     lastActivityTime: number | null,
@@ -408,6 +499,7 @@ describe('unlockVaultSaga', () => {
   const provides = (
     activeAccount: unknown
   ): Array<[ReturnType<typeof matchers.select.selector>, unknown]> => [
+    [matchers.select.selector(selectHasLoginRetryLockoutTime), false],
     [matchers.select.selector(selectAccountNamesByOriginDict), {}],
     [matchers.select.selector(selectVaultActiveAccount), activeAccount]
   ];
@@ -438,6 +530,7 @@ describe('unlockVaultSaga', () => {
     );
 
     expect(putTypes).toEqual([
+      dismissSagaErrorsBySource.type,
       loginRetryCountReseted.type,
       vaultLoaded.type,
       keysUpdated.type,
@@ -465,6 +558,23 @@ describe('unlockVaultSaga', () => {
       .run();
 
     expect(mockTabsQuery).not.toHaveBeenCalled();
+  });
+
+  it('refuses to unlock while a lockout is active', async () => {
+    await expectSaga(unlockVaultSaga, unlockAction)
+      .provide([
+        [matchers.select.selector(selectHasLoginRetryLockoutTime), true]
+      ])
+      .put(dismissSagaErrorsBySource('unlockVaultSaga'))
+      .put(
+        sagaError({
+          source: 'unlockVaultSaga',
+          message: 'Too many failed attempts. Wait before unlocking again.'
+        })
+      )
+      .not.put(loginRetryCountReseted())
+      .not.put(vaultUnlocked())
+      .run();
   });
 });
 
@@ -1228,6 +1338,7 @@ describe('saga error channel', () => {
       })
     )
       .provide([
+        [matchers.select.selector(selectHasLoginRetryLockoutTime), false],
         [
           matchers.select.selector(selectAccountNamesByOriginDict),
           throwError(Error('unlock failed'))

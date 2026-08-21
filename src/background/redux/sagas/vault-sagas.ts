@@ -7,6 +7,7 @@ import {
 } from 'redux-saga/effects';
 import { storage } from 'webextension-polyfill';
 
+import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';
 import { getActiveAccountSupports, getUrlOrigin } from '@src/utils';
 
 import {
@@ -23,7 +24,10 @@ import {
   loginRetryLockoutTimeReseted,
   loginRetryLockoutTimeSet
 } from '@background/redux/login-retry-lockout-time/actions';
-import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import {
+  selectHasLoginRetryLockoutTime,
+  selectLoginRetryLockoutTime
+} from '@background/redux/login-retry-lockout-time/selectors';
 import {
   AUTO_LOCK_DEADLINE_KEY,
   LOGIN_RETRY_LOCKOUT_DEADLINE_KEY
@@ -48,7 +52,11 @@ import { keysUpdated } from '../keys/actions';
 import { selectPasswordHash, selectPasswordSaltHash } from '../keys/selectors';
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
 import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
-import { loginRetryCountReseted } from '../login-retry-count/actions';
+import {
+  loginRetryCountIncremented,
+  loginRetryCountReseted
+} from '../login-retry-count/actions';
+import { selectLoginRetryCount } from '../login-retry-count/selectors';
 import {
   encryptionKeyHashCreated,
   sessionReseted,
@@ -113,6 +121,14 @@ export function* vaultSagas() {
   yield takeLatest(
     [loginRetryLockoutTimeSet.type, popupWindowInit.type, startBackground.type],
     setDelayForLockoutVaultSaga
+  );
+  // Registered AFTER setDelayForLockoutVaultSaga on purpose. That saga is a
+  // takeLatest that also watches startBackground; arming first on a resume would
+  // start a run the still-queued startBackground delivery then cancels, possibly
+  // before the deadline write.
+  yield takeEvery(
+    [loginRetryCountIncremented.type, startBackground.type],
+    armLockoutSaga
   );
   yield takeLatest(unlockVault.type, unlockVaultSaga);
   yield takeLatest(vaultLoaded.type, reconcileStalePayloadsSaga);
@@ -441,6 +457,30 @@ export function* setDelayForLockoutVaultSaga(
 }
 
 /**
+ * Arms the login-retry lockout in the background, so it cannot be skipped by a
+ * dropped UI dispatch. Runs on every increment and on resume, which also
+ * reconciles a persisted count that passed the limit while nothing armed it.
+ */
+export function* armLockoutSaga() {
+  const loginRetryCount = yield* sagaSelect(selectLoginRetryCount);
+
+  if (loginRetryCount < LOGIN_RETRY_ATTEMPTS_LIMIT) {
+    return;
+  }
+
+  // Not just a burst guard: without it a resume would restart the lockout clock.
+  if (yield* sagaSelect(selectHasLoginRetryLockoutTime)) {
+    return;
+  }
+
+  yield put(loginRetryLockoutTimeSet(Date.now()));
+
+  if (!(yield* sagaSelect(selectVaultIsLocked))) {
+    yield put(lockVault());
+  }
+}
+
+/**
  * Reclaim the capped payload slots (`MAX_STORED_PAYLOADS`) that no live request
  * can answer for. A plain auto-lock is enough to strand one: `lockVaultSaga`
  * flushes `updateVaultCipher` BEFORE the resets, so an unanswered payload is
@@ -538,6 +578,24 @@ export function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
   const releaseAnchor = anchorServiceWorker('unlock');
 
   try {
+    // Append-only errors + a route-independent banner mean a refused attempt's
+    // banner would otherwise outlive the retry that succeeds.
+    yield put(dismissSagaErrorsBySource('unlockVaultSaga'));
+
+    // Defence in depth, not the fix for WALLET-1424: a DROPPED
+    // `loginRetryLockoutTimeSet` leaves this selector null, so this cannot
+    // catch that. It closes the forged-`unlockVault` path, and once the
+    // background owns the unlock it is a belt-and-braces assertion.
+    if (yield* sagaSelect(selectHasLoginRetryLockoutTime)) {
+      yield put(
+        sagaError({
+          source: 'unlockVaultSaga',
+          message: 'Too many failed attempts. Wait before unlocking again.'
+        })
+      );
+      return;
+    }
+
     const {
       vault,
       newKeyDerivationSaltHash,
