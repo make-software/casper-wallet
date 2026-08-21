@@ -9,8 +9,14 @@ const PORT_RETRY_DELAYS_MS = [250, 500];
 /**
  * Liveness backstop. A message delivered before the background attached its
  * listener produces neither a response nor a disconnect, so retry alone cannot
- * see it. Generous on purpose: it must never fire during a real scrypt
- * derivation, which `request-with-retry.ts`'s 5s could not bound.
+ * see it.
+ *
+ * Sized for the requests this port is built to carry, not for the one it
+ * carries today. `changePassword` is acked as soon as the handler dispatches,
+ * ahead of any derivation — but the unlock and verify requests answer only
+ * *after* their scrypt, and those derivations are serialised process-wide, so a
+ * queued request waits out every one ahead of it. `request-with-retry.ts`'s 5s
+ * could not bound that, which is why this is a different order of magnitude.
  */
 export const PORT_RESPONSE_TIMEOUT_MS = 60_000;
 
@@ -53,7 +59,19 @@ function attempt<Res>(request: PortRequest): Promise<Res> {
       reject(new PortDisconnectedError());
     });
 
-    port.postMessage(request);
+    try {
+      port.postMessage(request);
+    } catch (error) {
+      // Same shape as the two listeners above: without it this exit leaves the
+      // timeout armed, holding the closure — and the request's passwords — for
+      // its full duration.
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        port.disconnect();
+        reject(error);
+      }
+    }
   });
 }
 
