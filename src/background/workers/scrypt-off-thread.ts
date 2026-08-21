@@ -17,6 +17,8 @@ import { isWorkerError } from './types';
 // popup's to begin with.
 const canOffloadToWorker = typeof Worker !== 'undefined';
 
+const DERIVATION_TIMEOUT_MS = 30_000;
+
 interface ScryptResult {
   key: Uint8Array;
 }
@@ -35,23 +37,43 @@ export function deriveScryptKey(
 
   return new Promise<Uint8Array>((resolve, reject) => {
     const worker = spawnScryptWorker();
+    let settled = false;
+
+    const settle = (outcome: () => void) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timer);
+      worker.terminate();
+      outcome();
+    };
+
+    // `unlock-requests.ts` chains every derivation on one promise, and a promise
+    // that stays pending can never be displaced — so a worker that dies without
+    // firing `onerror` would wedge the queue until the background restarts. Far
+    // above a real derivation (~350ms) and below the port's own 60s, so the
+    // caller sees a failed attempt rather than a transport timeout.
+    const timer = setTimeout(
+      () => settle(() => reject(Error('Key derivation timed out'))),
+      DERIVATION_TIMEOUT_MS
+    );
 
     worker.onmessage = (
       event: MessageEvent<ScryptResult | { error: true }>
     ) => {
-      worker.terminate();
+      settle(() => {
+        if (isWorkerError(event.data)) {
+          reject(Error('Key derivation failed'));
+          return;
+        }
 
-      if (isWorkerError(event.data)) {
-        reject(Error('Key derivation failed'));
-        return;
-      }
-
-      resolve(event.data.key);
+        resolve(event.data.key);
+      });
     };
 
     worker.onerror = () => {
-      worker.terminate();
-      reject(Error('Key derivation failed'));
+      settle(() => reject(Error('Key derivation failed')));
     };
 
     worker.postMessage({ password, saltHash });

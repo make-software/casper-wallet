@@ -61,9 +61,48 @@ describe('scrypt-off-thread — worker offload (the MV2 background page)', () =>
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     delete (globalThis as { Worker?: unknown }).Worker;
     jest.dontMock('./spawn-scrypt-worker');
     jest.resetModules();
+  });
+
+  // A worker that never answers must not hold the serialised derivation queue in
+  // `unlock-requests.ts` open: that queue chains on one promise, and a pending
+  // one can never be displaced, so every later unlock would wedge until the
+  // background restarts.
+  it('rejects and terminates the worker when the derivation never settles', async () => {
+    const { deriveScryptKey } = await loadWithWorker();
+    jest.useFakeTimers();
+    const pending = deriveScryptKey('pass', SALT);
+    const settled = jest.fn();
+    pending.then(settled, settled);
+
+    // Well past any plausible derivation: the assertion is that a deadline
+    // exists at all, not what its exact value is.
+    await jest.advanceTimersByTimeAsync(120_000);
+
+    await expect(pending).rejects.toThrow('Key derivation timed out');
+    expect(worker.terminate).toHaveBeenCalled();
+  });
+
+  // Without this the deadline above is satisfied by any value, including 0 — a
+  // derivation slower than the timeout would be reported as a failed attempt.
+  it('does not time out a derivation that is merely slow', async () => {
+    const { deriveScryptKey } = await loadWithWorker();
+    jest.useFakeTimers();
+    const pending = deriveScryptKey('pass', SALT);
+    const settled = jest.fn();
+    pending.then(settled, settled);
+
+    // An order of magnitude past a measured derivation (~350ms), still well
+    // inside the deadline.
+    await jest.advanceTimersByTimeAsync(5_000);
+    expect(settled).not.toHaveBeenCalled();
+
+    worker.onmessage?.({ data: { key } });
+
+    await expect(pending).resolves.toBe(key);
   });
 
   it('sends the password and salt to the worker and resolves with its key', async () => {
