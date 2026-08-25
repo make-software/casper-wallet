@@ -1,5 +1,6 @@
-import { MAX_RESPONDED_TOMBSTONES } from './reducer';
+import { MAX_OPEN_REQUESTS, MAX_RESPONDED_TOMBSTONES } from './reducer';
 import {
+  MAX_SESSION_ROWS,
   REQUEST_SESSION_KEY,
   SessionRecord,
   clearRequestSession,
@@ -490,6 +491,13 @@ describe('session-store — write path', () => {
 
     expect(sessionSet).toHaveBeenCalledTimes(2);
     expect(lastWrittenRecord().windowId).toBe(2);
+  });
+
+  it('bounds the write cap to exactly what the two request states can hold', () => {
+    // A row is either a tombstone or an open request — no third state — so the
+    // sum of their individual caps is the only correct figure, not headroom
+    // picked separately from the reducer's own open-request bound.
+    expect(MAX_SESSION_ROWS).toBe(MAX_RESPONDED_TOMBSTONES + MAX_OPEN_REQUESTS);
   });
 
   it('caps rows on the write side, dropping tombstones before open rows and oldest first', async () => {

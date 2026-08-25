@@ -69,6 +69,15 @@ function reportCapacityRefusal(action: SdkMethod) {
   );
 }
 
+// Same rationale as `reportCapacityRefusal`, for `MAX_OPEN_REQUESTS` rather
+// than the payload maps.
+function reportOpenRequestCapacityRefusal(action: SdkMethod) {
+  console.error('sdk-methods: open-request map at capacity, request refused', {
+    requestId: action.meta.requestId,
+    method: action.type
+  });
+}
+
 export async function handleSdkMethod(
   action: SdkMethod,
   sender: Runtime.MessageSender,
@@ -140,6 +149,21 @@ export async function handleSdkMethod(
           method: 'connect'
         })
       );
+
+      // At `MAX_OPEN_REQUESTS` the reducer refused the write silently; this is
+      // the analogue of the `getPayload(...) == null` check above, for a method
+      // with no capacity map of its own to read back.
+      if (
+        selectRequestStatus(store.getState(), action.meta.requestId) == null
+      ) {
+        reportOpenRequestCapacityRefusal(action);
+
+        return {
+          handled: true,
+          response: sdkMethod.connectResponse(false, action.meta)
+        };
+      }
+
       openWindow(store, {
         windowApp: WindowApp.ConnectToApp,
         searchParams: query,
@@ -178,6 +202,16 @@ export async function handleSdkMethod(
         method: 'switchAccount'
       })
     );
+
+    if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
+      reportOpenRequestCapacityRefusal(action);
+
+      return {
+        handled: true,
+        response: sdkMethod.switchAccountResponse(false, action.meta)
+      };
+    }
+
     openWindow(store, {
       windowApp: WindowApp.SwitchAccount,
       searchParams: query,
@@ -307,6 +341,19 @@ export async function handleSdkMethod(
         method: 'signMessage'
       })
     );
+
+    if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
+      reportOpenRequestCapacityRefusal(action);
+
+      return {
+        handled: true,
+        response: sdkMethod.signMessageResponse(
+          { cancelled: true },
+          action.meta
+        )
+      };
+    }
+
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestMessage,
       searchParams: {
@@ -412,6 +459,19 @@ export async function handleSdkMethod(
         method: 'decryptMessage'
       })
     );
+
+    if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
+      reportOpenRequestCapacityRefusal(action);
+
+      return {
+        handled: true,
+        response: sdkMethod.decryptMessageResponse(
+          { cancelled: true },
+          action.meta
+        )
+      };
+    }
+
     openWindow(store, {
       windowApp: WindowApp.DecryptMessageRequest,
       searchParams: {

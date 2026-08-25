@@ -9,6 +9,11 @@ import { CancellableMethod, WindowManagementState } from './types';
 // background page never restarts.
 export const MAX_RESPONDED_TOMBSTONES = 50;
 
+// One shared approval window plus the Ledger second window keeps steady-state
+// open-request concurrency at ~1-2; this only needs to bound the 250 ms
+// `CANCEL_GRACE_MS` burst, not any sustained load.
+export const MAX_OPEN_REQUESTS = 20;
+
 // Derived from the map rather than kept in a counter field: a counter is state
 // the session record does not carry, so after a service-worker restart it would
 // resume at zero and re-issue ordinals the restored map still holds.
@@ -65,6 +70,17 @@ const slice = createSlice({
         !isStorableRequestId(action.payload.requestId) ||
         getRequest(state.requests, action.payload.requestId) != null
       ) {
+        return state;
+      }
+
+      // At the cap, refuse the write rather than evict — "open requests are
+      // never evicted" is the standing invariant, and a refused write must
+      // consume no ordinal (below `nextSeq` is never reached).
+      const openCount = Object.values(state.requests).filter(
+        request => request?.status === 'open'
+      ).length;
+
+      if (openCount >= MAX_OPEN_REQUESTS) {
         return state;
       }
 

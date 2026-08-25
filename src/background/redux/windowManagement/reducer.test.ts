@@ -15,7 +15,11 @@ import {
   windowRequestResponded,
   windowRequestWindowAttached
 } from './actions';
-import { MAX_RESPONDED_TOMBSTONES, reducer } from './reducer';
+import {
+  MAX_OPEN_REQUESTS,
+  MAX_RESPONDED_TOMBSTONES,
+  reducer
+} from './reducer';
 import { WindowManagementState } from './types';
 
 const empty: WindowManagementState = {
@@ -556,6 +560,73 @@ describe('windowManagement requests', () => {
       }
 
       expect(state.requests['still-open']).toMatchObject({ status: 'open' });
+    });
+  });
+
+  describe('the open-request cap', () => {
+    it('refuses a write at the cap and returns state unchanged (same reference)', () => {
+      let state = empty;
+      for (let i = 0; i < MAX_OPEN_REQUESTS; i++) {
+        state = reducer(state, opened(`r${i}`));
+      }
+
+      const next = reducer(state, opened('over-cap'));
+
+      expect(next).toBe(state);
+      expect(next.requests['over-cap']).toBeUndefined();
+    });
+
+    it('consumes no ordinal for a write refused at the cap', () => {
+      let state = empty;
+      for (let i = 0; i < MAX_OPEN_REQUESTS; i++) {
+        state = reducer(state, opened(`r${i}`));
+      }
+      state = reducer(state, opened('over-cap'));
+      state = reducer(state, windowRequestResponded({ requestId: 'r0' }));
+
+      // If the refused write had consumed an ordinal, the next accepted one
+      // would be stamped one past where it should be.
+      const accepted = reducer(state, opened('under-cap'));
+      expect(accepted.requests['under-cap']).toMatchObject({
+        seq: MAX_OPEN_REQUESTS
+      });
+    });
+
+    it('never evicts an open request to make room at the cap either', () => {
+      let state = empty;
+      for (let i = 0; i < MAX_OPEN_REQUESTS; i++) {
+        state = reducer(state, opened(`r${i}`));
+      }
+
+      const next = reducer(state, opened('over-cap'));
+
+      for (let i = 0; i < MAX_OPEN_REQUESTS; i++) {
+        expect(next.requests[`r${i}`]).toMatchObject({ status: 'open' });
+      }
+    });
+
+    it('a completed request frees a slot for a new one', () => {
+      let state = empty;
+      for (let i = 0; i < MAX_OPEN_REQUESTS; i++) {
+        state = reducer(state, opened(`r${i}`));
+      }
+      state = reducer(state, windowRequestResponded({ requestId: 'r0' }));
+
+      const next = reducer(state, opened('fresh'));
+
+      expect(next.requests.fresh).toMatchObject({ status: 'open' });
+    });
+
+    it('tombstones do not count against the open-request cap', () => {
+      let state = empty;
+      for (let i = 0; i < MAX_OPEN_REQUESTS + 10; i++) {
+        state = reducer(state, opened(`t${i}`));
+        state = reducer(state, windowRequestResponded({ requestId: `t${i}` }));
+      }
+
+      const next = reducer(state, opened('still-fits'));
+
+      expect(next.requests['still-fits']).toMatchObject({ status: 'open' });
     });
   });
 });
