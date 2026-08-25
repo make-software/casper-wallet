@@ -9,6 +9,7 @@ import {
   windowDetachedFromRequests,
   windowIdChanged,
   windowIdCleared,
+  windowManagementReseted,
   windowRequestDeviceConfirmationChanged,
   windowRequestOpened,
   windowRequestResponded,
@@ -115,6 +116,30 @@ describe('windowManagement reducer', () => {
     // Responding twice must not throw or resurrect the dropped descriptor.
     state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
     expect(state.requests.r1).toEqual({ status: 'responded', seq: 2 });
+  });
+
+  it('windowManagementReseted wipes windowId, exportKeysWindowId and every request', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(state, windowIdChanged(7));
+    state = reducer(state, exportKeysWindowIdChanged(12));
+
+    expect(reducer(state, windowManagementReseted())).toEqual({
+      windowId: null,
+      exportKeysWindowId: null,
+      requests: {}
+    });
+  });
+
+  it('windowManagementReseted returns the shared initialState reference', () => {
+    // Load-bearing for spec §8.3: the get-main-store.ts subscriber guard
+    // compares `requests`/`windowId` by reference, so a state that was already
+    // at rest must reset to the SAME object — the reset flow does not rely on
+    // that guard to persist the clear, but the identity is still the contract
+    // this reducer promises every other reset case.
+    const first = reducer(empty, windowManagementReseted());
+    const second = reducer(first, windowManagementReseted());
+
+    expect(first).toBe(second);
   });
 });
 
