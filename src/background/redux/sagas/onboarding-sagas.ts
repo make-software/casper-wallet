@@ -65,7 +65,7 @@ function deliverResetCancels(openRequests: readonly OpenRequest[]): void {
   for (const request of openRequests) {
     deliverCancelResponse(request, 'resetVaultSaga').catch(error => {
       console.error(
-        'resetVaultSaga: cancel delivery failed',
+        'resetVaultSaga: cancel delivery rejected',
         { requestId: request.requestId },
         redactUrlQuery(error)
       );

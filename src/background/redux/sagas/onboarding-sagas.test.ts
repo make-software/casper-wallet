@@ -257,7 +257,7 @@ describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', ()
 
   it('logs, and does not throw, when a delivery rejects', async () => {
     (deliverCancelResponse as jest.Mock).mockRejectedValue(
-      new Error('deliver failed')
+      new Error('deliver failed: https://dapp/page?message=super-secret')
     );
     const consoleError = jest
       .spyOn(console, 'error')
@@ -271,17 +271,25 @@ describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', ()
     await Promise.resolve();
 
     expect(consoleError).toHaveBeenCalledWith(
-      'resetVaultSaga: cancel delivery failed',
+      'resetVaultSaga: cancel delivery rejected',
       { requestId: 'r1' },
-      expect.anything()
+      expect.any(String)
     );
+    const [, , loggedError] = consoleError.mock.calls.find(
+      ([message]) => message === 'resetVaultSaga: cancel delivery rejected'
+    )!;
+    // Pins that the argument is `redactUrlQuery`'s output, not the raw
+    // rejection: a raw `Error` would fail the type check, and an
+    // un-redacted string would still carry the `?...=` query.
+    expect(loggedError).not.toBeInstanceOf(Error);
+    expect(loggedError).not.toMatch(/\?[^"]*=/);
     consoleError.mockRestore();
   });
 
   it('logs, and does not throw, when windows.remove rejects', async () => {
     (deliverCancelResponse as jest.Mock).mockResolvedValue(1);
     (windows.remove as jest.Mock).mockRejectedValue(
-      new Error('no such window')
+      new Error('no such window: https://dapp/page?message=super-secret')
     );
     const consoleError = jest
       .spyOn(console, 'error')
@@ -297,14 +305,19 @@ describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', ()
     expect(consoleError).toHaveBeenCalledWith(
       'resetVaultSaga: window removal failed',
       { windowId: 42 },
-      expect.anything()
+      expect.any(String)
     );
+    const [, , loggedError] = consoleError.mock.calls.find(
+      ([message]) => message === 'resetVaultSaga: window removal failed'
+    )!;
+    expect(loggedError).not.toBeInstanceOf(Error);
+    expect(loggedError).not.toMatch(/\?[^"]*=/);
     consoleError.mockRestore();
   });
 
   it('logs, and does not throw, when clearing the session mirror rejects', async () => {
     (clearRequestSession as jest.Mock).mockRejectedValue(
-      new Error('write failed')
+      new Error('write failed: https://dapp/page?message=super-secret')
     );
     const consoleError = jest
       .spyOn(console, 'error')
@@ -325,8 +338,13 @@ describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', ()
 
     expect(consoleError).toHaveBeenCalledWith(
       'resetVaultSaga: clear request mirror failed',
-      expect.anything()
+      expect.any(String)
     );
+    const [, loggedError] = consoleError.mock.calls.find(
+      ([message]) => message === 'resetVaultSaga: clear request mirror failed'
+    )!;
+    expect(loggedError).not.toBeInstanceOf(Error);
+    expect(loggedError).not.toMatch(/\?[^"]*=/);
     consoleError.mockRestore();
   });
 });

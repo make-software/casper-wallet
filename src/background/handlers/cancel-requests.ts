@@ -208,7 +208,7 @@ export type CancelDeliveryRow = Pick<
 
 export async function deliverCancelResponse(
   row: CancelDeliveryRow,
-  logSource: string
+  logSource: SagaErrorSource
 ): Promise<number> {
   const { requestId, tabId, origin, method, frameId } = row;
   const action = buildCancelResponse(method, requestId);
