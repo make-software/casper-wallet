@@ -202,8 +202,11 @@ export async function cancelRequestsDisplacedBy(
 // (spec §8.1). Without this the dapp promise hangs until its own timeout
 // (30 min by default).
 //
-// `source` defaults to the original trigger so every existing call site keeps
-// its behaviour unchanged. It doubles as the banner policy: only
+// `source` defaults to the original trigger so the `open-window-failed` call
+// site keeps its BANNER policy unchanged — its delivery does not: #1484's
+// stale-tab check below applies to every source alike, so that call site's
+// delivery is deliberately narrowed too, same as the sweep's. `source` doubles
+// as the banner policy: only
 // `'open-window-failed'` dispatches `sagaError` (a `windows.create` failure is
 // the wallet's own doing, with nothing else to tell the user). Every other
 // source — today just the sweep — is dapp-triggerable and console-only,
@@ -238,14 +241,21 @@ export async function failRequestOnWindowError(
   // the TOP document's origin, so only a top-frame request (no `frameId`, or
   // `0`) is checkable this way; a sub-frame request goes straight to the
   // frame-targeted send, same as today.
-  const staleOrigin =
-    (frameId == null || frameId === 0) &&
-    (await getLiveTabOrigin(tabId)) !== origin;
+  const isTopFrame = frameId == null || frameId === 0;
+  const liveOrigin = isTopFrame ? await getLiveTabOrigin(tabId) : undefined;
+  const staleOrigin = isTopFrame && liveOrigin !== origin;
 
   let delivered = 1;
 
   if (staleOrigin) {
     delivered = await deliverViaOrigin(origin, action, frameId);
+
+    // Identifiers and origins only, matching sdk-response-to-tab's withheld-
+    // response log — never a URL.
+    console.error(
+      `${source}: target tab no longer hosts the requesting origin; response withheld`,
+      { requestId, tabId, expectedOrigin: origin, liveOrigin, delivered }
+    );
   } else {
     try {
       await (frameId == null
@@ -265,6 +275,9 @@ export async function failRequestOnWindowError(
     }
   }
 
+  // The sweep (source === 'sweep-orphaned-requests') knowingly shares this
+  // same tombstone-before-delivery ordering — an accepted residual, not an
+  // oversight specific to the sweep.
   if (source !== 'open-window-failed') {
     console[delivered > 0 ? 'warn' : 'error'](
       `${source}: cancelled an orphaned request`,

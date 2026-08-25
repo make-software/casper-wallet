@@ -1,6 +1,10 @@
 import { windows } from 'webextension-polyfill';
 
-import { collectRequestIdsFromOpenWindows } from './open-request-windows';
+import { WindowApp, getUrlByWindowApp } from './create-open-window';
+import {
+  REQUEST_BEARING_PATHNAMES,
+  collectRequestIdsFromOpenWindows
+} from './open-request-windows';
 
 jest.mock('webextension-polyfill', () => ({
   windows: { getAll: jest.fn().mockResolvedValue([]) },
@@ -265,5 +269,41 @@ describe('collectRequestIdsFromOpenWindows', () => {
     const logged = JSON.stringify(consoleError.mock.calls);
     expect(logged).not.toContain('my-secret-message');
     expect(logged).not.toContain('?');
+  });
+});
+
+// Oracle: nothing else ties `REQUEST_BEARING_PATHNAMES` to the URLs approval
+// windows actually open at — the two lists could drift silently. Derived from
+// `getUrlByWindowApp`, not restated as literals, so a pathname change on
+// either side fails here instead of only in production.
+describe('REQUEST_BEARING_PATHNAMES tracks every approval WindowApp', () => {
+  const APPROVAL_WINDOW_APPS = [
+    WindowApp.ConnectToApp,
+    WindowApp.SwitchAccount,
+    WindowApp.SignatureRequestDeploy,
+    WindowApp.SignatureRequestMessage,
+    WindowApp.SignatureRequestEip712,
+    WindowApp.DecryptMessageRequest
+  ];
+
+  const pathnameFor = (windowApp: WindowApp) =>
+    new URL(
+      getUrlByWindowApp(windowApp),
+      'chrome-extension://abcdefghijklmnop/'
+    ).pathname;
+
+  it.each(APPROVAL_WINDOW_APPS)(
+    'covers the pathname %s opens at',
+    windowApp => {
+      expect(REQUEST_BEARING_PATHNAMES.has(pathnameFor(windowApp))).toBe(true);
+    }
+  );
+
+  // Deliberately excluded: `import-account-with-file.html` is a separate
+  // window, never displays a `?requestId=`.
+  it('does not cover ImportAccount', () => {
+    expect(
+      REQUEST_BEARING_PATHNAMES.has(pathnameFor(WindowApp.ImportAccount))
+    ).toBe(false);
   });
 });

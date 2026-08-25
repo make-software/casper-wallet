@@ -234,7 +234,14 @@ it('bounds cancellation work per wake to the session write cap', async () => {
   expect(tabs.sendMessage).toHaveBeenCalledTimes(MAX_SESSION_ROWS);
 });
 
-it('a per-row cancel failure is logged with identifiers only, never a raw URL', async () => {
+it('a per-row cancel failure is logged with identifiers only, never a raw URL or a raw Error', async () => {
+  // `JSON.stringify` on a whole log-call array is blind to a surgical revert
+  // of `error: redactUrlQuery(error)` back to `error: error`: `Error#message`
+  // is a non-enumerable own property, so a raw Error renders `{}` and the
+  // secret-text checks below would pass right past it — same trap as
+  // `fail-request-on-window-error.test.ts`'s equivalent test. Walk every
+  // logged argument's own values directly instead of trusting serialization
+  // to surface them.
   (collectRequestIdsFromOpenWindows as jest.Mock).mockResolvedValue(new Set());
   const requests = { r1: openRow(3, 0) };
   const store = makeStore(requests);
@@ -249,7 +256,22 @@ it('a per-row cancel failure is logged with identifiers only, never a raw URL', 
   await jest.advanceTimersByTimeAsync(CANCEL_GRACE_MS);
   await promise;
 
-  const serialized = JSON.stringify((console.error as jest.Mock).mock.calls);
-  expect(serialized).not.toContain('super-secret');
-  expect(serialized).not.toMatch(/\?[^"]*=/);
+  const calls = (console.error as jest.Mock).mock.calls;
+  expect(calls.length).toBeGreaterThan(0);
+
+  for (const call of calls) {
+    for (const arg of call) {
+      expect(arg).not.toBeInstanceOf(Error);
+
+      if (typeof arg === 'object' && arg != null) {
+        for (const value of Object.values(arg)) {
+          expect(value).not.toBeInstanceOf(Error);
+        }
+      }
+
+      const text = typeof arg === 'string' ? arg : JSON.stringify(arg);
+      expect(text).not.toContain('super-secret');
+      expect(text).not.toMatch(/\?[^"]*=/);
+    }
+  }
 });

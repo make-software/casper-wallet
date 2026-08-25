@@ -14,7 +14,7 @@ export enum WindowApp {
 
 export type WindowSearchParams = Record<string, string>;
 
-function getUrlByWindowApp(
+export function getUrlByWindowApp(
   windowApp: WindowApp,
   searchParams?: WindowSearchParams
 ) {

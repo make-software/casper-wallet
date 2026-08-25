@@ -135,10 +135,14 @@ it('already-answered requestId (tombstoned) → clean no-op, nothing dispatched,
 });
 
 describe('#1484 origin check (inside the vehicle)', () => {
-  it('a navigated-away tab gets deliverViaOrigin, not a direct send', async () => {
+  it('a navigated-away tab gets deliverViaOrigin, not a direct send, and logs identifiers + origins only', async () => {
     (tabs.get as jest.Mock).mockResolvedValue({
       url: 'https://elsewhere/page'
     });
+    (deliverViaOrigin as jest.Mock).mockResolvedValue(1);
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
     const dispatch = jest.fn();
     const getState = jest.fn().mockReturnValue(state({ r1: open(3, 'sign') }));
 
@@ -150,6 +154,20 @@ describe('#1484 origin check (inside the vehicle)', () => {
       sdkMethod.signResponse({ cancelled: true }, { requestId: 'r1' }),
       undefined
     );
+    // Identifiers and origins only — never the tab's URL (`https://elsewhere/page`).
+    expect(consoleError).toHaveBeenCalledWith(
+      expect.stringContaining('response withheld'),
+      {
+        requestId: 'r1',
+        tabId: 3,
+        expectedOrigin: 'https://dapp',
+        liveOrigin: 'https://elsewhere',
+        delivered: 1
+      }
+    );
+    const logged = JSON.stringify(consoleError.mock.calls);
+    expect(logged).not.toContain('/page');
+    consoleError.mockRestore();
   });
 
   it('an unresolvable live origin (tab gone) also routes via deliverViaOrigin', async () => {
@@ -227,6 +245,9 @@ describe('policy parameter (source)', () => {
     const consoleWarn = jest
       .spyOn(console, 'warn')
       .mockImplementation(() => {});
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
     const dispatch = jest.fn();
     const getState = jest.fn().mockReturnValue(state({ r1: open(3, 'sign') }));
 
@@ -245,7 +266,11 @@ describe('policy parameter (source)', () => {
       expect.objectContaining({ type: 'appEvents/sagaError' })
     );
     expect(consoleWarn).toHaveBeenCalled();
+    // The other collapse direction: a delivered response must not ALSO log at
+    // error level.
+    expect(consoleError).not.toHaveBeenCalled();
     consoleWarn.mockRestore();
+    consoleError.mockRestore();
   });
 
   it('a suppressed-source delivery failure logs at error level, not warn', async () => {
@@ -253,6 +278,9 @@ describe('policy parameter (source)', () => {
     (deliverViaOrigin as jest.Mock).mockResolvedValue(0);
     const consoleError = jest
       .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    const consoleWarn = jest
+      .spyOn(console, 'warn')
       .mockImplementation(() => {});
     const dispatch = jest.fn();
     const getState = jest.fn().mockReturnValue(state({ r1: open(3, 'sign') }));
@@ -266,11 +294,19 @@ describe('policy parameter (source)', () => {
     expect(dispatch).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'appEvents/sagaError' })
     );
+    // The `sendMessage` rejection above also logs its OWN unconditional
+    // `${source}: cancel delivery failed` at error level, before the
+    // delivered-ternary log this test is actually about — a loose
+    // `stringContaining(source)` match is satisfied by that first, unrelated
+    // call and stays blind to the ternary collapsing to unconditional `warn`.
+    // Pin the exact message the ternary produces, and that `warn` is untouched.
     expect(consoleError).toHaveBeenCalledWith(
-      expect.stringContaining('sweep-orphaned-requests'),
+      expect.stringContaining('cancelled an orphaned request'),
       expect.anything()
     );
+    expect(consoleWarn).not.toHaveBeenCalled();
     consoleError.mockRestore();
+    consoleWarn.mockRestore();
   });
 });
 
