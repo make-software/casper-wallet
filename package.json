@@ -184,7 +184,7 @@
     "playwright": "^1.61.0",
     "prettier": "^3.9.6",
     "redux-saga-test-plan": "^4.0.6",
-    "selenium-webdriver": "^4.45.0",
+    "selenium-webdriver": "^4.47.0",
     "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.6.1",
     "ts-jest": "^29.4.12",
