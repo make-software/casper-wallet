@@ -149,7 +149,7 @@
     "@testing-library/jest-dom": "^7.0.1",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/big.js": "^7.0.0",
-    "@types/chrome": "^0.2.0",
+    "@types/chrome": "^0.2.6",
     "@types/jest": "^30.0.0",
     "@types/lodash.debounce": "^4.0.9",
     "@types/lodash.throttle": "4.1.9",
