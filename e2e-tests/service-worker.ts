@@ -5,7 +5,12 @@ const GENERATION_KEY = '__casperWorkerGeneration';
 const STOP_TIMEOUT_MS = 15000;
 
 function currentWorker(context: BrowserContext) {
-  const worker = context.serviceWorkers()[0];
+  // Index 0 is not necessarily the extension: other registered workers (a
+  // Playwright-loaded page's own service worker, another extension) can share
+  // the context, and their position in the list is not guaranteed.
+  const worker = context
+    .serviceWorkers()
+    .find(w => w.url().startsWith('chrome-extension://'));
 
   if (!worker) {
     throw new Error('No extension service worker is registered.');

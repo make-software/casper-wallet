@@ -33,15 +33,17 @@ rules:
 
   # ============================================================================
   # Same invariant, storage layer: state persistence via browser.storage.local
-  # is owned by the background script (get-main-store.ts). Frontend apps must
+  # and browser.storage.session is owned by the background script
+  # (get-main-store.ts, windowManagement/session-store.ts). Frontend apps must
   # not read or write extension storage directly.
   # ============================================================================
   - id: cw-storage-local-outside-background
     message: >
       Direct browser storage access outside src/background/. State persistence
-      (encrypted vault, keys, settings) is owned by the background script;
-      frontend apps must consume state replicas instead. If this usage is
-      intentional and does not touch persisted state, add a
+      (encrypted vault, keys, settings, the request-lifecycle session mirror)
+      is owned by the background script; frontend apps must consume state
+      replicas instead. If this usage is intentional and does not touch
+      persisted state, add a
       // nosemgrep: cw-storage-local-outside-background comment with justification.
     severity: WARNING
     languages: [typescript, javascript]
@@ -55,6 +57,18 @@ rules:
       - pattern: chrome.storage.local.get(...)
       - pattern: chrome.storage.local.set(...)
       - pattern: chrome.storage.local.remove(...)
+      - pattern: storage.session.get(...)
+      - pattern: storage.session.set(...)
+      - pattern: storage.session.remove(...)
+      - pattern: storage.session.setAccessLevel(...)
+      - pattern: browser.storage.session.get(...)
+      - pattern: browser.storage.session.set(...)
+      - pattern: browser.storage.session.remove(...)
+      - pattern: browser.storage.session.setAccessLevel(...)
+      - pattern: chrome.storage.session.get(...)
+      - pattern: chrome.storage.session.set(...)
+      - pattern: chrome.storage.session.remove(...)
+      - pattern: chrome.storage.session.setAccessLevel(...)
     paths:
       exclude:
         - 'src/background/**'

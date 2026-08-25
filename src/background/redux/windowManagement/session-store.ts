@@ -5,7 +5,7 @@ import { isEphemeralBackgroundBuild } from '@src/utils';
 import { redactUrlQuery } from '@background/redact-url-query';
 
 import { MAX_RESPONDED_TOMBSTONES } from './reducer';
-import { isStorableRequestId } from './request-map';
+import { MAX_REQUEST_ID_LENGTH, isStorableRequestId } from './request-map';
 import { CancellableMethod, Request, WindowManagementState } from './types';
 
 // Follows the obfuscated `storage.local` convention for consistency only. This
@@ -26,7 +26,6 @@ export type SessionRecord = {
 // has to be defined there and key hoisting can never decide which rows survive.
 const MAX_SESSION_ROWS = MAX_RESPONDED_TOMBSTONES + 20;
 
-const MAX_REQUEST_ID_LENGTH = 256;
 const MAX_ORIGIN_LENGTH = 256;
 const MAX_WINDOW_IDS = 16;
 

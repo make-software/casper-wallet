@@ -166,6 +166,21 @@ describe('session-store — read path', () => {
     });
   });
 
+  it('drops an array of otherwise-valid rows to {}, not index-keyed entries', async () => {
+    // Every element here individually passes `sanitizeRequest`, so this is
+    // blind to the `Array.isArray` guard specifically: without it,
+    // `Object.entries` on an array hydrates as `{'0': …, '1': …}` instead of
+    // `{}`.
+    sessionGet.mockResolvedValue(
+      storedRecord({ requests: [openRow(), openRow()], windowId: null })
+    );
+
+    await expect(readRequestSession()).resolves.toEqual({
+      requests: {},
+      windowId: null
+    });
+  });
+
   it.each([
     ['a non-integer', 1.5],
     ['a string', '4'],
@@ -283,7 +298,12 @@ describe('session-store — the sanitizer drops only the row it cannot vouch for
       'a truthy non-boolean awaitingDeviceConfirmation',
       openRow({ awaitingDeviceConfirmation: 1 })
     ],
-    ['a non-object row', 'nope' as unknown as Record<string, unknown>]
+    ['a non-object row', 'nope' as unknown as Record<string, unknown>],
+    // `typeof null === 'object'`, so this exercises the `raw == null` half of
+    // the guard specifically — the `typeof raw !== 'object'` half alone would
+    // let a null row through as "an object".
+    ['a null row', null as unknown as Record<string, unknown>],
+    ['an undefined row', undefined as unknown as Record<string, unknown>]
   ];
 
   it.each(cases)('drops a row with %s', async (_label, row) => {
@@ -317,6 +337,10 @@ describe('session-store — the sanitizer drops only the row it cannot vouch for
 
     expect(requests).toEqual({ good: survivingRow });
     expect(Object.keys(requests)).toEqual(['good']);
+    // `__proto__` must be dropped as a KEY, not assigned — assigning it inside
+    // the sanitizer's output builder would set the object's PROTOTYPE instead,
+    // silently making every later lookup on this map inherit `openRow()`.
+    expect(Object.getPrototypeOf(requests)).toBe(Object.prototype);
   });
 
   it('keeps awaitingDeviceConfirmation: true and an empty windowIds', async () => {
@@ -326,6 +350,42 @@ describe('session-store — the sanitizer drops only the row it cannot vouch for
     );
 
     expect((await readRequestSession()).requests).toEqual({ 'req-1': row });
+  });
+});
+
+describe('session-store — sanitizer completeness pin', () => {
+  type OpenRow = Extract<Request, { status: 'open' }>;
+
+  // `sanitizeRequest`'s open-row return literal is checked against `Request`,
+  // but TS does not require an OPTIONAL field to appear in an object literal
+  // typed as a union member — `frameId` proved exactly this can go unnoticed
+  // for a while. This record must list every key of `OpenRow`; a field added
+  // there without a matching key here is a compile error, forcing the
+  // sanitizer's return literal in session-store.ts to be revisited too.
+  const OPEN_ROW_KEYS = {
+    status: true,
+    tabId: true,
+    frameId: true,
+    origin: true,
+    method: true,
+    windowIds: true,
+    awaitingDeviceConfirmation: true,
+    seq: true
+  } satisfies Record<keyof OpenRow, true>;
+
+  it('lists every OpenRow field', () => {
+    expect(Object.keys(OPEN_ROW_KEYS).sort()).toEqual(
+      [
+        'status',
+        'tabId',
+        'frameId',
+        'origin',
+        'method',
+        'windowIds',
+        'awaitingDeviceConfirmation',
+        'seq'
+      ].sort()
+    );
   });
 });
 
@@ -405,6 +465,33 @@ describe('session-store — write path', () => {
     await writeRequestSession({ requests: {}, windowId: 2 });
 
     expect(sessionSet).toHaveBeenCalledTimes(1);
+    expect(lastWrittenRecord().windowId).toBe(2);
+  });
+
+  it('does not start a queued flush until the in-flight one settles', async () => {
+    let resolveA: (() => void) | undefined;
+    sessionSet.mockImplementationOnce(
+      () =>
+        new Promise<void>(resolve => {
+          resolveA = resolve;
+        })
+    );
+
+    const writeA = writeRequestSession({ requests: {}, windowId: 1 });
+    // Let flush() run up to its `await area.set(...)` — this is what resets
+    // `flushQueued` before A's write has actually landed.
+    await Promise.resolve();
+
+    const writeB = writeRequestSession({ requests: {}, windowId: 2 });
+    // The reset queue only lets B's flush get CHAINED after A's — A's `set`
+    // promise is still pending, so B's flush cannot have started yet.
+    expect(sessionSet).toHaveBeenCalledTimes(1);
+
+    resolveA?.();
+    await writeA;
+    await writeB;
+
+    expect(sessionSet).toHaveBeenCalledTimes(2);
     expect(lastWrittenRecord().windowId).toBe(2);
   });
 
