@@ -197,14 +197,21 @@ const slice = createSlice({
         return state;
       }
 
+      // The tombstone is restamped with a fresh ordinal rather than keeping
+      // the registration `seq`: eviction below is oldest-ANSWERED-first, so
+      // reusing the registration ordinal could make answering the
+      // oldest-registered request write a tombstone this same dispatch evicts.
       const requests: WindowManagementState['requests'] = {
         ...state.requests,
-        [action.payload.requestId]: { status: 'responded', seq: request.seq }
+        [action.payload.requestId]: {
+          status: 'responded',
+          seq: nextSeq(state.requests)
+        }
       };
 
-      // Oldest first by stamped ordinal, not by key order: enumeration hoists
-      // an integer-like dapp-chosen key ahead of every string key, so `"42"`
-      // would be evicted first however recently it was registered.
+      // Oldest-ANSWERED first by stamped ordinal, not by key order: enumeration
+      // hoists an integer-like dapp-chosen key ahead of every string key, so
+      // `"42"` would be evicted first however recently it was answered.
       const respondedIds = Object.entries(requests)
         .flatMap(([requestId, entry]) =>
           entry?.status === 'responded' ? [[requestId, entry.seq] as const] : []

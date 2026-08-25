@@ -147,7 +147,7 @@ describe('markRequestResponded', () => {
     });
     expect(store.getState().windowManagement.requests.r1).toEqual({
       status: 'responded',
-      seq: 0
+      seq: 1
     });
   });
 
@@ -445,7 +445,7 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     expect(sendMessageMock).toHaveBeenCalled();
     expect(store.getState().windowManagement.requests.r1).toEqual({
       status: 'responded',
-      seq: 0
+      seq: 1
     });
     expect(removeMock).not.toHaveBeenCalled();
   });
