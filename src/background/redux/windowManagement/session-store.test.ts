@@ -169,7 +169,8 @@ describe('session-store — read path', () => {
   it.each([
     ['a non-integer', 1.5],
     ['a string', '4'],
-    ['undefined', undefined]
+    ['undefined', undefined],
+    ['negative', -1]
   ])('nulls a windowId that is %s', async (_label, windowId) => {
     sessionGet.mockResolvedValue(storedRecord({ requests: {}, windowId }));
 
@@ -231,6 +232,7 @@ describe('session-store — frameId', () => {
   it.each([
     ['a stringified frameId', '1'],
     ['a fractional frameId', 1.5],
+    ['a negative frameId', -1],
     ['null', null]
   ])(
     'drops the frameId field but keeps the row for %s',

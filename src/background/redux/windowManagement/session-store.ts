@@ -125,9 +125,10 @@ function sanitizeRequest(raw: unknown): Request | undefined {
     return undefined;
   }
 
-  // `frameId` is kept only when `Number.isInteger` — so `0` (top frame, falsy)
-  // survives verbatim — and otherwise omitted, never defaulted, so an absent or
-  // malformed value degrades to today's unscoped send rather than dropping the row.
+  // `frameId` is kept only when `isNonNegativeInteger` — so `0` (top frame,
+  // falsy) survives verbatim — and otherwise omitted, never defaulted, so an
+  // absent or malformed (including negative) value degrades to today's
+  // unscoped send rather than dropping the row.
   return {
     status: 'open',
     tabId,
@@ -136,7 +137,7 @@ function sanitizeRequest(raw: unknown): Request | undefined {
     windowIds,
     awaitingDeviceConfirmation,
     seq,
-    ...(Number.isInteger(row.frameId) ? { frameId: row.frameId as number } : {})
+    ...(isNonNegativeInteger(row.frameId) ? { frameId: row.frameId } : {})
   };
 }
 
@@ -166,7 +167,7 @@ function sanitizeRequestMap(raw: unknown): WindowManagementState['requests'] {
 }
 
 const sanitizeWindowId = (raw: unknown): number | null =>
-  typeof raw === 'number' && Number.isInteger(raw) ? raw : null;
+  isNonNegativeInteger(raw) ? raw : null;
 
 // Tombstones go before open rows, oldest first by ordinal: a dropped open row
 // is a request whose window is on screen, a dropped tombstone only costs a dedup.
