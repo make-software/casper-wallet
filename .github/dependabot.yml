@@ -6,7 +6,18 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+    # One combined PR for all minor+patch bumps; majors stay individual
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+    # Wait out the window in which compromised releases are typically
+    # detected and yanked. Security updates from Dependabot alerts bypass this.
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
     target-branch: "develop"
     # Specify labels for npm pull requests
     labels:
