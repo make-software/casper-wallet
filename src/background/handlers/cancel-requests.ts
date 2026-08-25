@@ -1,8 +1,9 @@
 import { tabs } from 'webextension-polyfill';
 
+import { redactUrlQuery } from '@background/redact-url-query';
 import { sagaError } from '@background/redux/app-events/actions';
 import { SagaErrorSource } from '@background/redux/app-events/types';
-import { MainStore } from '@background/redux/get-main-store';
+import type { MainStore } from '@background/redux/get-main-store';
 import {
   windowDetachedFromRequests,
   windowRequestResponded
@@ -16,6 +17,7 @@ import {
 import { SdkMethod, sdkMethod } from '@content/sdk-method';
 
 import { deliverViaOrigin } from './deliver-via-origin';
+import { getLiveTabOrigin } from './tab-origin';
 
 // Grace before cancelling an abandoned request: lets an in-flight genuine
 // response (a button response, or a Ledger success cleanup that closes this
@@ -28,9 +30,10 @@ const delay = (ms: number) =>
 // The window-driven cancel paths only. Derived from `SagaErrorSource` rather
 // than spelled out again, so the two can never drift — a `source` this module
 // dispatches is by construction one the banner reader knows.
-// `'open-window-failed'` is deliberately NOT here: it is produced by
-// `failRequestOnWindowError`, which is a separate trigger with no grace and no
-// window event behind it.
+// Neither `'open-window-failed'` nor `'sweep-orphaned-requests'` is here: both
+// are produced by `failRequestOnWindowError`, a separate trigger with no
+// window event behind it — and only the first of the two banners at all (see
+// its `source` parameter below).
 export type CancelSource = Extract<
   SagaErrorSource,
   'cancel-on-close' | 'cancel-on-supersede'
@@ -193,12 +196,26 @@ export async function cancelRequestsDisplacedBy(
   await cancelRequests(store, candidates, source, windowId, afterMark);
 }
 
-// `windows.create` rejected, so no window will ever display this request and no
-// `windows.onRemoved` will ever fire for it. Without this the dapp promise hangs
-// until its own timeout (30 min by default).
+// The trigger with no window event behind it — either `windows.create`
+// rejected (no `windows.onRemoved` will ever fire for a window that never
+// existed) or the startup sweep decided a hydrated 'open' row is orphaned
+// (spec §8.1). Without this the dapp promise hangs until its own timeout
+// (30 min by default).
+//
+// `source` defaults to the original trigger so every existing call site keeps
+// its behaviour unchanged. It doubles as the banner policy: only
+// `'open-window-failed'` dispatches `sagaError` (a `windows.create` failure is
+// the wallet's own doing, with nothing else to tell the user). Every other
+// source — today just the sweep — is dapp-triggerable and console-only,
+// matching the precedent in `sdk-methods.ts`'s `reportCapacityRefusal`: a
+// banner mounted route-independently over every approval screen must not
+// fire for a request the user cannot act on, and in close-as-wake the sweep's
+// enumeration resolves inside another cancel's own grace, so it would often
+// paint over an ordinary close or a live signing prompt.
 export async function failRequestOnWindowError(
   store: MainStore,
-  requestId: string
+  requestId: string,
+  source: SagaErrorSource = 'open-window-failed'
 ): Promise<void> {
   const request = selectOpenRequests(store.getState()).find(
     openRequest => openRequest.requestId === requestId
@@ -210,17 +227,50 @@ export async function failRequestOnWindowError(
 
   store.dispatch(windowRequestResponded({ requestId }));
 
-  const action = buildCancelResponse(request.method, requestId);
+  const { tabId, origin, method, frameId } = request;
+  const action = buildCancelResponse(method, requestId);
+
+  // #1484: verify the tab still hosts the requesting origin BEFORE sending.
+  // On a navigated-away tab `tabs.sendMessage` SUCCEEDS (the content script is
+  // injected on every http(s) page), so the catch → `deliverViaOrigin`
+  // fallback below would never fire — a swept row can be arbitrarily old, so
+  // navigated-away is the expected case, not the exception. `tabs.get` reports
+  // the TOP document's origin, so only a top-frame request (no `frameId`, or
+  // `0`) is checkable this way; a sub-frame request goes straight to the
+  // frame-targeted send, same as today.
+  const staleOrigin =
+    (frameId == null || frameId === 0) &&
+    (await getLiveTabOrigin(tabId)) !== origin;
+
   let delivered = 1;
-  try {
-    await tabs.sendMessage(request.tabId, action);
-  } catch (error) {
-    console.error(
-      'open-window-failed: cancel delivery failed',
-      { requestId, method: request.method, tabId: request.tabId },
-      error
+
+  if (staleOrigin) {
+    delivered = await deliverViaOrigin(origin, action, frameId);
+  } else {
+    try {
+      await (frameId == null
+        ? tabs.sendMessage(tabId, action)
+        : tabs.sendMessage(tabId, action, { frameId }));
+    } catch (error) {
+      // Never the raw error: a `tabs.sendMessage` rejection can echo back a
+      // navigated-away tab's URL, and one of this window's own URLs carries a
+      // signMessage request's plaintext message as a query param.
+      console.error(`${source}: cancel delivery failed`, {
+        requestId,
+        method,
+        tabId,
+        error: redactUrlQuery(error)
+      });
+      delivered = await deliverViaOrigin(origin, action, frameId);
+    }
+  }
+
+  if (source !== 'open-window-failed') {
+    console[delivered > 0 ? 'warn' : 'error'](
+      `${source}: cancelled an orphaned request`,
+      { requestId, tabId, delivered }
     );
-    delivered = await deliverViaOrigin(request.origin, action);
+    return;
   }
 
   // Dispatched AFTER the delivery attempt so the message can tell the truth.
@@ -230,7 +280,7 @@ export async function failRequestOnWindowError(
   // request was cancelled" there would be a lie the user cannot act on.
   store.dispatch(
     sagaError({
-      source: 'open-window-failed',
+      source,
       message:
         delivered > 0
           ? 'Approval window could not be opened; the request was cancelled'

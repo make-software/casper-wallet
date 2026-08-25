@@ -25,7 +25,10 @@ export type SagaErrorSource =
   | 'cancel-on-close'
   | 'cancel-on-supersede'
   | 'open-window-failed'
-  | 'sdk-response-to-tab';
+  | 'sdk-response-to-tab'
+  // Startup sweep of a hydrated 'open' row no window still claims (spec
+  // §8.1) — a second, console-only trigger for `failRequestOnWindowError`.
+  | 'sweep-orphaned-requests';
 
 export interface SagaError {
   id: number;
