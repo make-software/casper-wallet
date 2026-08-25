@@ -686,11 +686,11 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
-  it('no descriptor (service worker restarted) → still delivers, dispatches nothing', async () => {
+  it('no descriptor (residual descriptor-less path) → still delivers, dispatches nothing', async () => {
     // Every approval-window url carries `?origin=` (all six flows build it), so
-    // a restart can still be verified against the live tab. `UI_SENDER` without
-    // one is a synthetic sender no page produces — the fail-closed case it now
-    // exercises has its own test above.
+    // a descriptor-less response can still be verified against the live tab.
+    // `UI_SENDER` without one is a synthetic sender no page produces — the
+    // fail-closed case it now exercises has its own test above.
     const { store, dispatch } = makeStore(undefined);
 
     const result = await handleSdkResponseToTab(
@@ -808,7 +808,8 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('withholds the response when no origin can be established', async () => {
-    // No descriptor (MV3 restart) AND a sender url with no ?origin= param.
+    // No descriptor (a residual descriptor-less path) AND a sender url with
+    // no ?origin= param.
     const { store, dispatch } = makeStore();
 
     await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);

@@ -132,9 +132,11 @@ export async function getExistingMainStoreSingletonOrInit() {
             : undefined,
           trustedWasm,
           csprNameExpirations,
-          // Present before any handler can run: `windowManagement.requests`
-          // lives only in the worker's memory, and an MV3 restart destroys it
-          // while the approval windows it describes are still on screen.
+          // Present before any handler can run: on Chrome/Edge `requestSession`
+          // is the session mirror, rehydrating `windowManagement.requests`
+          // across an MV3 restart (residual paths aside — a lost mirror write,
+          // a sanitizer-dropped row); on Firefox/Safari's persistent background
+          // page it is always the empty record, since nothing there restarts.
           windowManagement: {
             windowId: requestSession.windowId,
             exportKeysWindowId: null,

@@ -740,9 +740,9 @@ describe('reconcileStalePayloadsSaga', () => {
   const vaultOf = (storeState: unknown) =>
     (storeState as { vault: VaultState }).vault;
 
-  // The window half of the keep-set. `windowManagement.requests` is not
-  // persisted, so after a service-worker restart the descriptor is gone while
-  // the window is still on screen and still signable.
+  // The window half of the keep-set. On a residual descriptor-less path (a
+  // lost mirror write, a sanitizer-dropped row, etc.) the descriptor is gone
+  // while the window is still on screen and still signable.
   it('keeps a payload whose requestId appears in an open window tab URL, with no descriptor in the store', async () => {
     mockWindowsGetAll.mockResolvedValue([
       { id: 1, tabs: [{ url: approvalWindowUrl('live-1') }] }

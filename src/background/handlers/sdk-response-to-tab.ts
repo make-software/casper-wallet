@@ -176,10 +176,10 @@ export async function handleSdkResponseToTab(
       ? selectOpenRequest(store.getState(), requestId)
       : undefined;
 
-  // An MV3 service-worker restart empties the requests map while the approval
-  // window lives on, so a legitimate response can arrive with no descriptor at
-  // all. The window url still carries `?origin=`, so fall back to that rather
-  // than dropping a signature the user just produced.
+  // The requests map is mirrored across an MV3 restart now, but residual
+  // paths (a lost mirror write, a sanitizer-dropped row) can still leave the
+  // approval window open with no descriptor. Fall back to the window url's
+  // `?origin=` rather than dropping a signature the user just produced.
   const expectedOrigin = request?.origin ?? recoverDappOrigin(sender.url);
   const frameId = request?.frameId;
 

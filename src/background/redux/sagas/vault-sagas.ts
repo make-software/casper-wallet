@@ -516,9 +516,10 @@ export function* reconcileStalePayloadsSaga() {
     const openRequests = yield* sagaSelect(selectOpenRequests);
     const vault = yield* sagaSelect(selectVault);
 
-    // Both halves are needed. After a service-worker restart the descriptors
-    // are gone while the window still shows its `?requestId=`; on window reuse
-    // a live window still reports the previous request's URL mid-navigation.
+    // Both halves are needed. On a residual descriptor-less path the
+    // descriptors are gone while the window still shows its `?requestId=`;
+    // on window reuse a live window still reports the previous request's
+    // URL mid-navigation.
     const keep = new Set(liveIdsFromWindows);
 
     for (const { requestId } of openRequests) {
