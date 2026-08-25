@@ -190,6 +190,66 @@ describe('session-store — read path', () => {
   });
 });
 
+describe('session-store — frameId', () => {
+  it('keeps frameId 0 (top frame) verbatim through hydration', async () => {
+    sessionGet.mockResolvedValue(
+      storedRecord({
+        requests: { 'req-1': openRow({ frameId: 0 }) },
+        windowId: null
+      })
+    );
+
+    expect((await readRequestSession()).requests).toEqual({
+      'req-1': openRow({ frameId: 0 })
+    });
+  });
+
+  it('keeps a positive frameId verbatim through hydration', async () => {
+    sessionGet.mockResolvedValue(
+      storedRecord({
+        requests: { 'req-1': openRow({ frameId: 4 }) },
+        windowId: null
+      })
+    );
+
+    expect((await readRequestSession()).requests).toEqual({
+      'req-1': openRow({ frameId: 4 })
+    });
+  });
+
+  it('leaves frameId absent when the stored row has none', async () => {
+    sessionGet.mockResolvedValue(
+      storedRecord({ requests: { 'req-1': openRow() }, windowId: null })
+    );
+
+    const { requests } = await readRequestSession();
+
+    expect(requests).toEqual({ 'req-1': openRow() });
+    expect('frameId' in (requests['req-1'] as object)).toBe(false);
+  });
+
+  it.each([
+    ['a stringified frameId', '1'],
+    ['a fractional frameId', 1.5],
+    ['null', null]
+  ])(
+    'drops the frameId field but keeps the row for %s',
+    async (_label, frameId) => {
+      sessionGet.mockResolvedValue(
+        storedRecord({
+          requests: { 'req-1': openRow({ frameId }) },
+          windowId: null
+        })
+      );
+
+      const { requests } = await readRequestSession();
+
+      expect(requests).toEqual({ 'req-1': openRow() });
+      expect('frameId' in (requests['req-1'] as object)).toBe(false);
+    }
+  );
+});
+
 describe('session-store — the sanitizer drops only the row it cannot vouch for', () => {
   const survivingRow = openRow({ seq: 9 });
 
@@ -277,6 +337,20 @@ describe('session-store — write path', () => {
     expect(sessionSet).toHaveBeenCalledWith({
       [REQUEST_SESSION_KEY]: {
         requests: { 'req-1': openRow() },
+        windowId: 3
+      }
+    });
+  });
+
+  it('round-trips frameId, including 0, through the write path', async () => {
+    await writeRequestSession({
+      requests: { 'req-1': openRow({ frameId: 0 }) as Request },
+      windowId: 3
+    });
+
+    expect(sessionSet).toHaveBeenCalledWith({
+      [REQUEST_SESSION_KEY]: {
+        requests: { 'req-1': openRow({ frameId: 0 }) },
         windowId: 3
       }
     });

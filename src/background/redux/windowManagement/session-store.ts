@@ -125,9 +125,9 @@ function sanitizeRequest(raw: unknown): Request | undefined {
     return undefined;
   }
 
-  // `frameId` (PR #1484) is sanitized here once it lands, on `Number.isInteger`
-  // alone: `0` is the top frame and is falsy, so `raw.frameId || undefined`
-  // would erase it.
+  // `frameId` is kept only when `Number.isInteger` — so `0` (top frame, falsy)
+  // survives verbatim — and otherwise omitted, never defaulted, so an absent or
+  // malformed value degrades to today's unscoped send rather than dropping the row.
   return {
     status: 'open',
     tabId,
@@ -135,7 +135,8 @@ function sanitizeRequest(raw: unknown): Request | undefined {
     method,
     windowIds,
     awaitingDeviceConfirmation,
-    seq
+    seq,
+    ...(Number.isInteger(row.frameId) ? { frameId: row.frameId as number } : {})
   };
 }
 
