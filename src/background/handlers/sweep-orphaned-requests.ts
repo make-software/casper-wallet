@@ -68,10 +68,11 @@ export async function sweepOrphanedRequests(
     return;
   }
 
-  // Bound the work per wake to the session write cap. The hydrated snapshot
-  // can never hold more open rows than this anyway (`capRows` keeps open rows
-  // over tombstones), but a row past the cut stays 'open' and is re-swept on
-  // the next wake regardless.
+  // Bound the work per wake to the session write cap (`MAX_SESSION_ROWS`,
+  // currently 70). The reducer's own `MAX_OPEN_REQUESTS` cap (20) is the real
+  // bound on how many open rows a hydrated snapshot can hold; this slice is
+  // the outer guard for whatever a stale or pre-cap mirror still carries. A
+  // row past the cut stays 'open' and is re-swept on the next wake regardless.
   const toSweep = orphaned
     .slice()
     .sort((a, b) => a.seq - b.seq)

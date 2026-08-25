@@ -124,7 +124,9 @@ it('a row a window still claims is untouched — including when its windowIds is
 
 it('a Ledger row with two dead windows is cancelled', async () => {
   (collectRequestIdsFromOpenWindows as jest.Mock).mockResolvedValue(new Set());
-  const requests = { r1: openRow(3, 0, [7, 9]) };
+  const requests = {
+    r1: { ...openRow(3, 0, [7, 9]), awaitingDeviceConfirmation: true }
+  };
   const store = makeStore(requests);
 
   const promise = sweepOrphanedRequests(store, requests);

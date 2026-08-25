@@ -304,6 +304,18 @@ it('never logs a raw URL or a raw Error — only redacted identifiers appear acr
       // rejection embedded, un-redacted, past this check entirely.
       expect(arg).not.toBeInstanceOf(Error);
 
+      // `JSON.stringify` alone would miss a surgical revert of
+      // `error: redactUrlQuery(error)` back to `error: error` inside the
+      // object argument: `Error#message` is a non-enumerable own property, so
+      // stringifying a raw Error renders `{}` and the secret text check below
+      // would pass right past it. Walk every object argument's own values
+      // directly instead of trusting the serialization to surface them.
+      if (typeof arg === 'object' && arg != null) {
+        for (const value of Object.values(arg)) {
+          expect(value).not.toBeInstanceOf(Error);
+        }
+      }
+
       const text = typeof arg === 'string' ? arg : JSON.stringify(arg);
       expect(text).not.toContain('super-secret');
       expect(text).not.toMatch(/\?[^"]*=/);
