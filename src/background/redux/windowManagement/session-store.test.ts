@@ -1,3 +1,5 @@
+import { MAX_STORED_PAYLOADS } from '@background/redux/vault/reducer';
+
 import { MAX_OPEN_REQUESTS, MAX_RESPONDED_TOMBSTONES } from './reducer';
 import {
   MAX_SESSION_ROWS,
@@ -498,6 +500,13 @@ describe('session-store — write path', () => {
     // sum of their individual caps is the only correct figure, not headroom
     // picked separately from the reducer's own open-request bound.
     expect(MAX_SESSION_ROWS).toBe(MAX_RESPONDED_TOMBSTONES + MAX_OPEN_REQUESTS);
+  });
+
+  it('keeps the open-request cap above the binding floor set by the payload caps', () => {
+    // Below `2 * MAX_STORED_PAYLOADS` the open-request cap would fire before
+    // either payload cap on the sign/signTypedData paths, stranding an already
+    // -accepted payload with no window ever opened for it.
+    expect(MAX_OPEN_REQUESTS).toBeGreaterThanOrEqual(2 * MAX_STORED_PAYLOADS);
   });
 
   it('caps rows on the write side, dropping tombstones before open rows and oldest first', async () => {

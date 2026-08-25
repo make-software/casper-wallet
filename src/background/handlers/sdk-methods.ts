@@ -306,6 +306,28 @@ export async function handleSdkMethod(
         method: 'sign'
       })
     );
+
+    // At `MAX_OPEN_REQUESTS` the reducer refused the write silently, same as
+    // the four capless methods above — but the payload above has ALREADY been
+    // accepted into the map, so it is stranded here rather than refused; it is
+    // reclaimed by `reconcileStalePayloadsSaga` since no descriptor and no
+    // window will ever claim it.
+    if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
+      reportOpenRequestCapacityRefusal(action);
+
+      return {
+        handled: true,
+        response: sdkMethod.signResponse(
+          {
+            cancelled: true,
+            message: CAPACITY_REFUSAL_MESSAGE,
+            errorCode: SdkErrorCode.tooManyPendingRequests
+          },
+          { requestId: action.meta.requestId }
+        )
+      };
+    }
+
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestDeploy,
       searchParams: {
@@ -423,6 +445,29 @@ export async function handleSdkMethod(
         method: 'signTypedData'
       })
     );
+
+    // Same residual as the deploy branch: the payload above is already
+    // accepted, so a refusal here strands it for `reconcileStalePayloadsSaga`
+    // to reclaim rather than refusing the payload write itself.
+    if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
+      reportOpenRequestCapacityRefusal(action);
+
+      return {
+        handled: true,
+        response: sdkMethod.signTypedDataResponse(
+          {
+            cancelled: true,
+            signature: null,
+            digest: null,
+            publicKey: null,
+            error: CAPACITY_REFUSAL_MESSAGE,
+            errorCode: SdkErrorCode.tooManyPendingRequests
+          },
+          { requestId: action.meta.requestId }
+        )
+      };
+    }
+
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestEip712,
       searchParams: {

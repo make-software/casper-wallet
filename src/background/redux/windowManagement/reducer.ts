@@ -11,7 +11,10 @@ export const MAX_RESPONDED_TOMBSTONES = 50;
 
 // One shared approval window plus the Ledger second window keeps steady-state
 // open-request concurrency at ~1-2; this only needs to bound the 250 ms
-// `CANCEL_GRACE_MS` burst, not any sustained load.
+// `CANCEL_GRACE_MS` burst, not any sustained load. Binding floor: this must
+// stay >= 2 * `MAX_STORED_PAYLOADS` (vault/reducer.ts) — below that, this cap
+// would fire before either payload cap on the sign/signTypedData paths, and
+// the payload already accepted by then is stranded with no window to show it.
 export const MAX_OPEN_REQUESTS = 20;
 
 // Derived from the map rather than kept in a counter field: a counter is state

@@ -439,6 +439,9 @@ describe('connectRequest', () => {
       handled: true,
       response: sdkMethod.connectResponse(false, META)
     });
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: windowRequestOpened.type })
+    );
     expect(openWindowMock).not.toHaveBeenCalled();
   });
 });
@@ -533,6 +536,9 @@ describe('switchAccountRequest', () => {
       handled: true,
       response: sdkMethod.switchAccountResponse(false, META)
     });
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: windowRequestOpened.type })
+    );
     expect(openWindowMock).not.toHaveBeenCalled();
   });
 });
@@ -787,6 +793,59 @@ describe('signRequest', () => {
       expect.objectContaining({ requestId: 'req-1' })
     );
   });
+
+  it('refused at the open-request cap → the payload-cap-style cancelled response, no window', async () => {
+    // Payload cap has room (default mock), only the open-request cap refuses —
+    // so, unlike the payload-cap refusal above, the payload dispatch DOES land
+    // and only the descriptor dispatch is refused: the accepted deploy payload
+    // is left stranded for `reconcileStalePayloadsSaga` to reclaim.
+    isEqualCIMock.mockReturnValue(false);
+    const { store, dispatch } = makeStore();
+    dispatch.mockImplementation(() => {});
+
+    const result = await handleSdkMethod(
+      sdkMethod.signRequest({ deployJson, signingPublicKeyHex: 'PK-1' }, META),
+      SENDER,
+      store
+    );
+
+    expect(result).toEqual({
+      handled: true,
+      response: sdkMethod.signResponse(
+        {
+          cancelled: true,
+          message: 'Too many pending signature requests',
+          errorCode: SdkErrorCode.tooManyPendingRequests
+        },
+        { requestId: 'req-1' }
+      )
+    });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: windowRequestOpened.type })
+    );
+    expect(openWindowMock).not.toHaveBeenCalled();
+  });
+
+  it('an open-request-cap refusal is logged, distinct from the payload-cap message, identifiers only', async () => {
+    isEqualCIMock.mockReturnValue(false);
+    const { store, dispatch } = makeStore();
+    dispatch.mockImplementation(() => {});
+
+    await handleSdkMethod(
+      sdkMethod.signRequest({ deployJson, signingPublicKeyHex: 'PK-1' }, META),
+      SENDER,
+      store
+    );
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('open-request map at capacity'),
+      { requestId: 'req-1', method: sdkMethod.signRequest.type }
+    );
+    const logged = JSON.stringify(consoleErrorSpy.mock.calls);
+    expect(logged).not.toContain('PK-1');
+    expect(logged).not.toContain(ORIGIN);
+  });
 });
 
 describe('signMessageRequest', () => {
@@ -879,6 +938,9 @@ describe('signMessageRequest', () => {
       handled: true,
       response: sdkMethod.signMessageResponse({ cancelled: true }, META)
     });
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: windowRequestOpened.type })
+    );
     expect(openWindowMock).not.toHaveBeenCalled();
   });
 });
@@ -1108,6 +1170,74 @@ describe('signTypedDataRequest', () => {
       })
     );
   });
+
+  it('refused at the open-request cap → the payload-cap-style cancelled response, no window', async () => {
+    // Payload cap has room (default mock), only the open-request cap refuses —
+    // so, unlike the payload-cap refusal above, the payload dispatch DOES land
+    // and only the descriptor dispatch is refused: the accepted eip712 payload
+    // is left stranded for `reconcileStalePayloadsSaga` to reclaim.
+    const { store, dispatch } = makeStore();
+    dispatch.mockImplementation(() => {});
+
+    const result = await handleSdkMethod(
+      sdkMethod.signTypedDataRequest(
+        {
+          typedData: { foo: 'bar' } as any,
+          options: undefined,
+          signingPublicKeyHex: 'PK-1'
+        },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(result).toEqual({
+      handled: true,
+      response: sdkMethod.signTypedDataResponse(
+        {
+          cancelled: true,
+          signature: null,
+          digest: null,
+          publicKey: null,
+          error: 'Too many pending signature requests',
+          errorCode: SdkErrorCode.tooManyPendingRequests
+        },
+        { requestId: 'req-1' }
+      )
+    });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: windowRequestOpened.type })
+    );
+    expect(openWindowMock).not.toHaveBeenCalled();
+  });
+
+  it('an open-request-cap refusal is logged, distinct from the payload-cap message, identifiers only', async () => {
+    const { store, dispatch } = makeStore();
+    dispatch.mockImplementation(() => {});
+
+    await handleSdkMethod(
+      sdkMethod.signTypedDataRequest(
+        {
+          typedData: { foo: 'secret' } as any,
+          options: undefined,
+          signingPublicKeyHex: 'PK-1'
+        },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('open-request map at capacity'),
+      { requestId: 'req-1', method: sdkMethod.signTypedDataRequest.type }
+    );
+    const logged = JSON.stringify(consoleErrorSpy.mock.calls);
+    expect(logged).not.toContain('secret');
+    expect(logged).not.toContain(ORIGIN);
+  });
 });
 
 describe('decryptMessageRequest', () => {
@@ -1200,6 +1330,9 @@ describe('decryptMessageRequest', () => {
       handled: true,
       response: sdkMethod.decryptMessageResponse({ cancelled: true }, META)
     });
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: windowRequestOpened.type })
+    );
     expect(openWindowMock).not.toHaveBeenCalled();
   });
 });
