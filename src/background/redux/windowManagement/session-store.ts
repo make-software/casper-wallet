@@ -4,7 +4,7 @@ import { isEphemeralBackgroundBuild } from '@src/utils';
 
 import { redactUrlQuery } from '@background/redact-url-query';
 
-import { MAX_RESPONDED_TOMBSTONES } from './reducer';
+import { MAX_OPEN_REQUESTS, MAX_RESPONDED_TOMBSTONES } from './reducer';
 import { isStorableRequestId } from './request-map';
 import { CancellableMethod, Request, WindowManagementState } from './types';
 
@@ -21,13 +21,14 @@ export type SessionRecord = {
   windowId: number | null;
 };
 
-// Write-side row cap: the reducer's tombstone bound plus headroom for the open
-// rows that can exist alongside them. The read stays uncapped, so no drop order
-// has to be defined there and key hoisting can never decide which rows survive.
-// Exported so the startup sweep can bound its own per-wake work to the same
-// figure (see sweep-orphaned-requests.ts) — the hydrated snapshot it reads can
-// never hold more open rows than this in the first place.
-export const MAX_SESSION_ROWS = MAX_RESPONDED_TOMBSTONES + 20;
+// Write-side row cap: the reducer's tombstone bound plus its open-request bound
+// — the two are the only ways a row can exist, so their sum is the only correct
+// figure, not headroom picked separately. The read stays uncapped, so no drop
+// order has to be defined there and key hoisting can never decide which rows
+// survive. Exported so the startup sweep can bound its own per-wake work to the
+// same figure (see sweep-orphaned-requests.ts) — the hydrated snapshot it reads
+// can never hold more open rows than this in the first place.
+export const MAX_SESSION_ROWS = MAX_RESPONDED_TOMBSTONES + MAX_OPEN_REQUESTS;
 
 const MAX_ORIGIN_LENGTH = 256;
 const MAX_WINDOW_IDS = 16;

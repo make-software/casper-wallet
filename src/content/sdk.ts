@@ -169,7 +169,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
   return {
     /**
      * Request the connect interface with the Casper Wallet extension. Will not show UI for already connected accounts and return true immediately.
-     * @returns `true` value when connection request is accepted by the user or when account is already connected, `false` otherwise.
+     * @returns `true` value when connection request is accepted by the user or when account is already connected, `false` otherwise — including when the wallet refused for its own open-request capacity, currently indistinguishable from a user decline (WALLET-1436 will make it explicit).
      */
     requestConnection(): Promise<boolean> {
       return fetchFromBackground<
@@ -186,7 +186,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
     },
     /**
      * Request the switch account interface with the Casper Wallet extension
-     * @returns `true` value when successfully switched account, `false` otherwise.
+     * @returns `true` value when successfully switched account, `false` otherwise — including when the wallet refused for its own open-request capacity, currently indistinguishable from a user decline (WALLET-1436 will make it explicit).
      */
     requestSwitchAccount(): Promise<boolean> {
       return fetchFromBackground<

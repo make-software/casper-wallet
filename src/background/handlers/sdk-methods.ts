@@ -28,9 +28,15 @@ import {
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
-import { windowRequestOpened } from '@background/redux/windowManagement/actions';
+import {
+  windowRequestOpened,
+  windowRequestResponded
+} from '@background/redux/windowManagement/actions';
 import { isStorableRequestId } from '@background/redux/windowManagement/request-map';
-import { selectRequestStatus } from '@background/redux/windowManagement/selectors';
+import {
+  selectOpenRequests,
+  selectRequestStatus
+} from '@background/redux/windowManagement/selectors';
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
@@ -67,6 +73,24 @@ function reportCapacityRefusal(action: SdkMethod) {
     'sdk-methods: pending-payload map at capacity, request refused',
     { requestId: action.meta.requestId, method: action.type }
   );
+}
+
+// Same LOGGING rationale as `reportCapacityRefusal` (this side is not
+// invisible to the wallet even when refused silently) — but not the same dapp
+// half: only the two payload-bearing refusals (`sign`, `signTypedData`) carry
+// `errorCode`. For the four capless methods the refusal is indistinguishable
+// from an ordinary user decline on the dapp side until WALLET-1436 gives it
+// one too. `openCount` is the count AFTER the refused write — it names how
+// full the map the refusal fired against actually was.
+function reportOpenRequestCapacityRefusal(
+  action: SdkMethod,
+  openCount: number
+) {
+  console.error('sdk-methods: open-request map at capacity, request refused', {
+    requestId: action.meta.requestId,
+    method: action.type,
+    openCount
+  });
 }
 
 export async function handleSdkMethod(
@@ -140,6 +164,24 @@ export async function handleSdkMethod(
           method: 'connect'
         })
       );
+
+      // At `MAX_OPEN_REQUESTS` the reducer refused the write silently; this is
+      // the analogue of the `getPayload(...) == null` check above, for a method
+      // with no capacity map of its own to read back.
+      if (
+        selectRequestStatus(store.getState(), action.meta.requestId) == null
+      ) {
+        reportOpenRequestCapacityRefusal(
+          action,
+          selectOpenRequests(store.getState()).length
+        );
+
+        return {
+          handled: true,
+          response: sdkMethod.connectResponse(false, action.meta)
+        };
+      }
+
       openWindow(store, {
         windowApp: WindowApp.ConnectToApp,
         searchParams: query,
@@ -178,6 +220,19 @@ export async function handleSdkMethod(
         method: 'switchAccount'
       })
     );
+
+    if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
+      reportOpenRequestCapacityRefusal(
+        action,
+        selectOpenRequests(store.getState()).length
+      );
+
+      return {
+        handled: true,
+        response: sdkMethod.switchAccountResponse(false, action.meta)
+      };
+    }
+
     openWindow(store, {
       windowApp: WindowApp.SwitchAccount,
       searchParams: query,
@@ -272,6 +327,38 @@ export async function handleSdkMethod(
         method: 'sign'
       })
     );
+
+    // At `MAX_OPEN_REQUESTS` the reducer refused the write silently, same as
+    // the four capless methods above — but the payload above has ALREADY been
+    // accepted into the map, so it is stranded here rather than refused; it is
+    // reclaimed by `reconcileStalePayloadsSaga` since no descriptor and no
+    // window will ever claim it. `windowRequestResponded` reclaims it
+    // immediately instead: the vault reducer deletes the payload keyed off
+    // this exact action (the WALLET-1418 orphan mechanism, and it is in the
+    // re-encrypt debounce list so the deletion reaches the cipher), and the
+    // windowManagement case no-ops for an id with no open row.
+    if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
+      reportOpenRequestCapacityRefusal(
+        action,
+        selectOpenRequests(store.getState()).length
+      );
+      store.dispatch(
+        windowRequestResponded({ requestId: action.meta.requestId })
+      );
+
+      return {
+        handled: true,
+        response: sdkMethod.signResponse(
+          {
+            cancelled: true,
+            message: CAPACITY_REFUSAL_MESSAGE,
+            errorCode: SdkErrorCode.tooManyPendingRequests
+          },
+          { requestId: action.meta.requestId }
+        )
+      };
+    }
+
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestDeploy,
       searchParams: {
@@ -307,6 +394,22 @@ export async function handleSdkMethod(
         method: 'signMessage'
       })
     );
+
+    if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
+      reportOpenRequestCapacityRefusal(
+        action,
+        selectOpenRequests(store.getState()).length
+      );
+
+      return {
+        handled: true,
+        response: sdkMethod.signMessageResponse(
+          { cancelled: true },
+          action.meta
+        )
+      };
+    }
+
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestMessage,
       searchParams: {
@@ -376,6 +479,37 @@ export async function handleSdkMethod(
         method: 'signTypedData'
       })
     );
+
+    // Same residual as the deploy branch: the payload above is already
+    // accepted, so a refusal here strands it for `reconcileStalePayloadsSaga`
+    // to reclaim rather than refusing the payload write itself.
+    // `windowRequestResponded` reclaims it immediately instead — same
+    // mechanism as the `sign` branch above.
+    if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
+      reportOpenRequestCapacityRefusal(
+        action,
+        selectOpenRequests(store.getState()).length
+      );
+      store.dispatch(
+        windowRequestResponded({ requestId: action.meta.requestId })
+      );
+
+      return {
+        handled: true,
+        response: sdkMethod.signTypedDataResponse(
+          {
+            cancelled: true,
+            signature: null,
+            digest: null,
+            publicKey: null,
+            error: CAPACITY_REFUSAL_MESSAGE,
+            errorCode: SdkErrorCode.tooManyPendingRequests
+          },
+          { requestId: action.meta.requestId }
+        )
+      };
+    }
+
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestEip712,
       searchParams: {
@@ -412,6 +546,22 @@ export async function handleSdkMethod(
         method: 'decryptMessage'
       })
     );
+
+    if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
+      reportOpenRequestCapacityRefusal(
+        action,
+        selectOpenRequests(store.getState()).length
+      );
+
+      return {
+        handled: true,
+        response: sdkMethod.decryptMessageResponse(
+          { cancelled: true },
+          action.meta
+        )
+      };
+    }
+
     openWindow(store, {
       windowApp: WindowApp.DecryptMessageRequest,
       searchParams: {

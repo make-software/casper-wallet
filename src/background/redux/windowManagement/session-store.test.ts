@@ -1,4 +1,6 @@
-import { MAX_RESPONDED_TOMBSTONES } from './reducer';
+import { MAX_STORED_PAYLOADS } from '@background/redux/vault/reducer';
+
+import { MAX_OPEN_REQUESTS, MAX_RESPONDED_TOMBSTONES } from './reducer';
 import {
   REQUEST_SESSION_KEY,
   SessionRecord,
@@ -490,6 +492,36 @@ describe('session-store — write path', () => {
 
     expect(sessionSet).toHaveBeenCalledTimes(2);
     expect(lastWrittenRecord().windowId).toBe(2);
+  });
+
+  it('drops nothing at exactly the combined cap: MAX_RESPONDED_TOMBSTONES tombstones plus MAX_OPEN_REQUESTS open rows', async () => {
+    // The identity `MAX_SESSION_ROWS === MAX_RESPONDED_TOMBSTONES +
+    // MAX_OPEN_REQUESTS` restates the definition character-for-character and
+    // proves nothing about the write-side cap itself. This instead builds
+    // the actual boundary case — a row is either a tombstone or an open
+    // request, no third state — and asserts the write path keeps every one
+    // of them, exactly at the cap.
+    const requests: Record<string, Request> = {};
+    for (let seq = 0; seq < MAX_RESPONDED_TOMBSTONES; seq += 1) {
+      requests[`tombstone-${seq}`] = { status: 'responded', seq } as Request;
+    }
+    for (let seq = 0; seq < MAX_OPEN_REQUESTS; seq += 1) {
+      requests[`open-${seq}`] = openRow({ seq }) as Request;
+    }
+
+    await writeRequestSession({ requests, windowId: null });
+
+    expect(lastWrittenRecord().requests).toEqual(requests);
+  });
+
+  it('keeps the open-request cap above the binding floor set by the payload caps (sign/signTypedData only)', () => {
+    // Below `2 * MAX_STORED_PAYLOADS` the open-request cap would fire before
+    // either payload cap on the sign/signTypedData paths specifically,
+    // stranding an already-accepted payload with no window ever opened for
+    // it. The four capless methods share this same cap but have no payload
+    // map to strand, so this floor says nothing about them — kept as a
+    // tripwire for the two methods it actually bounds.
+    expect(MAX_OPEN_REQUESTS).toBeGreaterThanOrEqual(2 * MAX_STORED_PAYLOADS);
   });
 
   it('caps rows on the write side, dropping tombstones before open rows and oldest first', async () => {
