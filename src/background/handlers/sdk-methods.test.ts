@@ -266,6 +266,27 @@ describe('a requestId that is not storable', () => {
 
     expect(openWindowMock).toHaveBeenCalledTimes(1);
   });
+
+  it('refuses an oversized requestId before anything registers', async () => {
+    // Unbounded, a multi-MB dapp-supplied id could register here and later
+    // overflow the `storage.session` mirror's write quota (session-store.ts).
+    const { store, dispatch } = makeStore();
+    const oversizedRequestId = 'x'.repeat(257);
+
+    await expect(
+      handleSdkMethod(
+        sdkMethod.connectRequest(
+          { title: 't' },
+          { requestId: oversizedRequestId }
+        ),
+        SENDER,
+        store
+      )
+    ).rejects.toThrow('Invalid requestId');
+
+    expect(openWindowMock).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
 });
 
 describe('connectRequest', () => {

@@ -57,6 +57,13 @@ export const isLedgerAvailable =
   process.env.BROWSER === Browser.Chrome ||
   process.env.BROWSER === Browser.Edge;
 
+// Named for the property rather than the vendor: `Browser.Edge` is Chromium
+// too, and an `isChromeBuild` gate would silently ship an Edge build without
+// the request mirror. Build-time, so DefinePlugin still eliminates dead code.
+export const isEphemeralBackgroundBuild =
+  process.env.BROWSER === Browser.Chrome ||
+  process.env.BROWSER === Browser.Edge;
+
 export const isValidU64 = (value?: string): boolean => {
   if (!value) {
     return false;

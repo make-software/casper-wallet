@@ -1,18 +1,23 @@
 import type { KeysState } from '@background/redux/keys/types';
 import {
+  exportKeysWindowIdCleared,
   windowIdChanged,
   windowRequestOpened
 } from '@background/redux/windowManagement/actions';
+import { REQUEST_SESSION_KEY } from '@background/redux/windowManagement/session-store';
 
 // --- storage / runtime mock -------------------------------------------------
 // storage.local.get returns the per-test snapshot; set/remove/sendMessage are
 // no-op spies that absorb the subscribe-persist write and the saga deadline
 // clears armed by startBackground (no real timers are scheduled for a
 // keys-only snapshot). This is the same mock style as the handler/saga tests.
+// `storage.session` is here to exercise hydration, not to avoid a throw.
 const storageGet = jest.fn<Promise<Record<string, unknown>>, [unknown]>();
 const storageSet = jest.fn().mockResolvedValue(undefined);
 const storageRemove = jest.fn().mockResolvedValue(undefined);
 const runtimeSendMessage = jest.fn().mockResolvedValue(undefined);
+const sessionGet = jest.fn<Promise<Record<string, unknown>>, [unknown]>();
+const sessionSet = jest.fn().mockResolvedValue(undefined);
 
 jest.mock('webextension-polyfill', () => ({
   storage: {
@@ -20,12 +25,24 @@ jest.mock('webextension-polyfill', () => ({
       get: (...args: unknown[]) => storageGet(...(args as [unknown])),
       set: (...args: unknown[]) => storageSet(...args),
       remove: (...args: unknown[]) => storageRemove(...args)
+    },
+    session: {
+      get: (...args: unknown[]) => sessionGet(...(args as [unknown])),
+      set: (...args: unknown[]) => sessionSet(...args),
+      remove: jest.fn().mockResolvedValue(undefined)
     }
   },
   runtime: {
     sendMessage: (...args: unknown[]) => runtimeSendMessage(...args)
   },
   tabs: { query: jest.fn().mockResolvedValue([]) }
+}));
+
+// The mirror is gated on a build-time flag that is FALSE under jest, so without
+// this the hydration cases would exercise the disabled path.
+jest.mock('@src/utils', () => ({
+  ...jest.requireActual('@src/utils'),
+  isEphemeralBackgroundBuild: true
 }));
 
 // Drive the REAL preload of getExistingMainStoreSingletonOrInit with a fresh
@@ -51,6 +68,8 @@ async function initWithKeysSnapshot(keys: KeysState | undefined) {
 describe('getExistingMainStoreSingletonOrInit — keysDoesExist preload derivation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionGet.mockResolvedValue({});
+    sessionSet.mockResolvedValue(undefined);
     storageSet.mockResolvedValue(undefined);
     storageRemove.mockResolvedValue(undefined);
     runtimeSendMessage.mockResolvedValue(undefined);
@@ -124,6 +143,8 @@ function lastPopupStateBroadcast(): Record<string, unknown> | undefined {
 describe('selectPopupState broadcast — replica privacy narrowing', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionGet.mockResolvedValue({});
+    sessionSet.mockResolvedValue(undefined);
     storageSet.mockResolvedValue(undefined);
     storageRemove.mockResolvedValue(undefined);
     runtimeSendMessage.mockResolvedValue(undefined);
@@ -172,11 +193,143 @@ describe('selectPopupState broadcast — replica privacy narrowing', () => {
   });
 });
 
+describe('preload hydration — the session mirror', () => {
+  const mirroredRequest = {
+    status: 'open',
+    tabId: 7,
+    origin: 'https://dapp.example',
+    method: 'sign',
+    windowIds: [11],
+    awaitingDeviceConfirmation: false,
+    seq: 0
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    sessionGet.mockResolvedValue({});
+    sessionSet.mockResolvedValue(undefined);
+    storageSet.mockResolvedValue(undefined);
+    storageRemove.mockResolvedValue(undefined);
+    runtimeSendMessage.mockResolvedValue(undefined);
+  });
+
+  it('puts a mirrored request map and windowId into the store before any handler can run', async () => {
+    sessionGet.mockResolvedValue({
+      [REQUEST_SESSION_KEY]: {
+        requests: { 'req-1': mirroredRequest },
+        windowId: 3
+      }
+    });
+
+    const store = await initWithKeysSnapshot(undefined);
+
+    expect(store.getState().windowManagement).toEqual({
+      windowId: 3,
+      exportKeysWindowId: null,
+      requests: { 'req-1': mirroredRequest }
+    });
+  });
+
+  it('drops a malformed record without throwing, leaving the empty slice', async () => {
+    sessionGet.mockResolvedValue({
+      [REQUEST_SESSION_KEY]: {
+        requests: { 'req-1': { status: 'open', tabId: '7' } },
+        windowId: 'not a window'
+      }
+    });
+
+    const store = await initWithKeysSnapshot(undefined);
+
+    expect(store.getState().windowManagement).toEqual({
+      windowId: null,
+      exportKeysWindowId: null,
+      requests: {}
+    });
+  });
+
+  it('survives a rejected session read', async () => {
+    sessionGet.mockRejectedValue('context invalidated');
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    const store = await initWithKeysSnapshot(undefined);
+
+    expect(store.getState().windowManagement.requests).toEqual({});
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('keeps a hydrated request out of the replica broadcast', async () => {
+    sessionGet.mockResolvedValue({
+      [REQUEST_SESSION_KEY]: {
+        requests: { 'req-1': mirroredRequest },
+        windowId: 3
+      }
+    });
+
+    const store = await initWithKeysSnapshot(undefined);
+    store.dispatch(windowIdChanged(11));
+
+    expect(JSON.stringify(lastPopupStateBroadcast())).not.toContain(
+      'dapp.example'
+    );
+  });
+
+  it('mirrors a request the store registers after hydration', async () => {
+    const store = await initWithKeysSnapshot(undefined);
+
+    store.dispatch(
+      windowRequestOpened({
+        requestId: 'req-1',
+        tabId: 7,
+        origin: 'https://dapp.example',
+        method: 'sign'
+      })
+    );
+    await new Promise(resolve => setImmediate(resolve as () => void));
+
+    expect(sessionSet).toHaveBeenCalledWith({
+      [REQUEST_SESSION_KEY]: {
+        // No window has attached yet at registration time.
+        requests: { 'req-1': { ...mirroredRequest, windowIds: [] } },
+        windowId: null
+      }
+    });
+  });
+
+  it('does not write the mirror for a change that leaves the pair identical', async () => {
+    const store = await initWithKeysSnapshot(undefined);
+    sessionSet.mockClear();
+
+    // No no-op path: the reducer returns a fresh slice for a value-equal write.
+    store.dispatch(exportKeysWindowIdCleared());
+    await new Promise(resolve => setImmediate(resolve as () => void));
+
+    expect(sessionSet).not.toHaveBeenCalled();
+  });
+
+  it('yields ONE store for two interleaved first callers', async () => {
+    await jest.isolateModulesAsync(async () => {
+      const mod = await import('@background/redux/get-main-store');
+      storageGet.mockResolvedValue({});
+
+      const [first, second] = await Promise.all([
+        mod.getExistingMainStoreSingletonOrInit(),
+        mod.getExistingMainStoreSingletonOrInit()
+      ]);
+
+      expect(first).toBe(second);
+    });
+  });
+});
+
 describe('replica broadcast — rejection handling', () => {
   let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionGet.mockResolvedValue({});
+    sessionSet.mockResolvedValue(undefined);
     storageSet.mockResolvedValue(undefined);
     storageRemove.mockResolvedValue(undefined);
     runtimeSendMessage.mockResolvedValue(undefined);

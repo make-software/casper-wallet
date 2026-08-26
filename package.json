@@ -60,6 +60,8 @@
     "dependency:orphans": "npx madge --ts-config=tsconfig.json --orphans src/**/*",
     "e2e:chrome:headless:onboarding": "TEST_ENV=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/onboarding-flow --project chromium",
     "e2e:chrome:ui:onboarding": "TEST_ENV=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/onboarding-flow --ui --project chromium",
+    "e2e:chrome:headless:request-lifecycle": "TEST_ENV=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/request-lifecycle --project chromium",
+    "e2e:chrome:ui:request-lifecycle": "TEST_ENV=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/request-lifecycle --ui --project chromium",
     "e2e:chrome:headless:popup": "TEST_ENV=true MOCK_STATE=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/popup --project chromium",
     "e2e:chrome:ui:popup": "TEST_ENV=true MOCK_STATE=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/popup --ui --project chromium",
     "e2e:firefox:headless:smoke": "TEST_ENV=true npm run build:firefox && npx playwright test --config playwright.firefox.config.ts",

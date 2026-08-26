@@ -1,5 +1,11 @@
 import { Request, WindowManagementState } from './types';
 
+// `requestId` is page-generated and page-controlled (`generateRequestId`,
+// src/content/sdk.ts) — an oversized id must be refused here, at the SDK
+// entry, before it can register and later overflow the `storage.session`
+// mirror's write quota (session-store.ts).
+const MAX_REQUEST_ID_LENGTH = 256;
+
 /**
  * The only sanctioned way to read the `requests` map.
  *
@@ -34,7 +40,11 @@ export function getRequest(
  * descriptor would then be inherited by every later lookup in the map. The
  * other four (`toString`, `constructor`, `valueOf`, `hasOwnProperty`) store as
  * ordinary own properties once reads go through `getRequest`.
+ *
+ * Also bounds length: unchecked here, a multi-MB dapp-supplied id could
+ * register, then overflow the `storage.session` mirror's write quota, and the
+ * mirror's remove-on-reject wipes the whole thing.
  */
 export function isStorableRequestId(requestId: string): boolean {
-  return requestId !== '__proto__';
+  return requestId !== '__proto__' && requestId.length <= MAX_REQUEST_ID_LENGTH;
 }
