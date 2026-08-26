@@ -51,8 +51,13 @@ To open as a tab:
 
 ### Load Wallet Extension in Safari
 
-1. Open `build/safari` folder from `builds.zip` or `builds` folder when building from sources.
-2. Double click on "Casper Wallet.app" file.
+The Safari build is distributed through TestFlight — install it from there,
+then follow steps 3-4 below.
+
+To run it from sources instead:
+
+1. Run `npm run build:safari` to produce the web-extension resources in `build/safari`.
+2. Open `xcode-project/Casper Wallet/Casper Wallet.xcodeproj` and run the "Casper Wallet" scheme.
 3. Follow instructions and enable Casper Wallet in opened Extensions Preferences window.
 4. Open Safari and enable unsigned extensions. Extension should be available.
 
@@ -124,7 +129,7 @@ Firefox:
 npm run build:firefox
 ```
 
-Safari:
+Safari (web-extension resources only — see below):
 
 ```shell
 npm run build:safari
@@ -135,6 +140,10 @@ All at once:
 ```shell
 npm run build:all
 ```
+
+For Safari both commands stop at the web-extension resources in `build/safari`.
+The app around them is built and submitted to TestFlight from
+`xcode-project/Casper Wallet` in Xcode; there is no npm script for that step.
 
 ### Reproducible builds from the source package
 

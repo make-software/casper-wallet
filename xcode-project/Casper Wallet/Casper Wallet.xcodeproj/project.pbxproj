@@ -73,18 +73,18 @@
 		2439D79C29F0757B00F07C90 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		2439D79E29F0757B00F07C90 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2439D79F29F0757B00F07C90 /* Casper_Wallet_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Casper_Wallet_Extension.entitlements; sourceTree = "<group>"; };
-		2439D7AB29F0757C00F07C90 /* logo16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo16.png; path = ../../../build/firefox/logo16.png; sourceTree = "<group>"; };
-		2439D7AC29F0757C00F07C90 /* connect-to-app.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "connect-to-app.html"; path = "../../../build/firefox/connect-to-app.html"; sourceTree = "<group>"; };
-		2439D7AE29F0757C00F07C90 /* locales */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locales; path = ../../../build/firefox/locales; sourceTree = "<group>"; };
-		2439D7AF29F0757C00F07C90 /* import-account-with-file.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "import-account-with-file.html"; path = "../../../build/firefox/import-account-with-file.html"; sourceTree = "<group>"; };
-		2439D7B229F0757C00F07C90 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = ../../../build/firefox/popup.html; sourceTree = "<group>"; };
-		2439D7B429F0757C00F07C90 /* logo128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo128.png; path = ../../../build/firefox/logo128.png; sourceTree = "<group>"; };
-		2439D7B529F0757C00F07C90 /* logo64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo64.png; path = ../../../build/firefox/logo64.png; sourceTree = "<group>"; };
-		2439D7B929F0757C00F07C90 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../../../build/firefox/manifest.json; sourceTree = "<group>"; };
-		2439D7BB29F0757C00F07C90 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../../../build/firefox/assets; sourceTree = "<group>"; };
-		2439D7BD29F0757C00F07C90 /* logo192.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo192.png; path = ../../../build/firefox/logo192.png; sourceTree = "<group>"; };
-		2439D7BE29F0757C00F07C90 /* onboarding.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = onboarding.html; path = ../../../build/firefox/onboarding.html; sourceTree = "<group>"; };
-		2439D7BF29F0757C00F07C90 /* signature-request.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "signature-request.html"; path = "../../../build/firefox/signature-request.html"; sourceTree = "<group>"; };
+		2439D7AB29F0757C00F07C90 /* logo16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo16.png; path = ../../../build/safari/logo16.png; sourceTree = "<group>"; };
+		2439D7AC29F0757C00F07C90 /* connect-to-app.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "connect-to-app.html"; path = "../../../build/safari/connect-to-app.html"; sourceTree = "<group>"; };
+		2439D7AE29F0757C00F07C90 /* locales */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locales; path = ../../../build/safari/locales; sourceTree = "<group>"; };
+		2439D7AF29F0757C00F07C90 /* import-account-with-file.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "import-account-with-file.html"; path = "../../../build/safari/import-account-with-file.html"; sourceTree = "<group>"; };
+		2439D7B229F0757C00F07C90 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = ../../../build/safari/popup.html; sourceTree = "<group>"; };
+		2439D7B429F0757C00F07C90 /* logo128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo128.png; path = ../../../build/safari/logo128.png; sourceTree = "<group>"; };
+		2439D7B529F0757C00F07C90 /* logo64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo64.png; path = ../../../build/safari/logo64.png; sourceTree = "<group>"; };
+		2439D7B929F0757C00F07C90 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../../../build/safari/manifest.json; sourceTree = "<group>"; };
+		2439D7BB29F0757C00F07C90 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../../../build/safari/assets; sourceTree = "<group>"; };
+		2439D7BD29F0757C00F07C90 /* logo192.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo192.png; path = ../../../build/safari/logo192.png; sourceTree = "<group>"; };
+		2439D7BE29F0757C00F07C90 /* onboarding.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = onboarding.html; path = ../../../build/safari/onboarding.html; sourceTree = "<group>"; };
+		2439D7BF29F0757C00F07C90 /* signature-request.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "signature-request.html"; path = "../../../build/safari/signature-request.html"; sourceTree = "<group>"; };
 		B3867CAC2A7B038000BD01B7 /* declarative_net_request_rules.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = declarative_net_request_rules.json; path = ../../../src/declarative_net_request_rules.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -309,7 +309,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "rm -f \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"/*.bundle.js\ncp \"${SRCROOT}\"/../../build/firefox/*.bundle.js \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/\"\n";
+			shellScript = "rm -f \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"/*.bundle.js\ncp \"${SRCROOT}\"/../../build/safari/*.bundle.js \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
