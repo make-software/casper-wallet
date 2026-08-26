@@ -143,7 +143,15 @@ npm run build:all
 
 For Safari both commands stop at the web-extension resources in `build/safari`.
 The app around them is built and submitted to TestFlight from
-`xcode-project/Casper Wallet` in Xcode; there is no npm script for that step.
+`xcode-project/Casper Wallet` in Xcode; there is no npm script for that step,
+and the resources are not part of the archive below — Xcode reads them from
+`build/safari` directly.
+
+`build:all` bundles the Chrome and Firefox builds into
+`build/casper-wallet-<version>rc<n>#<sha>.zip`, taking `<version>` from
+`package.json`. The rc number restarts at 1 whenever that version changes and
+otherwise continues from the highest archive already sitting in `build/` — so
+keep the previous archives there if you want the count to carry on.
 
 ### Reproducible builds from the source package
 
