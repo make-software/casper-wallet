@@ -22,18 +22,30 @@ for archive in "build/casper-wallet-${VERSION}rc"*"#"*.zip; do
   fi
 done
 
-ARCHIVE="casper-wallet-${VERSION}rc$((last_rc + 1))#${HASH}.zip"
+RC=$((last_rc + 1))
+STAMP="${VERSION}rc${RC}#${HASH}"
 
 npm run build:chrome
 npm run build:firefox
 npm run build:safari
 
-# Named explicitly, not `./*`: earlier archives stay in build/ to carry the rc
-# counter, and zipping them into the new one would nest every past release.
-# Safari is out on purpose — Xcode reads those resources straight from
-# build/safari and ships them inside the app.
-(cd ./build && zip -r "$ARCHIVE" chrome firefox)
+# Store uploads want the extension at the zip root, so each one is zipped from
+# inside its own build dir. Dotfiles are dropped: a Finder visit leaves a
+# .DS_Store behind, and the stores flag it.
+for target in chrome firefox; do
+  store_archive="casper-wallet-${target}-${STAMP}.zip"
+  rm -f "build/$store_archive"
+  (cd "./build/$target" && zip -qr -X "../$store_archive" . -x '.*' '*/.*')
+  echo "Store archive: build/$store_archive"
+done
+
+# Named explicitly, not `./*`: the archives above and the ones from earlier runs
+# live in build/ too, and `./*` would nest all of them into this one. Safari is
+# out on purpose — Xcode reads those resources straight from build/safari and
+# ships them inside the app.
+rm -f "build/casper-wallet-${STAMP}.zip"
+(cd ./build && zip -qr "casper-wallet-${STAMP}.zip" chrome firefox)
 
 npm run build:src
 
-echo "Archive: build/$ARCHIVE"
+echo "Archive: build/casper-wallet-${STAMP}.zip"

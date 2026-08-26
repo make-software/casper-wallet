@@ -153,6 +153,10 @@ and the resources are not part of the archive below — Xcode reads them from
 otherwise continues from the highest archive already sitting in `build/` — so
 keep the previous archives there if you want the count to carry on.
 
+Alongside it come `build/casper-wallet-chrome-<version>rc<n>#<sha>.zip` and its
+`firefox` counterpart, ready to upload to the stores as they are: each holds
+the extension at the zip root, which is what the stores expect.
+
 ### Reproducible builds from the source package
 
 `npm run build:src` produces `build/casper-wallet-src#<sha>.zip`, the package
