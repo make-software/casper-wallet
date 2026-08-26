@@ -45,8 +45,16 @@ export type Request =
       // entry, and a detach shrinks `windowIds`, which is the other half of the
       // question. WALLET-1394.
       readonly awaitingDeviceConfirmation: boolean;
+      // Registration order, stamped once. Key order cannot stand in for it: an
+      // integer-like dapp-chosen id such as `"42"` enumerates ahead of every
+      // string key whatever its age.
+      readonly seq: number;
     }
-  | { readonly status: 'responded' };
+  | {
+      readonly status: 'responded';
+      // Outlives the descriptor because eviction ranks tombstones by age.
+      readonly seq: number;
+    };
 
 // Not exported: with `selectOpenRequests` narrowing on the discriminant rather
 // than asserting a predicate, nothing outside this file needs the bare

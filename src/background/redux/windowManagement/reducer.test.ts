@@ -84,10 +84,10 @@ describe('windowManagement reducer', () => {
   it('marks a request as responded, and is idempotent on a second respond', () => {
     let state = reducer(empty, opened('r1'));
     state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
-    expect(state.requests.r1).toEqual({ status: 'responded' });
+    expect(state.requests.r1).toEqual({ status: 'responded', seq: 1 });
 
     state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
-    expect(state.requests.r1).toEqual({ status: 'responded' });
+    expect(state.requests.r1).toEqual({ status: 'responded', seq: 1 });
   });
 
   it('leaves a still-open sibling untouched when one request is answered', () => {
@@ -108,12 +108,13 @@ describe('windowManagement reducer', () => {
       origin: 'https://other.example',
       method: 'signMessage',
       windowIds: [],
-      awaitingDeviceConfirmation: false
+      awaitingDeviceConfirmation: false,
+      seq: 1
     });
 
     // Responding twice must not throw or resurrect the dropped descriptor.
     state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
-    expect(state.requests.r1).toEqual({ status: 'responded' });
+    expect(state.requests.r1).toEqual({ status: 'responded', seq: 2 });
   });
 });
 
@@ -127,7 +128,8 @@ describe('windowManagement requests', () => {
       origin: 'https://dapp',
       method: 'sign',
       windowIds: [],
-      awaitingDeviceConfirmation: false
+      awaitingDeviceConfirmation: false,
+      seq: 0
     });
   });
 
@@ -150,7 +152,8 @@ describe('windowManagement requests', () => {
       origin: 'https://dapp.example',
       method: 'sign',
       windowIds: [],
-      awaitingDeviceConfirmation: false
+      awaitingDeviceConfirmation: false,
+      seq: 0
     });
   });
 
@@ -177,7 +180,8 @@ describe('windowManagement requests', () => {
       origin: 'https://dapp.example',
       method: 'sign',
       windowIds: [],
-      awaitingDeviceConfirmation: false
+      awaitingDeviceConfirmation: false,
+      seq: 0
     });
   });
 
@@ -275,7 +279,7 @@ describe('windowManagement requests', () => {
     let state = reducer(empty, opened('r1'));
     state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
 
-    expect(state.requests.r1).toEqual({ status: 'responded' });
+    expect(state.requests.r1).toEqual({ status: 'responded', seq: 1 });
   });
 
   it('a reused requestId does not resurrect a tombstone', () => {
@@ -284,7 +288,7 @@ describe('windowManagement requests', () => {
     const next = reducer(state, opened('r1'));
 
     expect(next).toBe(state);
-    expect(next.requests.r1).toEqual({ status: 'responded' });
+    expect(next.requests.r1).toEqual({ status: 'responded', seq: 1 });
   });
 
   it('a reused requestId does not clobber a still-open descriptor', () => {
@@ -379,7 +383,7 @@ describe('windowManagement requests', () => {
         windowRequestResponded({ requestId: 'r1' })
       );
 
-      expect(next.requests.r1).toEqual({ status: 'responded' });
+      expect(next.requests.r1).toEqual({ status: 'responded', seq: 1 });
       expect(Object.keys(next.requests)).toContain('ghost');
     });
   });
@@ -431,9 +435,91 @@ describe('windowManagement requests', () => {
       // Oldest evicted, newest kept: a late duplicate is most likely to arrive
       // for a request that was answered recently.
       expect(state.requests.r0).toBeUndefined();
+      // Each iteration consumes two ordinals (open, then the respond restamp),
+      // so the last of MAX_RESPONDED_TOMBSTONES + 10 iterations lands here.
       expect(state.requests[`r${MAX_RESPONDED_TOMBSTONES + 9}`]).toEqual({
-        status: 'responded'
+        status: 'responded',
+        seq: 2 * MAX_RESPONDED_TOMBSTONES + 19
       });
+    });
+
+    // Eviction ranked on `Object.keys`, whose order is not registration order:
+    // an integer-like dapp-chosen key is enumerated ahead of every string key
+    // however recently it was written, so `"42"` was always evicted first.
+    it('does not evict an integer-like key ahead of older string-keyed tombstones', () => {
+      let state = empty;
+      for (let i = 0; i < MAX_RESPONDED_TOMBSTONES; i++) {
+        state = reducer(state, opened(`r${i}`));
+        state = reducer(state, windowRequestResponded({ requestId: `r${i}` }));
+      }
+
+      state = reducer(state, opened('42'));
+      state = reducer(state, windowRequestResponded({ requestId: '42' }));
+
+      expect(Object.keys(state.requests)).toHaveLength(
+        MAX_RESPONDED_TOMBSTONES
+      );
+      expect(state.requests['42']).toEqual({
+        status: 'responded',
+        seq: 2 * MAX_RESPONDED_TOMBSTONES + 1
+      });
+      expect(state.requests.r0).toBeUndefined();
+    });
+
+    // Eviction is oldest-ANSWERED-first, not oldest-REGISTERED-first: a
+    // request that registered before every other one but is answered last
+    // must get the highest seq and outlive tombstones for requests that
+    // registered later but were answered sooner. Restamping the tombstone at
+    // respond time (rather than keeping the registration seq) is what makes
+    // this hold — otherwise `first` would answer with its own registration
+    // seq of 0, making it the lowest-seq (oldest) tombstone and evicting
+    // itself in the very dispatch that created it.
+    it('a request registered first but answered last survives eviction over an earlier-answered tombstone', () => {
+      let state = reducer(empty, opened('first'));
+
+      for (let i = 0; i < MAX_RESPONDED_TOMBSTONES; i++) {
+        state = reducer(state, opened(`r${i}`));
+        state = reducer(state, windowRequestResponded({ requestId: `r${i}` }));
+      }
+
+      state = reducer(state, windowRequestResponded({ requestId: 'first' }));
+
+      expect(Object.keys(state.requests)).toHaveLength(
+        MAX_RESPONDED_TOMBSTONES
+      );
+      expect(state.requests.r0).toBeUndefined();
+      expect(state.requests.first).toEqual({
+        status: 'responded',
+        seq: 2 * MAX_RESPONDED_TOMBSTONES + 1
+      });
+    });
+
+    it('stamps the first request of an empty map with the first ordinal', () => {
+      expect(reducer(empty, opened('r1')).requests.r1).toMatchObject({
+        seq: 0
+      });
+    });
+
+    // Re-stamping would let a page promote its own tombstone past older ones
+    // by re-sending an id it already used.
+    it('does not re-stamp the ordinal of an id that is re-sent', () => {
+      let state = reducer(empty, opened('r1'));
+      state = reducer(state, opened('r2'));
+      state = reducer(state, opened('r1'));
+
+      expect(state.requests.r1).toMatchObject({ seq: 0 });
+      expect(state.requests.r2).toMatchObject({ seq: 1 });
+    });
+
+    // The sequence names only ids the map actually holds, so a refused write
+    // cannot leak a slot of its own.
+    it('consumes no ordinal for a refused write', () => {
+      let state = reducer(empty, opened('r1'));
+      state = reducer(state, opened('__proto__'));
+      state = reducer(state, opened('r1'));
+      state = reducer(state, opened('r2'));
+
+      expect(state.requests.r2).toMatchObject({ seq: 1 });
     });
 
     it('never evicts an open request to make room', () => {

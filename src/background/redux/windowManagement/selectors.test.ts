@@ -20,10 +20,11 @@ const requests: Record<string, Request> = {
     origin: 'o',
     method: 'sign',
     windowIds: [7],
-    awaitingDeviceConfirmation: false
+    awaitingDeviceConfirmation: false,
+    seq: 0
   },
-  b: { status: 'responded' },
-  c: { status: 'responded' }
+  b: { status: 'responded', seq: 1 },
+  c: { status: 'responded', seq: 2 }
 };
 
 const state = {
@@ -48,7 +49,8 @@ it('selectOpenRequests joins open status with its descriptor, including windowId
       origin: 'o',
       method: 'sign',
       windowIds: [7],
-      awaitingDeviceConfirmation: false
+      awaitingDeviceConfirmation: false,
+      seq: 0
     }
   ]);
 });
@@ -61,7 +63,8 @@ it('selectOpenRequest returns the open descriptor with its id', () => {
     origin: 'o',
     method: 'sign',
     windowIds: [7],
-    awaitingDeviceConfirmation: false
+    awaitingDeviceConfirmation: false,
+    seq: 0
   });
 });
 
@@ -90,7 +93,8 @@ describe('selectIsWindowBusyWithDevice', () => {
     origin: 'https://dapp.example',
     method: 'sign',
     windowIds,
-    awaitingDeviceConfirmation: true
+    awaitingDeviceConfirmation: true,
+    seq: 0
   });
 
   it('reports the window that displays the awaiting request', () => {
