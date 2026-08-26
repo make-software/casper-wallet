@@ -5,7 +5,7 @@ import { redactUrlQuery } from '@background/redact-url-query';
 // Every page a `?requestId=` can legitimately reach. `popup.html` never carries
 // one today, but it is `use-ledger.ts`'s default `domain` and none of these is
 // web-accessible, so listing it costs nothing and fails toward keeping.
-const REQUEST_BEARING_PATHNAMES = new Set([
+export const REQUEST_BEARING_PATHNAMES = new Set([
   '/signature-request.html',
   '/connect-to-app.html',
   '/popup.html'

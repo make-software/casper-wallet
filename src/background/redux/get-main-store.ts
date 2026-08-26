@@ -1,5 +1,6 @@
 import { storage } from 'webextension-polyfill';
 
+import { sweepOrphanedRequests } from '@background/handlers/sweep-orphaned-requests';
 import { redactUrlQuery } from '@background/redact-url-query';
 import { AppEventsState } from '@background/redux/app-events/types';
 import { broadcastPopupState } from '@background/redux/broadcast-popup-state';
@@ -208,6 +209,19 @@ export async function getExistingMainStoreSingletonOrInit() {
           });
         }
       });
+
+      // Fire-and-forget hardening pass (spec §8.1): catches the two durable-
+      // state freezes no window event can ever recover from. Passed the
+      // hydrated snapshot rather than reading `getState()` itself — a request
+      // registered moments after this line is not in it, and so cannot be
+      // cancelled during its own registration→attach gap.
+      void sweepOrphanedRequests(storeSingleton, requestSession.requests).catch(
+        e =>
+          console.error(
+            'sweep-orphaned-requests: sweep failed',
+            redactUrlQuery(e)
+          )
+      );
     }
   } catch (e) {
     console.error('Failed to retrieve data from local storage: ', e);

@@ -18,6 +18,26 @@ const storageRemove = jest.fn().mockResolvedValue(undefined);
 const runtimeSendMessage = jest.fn().mockResolvedValue(undefined);
 const sessionGet = jest.fn<Promise<Record<string, unknown>>, [unknown]>();
 const sessionSet = jest.fn().mockResolvedValue(undefined);
+// Absent until now, so the fire-and-forget `sweepOrphanedRequests(...).catch`
+// in `getExistingMainStoreSingletonOrInit` silently swallowed a
+// `windows.getAll is not a function` TypeError in every test here — the sweep
+// call was wired but never actually observed to run.
+//
+// Defaults to reporting `mirroredRequest`'s own requestId ('req-1') as still
+// LIVE. Every hydration test below seeds that same row, and the sweep only
+// short-circuits (no `delay(CANCEL_GRACE_MS)`, no cancel/log side effects)
+// when it finds a hydrated open row's id among the live ones — anything else
+// would race a real 250ms timer against whichever test runs next.
+const windowsGetAll = jest.fn().mockResolvedValue([
+  {
+    id: 1,
+    tabs: [
+      {
+        url: 'chrome-extension://test-extension-id/signature-request.html?requestId=req-1'
+      }
+    ]
+  }
+]);
 
 jest.mock('webextension-polyfill', () => ({
   storage: {
@@ -33,9 +53,13 @@ jest.mock('webextension-polyfill', () => ({
     }
   },
   runtime: {
-    sendMessage: (...args: unknown[]) => runtimeSendMessage(...args)
+    sendMessage: (...args: unknown[]) => runtimeSendMessage(...args),
+    getURL: (path: string) => `chrome-extension://test-extension-id/${path}`
   },
-  tabs: { query: jest.fn().mockResolvedValue([]) }
+  tabs: { query: jest.fn().mockResolvedValue([]) },
+  windows: {
+    getAll: (...args: unknown[]) => windowsGetAll(...args)
+  }
 }));
 
 // The mirror is gated on a build-time flag that is FALSE under jest, so without
@@ -306,6 +330,23 @@ describe('preload hydration — the session mirror', () => {
     await new Promise(resolve => setImmediate(resolve as () => void));
 
     expect(sessionSet).not.toHaveBeenCalled();
+  });
+
+  it('actually runs the sweep on the hydration-enabled path, not just calls it', async () => {
+    // A non-empty hydrated OPEN row is required: `sweepOrphanedRequests`
+    // returns before enumerating windows when there is nothing to sweep, so
+    // an empty map would pass even with a totally disconnected sweep call.
+    sessionGet.mockResolvedValue({
+      [REQUEST_SESSION_KEY]: {
+        requests: { 'req-1': mirroredRequest },
+        windowId: 3
+      }
+    });
+
+    await initWithKeysSnapshot(undefined);
+    await new Promise(resolve => setImmediate(resolve as () => void));
+
+    expect(windowsGetAll).toHaveBeenCalledWith({ populate: true });
   });
 
   it('yields ONE store for two interleaved first callers', async () => {
