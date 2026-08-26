@@ -22,7 +22,10 @@ import {
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
-import { windowRequestOpened } from '@background/redux/windowManagement/actions';
+import {
+  windowRequestOpened,
+  windowRequestResponded
+} from '@background/redux/windowManagement/actions';
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { sdkMethod } from '@content/sdk-method';
@@ -820,9 +823,18 @@ describe('signRequest', () => {
         { requestId: 'req-1' }
       )
     });
-    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenCalledTimes(3);
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({ type: windowRequestOpened.type })
+    );
+    // Reclaims the stranded payload immediately, rather than waiting on
+    // `reconcileStalePayloadsSaga`: the vault reducer deletes the payload
+    // keyed off exactly this action.
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: windowRequestResponded.type,
+        payload: { requestId: 'req-1' }
+      })
     );
     expect(openWindowMock).not.toHaveBeenCalled();
   });
@@ -840,7 +852,11 @@ describe('signRequest', () => {
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining('open-request map at capacity'),
-      { requestId: 'req-1', method: sdkMethod.signRequest.type }
+      {
+        requestId: 'req-1',
+        method: sdkMethod.signRequest.type,
+        openCount: 0
+      }
     );
     const logged = JSON.stringify(consoleErrorSpy.mock.calls);
     expect(logged).not.toContain('PK-1');
@@ -1206,9 +1222,17 @@ describe('signTypedDataRequest', () => {
         { requestId: 'req-1' }
       )
     });
-    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenCalledTimes(3);
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({ type: windowRequestOpened.type })
+    );
+    // Reclaims the stranded eip712 payload immediately — same mechanism as
+    // the `sign` branch's equivalent assertion.
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: windowRequestResponded.type,
+        payload: { requestId: 'req-1' }
+      })
     );
     expect(openWindowMock).not.toHaveBeenCalled();
   });
@@ -1232,7 +1256,11 @@ describe('signTypedDataRequest', () => {
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining('open-request map at capacity'),
-      { requestId: 'req-1', method: sdkMethod.signTypedDataRequest.type }
+      {
+        requestId: 'req-1',
+        method: sdkMethod.signTypedDataRequest.type,
+        openCount: 0
+      }
     );
     const logged = JSON.stringify(consoleErrorSpy.mock.calls);
     expect(logged).not.toContain('secret');

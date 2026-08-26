@@ -28,9 +28,15 @@ import {
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
-import { windowRequestOpened } from '@background/redux/windowManagement/actions';
+import {
+  windowRequestOpened,
+  windowRequestResponded
+} from '@background/redux/windowManagement/actions';
 import { isStorableRequestId } from '@background/redux/windowManagement/request-map';
-import { selectRequestStatus } from '@background/redux/windowManagement/selectors';
+import {
+  selectOpenRequests,
+  selectRequestStatus
+} from '@background/redux/windowManagement/selectors';
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
@@ -69,12 +75,21 @@ function reportCapacityRefusal(action: SdkMethod) {
   );
 }
 
-// Same rationale as `reportCapacityRefusal`, for `MAX_OPEN_REQUESTS` rather
-// than the payload maps.
-function reportOpenRequestCapacityRefusal(action: SdkMethod) {
+// Same LOGGING rationale as `reportCapacityRefusal` (this side is not
+// invisible to the wallet even when refused silently) — but not the same dapp
+// half: only the two payload-bearing refusals (`sign`, `signTypedData`) carry
+// `errorCode`. For the four capless methods the refusal is indistinguishable
+// from an ordinary user decline on the dapp side until WALLET-1436 gives it
+// one too. `openCount` is the count AFTER the refused write — it names how
+// full the map the refusal fired against actually was.
+function reportOpenRequestCapacityRefusal(
+  action: SdkMethod,
+  openCount: number
+) {
   console.error('sdk-methods: open-request map at capacity, request refused', {
     requestId: action.meta.requestId,
-    method: action.type
+    method: action.type,
+    openCount
   });
 }
 
@@ -156,7 +171,10 @@ export async function handleSdkMethod(
       if (
         selectRequestStatus(store.getState(), action.meta.requestId) == null
       ) {
-        reportOpenRequestCapacityRefusal(action);
+        reportOpenRequestCapacityRefusal(
+          action,
+          selectOpenRequests(store.getState()).length
+        );
 
         return {
           handled: true,
@@ -204,7 +222,10 @@ export async function handleSdkMethod(
     );
 
     if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
-      reportOpenRequestCapacityRefusal(action);
+      reportOpenRequestCapacityRefusal(
+        action,
+        selectOpenRequests(store.getState()).length
+      );
 
       return {
         handled: true,
@@ -311,9 +332,19 @@ export async function handleSdkMethod(
     // the four capless methods above — but the payload above has ALREADY been
     // accepted into the map, so it is stranded here rather than refused; it is
     // reclaimed by `reconcileStalePayloadsSaga` since no descriptor and no
-    // window will ever claim it.
+    // window will ever claim it. `windowRequestResponded` reclaims it
+    // immediately instead: the vault reducer deletes the payload keyed off
+    // this exact action (the WALLET-1418 orphan mechanism, and it is in the
+    // re-encrypt debounce list so the deletion reaches the cipher), and the
+    // windowManagement case no-ops for an id with no open row.
     if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
-      reportOpenRequestCapacityRefusal(action);
+      reportOpenRequestCapacityRefusal(
+        action,
+        selectOpenRequests(store.getState()).length
+      );
+      store.dispatch(
+        windowRequestResponded({ requestId: action.meta.requestId })
+      );
 
       return {
         handled: true,
@@ -365,7 +396,10 @@ export async function handleSdkMethod(
     );
 
     if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
-      reportOpenRequestCapacityRefusal(action);
+      reportOpenRequestCapacityRefusal(
+        action,
+        selectOpenRequests(store.getState()).length
+      );
 
       return {
         handled: true,
@@ -449,8 +483,16 @@ export async function handleSdkMethod(
     // Same residual as the deploy branch: the payload above is already
     // accepted, so a refusal here strands it for `reconcileStalePayloadsSaga`
     // to reclaim rather than refusing the payload write itself.
+    // `windowRequestResponded` reclaims it immediately instead — same
+    // mechanism as the `sign` branch above.
     if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
-      reportOpenRequestCapacityRefusal(action);
+      reportOpenRequestCapacityRefusal(
+        action,
+        selectOpenRequests(store.getState()).length
+      );
+      store.dispatch(
+        windowRequestResponded({ requestId: action.meta.requestId })
+      );
 
       return {
         handled: true,
@@ -506,7 +548,10 @@ export async function handleSdkMethod(
     );
 
     if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
-      reportOpenRequestCapacityRefusal(action);
+      reportOpenRequestCapacityRefusal(
+        action,
+        selectOpenRequests(store.getState()).length
+      );
 
       return {
         handled: true,

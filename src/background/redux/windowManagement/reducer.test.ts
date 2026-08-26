@@ -584,11 +584,13 @@ describe('windowManagement requests', () => {
       state = reducer(state, opened('over-cap'));
       state = reducer(state, windowRequestResponded({ requestId: 'r0' }));
 
-      // If the refused write had consumed an ordinal, the next accepted one
-      // would be stamped one past where it should be.
+      // If the refused 'over-cap' write had ALSO consumed an ordinal, the next
+      // accepted one would be stamped one past where it should be. The
+      // `windowRequestResponded` restamp above is the one ordinal genuinely
+      // spent between the loop (0..MAX_OPEN_REQUESTS-1) and this request.
       const accepted = reducer(state, opened('under-cap'));
       expect(accepted.requests['under-cap']).toMatchObject({
-        seq: MAX_OPEN_REQUESTS
+        seq: MAX_OPEN_REQUESTS + 1
       });
     });
 
