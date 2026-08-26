@@ -727,8 +727,9 @@ const slice = createSlice({
   // paths funnels through `windowRequestResponded`.
   //
   // Keyed off the ACTION, not off `windowManagement`'s resulting state: that
-  // reducer no-ops the transition unless the request is currently 'open', which
-  // is exactly the orphan case (an MV3 restart between registration and the
+  // reducer no-ops the transition unless the request is currently 'open',
+  // which is exactly one of the residual descriptor-less paths (a lost mirror
+  // write, a sanitizer-dropped row, etc., between registration and the
   // response) where a stale payload most needs dropping.
   extraReducers: builder => {
     builder.addCase(

@@ -537,7 +537,7 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
     expect(removeMock).not.toHaveBeenCalled();
   });
 
-  it('after an MV3 restart it delivers and closes nothing', async () => {
+  it('with no descriptor ever registered it delivers and closes nothing', async () => {
     const store = makeRealStore();
     store.dispatch(
       ledgerNewWindowIdChanged({

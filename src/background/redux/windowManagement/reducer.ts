@@ -170,16 +170,15 @@ const slice = createSlice({
     },
     // The tombstone is deliberately kept: `selectRequestStatus` reading back
     // 'responded' is what makes the background dedup drop a duplicate response.
-    // It is in-memory only, but "in-memory" bounds nothing by itself: on MV3 a
-    // service-worker restart wipes it (after which a late duplicate is no
-    // longer deduped), while `manifest.v2.json` and `manifest.v2.safari.json`
-    // both declare `"persistent": true`, so on Firefox and Safari the
-    // background page is never torn down. Nothing here deleted a key, so on
-    // those two targets the map grew by one permanent entry per request —
-    // keyed by a dapp-supplied string — for the whole browser session. Hence
-    // the FIFO cap below: the descriptor is dropped as before, and the oldest
-    // tombstones are evicted once there are more than a dedup could plausibly
-    // need. Open requests are never evicted.
+    // On Chrome/Edge the session mirror now survives a service-worker restart
+    // (residual paths aside), so "in-memory" no longer bounds it there either.
+    // `manifest.v2.json` and `manifest.v2.safari.json` both declare
+    // `"persistent": true`, so on Firefox and Safari the background page is
+    // never torn down and nothing here deletes a key — the map grows by one
+    // permanent entry per request, keyed by a dapp-supplied string, for the
+    // whole browser session. Hence the FIFO cap below: the descriptor is
+    // dropped as before, and the oldest tombstones are evicted once there are
+    // more than a dedup could plausibly need. Open requests are never evicted.
     windowRequestResponded: (
       state,
       action: PayloadAction<{ requestId: string }>
@@ -188,9 +187,9 @@ const slice = createSlice({
       // Only a request that is currently 'open' can become 'responded'; the
       // union models ∅ → open → responded and this is what stops the reducer
       // permitting ∅ → responded. Without it, a response the UI forwards for an
-      // id the store no longer holds (an MV3 restart between registration and
-      // the response) wrote an orphan tombstone that consumed a slot in the cap
-      // below and made the SDK entry guard reject that id as a duplicate.
+      // id the store no longer holds (one of the residual descriptor-less
+      // paths) wrote an orphan tombstone that consumed a slot in the cap below
+      // and made the SDK entry guard reject that id as a duplicate.
       const request = getRequest(state.requests, action.payload.requestId);
 
       if (request?.status !== 'open') {

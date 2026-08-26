@@ -23,7 +23,8 @@ export async function deliverViaOrigin(
   // wrong one is both a leak and a loss. Only frame 0 is the same frame in
   // every tab, and the origin match already established that tab's top
   // document belongs to the dapp — so a non-zero frameId must not broadcast.
-  // `undefined` (no descriptor — MV3-restart path) keeps broadcasting unscoped.
+  // `undefined` (no descriptor — one of the residual descriptor-less paths)
+  // keeps broadcasting unscoped.
   if (frameId != null && frameId !== 0) {
     console.error(
       'deliverViaOrigin: sub-frame response not broadcast — no other tab can be matched to it',

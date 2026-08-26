@@ -392,10 +392,10 @@ describe('windowManagement requests', () => {
     // Its two siblings refuse to act on a missing or wrong-status entry; this
     // one wrote unconditionally, so the union modelled ∅ → open → responded
     // while the reducer permitted ∅ → responded. Reachable whenever the UI
-    // forwards a response for an id the store no longer has — an MV3
-    // service-worker restart between registration and the response — and the
-    // orphan then consumes a slot in the tombstone cap and makes the SDK entry
-    // guard reject that id as a duplicate.
+    // forwards a response for an id the store no longer has — one of the
+    // residual descriptor-less paths — and the orphan then consumes a slot in
+    // the tombstone cap and makes the SDK entry guard reject that id as a
+    // duplicate.
     it('refuses to tombstone a requestId that was never registered', () => {
       const next = reducer(
         empty,
@@ -417,12 +417,13 @@ describe('windowManagement requests', () => {
 
   describe('tombstone eviction', () => {
     it('caps the responded entries instead of growing for the whole session', () => {
-      // Nothing ever deleted a key. On MV3 a service-worker restart eventually
-      // wiped the map, but `manifest.v2.json` and `manifest.v2.safari.json`
-      // both declare `"persistent": true` — on Firefox and Safari the
-      // background page is never torn down, so this grew by one permanent
-      // entry per request, keyed by a dapp-supplied string, for the entire
-      // browser session.
+      // Nothing ever deleted a key. Before the session mirror, an MV3
+      // service-worker restart eventually wiped the map; now Chrome/Edge
+      // tombstones survive it too (residual paths aside). But
+      // `manifest.v2.json` and `manifest.v2.safari.json` both declare
+      // `"persistent": true` — on Firefox and Safari the background page is
+      // never torn down, so this grows by one permanent entry per request,
+      // keyed by a dapp-supplied string, for the entire browser session.
       let state = empty;
       for (let i = 0; i < MAX_RESPONDED_TOMBSTONES + 10; i++) {
         state = reducer(state, opened(`r${i}`));
