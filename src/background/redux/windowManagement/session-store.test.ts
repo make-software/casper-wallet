@@ -155,6 +155,23 @@ describe('session-store — read path', () => {
     });
   });
 
+  // `typeof record !== 'object' || record == null` is deletable and the VALUE
+  // above still passes: destructuring `null` without the guard throws, which
+  // the outer `catch` swallows into the same `emptyRecord()`. The only
+  // observable difference is the catch's side effect — it LOGS. (A string
+  // like 'nope' would not distinguish this: object-destructuring a primitive
+  // string does not throw, so its result is identical with or without the
+  // guard.)
+  it('returns the empty record for a null session record without logging', async () => {
+    sessionGet.mockResolvedValue(storedRecord(null));
+
+    await expect(readRequestSession()).resolves.toEqual({
+      requests: {},
+      windowId: null
+    });
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
   it('drops a non-object requests map to {} without touching windowId', async () => {
     sessionGet.mockResolvedValue(
       storedRecord({ requests: ['not', 'a', 'map'], windowId: 4 })
@@ -353,41 +370,11 @@ describe('session-store — the sanitizer drops only the row it cannot vouch for
   });
 });
 
-describe('session-store — sanitizer completeness pin', () => {
-  type OpenRow = Extract<Request, { status: 'open' }>;
-
-  // `sanitizeRequest`'s open-row return literal is checked against `Request`,
-  // but TS does not require an OPTIONAL field to appear in an object literal
-  // typed as a union member — `frameId` proved exactly this can go unnoticed
-  // for a while. This record must list every key of `OpenRow`; a field added
-  // there without a matching key here is a compile error, forcing the
-  // sanitizer's return literal in session-store.ts to be revisited too.
-  const OPEN_ROW_KEYS = {
-    status: true,
-    tabId: true,
-    frameId: true,
-    origin: true,
-    method: true,
-    windowIds: true,
-    awaitingDeviceConfirmation: true,
-    seq: true
-  } satisfies Record<keyof OpenRow, true>;
-
-  it('lists every OpenRow field', () => {
-    expect(Object.keys(OPEN_ROW_KEYS).sort()).toEqual(
-      [
-        'status',
-        'tabId',
-        'frameId',
-        'origin',
-        'method',
-        'windowIds',
-        'awaitingDeviceConfirmation',
-        'seq'
-      ].sort()
-    );
-  });
-});
+// The completeness pin moved to session-store.ts, colocated with
+// `sanitizeRequest`'s open-row literal it actually guards — a copy here was
+// satisfiable inside the test file alone (add a field to BOTH the pin and a
+// hand-maintained runtime list, and the build stays green while the
+// sanitizer itself still silently drops it).
 
 describe('session-store — write path', () => {
   it('writes the record under the session key', async () => {
@@ -483,6 +470,15 @@ describe('session-store — write path', () => {
     await Promise.resolve();
 
     const writeB = writeRequestSession({ requests: {}, windowId: 2 });
+    // One more tick: if B's flush were merely CHAINED but not yet started
+    // (the real, serialised behaviour), this changes nothing — it is still
+    // waiting on A's unresolved `set`. If `writeChain` were rebuilt from a
+    // fresh `Promise.resolve()` instead of chained onto the existing one
+    // (serialisation lost), B's flush would be a microtask away from running
+    // regardless of A — this tick is what lets that difference surface as a
+    // second `sessionSet` call, which asserting synchronously right after the
+    // `writeB` call cannot see.
+    await Promise.resolve();
     // The reset queue only lets B's flush get CHAINED after A's — A's `set`
     // promise is still pending, so B's flush cannot have started yet.
     expect(sessionSet).toHaveBeenCalledTimes(1);

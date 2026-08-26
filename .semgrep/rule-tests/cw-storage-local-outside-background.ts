@@ -35,27 +35,17 @@ export async function sessionArea() {
   // ruleid: cw-storage-local-outside-background
   await storage.session.remove('a');
   // ruleid: cw-storage-local-outside-background
-  await storage.session.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' });
-  // ruleid: cw-storage-local-outside-background
   await browser.storage.session.get('a');
   // ruleid: cw-storage-local-outside-background
   await browser.storage.session.set({ a: 1 });
   // ruleid: cw-storage-local-outside-background
   await browser.storage.session.remove('a');
   // ruleid: cw-storage-local-outside-background
-  await browser.storage.session.setAccessLevel({
-    accessLevel: 'TRUSTED_CONTEXTS'
-  });
-  // ruleid: cw-storage-local-outside-background
   await chrome.storage.session.get('a');
   // ruleid: cw-storage-local-outside-background
   await chrome.storage.session.set({ a: 1 });
   // ruleid: cw-storage-local-outside-background
   await chrome.storage.session.remove('a');
-  // ruleid: cw-storage-local-outside-background
-  await chrome.storage.session.setAccessLevel({
-    accessLevel: 'TRUSTED_CONTEXTS'
-  });
 }
 
 export async function safeAlternatives() {

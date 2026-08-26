@@ -60,20 +60,40 @@ rules:
       - pattern: storage.session.get(...)
       - pattern: storage.session.set(...)
       - pattern: storage.session.remove(...)
-      - pattern: storage.session.setAccessLevel(...)
       - pattern: browser.storage.session.get(...)
       - pattern: browser.storage.session.set(...)
       - pattern: browser.storage.session.remove(...)
-      - pattern: browser.storage.session.setAccessLevel(...)
       - pattern: chrome.storage.session.get(...)
       - pattern: chrome.storage.session.set(...)
       - pattern: chrome.storage.session.remove(...)
-      - pattern: chrome.storage.session.setAccessLevel(...)
     paths:
       exclude:
         - 'src/background/**'
         - '**/*.test.ts'
         - '**/*.test.tsx'
+
+  # ============================================================================
+  # `setAccessLevel` widens who can read `storage.session` — TRUSTED_AND_UNTRUSTED
+  # would hand every dapp content script the pending-request origins the mirror
+  # holds. A SEPARATE rule, not folded into cw-storage-local-outside-background:
+  # that rule's `paths.exclude` drops src/background/** (the only place session
+  # code legitimately lives), so a background-side `setAccessLevel` call — the
+  # one that matters — would never be flagged there. This one has no `paths`
+  # block: forbidden everywhere, always.
+  # ============================================================================
+  - id: cw-storage-session-access-level
+    message: >
+      storage.session.setAccessLevel() must never be called. The area's
+      default access level (TRUSTED_CONTEXTS) is what keeps the pending
+      request-lifecycle mirror — dapp origins, tab ids, live request ids —
+      out of reach of every content script; TRUSTED_AND_UNTRUSTED would hand
+      it to any dapp.
+    severity: ERROR
+    languages: [typescript, javascript]
+    pattern-either:
+      - pattern: storage.session.setAccessLevel(...)
+      - pattern: browser.storage.session.setAccessLevel(...)
+      - pattern: chrome.storage.session.setAccessLevel(...)
 
   # ============================================================================
   # Async side effects use Redux-Saga (src/background/redux/sagas/), not

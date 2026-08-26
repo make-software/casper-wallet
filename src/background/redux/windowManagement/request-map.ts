@@ -4,7 +4,7 @@ import { Request, WindowManagementState } from './types';
 // src/content/sdk.ts) — an oversized id must be refused here, at the SDK
 // entry, before it can register and later overflow the `storage.session`
 // mirror's write quota (session-store.ts).
-export const MAX_REQUEST_ID_LENGTH = 256;
+const MAX_REQUEST_ID_LENGTH = 256;
 
 /**
  * The only sanctioned way to read the `requests` map.

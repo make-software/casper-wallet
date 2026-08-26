@@ -5,7 +5,7 @@ import { isEphemeralBackgroundBuild } from '@src/utils';
 import { redactUrlQuery } from '@background/redact-url-query';
 
 import { MAX_RESPONDED_TOMBSTONES } from './reducer';
-import { MAX_REQUEST_ID_LENGTH, isStorableRequestId } from './request-map';
+import { isStorableRequestId } from './request-map';
 import { CancellableMethod, Request, WindowManagementState } from './types';
 
 // Follows the obfuscated `storage.local` convention for consistency only. This
@@ -86,6 +86,26 @@ const isDeliverableOrigin = (raw: unknown): raw is string => {
   }
 };
 
+// Completeness pin for the open-row return literal below, same idiom as
+// `CANCELLABLE_METHODS` above: every key of the 'open' variant of `Request`,
+// so a field added there without a matching key here is a compile error IN
+// THIS FILE. TS does not otherwise require an OPTIONAL field to appear in an
+// object literal typed as a union member — `frameId` proved exactly that can
+// go unnoticed. `void`d rather than exported: its only job is the type
+// check, and an unused export would earn its own knip complaint instead.
+type OpenRow = Extract<Request, { status: 'open' }>;
+const OPEN_ROW_KEYS: Record<keyof OpenRow, true> = {
+  status: true,
+  tabId: true,
+  frameId: true,
+  origin: true,
+  method: true,
+  windowIds: true,
+  awaitingDeviceConfirmation: true,
+  seq: true
+};
+void OPEN_ROW_KEYS;
+
 // Total: it drops what it cannot vouch for and never throws — a throw would
 // leave the background unable to start at all.
 function sanitizeRequest(raw: unknown): Request | undefined {
@@ -148,10 +168,9 @@ function sanitizeRequestMap(raw: unknown): WindowManagementState['requests'] {
   const requests: WindowManagementState['requests'] = {};
 
   for (const [requestId, value] of Object.entries(raw)) {
-    if (
-      !isStorableRequestId(requestId) ||
-      requestId.length > MAX_REQUEST_ID_LENGTH
-    ) {
+    // `isStorableRequestId` already rejects an over-long id (the length
+    // bound lives there, at the SDK entry) — no separate length check here.
+    if (!isStorableRequestId(requestId)) {
       continue;
     }
 
