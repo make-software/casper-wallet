@@ -2,6 +2,7 @@ import { MAX_RESPONDED_TOMBSTONES } from './reducer';
 import {
   REQUEST_SESSION_KEY,
   SessionRecord,
+  clearRequestSession,
   readRequestSession,
   writeRequestSession
 } from './session-store';
@@ -533,6 +534,35 @@ describe('session-store — write path', () => {
 
     expect(written['42']).toBeDefined();
     expect(written['req-0']).toBeUndefined();
+  });
+});
+
+describe('session-store — clearRequestSession (spec §8.3)', () => {
+  it('writes the empty record under the session key, joining the write chain', async () => {
+    await clearRequestSession();
+
+    expect(sessionSet).toHaveBeenCalledWith({
+      [REQUEST_SESSION_KEY]: { requests: {}, windowId: null }
+    });
+  });
+
+  it('coalesces with a same-tick writeRequestSession call onto the newest snapshot', async () => {
+    void writeRequestSession({
+      requests: { 'req-1': openRow() as Request },
+      windowId: 3
+    });
+    await clearRequestSession();
+
+    expect(sessionSet).toHaveBeenCalledTimes(1);
+    expect(lastWrittenRecord()).toEqual({ requests: {}, windowId: null });
+  });
+
+  it('is a no-op on a persistent-background build', async () => {
+    mockIsEphemeralBackgroundBuild = false;
+
+    await clearRequestSession();
+
+    expect(sessionSet).not.toHaveBeenCalled();
   });
 });
 

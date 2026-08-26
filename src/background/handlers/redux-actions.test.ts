@@ -74,15 +74,31 @@ beforeEach(() => {
 
 describe('handleReduxAction forwarding gate (fail-closed)', () => {
   it('resetVault → dispatches and re-enables the onboarding flow', async () => {
+    // A fresh `resetVault(...)` is built here, not the wire action re-cast —
+    // the sender's own window id (absent for this tab-less sender) is
+    // attached from `MessageSender`, which the UI has no access to and could
+    // not be trusted to self-report even if it did.
     const { store, dispatch } = makeStore();
     const action = { type: resetVault.type };
 
     const result = await handleReduxAction(action, trustedSender, store);
 
     expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(dispatch).toHaveBeenCalledWith(action);
+    expect(dispatch).toHaveBeenCalledWith(resetVault(undefined));
     expect(enableOnboardingFlowMock).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('resetVault from a tab sender → attaches the sender window id, excluded later by the saga', async () => {
+    const { store, dispatch } = makeStore();
+    const tabSender = {
+      ...trustedSender,
+      tab: { id: 9, windowId: 7 }
+    } as Runtime.MessageSender;
+
+    await handleReduxAction({ type: resetVault.type }, tabSender, store);
+
+    expect(dispatch).toHaveBeenCalledWith(resetVault(7));
   });
 
   it('windowRequestWindowAttached → handled by its own branch, which verifies the window', async () => {

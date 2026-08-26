@@ -205,7 +205,11 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // Background-only since WALLET-1424: the background owns the retry counter,
     // so a page can no longer forge attempts or clear the count.
     loginRetryCountActions.loginRetryCountIncremented,
-    loginRetryCountActions.loginRetryCountReseted
+    loginRetryCountActions.loginRetryCountReseted,
+    // Background-only (spec §8.3): `yield put` inside `resetVaultSaga` only, as
+    // part of the synchronous reset block. Never dispatched from the UI — a
+    // saga `put` never reaches `handleReduxAction` at all.
+    windowManagementActions.windowManagementReseted
   ].map(creator => creator.type)
 );
 

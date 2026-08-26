@@ -307,3 +307,13 @@ export function writeRequestSession(record: SessionRecord): Promise<void> {
 
   return writeChain;
 }
+
+// A direct clear for callers that cannot rely on the subscriber's
+// identity-based write guard (get-main-store.ts) — e.g. a reducer's reset
+// case that returns the shared `initialState` reference, which the guard
+// sees as no change at all when the slice was already at rest. Goes through
+// the same `writeRequestSession`/`writeChain` plumbing, never touching
+// `chrome.storage.session` on its own.
+export function clearRequestSession(): Promise<void> {
+  return writeRequestSession(emptyRecord());
+}

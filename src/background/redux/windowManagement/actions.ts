@@ -9,6 +9,7 @@ export {
   windowDetachedFromRequests,
   windowIdChanged,
   windowIdCleared,
+  windowManagementReseted,
   windowRequestDeviceConfirmationChanged,
   windowRequestOpened,
   windowRequestResponded,

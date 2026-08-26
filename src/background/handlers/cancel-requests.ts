@@ -196,6 +196,68 @@ export async function cancelRequestsDisplacedBy(
   await cancelRequests(store, candidates, source, windowId, afterMark);
 }
 
+// The store-free half of `failRequestOnWindowError`: origin check, direct
+// send, `deliverViaOrigin` fallback. Takes a snapshot row rather than reading
+// the store, so it works from a saga (no store access there) as much as from
+// a handler that has one — `resetVaultSaga`'s cancel-then-clear (spec §8.3)
+// shares it with the caller below.
+export type CancelDeliveryRow = Pick<
+  OpenRequest,
+  'requestId' | 'tabId' | 'origin' | 'method' | 'frameId'
+>;
+
+export async function deliverCancelResponse(
+  row: CancelDeliveryRow,
+  logSource: SagaErrorSource
+): Promise<number> {
+  const { requestId, tabId, origin, method, frameId } = row;
+  const action = buildCancelResponse(method, requestId);
+
+  // #1484: verify the tab still hosts the requesting origin BEFORE sending.
+  // On a navigated-away tab `tabs.sendMessage` SUCCEEDS (the content script is
+  // injected on every http(s) page), so the catch → `deliverViaOrigin`
+  // fallback below would never fire — a swept row can be arbitrarily old, so
+  // navigated-away is the expected case, not the exception. `tabs.get` reports
+  // the TOP document's origin, so only a top-frame request (no `frameId`, or
+  // `0`) is checkable this way; a sub-frame request goes straight to the
+  // frame-targeted send, same as today.
+  const isTopFrame = frameId == null || frameId === 0;
+  const liveOrigin = isTopFrame ? await getLiveTabOrigin(tabId) : undefined;
+  const staleOrigin = isTopFrame && liveOrigin !== origin;
+
+  let delivered = 1;
+
+  if (staleOrigin) {
+    delivered = await deliverViaOrigin(origin, action, frameId);
+
+    // Identifiers and origins only, matching sdk-response-to-tab's withheld-
+    // response log — never a URL.
+    console.error(
+      `${logSource}: target tab no longer hosts the requesting origin; response withheld`,
+      { requestId, tabId, expectedOrigin: origin, liveOrigin, delivered }
+    );
+  } else {
+    try {
+      await (frameId == null
+        ? tabs.sendMessage(tabId, action)
+        : tabs.sendMessage(tabId, action, { frameId }));
+    } catch (error) {
+      // Never the raw error: a `tabs.sendMessage` rejection can echo back a
+      // navigated-away tab's URL, and one of this window's own URLs carries a
+      // signMessage request's plaintext message as a query param.
+      console.error(`${logSource}: cancel delivery failed`, {
+        requestId,
+        method,
+        tabId,
+        error: redactUrlQuery(error)
+      });
+      delivered = await deliverViaOrigin(origin, action, frameId);
+    }
+  }
+
+  return delivered;
+}
+
 // The trigger with no window event behind it — either `windows.create`
 // rejected (no `windows.onRemoved` will ever fire for a window that never
 // existed) or the startup sweep decided a hydrated 'open' row is orphaned
@@ -231,49 +293,10 @@ export async function failRequestOnWindowError(
   store.dispatch(windowRequestResponded({ requestId }));
 
   const { tabId, origin, method, frameId } = request;
-  const action = buildCancelResponse(method, requestId);
-
-  // #1484: verify the tab still hosts the requesting origin BEFORE sending.
-  // On a navigated-away tab `tabs.sendMessage` SUCCEEDS (the content script is
-  // injected on every http(s) page), so the catch → `deliverViaOrigin`
-  // fallback below would never fire — a swept row can be arbitrarily old, so
-  // navigated-away is the expected case, not the exception. `tabs.get` reports
-  // the TOP document's origin, so only a top-frame request (no `frameId`, or
-  // `0`) is checkable this way; a sub-frame request goes straight to the
-  // frame-targeted send, same as today.
-  const isTopFrame = frameId == null || frameId === 0;
-  const liveOrigin = isTopFrame ? await getLiveTabOrigin(tabId) : undefined;
-  const staleOrigin = isTopFrame && liveOrigin !== origin;
-
-  let delivered = 1;
-
-  if (staleOrigin) {
-    delivered = await deliverViaOrigin(origin, action, frameId);
-
-    // Identifiers and origins only, matching sdk-response-to-tab's withheld-
-    // response log — never a URL.
-    console.error(
-      `${source}: target tab no longer hosts the requesting origin; response withheld`,
-      { requestId, tabId, expectedOrigin: origin, liveOrigin, delivered }
-    );
-  } else {
-    try {
-      await (frameId == null
-        ? tabs.sendMessage(tabId, action)
-        : tabs.sendMessage(tabId, action, { frameId }));
-    } catch (error) {
-      // Never the raw error: a `tabs.sendMessage` rejection can echo back a
-      // navigated-away tab's URL, and one of this window's own URLs carries a
-      // signMessage request's plaintext message as a query param.
-      console.error(`${source}: cancel delivery failed`, {
-        requestId,
-        method,
-        tabId,
-        error: redactUrlQuery(error)
-      });
-      delivered = await deliverViaOrigin(origin, action, frameId);
-    }
-  }
+  const delivered = await deliverCancelResponse(
+    { requestId, tabId, origin, method, frameId },
+    source
+  );
 
   // The sweep (source === 'sweep-orphaned-requests') knowingly shares this
   // same tombstone-before-delivery ordering — an accepted residual, not an

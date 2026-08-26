@@ -341,7 +341,14 @@ export async function handleReduxAction(
   }
 
   if (action.type === resetVault.type) {
-    store.dispatch(action as unknown as ReduxAction);
+    // The sender's OWN window, from `MessageSender` rather than the wire
+    // payload — `ResetVaultPage` renders inside the signature-request and
+    // connect-to-app approval windows (`LockedRouter`), so `resetVaultSaga`'s
+    // window-removal set must exclude it: closing the window the reset was
+    // issued FROM would kill the page's own continuation
+    // (`closeWindowByReloadExtension`), and on Firefox/Safari that also skips
+    // `runtime.reload()`. Absent for a non-tab sender, hence optional.
+    store.dispatch(resetVault(sender.tab?.windowId));
     await enableOnboardingFlow();
     return { handled: true, response: undefined };
   }

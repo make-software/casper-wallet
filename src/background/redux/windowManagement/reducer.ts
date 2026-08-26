@@ -226,7 +226,14 @@ const slice = createSlice({
       }
 
       return { ...state, requests };
-    }
+    },
+    // Dispatched only from `resetVaultSaga` (spec §8.3) — never forwarded from
+    // the UI, see the EXCLUSIONS entry in redux-actions.parity.test.ts. Returns
+    // the shared `initialState` reference like every other slice's reset case;
+    // the reset flow does not rely on the subscriber's write guard to clear
+    // the session mirror for this slice — it clears it directly instead (see
+    // session-store.ts).
+    windowManagementReseted: () => initialState
   }
 });
 
@@ -241,6 +248,7 @@ export const {
   windowDetachedFromRequests,
   windowIdChanged,
   windowIdCleared,
+  windowManagementReseted,
   windowRequestDeviceConfirmationChanged,
   windowRequestOpened,
   windowRequestResponded,
