@@ -1,4 +1,4 @@
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { call, fork, put, select, takeLatest } from 'redux-saga/effects';
 import { storage, windows } from 'webextension-polyfill';
 
 import { ErrorMessages } from '@src/constants';
@@ -16,7 +16,11 @@ import { recipientPublicKeyReseted } from '@background/redux/recent-recipient-pu
 import { vaultSettingsReseted } from '@background/redux/settings/actions';
 import { resetTrustedWasmState } from '@background/redux/trusted-wasm/actions';
 import { windowManagementReseted } from '@background/redux/windowManagement/actions';
-import { selectOpenRequests } from '@background/redux/windowManagement/selectors';
+import {
+  selectExportKeysWindowId,
+  selectOpenRequests,
+  selectWindowId
+} from '@background/redux/windowManagement/selectors';
 import { clearRequestSession } from '@background/redux/windowManagement/session-store';
 import { OpenRequest } from '@background/redux/windowManagement/types';
 import {
@@ -54,13 +58,12 @@ export function* onboardingSagas() {
   yield takeLatest(recoverVault.type, recoverVaultSaga);
 }
 
-// Fire-and-forget: delivery and window cleanup run AFTER the resets below
-// have already completed, from a snapshot taken before any of them. Never
-// awaited by the saga — see the ordering note there. `failRequestOnWindowError`
-// cannot be reused directly here: it needs the store (to dispatch the
-// tombstone), which the wallet no longer has any use for once every slice is
-// already wiped, so this only needs `deliverCancelResponse`, the store-free
-// half it shares.
+// Fire-and-forget: delivery runs AFTER the resets below have already
+// completed, from a snapshot taken before any of them. Never awaited by the
+// saga — see the ordering note there. `failRequestOnWindowError` cannot be
+// reused directly here: it needs the store (to dispatch the tombstone), which
+// the wallet no longer has any use for once every slice is already wiped, so
+// this only needs `deliverCancelResponse`, the store-free half it shares.
 function deliverResetCancels(openRequests: readonly OpenRequest[]): void {
   for (const request of openRequests) {
     deliverCancelResponse(request, 'resetVaultSaga').catch(error => {
@@ -71,29 +74,59 @@ function deliverResetCancels(openRequests: readonly OpenRequest[]): void {
       );
     });
   }
+}
 
-  const windowIds = [...new Set(openRequests.flatMap(r => r.windowIds))];
-
-  for (const windowId of windowIds) {
-    windows.remove(windowId).catch(error => {
-      console.error(
-        'resetVaultSaga: window removal failed',
-        { windowId },
-        redactUrlQuery(error)
-      );
-    });
+// Forked, not a bare `.catch`: a rejection here must reach the store via
+// `put`, and only a saga effect can do that from code that runs after the
+// synchronous reset block (a detached Promise callback has no store to
+// dispatch to). The descriptors and the mirror are already gone by the time
+// this runs, so a failure here is terminal — nothing else will ever find this
+// window again to retry. Window id only; no origins/URLs.
+function* removeResetWindow(windowId: number) {
+  try {
+    yield call([windows, windows.remove], windowId);
+  } catch (error) {
+    console.error(
+      'resetVaultSaga: window removal failed',
+      { windowId },
+      redactUrlQuery(error)
+    );
+    yield put(
+      sagaError({
+        source: 'resetVaultSaga',
+        message: `Could not close window ${windowId} after reset`
+      })
+    );
   }
 }
 
 /**
  *
  */
-function* resetVaultSaga() {
+function* resetVaultSaga(action: ReturnType<typeof resetVault>) {
   try {
-    // Snapshotted BEFORE any reset: the reducer that clears `windowManagement`
-    // below throws away the descriptors this needs to cancel and to find the
-    // approval windows to close.
+    // Snapshotted BEFORE any reset: the reducers cleared below throw away the
+    // descriptors this needs to cancel, the approval windows to close, and the
+    // export-keys window id — `selectOpenRequests` alone would miss the
+    // latter two, which are not requests. Widened rather than left to
+    // `selectOpenRequests` alone: without `windowId` here the shared approval
+    // window is never closed, and without `exportKeysWindowId` the
+    // Download-account-keys window survives reset with its single-window
+    // guard defeated for the rest of the service worker's life (the reducer
+    // nulls the id but nothing closes the window it named). No key material
+    // is exposed by the surviving window either way — it renders the error
+    // page — the guard is the loss.
+    //
+    // Accepted residual: a request still between registration and
+    // window-attach contributes no window here (`windowIds` is still `[]`).
+    // Its window opens after this reset, over the now-wiped wallet, gets
+    // tracked via `windowIdChanged` into the fresh slice, and is reused by
+    // the next approval like any other — not compensated for.
     const openRequests: OpenRequest[] = yield select(selectOpenRequests);
+    const windowId: number | null = yield select(selectWindowId);
+    const exportKeysWindowId: number | null = yield select(
+      selectExportKeysWindowId
+    );
 
     // Order matters and is the whole point (spec §8.3). Today the twelve
     // `put`s below complete synchronously inside `store.dispatch(resetVault())`
@@ -133,8 +166,28 @@ function* resetVaultSaga() {
     // Deliveries and window removal happen strictly AFTER the synchronous
     // block above, from the snapshot. A slow or rejecting delivery must not
     // delay or break the resets or `storage.local.clear()` — it can't, since
-    // this call is not awaited.
+    // none of this is awaited.
     deliverResetCancels(openRequests);
+
+    // The originating window is excluded: `ResetVaultPage` renders inside the
+    // signature-request and connect-to-app approval windows (`LockedRouter`),
+    // so removing it here would kill the page's OWN continuation
+    // (`closeWindowByReloadExtension`) before it runs — and on Firefox/Safari
+    // that also skips `runtime.reload()`. It converges on its own instead:
+    // Chrome closes itself via `window.close()`, Firefox/Safari die with
+    // `runtime.reload()`.
+    const senderWindowId = action.payload.senderWindowId;
+    const windowIdsToRemove = new Set(
+      [
+        ...openRequests.flatMap(r => r.windowIds),
+        windowId,
+        exportKeysWindowId
+      ].filter((id): id is number => id != null && id !== senderWindowId)
+    );
+
+    for (const id of windowIdsToRemove) {
+      yield fork(removeResetWindow, id);
+    }
   } catch (err) {
     console.error(err);
     yield put(

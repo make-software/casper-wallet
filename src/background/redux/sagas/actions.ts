@@ -9,7 +9,13 @@ import { SecretPhrase } from '@libs/crypto';
 import { Account } from '@libs/types/account';
 
 export const startBackground = createAction('START_BACKGROUND_SAGA');
-export const resetVault = createAction('RESET_VAULT_SAGA');
+// `senderWindowId` is attached by the background handler (`redux-actions.ts`,
+// from `MessageSender`), never by the UI dispatcher — the UI's own
+// `resetVault()` calls stay zero-arg. Optional: absent for a non-tab sender.
+export const resetVault = createAction(
+  'RESET_VAULT_SAGA',
+  (senderWindowId?: number) => ({ payload: { senderWindowId } })
+);
 export const lockVault = createAction('LOCK_VAULT_SAGA');
 export const openExportKeysWindow = createAction(
   'OPEN_EXPORT_KEYS_WINDOW_SAGA'
