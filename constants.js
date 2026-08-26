@@ -1,6 +1,5 @@
 const { NODE_ENV, BROWSER: browserEnvVar } = require('./utils/env');
 
-const extensionName = 'Casper Wallet';
 const buildRootDir = ['test', 'production'].includes(NODE_ENV)
   ? 'build'
   : 'output';
@@ -25,7 +24,6 @@ const isFirefox = browserEnvVar && browserEnvVar === 'firefox';
 
 module.exports = {
   ExtensionBuildPath,
-  extensionName,
   browserEnvVar,
   ManifestPath,
   isFirefox,

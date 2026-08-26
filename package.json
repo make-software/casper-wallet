@@ -20,7 +20,6 @@
     "build:manifest:v2:safari": "NODE_ENV=production BROWSER=safari HASH=$(git rev-parse HEAD) node utils/build.js",
     "build:manifest:v3:chrome": "NODE_ENV=production BROWSER=chrome HASH=$(git rev-parse HEAD) node utils/build.js",
     "dev:build:manifest:v2:firefox": "NODE_ENV=development BROWSER=firefox HASH=$(git rev-parse HEAD) node utils/build.js",
-    "dev:build:manifest:v2:safari": "NODE_ENV=development BROWSER=safari HASH=$(git rev-parse HEAD) node utils/build.js",
     "dev:build:manifest:v3:chrome": "NODE_ENV=development BROWSER=chrome HASH=$(git rev-parse HEAD) node utils/build.js",
     "build:chrome": "rm -rf ./build/chrome && npm run build:manifest:v3:chrome",
     "build:analyze": "ANALYZE=true npm run build:chrome",
@@ -36,7 +35,6 @@
     "start:chrome": "npm run dev:chrome",
     "dev:firefox": "npm run dev:build:firefox && NODE_ENV=development BROWSER=firefox HASH=$(git rev-parse HEAD) PORT=3002 node utils/webserver.js",
     "start:firefox": "npm run dev:firefox",
-    "start:safari": "npm run dev:build:manifest:v2:safari && ./convert-web-extension.sh && NODE_ENV=development BROWSER=safari PORT=3003 node utils/webserver.js",
     "format:check": "prettier --check 'src/*.{js,jsx,ts,tsx,json,md}'",
     "format:write": "prettier --write 'src/*.{js,jsx,ts,tsx,json,md}'",
     "lint": "eslint ./src",
@@ -198,8 +196,7 @@
     "webextension-polyfill": "0.12.0",
     "webpack": "^5.109.2",
     "webpack-bundle-analyzer": "^5.3.1",
-    "webpack-dev-server": "^6.0.0",
-    "xcode-build-webpack-plugin": "^1.0.2"
+    "webpack-dev-server": "^6.0.0"
   },
   "lavamoat": {
     "allowScripts": {

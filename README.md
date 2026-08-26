@@ -107,13 +107,8 @@ Firefox:
 npm run start:firefox
 ```
 
-Safari:
-
-```shell
-npm run start:safari
-```
-
-You can run all these commands in parallel.
+You can run both of these commands in parallel. Safari has no watch mode —
+build it with `npm run build:safari` and run the app from Xcode.
 
 ### Build deliverable from sources (`build` folder)
 
