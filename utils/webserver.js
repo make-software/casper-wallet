@@ -1,17 +1,10 @@
 const { execSync, execFileSync } = require('child_process');
-const XcodeBuildPlugin = require('xcode-build-webpack-plugin');
 const WebpackDevServer = require('webpack-dev-server');
 const webpack = require('webpack');
 
 const config = require('../webpack.config');
 const env = require('./env');
-const {
-  isChrome,
-  isFirefox,
-  isSafari,
-  ExtensionBuildPath,
-  extensionName
-} = require('../constants');
+const { isChrome, isFirefox, ExtensionBuildPath } = require('../constants');
 
 const { getExtensionBuildAbsolutePath } = require('./build-dir-utils');
 
@@ -40,19 +33,6 @@ config.plugins = [new webpack.HotModuleReplacementPlugin()].concat(
 );
 
 delete config.chromeExtensionBoilerplate;
-
-if (isSafari) {
-  config.plugins.push(
-    new XcodeBuildPlugin({
-      projectDir: extensionAbsPath,
-      args: {
-        quiet: true,
-        scheme: extensionName
-      },
-      buildActions: 'build'
-    })
-  );
-}
 
 const compiler = webpack(config);
 const publicPath = `http://localhost:${env.PORT}/`;
@@ -120,10 +100,6 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
     execSync(
       `web-ext run --source-dir ${ExtensionBuildPath.Firefox} -u about:debugging#/runtime/this-firefox`
     );
-  } else if (isSafari) {
-    // Pass args as an array (no shell) so the PORT-derived public path
-    // can't be interpreted as a shell command.
-    execFileSync('open', ['-na', 'Safari', `${publicPath}popup.html`]);
   } else {
     throw new Error("Unknown browser passed. Couldn't start browser");
   }

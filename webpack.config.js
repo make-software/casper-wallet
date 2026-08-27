@@ -40,7 +40,9 @@ const commitHash = resolveCommitHash({ root: __dirname, isDev });
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 const buildDir = isChrome
   ? ExtensionBuildPath.Chrome
-  : ExtensionBuildPath.Firefox;
+  : isSafari
+    ? ExtensionBuildPath.Safari
+    : ExtensionBuildPath.Firefox;
 
 const alias = {};
 

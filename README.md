@@ -51,8 +51,13 @@ To open as a tab:
 
 ### Load Wallet Extension in Safari
 
-1. Open `build/safari` folder from `builds.zip` or `builds` folder when building from sources.
-2. Double click on "Casper Wallet.app" file.
+The Safari build is distributed through TestFlight — install it from there,
+then follow steps 3-4 below.
+
+To run it from sources instead:
+
+1. Run `npm run build:safari` to produce the web-extension resources in `build/safari`.
+2. Open `xcode-project/Casper Wallet/Casper Wallet.xcodeproj` and run the "Casper Wallet" scheme.
 3. Follow instructions and enable Casper Wallet in opened Extensions Preferences window.
 4. Open Safari and enable unsigned extensions. Extension should be available.
 
@@ -102,13 +107,8 @@ Firefox:
 npm run start:firefox
 ```
 
-Safari:
-
-```shell
-npm run start:safari
-```
-
-You can run all these commands in parallel.
+You can run both of these commands in parallel. Safari has no watch mode —
+build it with `npm run build:safari` and run the app from Xcode.
 
 ### Build deliverable from sources (`build` folder)
 
@@ -124,7 +124,7 @@ Firefox:
 npm run build:firefox
 ```
 
-Safari:
+Safari (web-extension resources only — see below):
 
 ```shell
 npm run build:safari
@@ -134,6 +134,58 @@ All at once:
 
 ```shell
 npm run build:all
+```
+
+For Safari both commands stop at the web-extension resources in `build/safari`.
+The app around them lives in `xcode-project/Casper Wallet` and is built by
+`npm run release:safari` (see below), which reads those resources from
+`build/safari` directly — they are not part of the archive below.
+
+`build:all` bundles the Chrome and Firefox builds into
+`build/casper-wallet-<version>rc<n>#<sha>.zip`, taking `<version>` from
+`package.json`. The rc number restarts at 1 whenever that version changes and
+otherwise continues from the highest archive already sitting in `build/` — so
+keep the previous archives there if you want the count to carry on.
+
+Alongside it come `build/casper-wallet-chrome-<version>rc<n>#<sha>.zip` and its
+`firefox` counterpart, ready to upload to the stores as they are: each holds
+the extension at the zip root, which is what the stores expect.
+
+### Safari release to TestFlight
+
+`npm run release:safari` takes the Safari extension the whole way: it rebuilds
+`build/safari`, stamps the version into the Xcode project, archives the app and
+uploads it to App Store Connect. It needs macOS with Xcode and an App Store
+Connect API key, described by a gitignored `.env.release` in the repo root:
+
+```shell
+ASC_KEY_PATH=AuthKey_XXXXXXXXXX.p8
+ASC_KEY_ID=XXXXXXXXXX
+ASC_ISSUER_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+ASC_TEAM_ID=XXXXXXXXXX
+```
+
+Keep these out of `.env`, which `npm run build:src` copies into the source-review
+package — the script refuses to run if it finds `ASC_` values there. Exported
+variables win over the file. `ASC_KEY_PATH` is resolved against the repo root and
+`.p8` files are excluded from that package, so the key may sit next to it under
+its Apple-issued name.
+
+`MARKETING_VERSION` comes from `package.json`, so the app version is bumped by
+editing `package.json` and nothing else. `CURRENT_PROJECT_VERSION` is incremented
+on every upload, because App Store Connect rejects a build number it has already
+seen; the script prints the `git commit` that records it in
+`Casper Wallet.xcodeproj/project.pbxproj`. A run that ships nothing — a failure,
+or `--no-upload` — restores it instead. `SAFARI_BUILD=<n>` overrides it for one
+run.
+
+Signing is left to Xcode's automatic mode, which needs a **Mac Installer
+Distribution** certificate in the login keychain to sign the `.pkg`. An API key
+with the App Manager or Admin role mints one on demand; otherwise create it once
+in the Apple Developer portal. To exercise all of that without sending a build:
+
+```shell
+npm run release:safari -- --no-upload
 ```
 
 ### Reproducible builds from the source package

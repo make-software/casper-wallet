@@ -1,6 +1,5 @@
 const { NODE_ENV, BROWSER: browserEnvVar } = require('./utils/env');
 
-const extensionName = 'Casper Wallet';
 const buildRootDir = ['test', 'production'].includes(NODE_ENV)
   ? 'build'
   : 'output';
@@ -8,7 +7,9 @@ const buildRootDir = ['test', 'production'].includes(NODE_ENV)
 const ExtensionBuildPath = {
   Chrome: `${buildRootDir}/chrome`,
   Firefox: `${buildRootDir}/firefox`,
-  Safari: `${buildRootDir}/safari/${extensionName}`
+  // Web-extension resources only. The Xcode project reads them from here; the
+  // .app it produces is built and shipped from Xcode, never into this tree.
+  Safari: `${buildRootDir}/safari`
 };
 
 const ManifestPath = {
@@ -23,7 +24,6 @@ const isFirefox = browserEnvVar && browserEnvVar === 'firefox';
 
 module.exports = {
   ExtensionBuildPath,
-  extensionName,
   browserEnvVar,
   ManifestPath,
   isFirefox,
