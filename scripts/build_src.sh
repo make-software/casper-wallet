@@ -18,7 +18,10 @@ trap 'rm -f build-hash.json' EXIT
 printf '{\n  "commitHash": "%s"\n}\n' "$HASH" > build-hash.json
 
 # `*.*` already covers build-hash.json; naming it keeps the dependency visible.
-zip -r "casper-wallet-src#${HASH:0:7}.zip" src scripts utils *.* .env build-hash.json
+# It would also sweep up the App Store Connect key that release_safari.sh reads
+# from the repo root, and this package goes to store reviewers. Nothing the build
+# needs is a .p8, so the exclusion covers the key under any name.
+zip -r "casper-wallet-src#${HASH:0:7}.zip" src scripts utils *.* .env build-hash.json -x '*.p8'
 
 mkdir -p build
 mv "casper-wallet-src#${HASH:0:7}.zip" build/
