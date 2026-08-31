@@ -67,7 +67,11 @@ export function attachWindowToRequest(
       const tab = browserWindow.tabs?.[0];
       const tabUrl = tab?.url ?? tab?.pendingUrl;
 
-      if (tabUrl == null || tabUrl === '') {
+      // Every not-yet-settled shape, per browser: Chrome reports a navigating
+      // tab as `url: ''` (the target in `pendingUrl`); Firefox has no
+      // `pendingUrl` and reports `about:blank` until the navigation commits,
+      // which is what a freshly created window's tab shows when probed.
+      if (tabUrl == null || tabUrl === '' || tabUrl === 'about:blank') {
         return;
       }
 
