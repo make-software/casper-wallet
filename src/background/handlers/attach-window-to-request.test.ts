@@ -99,6 +99,20 @@ describe('a window that is not ours must not own a request', () => {
     expect(cancelMock).not.toHaveBeenCalled();
   });
 
+  it('does not undo the attach when the tab is still at about:blank', async () => {
+    // Firefox has no `pendingUrl` and reports a freshly created window's tab
+    // as `about:blank` until the navigation commits, so on a cold open there
+    // the probe lands on exactly this shape (WALLET-1439). Repairing on it
+    // cancelled the request whose window was on screen.
+    getMock.mockResolvedValue({ id: 7, tabs: [{ url: 'about:blank' }] });
+    const { store } = makeStore();
+
+    attachWindowToRequest(store, 'r1', 7);
+    await flush();
+
+    expect(cancelMock).not.toHaveBeenCalled();
+  });
+
   it('warns when our window carries no requestId at all', async () => {
     // Without this the ownership check establishes "one of our windows" and
     // says nothing about "the window showing THIS request" — and the two are
