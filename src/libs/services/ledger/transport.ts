@@ -4,8 +4,7 @@ import BluetoothTransport from '@ledgerhq/hw-transport-web-ble';
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
 import TransportWebUsb from '@ledgerhq/hw-transport-webusb';
 import { getLedgerDevices } from '@ledgerhq/hw-transport-webusb/lib/webusb';
-
-import { LedgerError } from '@libs/services/ledger/ledger';
+import { LedgerError } from 'casper-wallet-core';
 
 import { LedgerEventStatus, SelectedTransport } from './types';
 

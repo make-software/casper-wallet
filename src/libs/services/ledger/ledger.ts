@@ -2,6 +2,7 @@ import Transport from '@ledgerhq/hw-transport';
 import { blake2b } from '@noble/hashes/blake2b';
 import LedgerCasperApp, { ResponseSign } from '@zondax/ledger-casper';
 import { HexBytes, PublicKey, Transaction } from 'casper-js-sdk';
+import { LedgerError } from 'casper-wallet-core';
 import {
   BehaviorSubject,
   Observable,
@@ -23,12 +24,6 @@ import {
 const CONNECTION_TIMEOUT_MS = 60000;
 const CONNECTION_POLL_INTERVAL = 3000;
 
-export class LedgerError extends Error {
-  constructor(LedgerEventStatus: ILedgerEvent) {
-    super(JSON.stringify(LedgerEventStatus));
-  }
-}
-
 class Ledger {
   cachedAccounts: LedgerAccount[] = [];
 
@@ -37,12 +32,12 @@ class Ledger {
   #ledgerApp: LedgerCasperApp | null = null;
   #ledgerConnected = false;
   #allowReconnect: boolean = true;
-  #LedgerEventStatussSubject = new BehaviorSubject<ILedgerEvent>({
+  #LedgerEventStatusSubject = new BehaviorSubject<ILedgerEvent>({
     status: LedgerEventStatus.Disconnected
   });
 
-  subscribeToLedgerEventStatuss = (onData: (evt: ILedgerEvent) => void) =>
-    this.#LedgerEventStatussSubject.pipe(debounceTime(300)).subscribe(onData);
+  subscribeToLedgerEventStatus = (onData: (evt: ILedgerEvent) => void) =>
+    this.#LedgerEventStatusSubject.pipe(debounceTime(300)).subscribe(onData);
 
   /** @throws {LedgerError} */
   async connect(
@@ -57,13 +52,13 @@ class Ledger {
 
       if (!available) {
         const evt = { status: LedgerEventStatus.NotAvailable };
-        this.#LedgerEventStatussSubject.next(evt);
+        this.#LedgerEventStatusSubject.next(evt);
         reject(new LedgerError(evt));
       }
 
       const connectionObserver: Observer<ILedgerEvent> = {
         next: data => {
-          this.#LedgerEventStatussSubject.next(data);
+          this.#LedgerEventStatusSubject.next(data);
 
           if (
             data.status === LedgerEventStatus.Timeout ||
@@ -76,7 +71,7 @@ class Ledger {
           const evt: ILedgerEvent = {
             status: LedgerEventStatus.ErrorOpeningDevice
           };
-          this.#LedgerEventStatussSubject.next(evt);
+          this.#LedgerEventStatusSubject.next(evt);
           reject(new LedgerError(evt));
         },
         complete: async () => {
@@ -91,7 +86,7 @@ class Ledger {
       } catch (e) {
         if (!this.#transport) {
           const evt = { status: LedgerEventStatus.LedgerPermissionRequired };
-          this.#LedgerEventStatussSubject.next(evt);
+          this.#LedgerEventStatusSubject.next(evt);
           reject(new LedgerError(evt));
           return;
         }
@@ -105,7 +100,7 @@ class Ledger {
     if (this.#ledgerConnected) {
       try {
         await this.#transport?.close();
-        this.#LedgerEventStatussSubject.next({
+        this.#LedgerEventStatusSubject.next({
           status: LedgerEventStatus.Disconnected
         });
       } catch (err: any) {
@@ -152,7 +147,7 @@ class Ledger {
     try {
       if (!this.#ledgerApp || !this.#ledgerConnected) return;
 
-      this.#LedgerEventStatussSubject.next({
+      this.#LedgerEventStatusSubject.next({
         status: LedgerEventStatus.LoadingAccountsList
       });
 
@@ -163,11 +158,11 @@ class Ledger {
 
       if (!response || response.returnCode !== 0x9000) {
         if (response?.returnCode === 0xffff || response.returnCode === 21781) {
-          this.#LedgerEventStatussSubject.next({
+          this.#LedgerEventStatusSubject.next({
             status: LedgerEventStatus.DeviceLocked
           });
         } else if (response?.returnCode === 0x6e01) {
-          this.#LedgerEventStatussSubject.next({
+          this.#LedgerEventStatusSubject.next({
             status: LedgerEventStatus.CasperAppNotLoaded
           });
         } else {
@@ -193,7 +188,7 @@ class Ledger {
 
       const appInfo = await this.#ledgerApp?.getAppInfo();
 
-      this.#LedgerEventStatussSubject.next({
+      this.#LedgerEventStatusSubject.next({
         status: LedgerEventStatus.AccountListUpdated,
         firstAcctIndex: offset,
         accounts: updatedAccountList,
@@ -269,7 +264,7 @@ class Ledger {
         });
       }
 
-      this.#LedgerEventStatussSubject.next({
+      this.#LedgerEventStatusSubject.next({
         status: LedgerEventStatus.SignatureRequestedToUser,
         publicKey: account.publicKey,
         txHash
@@ -345,7 +340,7 @@ class Ledger {
 
       const prefixedSignatureHex = `02${patchedSignature.toString('hex')}`;
 
-      this.#LedgerEventStatussSubject.next({
+      this.#LedgerEventStatusSubject.next({
         status: LedgerEventStatus.SignatureCompleted,
         publicKey: account.publicKey,
         txHash,
@@ -455,7 +450,7 @@ class Ledger {
         blake2b(prefixedMessage, { dkLen: 32 })
       ).toString('hex');
 
-      this.#LedgerEventStatussSubject.next({
+      this.#LedgerEventStatusSubject.next({
         status: LedgerEventStatus.MsgSignatureRequestedToUser,
         publicKey: account.publicKey,
         message,
@@ -489,7 +484,7 @@ class Ledger {
           ? result.signatureRSV.subarray(0, 64)
           : result.signatureRSV;
 
-      this.#LedgerEventStatussSubject.next({
+      this.#LedgerEventStatusSubject.next({
         status: LedgerEventStatus.MsgSignatureCompleted,
         publicKey: account.publicKey,
         message: message,
@@ -538,7 +533,7 @@ class Ledger {
     this.#ledgerConnected = false;
     this.#allowReconnect = false;
     this.cachedAccounts = [];
-    this.#LedgerEventStatussSubject.next({
+    this.#LedgerEventStatusSubject.next({
       status: LedgerEventStatus.Disconnected
     });
     this.#transport?.off('disconnect', this.#onDisconnect);
@@ -642,7 +637,7 @@ class Ledger {
 
   /** @throws {LedgerError} message - ILedgerEvent JSON */
   #processError(evt: ILedgerEvent): never {
-    this.#LedgerEventStatussSubject.next(evt);
+    this.#LedgerEventStatusSubject.next(evt);
     throw new LedgerError(evt);
   }
 

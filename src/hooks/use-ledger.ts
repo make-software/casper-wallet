@@ -169,7 +169,7 @@ export const useLedger = ({
   };
 
   useEffect(() => {
-    const sub = ledger.subscribeToLedgerEventStatuss(event => {
+    const sub = ledger.subscribeToLedgerEventStatus(event => {
       if (event.status === LedgerEventStatus.Connected) {
         setIsLedgerConnected(true);
       } else if (event.status === LedgerEventStatus.Disconnected) {
@@ -388,7 +388,7 @@ export const useLedger = ({
 
   useEffect(() => {
     if (windowId && askPermissionUrlData?.domain !== 'popup.html') {
-      const sub = ledger.subscribeToLedgerEventStatuss(event => {
+      const sub = ledger.subscribeToLedgerEventStatus(event => {
         if (
           event.status === LedgerEventStatus.SignatureCompleted ||
           event.status === LedgerEventStatus.MsgSignatureCompleted
