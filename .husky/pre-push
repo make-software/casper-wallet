@@ -1,2 +1,4 @@
 npx lint-staged
-npm run ci-check
+# The unit suite is gated on CI (.github/workflows/ci-check.yml). Locally it
+# costs minutes on every push, so the hook keeps only the fast static checks.
+npm run check:static

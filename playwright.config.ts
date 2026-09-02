@@ -20,6 +20,10 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 2 : undefined,
+  /* A single onboarding test creates the whole vault — password, phrase,
+   * 12-word confirmation, then the popup. The 30s default left no headroom on
+   * a loaded CI runner and timed out mid-click. */
+  timeout: 60_000,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
