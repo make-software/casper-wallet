@@ -48,7 +48,7 @@
     "test": "jest --no-cache --passWithNoTests",
     "test:coverage": "jest --no-cache --coverage",
     "prepare": "husky",
-    "setup": "npm ci && npm run allow-scripts && husky",
+    "setup": "npm ci --allow-git=root && npm run allow-scripts && husky",
     "allow-scripts": "allow-scripts",
     "locale:extract_pot": "i18next 'src/**/*.{ts,tsx}' && node scripts/locale_extract_pot.mjs",
     "locale:update_translations": "node scripts/locale_update_translations.mjs",
