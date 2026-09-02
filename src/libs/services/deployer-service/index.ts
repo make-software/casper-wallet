@@ -1,13 +1,10 @@
-import { Deploy, HttpHandler, RpcClient, Transaction } from 'casper-js-sdk';
-import { isBefore, sub } from 'date-fns';
+import { Conversions, Deploy, Transaction } from 'casper-js-sdk';
+import { CasperNetwork, createPrivateKeySigner } from 'casper-wallet-core';
 
-import {
-  AuctionManagerEntryPoint,
-  CasperNodeUrl,
-  REFERRER_URL,
-  STAKE_COST_MOTES
-} from '@src/constants';
+import { AuctionManagerEntryPoint, STAKE_COST_MOTES } from '@src/constants';
 import { AsymmetricKeys } from '@src/libs/crypto/create-asymmetric-key';
+
+import { casperTransactionsRepository } from '@background/signing-repositories';
 
 import { Account, HardwareWalletType } from '@libs/types/account';
 
@@ -27,24 +24,8 @@ export const getAuctionManagerDeployCost = (
   }
 };
 
-export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
-  const defaultDate = sub(new Date(), { seconds: 2 });
-  const handler = new HttpHandler(nodeUrl, 'fetch');
-  handler.setReferrer(REFERRER_URL);
-  const rpcClient = new RpcClient(handler);
-
-  try {
-    const resp = await rpcClient.getStatus();
-
-    const nodeDate = resp.lastProgress.toDate();
-
-    return isBefore(nodeDate, defaultDate)
-      ? defaultDate.toISOString()
-      : nodeDate.toISOString();
-  } catch {
-    return defaultDate.toISOString();
-  }
-};
+export const getDateForDeploy = (network: CasperNetwork) =>
+  casperTransactionsRepository.getDateForTransaction(network);
 
 export const signTx = async (
   tx: Transaction,
@@ -79,33 +60,23 @@ export const signTx = async (
     throw new Error('Missing secret key');
   }
 
-  tx.sign(keys.secretKey);
+  // The redux account carries no secret material outside the background: the page fetches the
+  // key over the vault-secrets channel and hands it over as `keys`, so that is what signs.
+  const signer = createPrivateKeySigner({
+    publicKeyHex: activeAccount.publicKey,
+    secretKeyBase64: Conversions.encodeBase64(keys.secretKey.toBytes())
+  });
 
-  return tx;
+  return signer.getSignedTransaction(tx);
 };
 
-export const sendSignedTx = async (
+export const sendSignedTx = (
   tx: Transaction,
-  nodeUrl: CasperNodeUrl,
-  isCasper2Network: boolean
-): Promise<string> => {
-  const handler = new HttpHandler(nodeUrl, 'fetch');
-  handler.setReferrer(REFERRER_URL);
-  const rpcClient = new RpcClient(handler);
-
-  if (isCasper2Network) {
-    const txResp = await rpcClient.putTransaction(tx);
-
-    return txResp.transactionHash.toHex();
-  }
-
-  const deploy = tx.getDeploy();
-
-  if (deploy) {
-    const deployResp = await rpcClient.putDeploy(deploy);
-
-    return deployResp.deployHash.toHex();
-  }
-
-  throw new Error('Invalid Transaction object');
-};
+  network: CasperNetwork,
+  casperNetworkApiVersion: string
+) =>
+  casperTransactionsRepository.sendSignedTransaction({
+    transaction: tx,
+    network,
+    casperNetworkApiVersion
+  });

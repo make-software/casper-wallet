@@ -1,4 +1,5 @@
 import { Deploy } from 'casper-js-sdk';
+import { buildNftTransferTransactions } from 'casper-wallet-core';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -7,9 +8,9 @@ import { useParams } from 'react-router-dom';
 import {
   ErrorMessages,
   HomePageTabName,
-  networkNameToSdkNetworkNameMap
+  getCasperNetwork
 } from '@src/constants';
-import { NFTTokenStandard } from '@src/utils';
+import { NFTTokenStandard, coreNftStandardMap } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import { useHomeTab } from '@popup/hooks/use-home-tab';
@@ -36,9 +37,8 @@ import {
 } from '@background/redux/rate-app/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import {
-  selectApiConfigBasedOnActiveNetwork,
-  selectCasperNetworkApiVersion,
-  selectIsCasper2Network
+  selectActiveNetworkSetting,
+  selectCasperNetworkApiVersion
 } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
@@ -67,7 +67,6 @@ import {
   signTx
 } from '@libs/services/deployer-service';
 import { useFetchNftTokens } from '@libs/services/nft-service';
-import { buildNftTransferTransactions } from '@libs/services/tx-builders';
 import {
   Button,
   LedgerEventView,
@@ -93,7 +92,8 @@ export const TransferNftPage = () => {
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(false);
   const [isRecipientFormButtonDisabled, setIsRecipientFormButtonDisabled] =
     useState(true);
-  const isCasper2Network = useSelector(selectIsCasper2Network);
+  const activeNetworkSetting = useSelector(selectActiveNetworkSetting);
+  const network = getCasperNetwork(activeNetworkSetting);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
   const { setActiveHomeTab } = useHomeTab();
@@ -103,9 +103,6 @@ export const TransferNftPage = () => {
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
     selectIsActiveAccountFromLedger
-  );
-  const { networkName, nodeUrl } = useSelector(
-    selectApiConfigBasedOnActiveNetwork
   );
   const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
   const walletPublicKeys = useSelector(selectVaultAccountsPublicKeys);
@@ -138,7 +135,7 @@ export const TransferNftPage = () => {
   }, [navigate, nftToken]);
 
   useEffect(() => {
-    if (nftToken?.owner_reverse_lookup_mode) {
+    if (nftToken?.ownerReverseLookupMode) {
       setHaveReverseOwnerLookUp(true);
     }
   }, [nftToken]);
@@ -201,14 +198,14 @@ export const TransferNftPage = () => {
 
       const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
 
-      const timestamp = await getDateForDeploy(nodeUrl);
+      const timestamp = await getDateForDeploy(network);
 
       const { transaction, fallbackDeploy } = buildNftTransferTransactions(
         {
-          chainName: networkNameToSdkNetworkNameMap[networkName],
+          network,
           contractPackageHash: nftToken.contractPackageHash,
-          nftStandard: NFTTokenStandard[tokenStandard],
-          paymentAmount: CSPRtoMotes(paymentAmount),
+          nftStandard: coreNftStandardMap[NFTTokenStandard[tokenStandard]],
+          paymentAmountMotes: CSPRtoMotes(paymentAmount),
           recipientPublicKeyHex: recipientPublicKey,
           senderPublicKeyHex: KEYS.publicKey.toHex(),
           tokenId:
@@ -228,7 +225,7 @@ export const TransferNftPage = () => {
         changeActiveAccountSupportsWithEvent
       );
 
-      sendSignedTx(signedTx, nodeUrl, isCasper2Network)
+      sendSignedTx(signedTx, network, casperNetworkApiVersion)
         .then(hash => {
           dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
@@ -276,14 +273,14 @@ export const TransferNftPage = () => {
     const secretKey = await fetchAccountSecretKey(activeAccount.name);
     const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
 
-    const timestamp = await getDateForDeploy(nodeUrl);
+    const timestamp = await getDateForDeploy(network);
 
     const { transaction, fallbackDeploy } = buildNftTransferTransactions(
       {
-        chainName: networkNameToSdkNetworkNameMap[networkName],
+        network,
         contractPackageHash: nftToken.contractPackageHash,
-        nftStandard: NFTTokenStandard[tokenStandard],
-        paymentAmount: CSPRtoMotes(paymentAmount),
+        nftStandard: coreNftStandardMap[NFTTokenStandard[tokenStandard]],
+        paymentAmountMotes: CSPRtoMotes(paymentAmount),
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: KEYS.publicKey.toHex(),
         tokenId: nftToken.tokenIdType === 'uint' ? nftToken.tokenId : undefined,

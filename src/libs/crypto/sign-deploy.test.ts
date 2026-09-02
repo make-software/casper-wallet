@@ -1,74 +1,100 @@
 import { concatBytes } from '@noble/ciphers/utils.js';
 import {
-  CasperNetworkName,
   Conversions,
   Deploy,
   KeyAlgorithm,
   PrivateKey,
-  makeCsprTransferDeploy
+  Transaction
 } from 'casper-js-sdk';
+import {
+  KeyPairMismatchError,
+  buildCsprTransferTransactions,
+  createPrivateKeySigner
+} from 'casper-wallet-core';
 
-import { AsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
+const signWith = async (
+  publicKeyHex: string,
+  privateKeyBase64: string,
+  tx: Transaction
+) => {
+  const signer = createPrivateKeySigner({
+    publicKeyHex,
+    secretKeyBase64: privateKeyBase64
+  });
+  const { signature } = await signer.signTransaction(tx);
 
-import { signDeployForProviderResponse } from './sign-deploy';
-
-const getSignature = (hash: Uint8Array, keyPair: AsymmetricKeys) => {
-  const publicKeyHex = keyPair.publicKey.toHex(false);
-  const privateKeyBase64 = Conversions.encodeBase64(
-    keyPair.secretKey!.toBytes()
-  );
-  return signDeployForProviderResponse(hash, publicKeyHex, privateKeyBase64);
+  return signature; // raw, unprefixed — exactly what the dApp receives
 };
 
+const buildTransferDeploy = (senderPrivateKey: PrivateKey) =>
+  buildCsprTransferTransactions(
+    {
+      network: 'testnet',
+      transferAmountMotes: '1000000000',
+      memo: '34',
+      senderPublicKeyHex: senderPrivateKey.publicKey.toHex(),
+      recipientPublicKeyHex: PrivateKey.generate(
+        KeyAlgorithm.ED25519
+      ).publicKey.toHex()
+    },
+    '1.5.8'
+  ).fallbackDeploy;
+
 describe('sign-deploy', () => {
-  const hash = Buffer.from(
-    'cffc63f9c514bfc78c53852705f556b8a4fd5bfd6e073a66952ece942bdf19e0',
-    'hex'
-  );
-
-  it('should get correct signature for Ed25519 keyPair', () => {
+  it('should get correct signature for Ed25519 keyPair', async () => {
     const privateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
-    const keyPair: AsymmetricKeys = {
-      secretKey: privateKey,
-      publicKey: privateKey.publicKey
-    };
-    const signature = getSignature(hash, keyPair);
+    const tx = Transaction.fromDeploy(buildTransferDeploy(privateKey));
+    const privateKeyBase64 = Conversions.encodeBase64(privateKey.toBytes());
+
+    const signature = await signWith(
+      privateKey.publicKey.toHex(),
+      privateKeyBase64,
+      tx
+    );
     const algBytes = Uint8Array.of(privateKey.publicKey.cryptoAlg);
+
     expect(
-      keyPair.publicKey.verifySignature(hash, concatBytes(algBytes, signature))
+      privateKey.publicKey.verifySignature(
+        tx.hash.toBytes(),
+        concatBytes(algBytes, signature)
+      )
     ).toBeTruthy();
   });
 
-  it('should get correct signature for Secp256K1 keyPair', () => {
+  it('should get correct signature for Secp256K1 keyPair', async () => {
     const privateKey = PrivateKey.generate(KeyAlgorithm.SECP256K1);
-    const keyPair: AsymmetricKeys = {
-      secretKey: privateKey,
-      publicKey: privateKey.publicKey
-    };
+    const tx = Transaction.fromDeploy(buildTransferDeploy(privateKey));
+    const privateKeyBase64 = Conversions.encodeBase64(privateKey.toBytes());
+
+    const signature = await signWith(
+      privateKey.publicKey.toHex(),
+      privateKeyBase64,
+      tx
+    );
     const algBytes = Uint8Array.of(privateKey.publicKey.cryptoAlg);
-    const signature = getSignature(hash, keyPair);
+
     expect(
-      keyPair.publicKey.verifySignature(hash, concatBytes(algBytes, signature))
+      privateKey.publicKey.verifySignature(
+        tx.hash.toBytes(),
+        concatBytes(algBytes, signature)
+      )
     ).toBeTruthy();
   });
 
-  it('should set correct signature on the deploy with setSignature', () => {
+  it('should set correct signature on the deploy with setSignature', async () => {
     const signingPrivateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
-    const recipientPrivateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
 
-    const getSignedDeployApproval = () => {
-      let deploy = makeCsprTransferDeploy({
-        transferAmount: '1000000000',
-        memo: '34',
-        chainName: CasperNetworkName.Testnet,
-        senderPublicKeyHex: signingPrivateKey.publicKey.toHex(),
-        recipientPublicKeyHex: recipientPrivateKey.publicKey.toHex()
-      });
+    const getSignedDeployApproval = async () => {
+      let deploy = buildTransferDeploy(signingPrivateKey);
+      const privateKeyBase64 = Conversions.encodeBase64(
+        signingPrivateKey.toBytes()
+      );
 
-      const signature = getSignature(deploy.hash.toBytes(), {
-        publicKey: signingPrivateKey.publicKey,
-        secretKey: signingPrivateKey
-      });
+      const signature = await signWith(
+        signingPrivateKey.publicKey.toHex(),
+        privateKeyBase64,
+        Transaction.fromDeploy(deploy)
+      );
 
       deploy = Deploy.setSignature(
         deploy,
@@ -79,6 +105,21 @@ describe('sign-deploy', () => {
       return deploy.approvals[0].signer;
     };
 
-    expect(getSignedDeployApproval()).toEqual(signingPrivateKey.publicKey);
+    expect(await getSignedDeployApproval()).toEqual(
+      signingPrivateKey.publicKey
+    );
+  });
+
+  it('rejects a mismatched key pair with KeyPairMismatchError', async () => {
+    const signingPrivateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
+    const unrelatedPrivateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
+    const tx = Transaction.fromDeploy(buildTransferDeploy(signingPrivateKey));
+    const privateKeyBase64 = Conversions.encodeBase64(
+      signingPrivateKey.toBytes()
+    );
+
+    await expect(
+      signWith(unrelatedPrivateKey.publicKey.toHex(), privateKeyBase64, tx)
+    ).rejects.toThrow(KeyPairMismatchError);
   });
 });

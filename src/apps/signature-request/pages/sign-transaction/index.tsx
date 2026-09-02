@@ -1,5 +1,6 @@
 import { Transaction } from 'casper-js-sdk';
 import {
+  createPrivateKeySigner,
   isTxSignatureRequestWasmAction,
   isTxSignatureRequestWasmProxyAction
 } from 'casper-wallet-core';
@@ -53,7 +54,6 @@ import { useLedger } from '@hooks/use-ledger';
 
 import { sdkMethod } from '@content/sdk-method';
 
-import { signDeployForProviderResponse } from '@libs/crypto';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
@@ -281,11 +281,13 @@ export function SignTransactionPage() {
         return;
       }
 
-      signature = signDeployForProviderResponse(
-        transaction.hash.toBytes(),
-        signingAccount.publicKey,
-        secretKey
-      );
+      const signer = createPrivateKeySigner({
+        publicKeyHex: signingAccount.publicKey,
+        secretKeyBase64: secretKey
+      });
+      const resp = await signer.signTransaction(transaction);
+
+      signature = resp.signature;
     }
 
     if (!signature) {

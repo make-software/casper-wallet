@@ -1,5 +1,8 @@
-import { CasperNetworkName, Deploy } from 'casper-js-sdk';
-import { formatNumber } from 'casper-wallet-core';
+import { Deploy } from 'casper-js-sdk';
+import {
+  buildAuctionManagerTransactions,
+  formatNumber
+} from 'casper-wallet-core';
 import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -12,7 +15,8 @@ import {
   HomePageTabName,
   STAKE_COST_MOTES,
   StakeSteps,
-  networkNameToSdkNetworkNameMap
+  coreAuctionEntryPointMap,
+  getCasperNetwork
 } from '@src/constants';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
@@ -41,9 +45,8 @@ import {
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
 import {
-  selectApiConfigBasedOnActiveNetwork,
-  selectCasperNetworkApiVersion,
-  selectIsCasper2Network
+  selectActiveNetworkSetting,
+  selectCasperNetworkApiVersion
 } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
@@ -75,7 +78,6 @@ import {
   sendSignedTx,
   signTx
 } from '@libs/services/deployer-service';
-import { buildAuctionTransactions } from '@libs/services/tx-builders';
 import {
   Button,
   LedgerEventView,
@@ -114,7 +116,8 @@ export const StakesPage = () => {
   const [validator, setValidator] = useState<ValidatorDto | null>(null);
   const [newValidator, setNewValidator] = useState<ValidatorDto | null>(null);
   const [maxAmountMotesForStaking, setMaxAmountMotesForStaking] = useState('');
-  const isCasper2Network = useSelector(selectIsCasper2Network);
+  const activeNetworkSetting = useSelector(selectActiveNetworkSetting);
+  const network = getCasperNetwork(activeNetworkSetting);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
   const { setActiveHomeTab } = useHomeTab();
@@ -122,9 +125,6 @@ export const StakesPage = () => {
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
     selectIsActiveAccountFromLedger
-  );
-  const { networkName, nodeUrl } = useSelector(
-    selectApiConfigBasedOnActiveNetwork
   );
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
@@ -194,17 +194,14 @@ export const StakesPage = () => {
 
       const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
 
-      const timestamp = await getDateForDeploy(nodeUrl);
+      const timestamp = await getDateForDeploy(network);
 
-      const { transaction, fallbackDeploy } = buildAuctionTransactions(
+      const { transaction, fallbackDeploy } = buildAuctionManagerTransactions(
         {
-          amount: motesAmount,
-          // The map is typed as the enum's string values so @src/constants stays SDK-free;
-          // the core API asks for the nominal enum, which the same string satisfies.
-          chainName: networkNameToSdkNetworkNameMap[
-            networkName
-          ] as CasperNetworkName,
-          contractEntryPoint: stakeType,
+          network,
+          amountMotes: motesAmount,
+          paymentAmountMotes: STAKE_COST_MOTES,
+          entryPoint: coreAuctionEntryPointMap[stakeType],
           delegatorPublicKeyHex: activeAccount.publicKey,
           newValidatorPublicKeyHex: newValidatorPublicKey,
           validatorPublicKeyHex: validatorPublicKey,
@@ -221,7 +218,7 @@ export const StakesPage = () => {
         changeActiveAccountSupportsWithEvent
       );
 
-      sendSignedTx(signedTx, nodeUrl, isCasper2Network)
+      sendSignedTx(signedTx, network, casperNetworkApiVersion)
         .then(hash => {
           dispatchToMainStore(accountPendingDeployHashesChanged(hash));
           setStakeStep(StakeSteps.Success);
@@ -254,17 +251,14 @@ export const StakesPage = () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
-      const timestamp = await getDateForDeploy(nodeUrl);
+      const timestamp = await getDateForDeploy(network);
 
-      const { transaction, fallbackDeploy } = buildAuctionTransactions(
+      const { transaction, fallbackDeploy } = buildAuctionManagerTransactions(
         {
-          amount: motesAmount,
-          // The map is typed as the enum's string values so @src/constants stays SDK-free;
-          // the core API asks for the nominal enum, which the same string satisfies.
-          chainName: networkNameToSdkNetworkNameMap[
-            networkName
-          ] as CasperNetworkName,
-          contractEntryPoint: stakeType,
+          network,
+          amountMotes: motesAmount,
+          paymentAmountMotes: STAKE_COST_MOTES,
+          entryPoint: coreAuctionEntryPointMap[stakeType],
           delegatorPublicKeyHex: activeAccount.publicKey,
           newValidatorPublicKeyHex: newValidatorPublicKey,
           validatorPublicKeyHex: validatorPublicKey,

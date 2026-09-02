@@ -14,16 +14,23 @@ import {
  *
  * Importing this module links `casper-js-sdk` (~900 KB, one prebuilt UMD bundle with nothing to
  * shake out), so it is kept out of `./wallet-repositories`: every page entry reads balances and
- * accounts, but only the signing surfaces and the background need these two.
+ * accounts, but only the signing surfaces and the background need these.
  */
-const { txSignatureRequestRepository, eip712Repository } =
-  setupSigningRepositories({
-    httpDataProvider,
-    accountInfoRepository,
-    tokensRepository,
-    contractPackageRepository,
-    casperWalletApiByEnvUrl: CasperWalletApiByEnvUrl,
-    log
-  });
+const {
+  txSignatureRequestRepository,
+  eip712Repository,
+  casperTransactionsRepository
+} = setupSigningRepositories({
+  httpDataProvider,
+  accountInfoRepository,
+  tokensRepository,
+  contractPackageRepository,
+  casperWalletApiByEnvUrl: CasperWalletApiByEnvUrl,
+  log
+});
 
-export { txSignatureRequestRepository, eip712Repository };
+export {
+  txSignatureRequestRepository,
+  eip712Repository,
+  casperTransactionsRepository
+};

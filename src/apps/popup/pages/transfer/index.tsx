@@ -1,4 +1,8 @@
 import { Deploy, Transaction } from 'casper-js-sdk';
+import {
+  buildCep18TransferTransactions,
+  buildCsprTransferTransactions
+} from 'casper-wallet-core';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -8,7 +12,7 @@ import {
   ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES,
   ErrorMessages,
   HomePageTabName,
-  networkNameToSdkNetworkNameMap
+  getCasperNetwork
 } from '@src/constants';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
@@ -29,9 +33,8 @@ import {
 } from '@background/redux/rate-app/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import {
-  selectApiConfigBasedOnActiveNetwork,
-  selectCasperNetworkApiVersion,
-  selectIsCasper2Network
+  selectActiveNetworkSetting,
+  selectCasperNetworkApiVersion
 } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
@@ -62,10 +65,6 @@ import {
   sendSignedTx,
   signTx
 } from '@libs/services/deployer-service';
-import {
-  buildCep18Transactions,
-  buildCsprTransferTransactions
-} from '@libs/services/tx-builders';
 import { HardwareWalletType } from '@libs/types/account';
 import {
   Button,
@@ -105,7 +104,8 @@ export const TransferPage = () => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
-  const isCasper2Network = useSelector(selectIsCasper2Network);
+  const activeNetworkSetting = useSelector(selectActiveNetworkSetting);
+  const network = getCasperNetwork(activeNetworkSetting);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
   const { setActiveHomeTab } = useHomeTab();
@@ -130,9 +130,6 @@ export const TransferPage = () => {
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
     selectIsActiveAccountFromLedger
-  );
-  const { networkName, nodeUrl } = useSelector(
-    selectApiConfigBasedOnActiveNetwork
   );
   const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
   const walletPublicKeys = useSelector(selectVaultAccountsPublicKeys);
@@ -183,7 +180,7 @@ export const TransferPage = () => {
   } = useSubmitButton(transferStep === TransactionSteps.Confirm);
 
   const sendTx = (tx: Transaction) => {
-    sendSignedTx(tx, nodeUrl, isCasper2Network)
+    sendSignedTx(tx, network, casperNetworkApiVersion)
       .then(hash => {
         dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
         console.log('-------- hash', hash);
@@ -238,17 +235,17 @@ export const TransferPage = () => {
 
     const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
 
-    const timestamp = await getDateForDeploy(nodeUrl);
+    const timestamp = await getDateForDeploy(network);
 
     if (isErc20Transfer && selectedToken?.contractPackageHash) {
-      const { transaction, fallbackDeploy } = buildCep18Transactions(
+      const { transaction, fallbackDeploy } = buildCep18TransferTransactions(
         {
-          chainName: networkNameToSdkNetworkNameMap[networkName],
+          network,
           contractPackageHash: selectedToken.contractPackageHash,
-          paymentAmount: CSPRtoMotes(paymentAmount),
+          paymentAmountMotes: CSPRtoMotes(paymentAmount),
           recipientPublicKeyHex: recipientPublicKey,
           senderPublicKeyHex: activeAccount.publicKey,
-          transferAmount:
+          transferAmountMotes:
             multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0',
           timestamp
         },
@@ -265,13 +262,15 @@ export const TransferPage = () => {
 
       sendTx(signedTx);
     } else {
+      const memoForTransfer = transferIdMemo || Date.now().toString();
+
       const { transaction, fallbackDeploy } = buildCsprTransferTransactions(
         {
-          chainName: networkNameToSdkNetworkNameMap[networkName],
-          memo: transferIdMemo,
+          network,
+          memo: memoForTransfer,
           recipientPublicKeyHex: recipientPublicKey,
           senderPublicKeyHex: activeAccount.publicKey,
-          transferAmount: CSPRtoMotes(amount),
+          transferAmountMotes: CSPRtoMotes(amount),
           timestamp
         },
         casperNetworkApiVersion
@@ -292,18 +291,18 @@ export const TransferPage = () => {
   const beforeLedgerActionCb = async () => {
     setTransferStep(TransactionSteps.ConfirmWithLedger);
 
-    const timestamp = await getDateForDeploy(nodeUrl);
+    const timestamp = await getDateForDeploy(network);
 
     if (activeAccount?.hardware === HardwareWalletType.Ledger) {
       if (isErc20Transfer && selectedToken?.contractPackageHash) {
-        const { transaction, fallbackDeploy } = buildCep18Transactions(
+        const { transaction, fallbackDeploy } = buildCep18TransferTransactions(
           {
-            chainName: networkNameToSdkNetworkNameMap[networkName],
+            network,
             contractPackageHash: selectedToken.contractPackageHash,
-            paymentAmount: CSPRtoMotes(paymentAmount),
+            paymentAmountMotes: CSPRtoMotes(paymentAmount),
             recipientPublicKeyHex: recipientPublicKey,
             senderPublicKeyHex: activeAccount.publicKey,
-            transferAmount:
+            transferAmountMotes:
               multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0',
             timestamp
           },
@@ -321,14 +320,15 @@ export const TransferPage = () => {
         );
       } else {
         const motesAmount = CSPRtoMotes(amount);
+        const memoForTransfer = transferIdMemo || Date.now().toString();
 
         const { transaction, fallbackDeploy } = buildCsprTransferTransactions(
           {
-            chainName: networkNameToSdkNetworkNameMap[networkName],
-            memo: transferIdMemo,
+            network,
+            memo: memoForTransfer,
             recipientPublicKeyHex: recipientPublicKey,
             senderPublicKeyHex: activeAccount.publicKey,
-            transferAmount: motesAmount,
+            transferAmountMotes: motesAmount,
             timestamp
           },
           casperNetworkApiVersion

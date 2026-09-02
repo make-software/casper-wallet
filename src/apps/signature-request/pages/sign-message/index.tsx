@@ -1,3 +1,4 @@
+import { createPrivateKeySigner } from 'casper-wallet-core';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
@@ -28,7 +29,6 @@ import { useLedger } from '@hooks/use-ledger';
 
 import { sdkMethod } from '@content/sdk-method';
 
-import { signMessageForProviderResponse } from '@libs/crypto/sign-message';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
@@ -165,11 +165,12 @@ export function SignMessagePage() {
         return;
       }
 
-      signature = signMessageForProviderResponse(
-        message,
-        signingAccount.publicKey,
-        secretKey
-      );
+      const signer = createPrivateKeySigner({
+        publicKeyHex: signingAccount.publicKey,
+        secretKeyBase64: secretKey
+      });
+
+      signature = await signer.signMessage(message);
     }
 
     if (!signature) {

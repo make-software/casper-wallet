@@ -2,6 +2,8 @@ import { Deploy, Transaction } from 'casper-js-sdk';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { getCasperNetwork } from '@src/constants';
+
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
 import { fetchAccountSecretKey } from '@background/handlers/vault-secrets';
@@ -13,8 +15,8 @@ import {
 } from '@background/redux/ledger/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import {
-  selectApiConfigBasedOnActiveNetwork,
-  selectIsCasper2Network
+  selectActiveNetworkSetting,
+  selectCasperNetworkApiVersion
 } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
@@ -33,9 +35,10 @@ export const SignWithLedgerInNewWindowPage = () => {
   const txJson = useSelector(selectLedgerTransaction);
   const recipient = useSelector(selectLedgerRecipientToSaveOnSuccess);
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { nodeUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const activeNetworkSetting = useSelector(selectActiveNetworkSetting);
+  const network = getCasperNetwork(activeNetworkSetting);
   const [isSuccess, setIsSuccess] = useState(false);
-  const isCasper2Network = useSelector(selectIsCasper2Network);
+  const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const ledgerAction = async () => {
@@ -58,7 +61,7 @@ export const SignWithLedgerInNewWindowPage = () => {
       changeActiveAccountSupportsWithEvent
     );
 
-    sendSignedTx(signedTx, nodeUrl, isCasper2Network)
+    sendSignedTx(signedTx, network, casperNetworkApiVersion)
       .then(hash => {
         if (recipient) {
           dispatchToMainStore(recipientPublicKeyAdded(recipient));
