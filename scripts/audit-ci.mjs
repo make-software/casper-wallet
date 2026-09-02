@@ -39,20 +39,7 @@ const BLOCKING = new Set(['high', 'critical']);
  * product — not merely that it is inconvenient to fix. Record how that was
  * checked, so the next person can repeat it instead of trusting this comment.
  */
-const ACCEPTED = [
-  {
-    id: 'GHSA-qwww-vcr4-c8h2',
-    package: 'react-router',
-    reviewBy: '2026-10-27',
-    reason:
-      'CSRF bypass in React Router RSC mode, allowing an action to execute before a 400 ' +
-      'response. Requires RSC mode and server actions; this app is a browser extension ' +
-      'with no server. Only declarative APIs are used (HashRouter, Routes, Route, ' +
-      'useParams, useNavigate, useLocation, Navigate) — no createBrowserRouter, no ' +
-      'RouterProvider, no unstable_* APIs, and the internal/react-server-client entry ' +
-      'point is never imported. GitHub scores it CVSS 0. Fix requires the v8 major.',
-  },
-];
+const ACCEPTED = [];
 
 /** Runs npm audit. A non-zero exit is expected when advisories exist. */
 async function runNpmAudit() {
