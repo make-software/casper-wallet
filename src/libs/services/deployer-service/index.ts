@@ -1,5 +1,9 @@
 import { Conversions, Deploy, Transaction } from 'casper-js-sdk';
-import { CasperNetwork, createPrivateKeySigner } from 'casper-wallet-core';
+import {
+  CasperNetwork,
+  createLedgerSigner,
+  createPrivateKeySigner
+} from 'casper-wallet-core';
 
 import { AuctionManagerEntryPoint, STAKE_COST_MOTES } from '@src/constants';
 import { AsymmetricKeys } from '@src/libs/crypto/create-asymmetric-key';
@@ -38,18 +42,18 @@ export const signTx = async (
   ) => Promise<void>
 ) => {
   if (activeAccount?.hardware === HardwareWalletType.Ledger) {
-    const signedTx = await ledger.getSignedTransaction(
-      tx,
-      {
-        publicKey: activeAccount.publicKey,
-        index: activeAccount.derivationIndex
-      },
-      deployFallback ? Transaction.fromDeploy(deployFallback) : undefined,
+    const signer = createLedgerSigner({
+      service: ledger,
+      publicKeyHex: activeAccount.publicKey,
+      derivationIndex: activeAccount.derivationIndex,
       supportsTransactionV1Cb
-    );
-    const approval = signedTx.approvals[0];
+    });
 
-    if (!approval) {
+    const signedTx = await signer.getSignedTransaction(tx, {
+      fallbackDeploy: deployFallback
+    });
+
+    if (!signedTx.approvals[0]) {
       throw new Error('Invalid signature. Try to sign Transaction again');
     }
 

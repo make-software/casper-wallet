@@ -121,7 +121,6 @@
     "redux": "^5.0.1",
     "redux-saga": "^1.5.1",
     "reselect": "^5.2.0",
-    "rxjs": "^7.8.2",
     "styled-components": "6.4.3",
     "yup": "^1.7.1"
   },

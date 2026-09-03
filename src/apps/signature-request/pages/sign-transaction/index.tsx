@@ -1,5 +1,6 @@
 import { Transaction } from 'casper-js-sdk';
 import {
+  createLedgerSigner,
   createPrivateKeySigner,
   isTxSignatureRequestWasmAction,
   isTxSignatureRequestWasmProxyAction
@@ -256,14 +257,13 @@ export function SignTransactionPage() {
     }
 
     if (signingAccount.hardware === HardwareWalletType.Ledger) {
-      const resp = await ledger.signTransaction(
-        transaction,
-        {
-          index: signingAccount.derivationIndex,
-          publicKey: signingAccount.publicKey
-        },
-        changeActiveAccountSupportsWithEvent
-      );
+      const signer = createLedgerSigner({
+        service: ledger,
+        publicKeyHex: signingAccount.publicKey,
+        derivationIndex: signingAccount.derivationIndex,
+        supportsTransactionV1Cb: changeActiveAccountSupportsWithEvent
+      });
+      const resp = await signer.signTransaction(transaction);
 
       signature = resp.signature;
     } else {

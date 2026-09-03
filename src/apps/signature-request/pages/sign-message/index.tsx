@@ -1,4 +1,4 @@
-import { createPrivateKeySigner } from 'casper-wallet-core';
+import { createLedgerSigner, createPrivateKeySigner } from 'casper-wallet-core';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
@@ -144,12 +144,13 @@ export function SignMessagePage() {
     let signature: Uint8Array;
 
     if (signingAccount.hardware === HardwareWalletType.Ledger) {
-      const resp = await ledger.signMessage(message, {
-        index: signingAccount.derivationIndex,
-        publicKey: signingAccount.publicKey
+      const signer = createLedgerSigner({
+        service: ledger,
+        publicKeyHex: signingAccount.publicKey,
+        derivationIndex: signingAccount.derivationIndex
       });
 
-      signature = resp.signature;
+      signature = await signer.signMessage(message);
     } else {
       const secretKey = await fetchAccountSecretKey(signingAccount.name);
 
