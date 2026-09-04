@@ -19,6 +19,7 @@ import {
 const {
   txSignatureRequestRepository,
   eip712Repository,
+  dexContractRepository,
   casperTransactionsRepository
 } = setupSigningRepositories({
   httpDataProvider,
@@ -32,5 +33,6 @@ const {
 export {
   txSignatureRequestRepository,
   eip712Repository,
+  dexContractRepository,
   casperTransactionsRepository
 };
