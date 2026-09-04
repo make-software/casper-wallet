@@ -23,11 +23,13 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { useFetchCep18Tokens } from '@libs/services/cep18-service';
+import { useIsTokenSwappable } from '@libs/services/swap-service';
 import {
   Button,
   Hash,
   HashVariant,
   List,
+  Skeleton,
   SvgIcon,
   TokenPlate,
   Typography
@@ -71,6 +73,19 @@ export const Token = () => {
     casperToken,
     tokenName
   );
+
+  const { isSwappable, isLoading: isLoadingSwappable } =
+    useIsTokenSwappable(tokenData);
+
+  const showBuy =
+    tokenName === 'Casper' &&
+    network === NetworkSetting.Mainnet &&
+    !isSafariBuild;
+  // The skeleton stands in the same slot as the resolved button, so either fills it.
+  const showSwapSlot = isLoadingSwappable || isSwappable;
+  // Send and Receive are unconditional. A fourth action does not fit the card at
+  // the XXXL gap, so the row falls back to the unspaced layout the Home row uses.
+  const footerActionCount = 2 + Number(showBuy) + Number(showSwapSlot);
 
   const getTokenInfoList = (): TokenInfoList[] => {
     if (tokenName === 'Casper' && casperToken) {
@@ -145,7 +160,9 @@ export const Token = () => {
         </ListItemContainer>
       )}
       renderFooter={() => (
-        <FooterItemContainer gap={SpacingSize.XXXL}>
+        <FooterItemContainer
+          gap={footerActionCount > 3 ? SpacingSize.None : SpacingSize.XXXL}
+        >
           <ButtonContainer
             gap={SpacingSize.Medium}
             onClick={() =>
@@ -172,21 +189,44 @@ export const Token = () => {
               <Trans t={t}>Receive</Trans>
             </Typography>
           </ButtonContainer>
-          {tokenName === 'Casper' &&
-            network === NetworkSetting.Mainnet &&
-            !isSafariBuild && (
-              <ButtonContainer
-                gap={SpacingSize.Medium}
-                onClick={() => navigate(RouterPath.BuyCSPR)}
-              >
-                <Button circle>
-                  <SvgIcon src="assets/icons/card.svg" color="contentOnFill" />
-                </Button>
-                <Typography type="captionMedium" color="contentAction">
-                  <Trans t={t}>Buy</Trans>
-                </Typography>
-              </ButtonContainer>
-            )}
+          {showBuy && (
+            <ButtonContainer
+              gap={SpacingSize.Medium}
+              onClick={() => navigate(RouterPath.BuyCSPR)}
+            >
+              <Button circle>
+                <SvgIcon src="assets/icons/card.svg" color="contentOnFill" />
+              </Button>
+              <Typography type="captionMedium" color="contentAction">
+                <Trans t={t}>Buy</Trans>
+              </Typography>
+            </ButtonContainer>
+          )}
+          {isLoadingSwappable && (
+            <ButtonContainer gap={SpacingSize.Medium}>
+              <Skeleton circle width={48} height={48} />
+              <Skeleton width={40} height={16} />
+            </ButtonContainer>
+          )}
+          {!isLoadingSwappable && isSwappable && (
+            <ButtonContainer
+              gap={SpacingSize.Medium}
+              onClick={() =>
+                navigate(RouterPath.Swap, {
+                  state: {
+                    swapFromTokenId: tokenData?.contractPackageHash ?? 'cspr'
+                  }
+                })
+              }
+            >
+              <Button circle>
+                <SvgIcon src="assets/icons/swap.svg" color="contentOnFill" />
+              </Button>
+              <Typography type="captionMedium" color="contentAction">
+                <Trans t={t}>Swap</Trans>
+              </Typography>
+            </ButtonContainer>
+          )}
         </FooterItemContainer>
       )}
       marginLeftForItemSeparatorLine={16}
