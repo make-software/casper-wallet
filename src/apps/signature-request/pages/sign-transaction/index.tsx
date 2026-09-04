@@ -67,6 +67,7 @@ import {
 } from '@libs/layout';
 import { useFetchAccountsInfo } from '@libs/services/account-info';
 import { useFetchAccountsBalances } from '@libs/services/balance-service';
+import { getCoreErrorCopy, isLedgerFailure } from '@libs/services/core-errors';
 import { LedgerEventStatus, ledger } from '@libs/services/ledger';
 import { useFetchDataForSignatureRequest } from '@libs/services/signature-request-service';
 import { HardwareWalletType } from '@libs/types/account';
@@ -256,38 +257,61 @@ export function SignTransactionPage() {
       return;
     }
 
-    if (signingAccount.hardware === HardwareWalletType.Ledger) {
-      const signer = createLedgerSigner({
-        service: ledger,
-        publicKeyHex: signingAccount.publicKey,
-        derivationIndex: signingAccount.derivationIndex,
-        supportsTransactionV1Cb: changeActiveAccountSupportsWithEvent
-      });
-      const resp = await signer.signTransaction(transaction);
+    try {
+      if (signingAccount.hardware === HardwareWalletType.Ledger) {
+        const signer = createLedgerSigner({
+          service: ledger,
+          publicKeyHex: signingAccount.publicKey,
+          derivationIndex: signingAccount.derivationIndex,
+          supportsTransactionV1Cb: changeActiveAccountSupportsWithEvent
+        });
+        const resp = await signer.signTransaction(transaction);
 
-      signature = resp.signature;
-    } else {
-      const secretKey = await fetchAccountSecretKey(signingAccount.name);
+        signature = resp.signature;
+      } else {
+        const secretKey = await fetchAccountSecretKey(signingAccount.name);
 
-      if (!secretKey) {
-        const error = Error(
-          ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
-        );
-        sendSdkResponseToSpecificTab(
-          sdkMethod.signError(error, { requestId }),
-          requestTabId
-        );
-        closeCurrentWindow();
-        return;
+        if (!secretKey) {
+          const error = Error(
+            ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
+          );
+          sendSdkResponseToSpecificTab(
+            sdkMethod.signError(error, { requestId }),
+            requestTabId
+          );
+          closeCurrentWindow();
+          return;
+        }
+
+        const signer = createPrivateKeySigner({
+          publicKeyHex: signingAccount.publicKey,
+          secretKeyBase64: secretKey
+        });
+        const resp = await signer.signTransaction(transaction);
+
+        signature = resp.signature;
+      }
+    } catch (caught) {
+      // The Ledger views render their own failures; answering the dapp here as well would
+      // close the window out from under the error the user is being shown.
+      if (isLedgerFailure(caught)) {
+        throw caught;
       }
 
-      const signer = createPrivateKeySigner({
-        publicKeyHex: signingAccount.publicKey,
-        secretKeyBase64: secretKey
-      });
-      const resp = await signer.signTransaction(transaction);
+      console.error(caught, 'sign transaction error');
 
-      signature = resp.signature;
+      const error = Error(
+        getCoreErrorCopy(caught)?.description ??
+          ErrorMessages.common.UNKNOWN_ERROR.description
+      );
+
+      sendSdkResponseToSpecificTab(
+        sdkMethod.signError(error, { requestId }),
+        requestTabId
+      );
+      closeCurrentWindow();
+
+      return;
     }
 
     if (!signature) {
