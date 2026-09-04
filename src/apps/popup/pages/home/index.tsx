@@ -28,6 +28,7 @@ import {
   useFetchCsprNameExpirations
 } from '@libs/services/account-info';
 import { useGetActiveAppMarketingEvent } from '@libs/services/app-events';
+import { isSwapAvailable } from '@libs/services/swap-service';
 import {
   Button,
   SvgIcon,
@@ -143,6 +144,26 @@ export function HomePageContent() {
                   <Trans t={t}>Send</Trans>
                 </Typography>
               </ButtonContainer>
+              {isSwapAvailable(network, isSafariBuild) && (
+                <ButtonContainer
+                  gap={SpacingSize.Small}
+                  onClick={() =>
+                    navigate(RouterPath.Swap, {
+                      state: { swapFromTokenId: 'cspr' }
+                    })
+                  }
+                >
+                  <Button circle>
+                    <SvgIcon
+                      src="assets/icons/swap.svg"
+                      color="contentOnFill"
+                    />
+                  </Button>
+                  <Typography type="captionMedium" color="contentAction">
+                    <Trans t={t}>Swap</Trans>
+                  </Typography>
+                </ButtonContainer>
+              )}
               <MoreButtonsModal />
             </ButtonsContainer>
           </Container>
