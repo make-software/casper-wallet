@@ -143,6 +143,9 @@ const SignWithLedgerInNewWindowPage = lazy(() =>
 const StakesPage = lazy(() =>
   import('@popup/pages/stakes').then(m => ({ default: m.StakesPage }))
 );
+const SwapPage = lazy(() =>
+  import('@popup/pages/swap').then(m => ({ default: m.SwapPage }))
+);
 const TimeoutPageContent = lazy(() =>
   import('@popup/pages/timeout').then(m => ({
     default: m.TimeoutPageContent
@@ -358,6 +361,7 @@ function AppRoutes() {
         <Route path={RouterPath.Delegate} element={<StakesPage />} />
         <Route path={RouterPath.Undelegate} element={<StakesPage />} />
         <Route path={RouterPath.Redelegate} element={<StakesPage />} />
+        <Route path={RouterPath.Swap} element={<SwapPage />} />
         <Route
           path={ErrorPath}
           element={
