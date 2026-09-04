@@ -9,7 +9,7 @@ import {
   useTokenWarnings,
   useWrapTokens
 } from 'casper-wallet-core/src/react';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -26,7 +26,11 @@ import { SwapDetails } from './components/swap-details';
 import { SwitchTokensButton } from './components/switch-tokens-button';
 import { TokenAmountCard } from './components/token-amount-card';
 import { TokenSelectorModal } from './components/token-selector-modal';
-import { SwapFormMode, getSwapFormMode } from './wrap-utils';
+import {
+  SwapFormMode,
+  getSelectableTokens,
+  getSwapFormMode
+} from './wrap-utils';
 
 interface FormStepProps {
   swapDependencies: ISwapDependencies;
@@ -146,6 +150,28 @@ export function FormStep({
     activeTokenPosition === 'first'
       ? selectedTokens.first
       : selectedTokens.second;
+
+  // `useWrapTokens` rebuilds both legs itself, so its own tokens are the only place a real
+  // WCSPR row exists — the listed tokens never carry one.
+  const wcsprToken = wrapDirection === 'wrap' ? destinationToken : sourceToken;
+  const selectorTokens = useMemo(
+    () =>
+      getSelectableTokens({
+        tokens,
+        wcsprToken,
+        oppositeToken:
+          activeTokenPosition === 'first'
+            ? selectedTokens.second
+            : selectedTokens.first
+      }),
+    [
+      tokens,
+      wcsprToken,
+      activeTokenPosition,
+      selectedTokens.first,
+      selectedTokens.second
+    ]
+  );
 
   const { unlistedTokens } = useTokenWarnings(selectedTokens, 'swap');
   const unlistedTokenPackageHash =
@@ -285,7 +311,7 @@ export function FormStep({
 
       {isTokenSelectorOpen && (
         <TokenSelectorModal
-          tokens={tokens}
+          tokens={selectorTokens}
           isLoading={tokens == null}
           selectedTokenId={activeSelectedToken?.id ?? null}
           onSelect={selectToken}

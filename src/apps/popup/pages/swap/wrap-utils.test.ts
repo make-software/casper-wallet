@@ -1,6 +1,6 @@
 import { IDexToken } from 'casper-wallet-core/src/domain/swap';
 
-import { getSwapFormMode } from './wrap-utils';
+import { getSelectableTokens, getSwapFormMode } from './wrap-utils';
 
 const WCSPR = 'wcspr-hash';
 const cspr = { id: 'cspr' } as IDexToken;
@@ -27,5 +27,48 @@ describe('getSwapFormMode', () => {
   it('is swap while a token is missing', () => {
     expect(getSwapFormMode({ ...p, first: cspr, second: null })).toBe('swap');
     expect(getSwapFormMode({ ...p, first: null, second: null })).toBe('swap');
+  });
+});
+
+describe('getSelectableTokens', () => {
+  const listed = [other, { id: 'another' } as IDexToken];
+  const wcsprToken = wcspr;
+
+  it('offers WCSPR when the opposite card holds native CSPR', () => {
+    expect(
+      getSelectableTokens({ tokens: listed, wcsprToken, oppositeToken: cspr })
+    ).toEqual([wcsprToken, ...listed]);
+  });
+
+  it('keeps the listed tokens in API order behind it', () => {
+    const rows = getSelectableTokens({
+      tokens: listed,
+      wcsprToken,
+      oppositeToken: cspr
+    });
+
+    expect(rows?.slice(1)).toEqual(listed);
+  });
+
+  it('withholds WCSPR for an ordinary opposite token', () => {
+    expect(
+      getSelectableTokens({ tokens: listed, wcsprToken, oppositeToken: other })
+    ).toBe(listed);
+  });
+
+  it('withholds WCSPR while the opposite card is empty', () => {
+    expect(
+      getSelectableTokens({ tokens: listed, wcsprToken, oppositeToken: null })
+    ).toBe(listed);
+  });
+
+  it('passes a still-loading list through untouched', () => {
+    expect(
+      getSelectableTokens({
+        tokens: undefined,
+        wcsprToken,
+        oppositeToken: cspr
+      })
+    ).toBeUndefined();
   });
 });
