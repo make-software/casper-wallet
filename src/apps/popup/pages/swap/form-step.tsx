@@ -159,6 +159,17 @@ export function FormStep({
   // form, but the rate line, Swap details, and the quote/unlisted banners are all suppressed.
   const isWrapMode = swapFormMode !== 'swap';
 
+  // Both hooks keep their own copy of the pair, and only `useSwapTokens`' copy feeds the token
+  // selector. Flipping both keeps them aligned, so the selector highlights — and replaces — the
+  // leg the card actually shows; flipping only the direction inverts the two.
+  const handleFlip = () => {
+    handleSwitchTokens();
+
+    if (isWrapMode) {
+      switchDirection();
+    }
+  };
+
   const firstCardToken = isWrapMode ? sourceToken : selectedTokens.first;
   const secondCardToken = isWrapMode ? destinationToken : selectedTokens.second;
   const firstCardAmount = isWrapMode
@@ -211,9 +222,7 @@ export function FormStep({
             {quote}
           </Typography>
         )}
-        <SwitchTokensButton
-          onClick={isWrapMode ? switchDirection : handleSwitchTokens}
-        />
+        <SwitchTokensButton onClick={handleFlip} />
       </CardsGapContainer>
 
       <TokenAmountCard
