@@ -120,7 +120,7 @@ export const TransferNftPage = () => {
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
 
-  const { nftData } = location.state;
+  const nftData = location.state?.nftData;
 
   const nftToken = useMemo(
     () =>

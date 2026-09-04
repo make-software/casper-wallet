@@ -57,7 +57,7 @@ type TokenInfoList = {
 
 export const Token = () => {
   const location = useTypedLocation();
-  const initialTokenData = location.state.tokenData ?? null;
+  const initialTokenData = location.state?.tokenData ?? null;
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
