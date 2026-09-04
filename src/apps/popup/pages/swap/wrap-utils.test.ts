@@ -1,6 +1,10 @@
 import { IDexToken } from 'casper-wallet-core/src/domain/swap';
 
-import { getSelectableTokens, getSwapFormMode } from './wrap-utils';
+import {
+  getSelectableTokens,
+  getSwapFormMode,
+  isUnwrapEntry
+} from './wrap-utils';
 
 const WCSPR = 'wcspr-hash';
 const cspr = { id: 'cspr' } as IDexToken;
@@ -70,5 +74,28 @@ describe('getSelectableTokens', () => {
         oppositeToken: cspr
       })
     ).toBeUndefined();
+  });
+});
+
+describe('isUnwrapEntry', () => {
+  it('recognises the wrapped-CSPR contract', () => {
+    expect(isUnwrapEntry(WCSPR, WCSPR)).toBe(true);
+  });
+
+  it('ignores the native sentinel', () => {
+    expect(isUnwrapEntry('cspr', WCSPR)).toBe(false);
+  });
+
+  it('ignores an ordinary token', () => {
+    expect(isUnwrapEntry('some-other-hash', WCSPR)).toBe(false);
+  });
+
+  it('ignores a missing id', () => {
+    expect(isUnwrapEntry(null, WCSPR)).toBe(false);
+  });
+
+  it('never matches on a network with no wrapped-CSPR deployment', () => {
+    expect(isUnwrapEntry('', '')).toBe(false);
+    expect(isUnwrapEntry(null, '')).toBe(false);
   });
 });

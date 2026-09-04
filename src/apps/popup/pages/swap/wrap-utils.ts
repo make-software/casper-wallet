@@ -54,3 +54,21 @@ export function getSelectableTokens(params: {
 
   return [wcsprToken, ...tokens];
 }
+
+/**
+ * Whether an entry point's token id is the wrapped-CSPR contract, which is the one deep link
+ * that cannot be resolved by handing it to core as `tokenInHash`: the listed tokens carry that
+ * same `packageHash` on the synthetic native CSPR row, so core's preselection resolves it back
+ * to CSPR. The caller seeds the `WCSPR -> CSPR` pair itself instead.
+ *
+ * The empty-hash guard matters on networks with no wrapped-CSPR deployment, where the constant
+ * is `''` and would otherwise match an empty id.
+ */
+export function isUnwrapEntry(
+  swapFromTokenId: string | null,
+  wrappedCsprPackageHash: string
+): boolean {
+  return (
+    wrappedCsprPackageHash !== '' && swapFromTokenId === wrappedCsprPackageHash
+  );
+}

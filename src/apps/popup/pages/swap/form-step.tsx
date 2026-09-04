@@ -29,7 +29,8 @@ import { TokenSelectorModal } from './components/token-selector-modal';
 import {
   SwapFormMode,
   getSelectableTokens,
-  getSwapFormMode
+  getSwapFormMode,
+  isUnwrapEntry
 } from './wrap-utils';
 
 interface FormStepProps {
@@ -54,13 +55,23 @@ export function FormStep({
 }: FormStepProps) {
   const { t } = useTranslation();
 
-  // Deep-link support (the Home entry point sends the synthetic native id).
-  // CSPR_NATIVE_TOKEN_ID has no packageHash, so passing it through would
-  // match no listed token and fire a wasted lookup for a contract package
-  // literally named 'cspr'; core's own default (useTokenPairState) already
-  // preselects CSPR when tokenInHash is undefined.
+  const wrappedCsprPackageHash =
+    WrappedCsprContractPackageHash[swapDependencies.network];
+
+  // Two entry-point ids core cannot resolve from `tokenInHash`, for opposite reasons:
+  // CSPR_NATIVE_TOKEN_ID has no packageHash at all, so it would match no listed token and fire
+  // a wasted lookup for a contract literally named 'cspr' (core's own default already
+  // preselects CSPR); the wrapped-CSPR hash matches too well, because the synthetic native row
+  // carries it, so core would resolve it straight back to CSPR. The effect below seeds the
+  // unwrap pair for the second case.
+  const isUnwrapDeepLink = isUnwrapEntry(
+    swapFromTokenId,
+    wrappedCsprPackageHash
+  );
   const tokenInHash =
-    swapFromTokenId != null && swapFromTokenId !== CSPR_NATIVE_TOKEN_ID
+    swapFromTokenId != null &&
+    swapFromTokenId !== CSPR_NATIVE_TOKEN_ID &&
+    !isUnwrapDeepLink
       ? swapFromTokenId
       : undefined;
 
@@ -85,7 +96,8 @@ export function FormStep({
     maxSlippage,
     path,
     quoteData,
-    isFormValid: isSwapFormValid
+    isFormValid: isSwapFormValid,
+    setInitialTokens
   } = useSwapTokens({
     network: swapDependencies.network,
     activePublicKey: swapDependencies.activePublicKey,
@@ -99,9 +111,6 @@ export function FormStep({
   // CSPR/WCSPR has no DEX pool, so that pair routes through useWrapTokens instead. Both
   // hooks are always called — React forbids a conditional hook call — and the mode below
   // picks which one drives the view.
-  const wrappedCsprPackageHash =
-    WrappedCsprContractPackageHash[swapDependencies.network];
-
   const swapFormMode = getSwapFormMode({
     first: selectedTokens.first,
     second: selectedTokens.second,
@@ -154,6 +163,27 @@ export function FormStep({
   // `useWrapTokens` rebuilds both legs itself, so its own tokens are the only place a real
   // WCSPR row exists — the listed tokens never carry one.
   const wcsprToken = wrapDirection === 'wrap' ? destinationToken : sourceToken;
+
+  // Entering from WCSPR's token details means "unwrap this": seed both legs directly, once the
+  // list has loaded enough to supply the native row. The mode effect above then aligns
+  // `useWrapTokens`' own direction to the resulting pair.
+  const hasSeededUnwrapPairRef = useRef(false);
+  useEffect(() => {
+    if (hasSeededUnwrapPairRef.current || !isUnwrapDeepLink) {
+      return;
+    }
+
+    const nativeCsprToken = tokens?.find(
+      token => token.id === CSPR_NATIVE_TOKEN_ID
+    );
+
+    if (wcsprToken == null || nativeCsprToken == null) {
+      return;
+    }
+
+    setInitialTokens(wcsprToken, nativeCsprToken);
+    hasSeededUnwrapPairRef.current = true;
+  }, [isUnwrapDeepLink, tokens, wcsprToken, setInitialTokens]);
   const selectorTokens = useMemo(
     () =>
       getSelectableTokens({
