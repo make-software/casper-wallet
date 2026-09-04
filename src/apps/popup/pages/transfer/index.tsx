@@ -61,6 +61,10 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import {
+  getTransactionErrorCopy,
+  isLedgerFailure
+} from '@libs/services/core-errors';
+import {
   getDateForDeploy,
   sendSignedTx,
   signTx
@@ -190,17 +194,16 @@ export const TransferPage = () => {
       .catch(error => {
         console.error(error, 'transfer request error');
 
+        const { header, content } = getTransactionErrorCopy(
+          error,
+          (key: string) => t(key)
+        );
+
         navigate(
           ErrorPath,
           createErrorLocationState({
-            errorHeaderText:
-              error.sourceErr?.message ||
-              error.message ||
-              t(ErrorMessages.common.UNKNOWN_ERROR.message),
-            errorContentText:
-              typeof error?.sourceErr?.data === 'string'
-                ? error.sourceErr.data
-                : t(ErrorMessages.common.UNKNOWN_ERROR.description),
+            errorHeaderText: header,
+            errorContentText: content,
             errorPrimaryButtonLabel: t('Close'),
             errorRedirectPath: RouterPath.Home
           })
@@ -215,76 +218,103 @@ export const TransferPage = () => {
       return;
     }
 
-    const secretKey = await fetchAccountSecretKey(activeAccount.name);
+    try {
+      const secretKey = await fetchAccountSecretKey(activeAccount.name);
 
-    // Ledger accounts legitimately have no secret key: `onSubmitSending` doubles
-    // as this page's `ledgerAction`, and signTx takes the hardware branch for them.
-    if (!secretKey && activeAccount.hardware == null) {
+      // Ledger accounts legitimately have no secret key: `onSubmitSending` doubles
+      // as this page's `ledgerAction`, and signTx takes the hardware branch for them.
+      if (!secretKey && activeAccount.hardware == null) {
+        setIsSubmitButtonDisable(false);
+        navigate(
+          ErrorPath,
+          createErrorLocationState({
+            errorHeaderText: t(ErrorMessages.common.UNKNOWN_ERROR.message),
+            errorContentText: t(ErrorMessages.common.UNKNOWN_ERROR.description),
+            errorPrimaryButtonLabel: t('Close'),
+            errorRedirectPath: RouterPath.Home
+          })
+        );
+        return;
+      }
+
+      const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
+
+      const timestamp = await getDateForDeploy(network);
+
+      if (isErc20Transfer && selectedToken?.contractPackageHash) {
+        const { transaction, fallbackDeploy } = buildCep18TransferTransactions(
+          {
+            network,
+            contractPackageHash: selectedToken.contractPackageHash,
+            paymentAmountMotes: CSPRtoMotes(paymentAmount),
+            recipientPublicKeyHex: recipientPublicKey,
+            senderPublicKeyHex: activeAccount.publicKey,
+            transferAmountMotes:
+              multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0',
+            timestamp
+          },
+          casperNetworkApiVersion
+        );
+
+        const signedTx = await signTx(
+          transaction,
+          KEYS,
+          activeAccount,
+          fallbackDeploy,
+          changeActiveAccountSupportsWithEvent
+        );
+
+        sendTx(signedTx);
+      } else {
+        const memoForTransfer = transferIdMemo || Date.now().toString();
+
+        const { transaction, fallbackDeploy } = buildCsprTransferTransactions(
+          {
+            network,
+            memo: memoForTransfer,
+            recipientPublicKeyHex: recipientPublicKey,
+            senderPublicKeyHex: activeAccount.publicKey,
+            transferAmountMotes: CSPRtoMotes(amount),
+            timestamp
+          },
+          casperNetworkApiVersion
+        );
+
+        const signedTx = await signTx(
+          transaction,
+          KEYS,
+          activeAccount,
+          fallbackDeploy,
+          changeActiveAccountSupportsWithEvent
+        );
+
+        sendTx(signedTx);
+      }
+    } catch (error) {
+      // The Ledger views render their own failures, and the hook that runs this handler for
+      // a Ledger account swallows what it throws — so this must leave by the same door.
+      if (isLedgerFailure(error)) {
+        throw error;
+      }
+
+      console.error(error, 'transfer signing error');
+
       setIsSubmitButtonDisable(false);
+
+      const { header, content } = getTransactionErrorCopy(
+        error,
+        (key: string) => t(key)
+      );
+
       navigate(
         ErrorPath,
         createErrorLocationState({
-          errorHeaderText: t(ErrorMessages.common.UNKNOWN_ERROR.message),
-          errorContentText: t(ErrorMessages.common.UNKNOWN_ERROR.description),
+          errorHeaderText: header,
+          errorContentText: content,
           errorPrimaryButtonLabel: t('Close'),
           errorRedirectPath: RouterPath.Home
         })
       );
-      return;
-    }
-
-    const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
-
-    const timestamp = await getDateForDeploy(network);
-
-    if (isErc20Transfer && selectedToken?.contractPackageHash) {
-      const { transaction, fallbackDeploy } = buildCep18TransferTransactions(
-        {
-          network,
-          contractPackageHash: selectedToken.contractPackageHash,
-          paymentAmountMotes: CSPRtoMotes(paymentAmount),
-          recipientPublicKeyHex: recipientPublicKey,
-          senderPublicKeyHex: activeAccount.publicKey,
-          transferAmountMotes:
-            multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0',
-          timestamp
-        },
-        casperNetworkApiVersion
-      );
-
-      const signedTx = await signTx(
-        transaction,
-        KEYS,
-        activeAccount,
-        fallbackDeploy,
-        changeActiveAccountSupportsWithEvent
-      );
-
-      sendTx(signedTx);
-    } else {
-      const memoForTransfer = transferIdMemo || Date.now().toString();
-
-      const { transaction, fallbackDeploy } = buildCsprTransferTransactions(
-        {
-          network,
-          memo: memoForTransfer,
-          recipientPublicKeyHex: recipientPublicKey,
-          senderPublicKeyHex: activeAccount.publicKey,
-          transferAmountMotes: CSPRtoMotes(amount),
-          timestamp
-        },
-        casperNetworkApiVersion
-      );
-
-      const signedTx = await signTx(
-        transaction,
-        KEYS,
-        activeAccount,
-        fallbackDeploy,
-        changeActiveAccountSupportsWithEvent
-      );
-
-      sendTx(signedTx);
     }
   };
 
