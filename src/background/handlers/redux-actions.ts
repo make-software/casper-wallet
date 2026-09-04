@@ -98,6 +98,8 @@ import {
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
+  swapDeadlineSettingChanged,
+  swapSlippageSettingChanged,
   systemColorSchemeChanged,
   themeModeSettingChanged,
   vaultSettingsReseted
@@ -152,6 +154,8 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     activeNetworkSettingChanged,
     vaultSettingsReseted,
     themeModeSettingChanged,
+    swapSlippageSettingChanged,
+    swapDeadlineSettingChanged,
     lastActivityTimeRefreshed,
     siteConnected,
     anotherAccountConnected,

@@ -15,4 +15,8 @@ export interface SettingsState {
   isDarkMode: boolean;
   themeMode: ThemeMode;
   systemColorScheme: 'dark' | 'light' | null;
+  /** Max swap slippage, in percent. Always inside [MIN_SLIPPAGE, MAX_SLIPPAGE]. */
+  swapSlippage: number;
+  /** Swap transaction deadline, in minutes. Always inside [MIN_DEADLINE, MAX_DEADLINE]. */
+  swapDeadline: number;
 }

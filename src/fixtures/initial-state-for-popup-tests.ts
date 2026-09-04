@@ -99,7 +99,9 @@ export const initialStateForPopupTests: RootState = {
     activeTimeoutDuration: TimeoutDurationSetting['5 min'],
     isDarkMode: false,
     themeMode: ThemeMode.SYSTEM,
-    systemColorScheme: null
+    systemColorScheme: null,
+    swapSlippage: 3,
+    swapDeadline: 20
   },
   recentRecipientPublicKeys: [],
   accountInfo: {
