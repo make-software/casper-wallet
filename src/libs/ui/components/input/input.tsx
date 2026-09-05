@@ -121,6 +121,9 @@ export interface InputProps extends BaseProps {
   type?: HTMLInputTypeAttribute;
   required?: boolean;
   error?: boolean;
+  /** Amber advisory under the field. Unlike `error` it keeps `suffixText` visible and
+   *  never blocks submission. `error` wins when both are set. */
+  warning?: boolean;
   validationType?: InputValidationType;
   validationText?: string | null;
   dataTestId?: string;
@@ -143,6 +146,7 @@ export const Input = forwardRef<Ref, InputProps>(function Input(
     suffixIcon,
     suffixText,
     error,
+    warning,
     validationType,
     validationText,
     onFocus,
@@ -179,7 +183,13 @@ export const Input = forwardRef<Ref, InputProps>(function Input(
       style={style}
       label={label}
       rightLabel={rightLabel}
-      status={error ? FormFieldStatus.Error : undefined}
+      status={
+        error
+          ? FormFieldStatus.Error
+          : warning
+            ? FormFieldStatus.Warning
+            : undefined
+      }
       statusText={validationText}
     >
       <InputContainer
