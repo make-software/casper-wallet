@@ -1,3 +1,4 @@
+import { TOKEN_DISPLAY_DECIMALS } from 'casper-wallet-core/src/domain/constants/config';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -21,6 +22,7 @@ import {
   Typography
 } from '@libs/ui/components';
 
+import { formatAmountForDisplay } from './amount-input-utils';
 import { ISwapReviewData } from './types';
 import {
   ISwapAmountRow,
@@ -106,7 +108,8 @@ export const ConfirmStep = ({ review, progressRows }: ConfirmStepProps) => {
               <AlignedFlexRow gap={SpacingSize.Small}>
                 <TokenIcon row={row} />
                 <Typography type="body">
-                  {row.amount} {row.symbol}
+                  {formatAmountForDisplay(row.amount, TOKEN_DISPLAY_DECIMALS)}{' '}
+                  {row.symbol}
                 </Typography>
               </AlignedFlexRow>
             </AlignedSpaceBetweenFlexRow>

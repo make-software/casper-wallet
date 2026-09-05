@@ -58,6 +58,12 @@ const ScrollContainer = styled(VerticalSpaceContainer)<{
     height 0.5s ease-in-out;
 `;
 
+// The form step stays mounted behind the later steps: its quote hooks own the selected pair
+// and the typed amount, and unmounting them empties the form the user comes back to.
+const MountedStepContainer = styled.div<{ isHidden: boolean }>`
+  display: ${({ isHidden }) => (isHidden ? 'none' : 'contents')};
+`;
+
 const ConfirmButtonContainer = styled(FooterButtonsContainer)<{
   isHidden: boolean;
 }>`
@@ -78,10 +84,20 @@ export const SwapPage = () => {
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
   const [swapStep, setSwapStep] = useState<SwapSteps>(SwapSteps.Form);
+  // What the form currently quotes, and the snapshot taken when the user pressed Review. The
+  // form keeps requoting while it sits mounted behind the confirm screen, so only the snapshot
+  // may drive that screen: the amounts a user reviews must not move under them.
+  const [liveReview, setLiveReview] = useState<ISwapReviewData | null>(null);
   const [review, setReview] = useState<ISwapReviewData | null>(null);
 
+  // Confirm without a snapshot cannot render; fall back to the form rather than a broken screen.
+  const visibleStep =
+    swapStep === SwapSteps.Confirm && review == null
+      ? SwapSteps.Form
+      : swapStep;
+
   const { isSubmitButtonDisable, isAdditionalTextVisible } = useSubmitButton(
-    swapStep === SwapSteps.Confirm
+    visibleStep === SwapSteps.Confirm
   );
 
   const { submit, flowState, isProcessing } = useSwapSubmit({
@@ -130,15 +146,12 @@ export const SwapPage = () => {
     <FormStep
       swapDependencies={swapDependencies}
       swapFromTokenId={swapFromTokenId}
-      onReviewChange={setReview}
+      onReviewChange={setLiveReview}
     />
   );
 
   const content: Record<SwapSteps, JSX.Element> = {
     [SwapSteps.Form]: formStep,
-    // The form unmounts once Confirm holds a review, so it is the only possible snapshot
-    // source; a `null` review here means the step was reached without one, which renders the
-    // form again rather than a broken screen.
     [SwapSteps.Confirm]:
       review != null ? (
         <ConfirmStep
@@ -146,7 +159,7 @@ export const SwapPage = () => {
           progressRows={hasStartedSubmission ? progressRows : []}
         />
       ) : (
-        formStep
+        <></>
       ),
     [SwapSteps.ConfirmWithLedger]: (
       <LedgerEventView
@@ -188,8 +201,11 @@ export const SwapPage = () => {
         <Button
           color="primaryBlue"
           type="button"
-          disabled={review == null}
-          onClick={() => setSwapStep(SwapSteps.Confirm)}
+          disabled={liveReview == null}
+          onClick={() => {
+            setReview(liveReview);
+            setSwapStep(SwapSteps.Confirm);
+          }}
         >
           <Trans t={t}>Review</Trans>
         </Button>
@@ -263,14 +279,21 @@ export const SwapPage = () => {
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={
-            swapStep === SwapSteps.Success
+            visibleStep === SwapSteps.Success
               ? undefined
-              : () => headerButtons[swapStep]
+              : () => headerButtons[visibleStep]
           }
         />
       )}
-      renderContent={() => content[swapStep]}
-      renderFooter={() => footerButtons[swapStep]}
+      renderContent={() => (
+        <>
+          <MountedStepContainer isHidden={visibleStep !== SwapSteps.Form}>
+            {formStep}
+          </MountedStepContainer>
+          {visibleStep !== SwapSteps.Form && content[visibleStep]}
+        </>
+      )}
+      renderFooter={() => footerButtons[visibleStep]}
     />
   );
 };

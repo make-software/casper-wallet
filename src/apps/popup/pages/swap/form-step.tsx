@@ -6,6 +6,7 @@ import {
   useTokenWarnings,
   useWrapTokens
 } from 'casper-wallet-core/src/react';
+import { calculateSwapFee } from 'casper-wallet-core/src/utils/swap';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -242,7 +243,11 @@ export function FormStep({
         },
         rate: quote,
         priceImpact,
-        protocolFee
+        // Core's own `protocolFee` arrives as "<amount> <symbol>", but this field is contracted
+        // symbol-free — the detail row appends the symbol itself. Recomputing off the quoted
+        // amount also keeps the fee on the same quote as the two legs, where core's value reads
+        // the debounced form amount.
+        protocolFee: calculateSwapFee(quotedTrade.firstToken.amountFormatted)
       };
     }
 
@@ -263,7 +268,6 @@ export function FormStep({
     secondTokenFiatAmount,
     quote,
     priceImpact,
-    protocolFee,
     wrapDirection,
     sourceToken,
     destinationToken,
