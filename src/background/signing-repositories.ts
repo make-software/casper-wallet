@@ -9,6 +9,11 @@ import {
   tokensRepository
 } from '@background/wallet-repositories';
 
+import {
+  PROXY_CALLER_WASM_SHA256,
+  getProxyWasm
+} from '@libs/services/swap-service/proxy-wasm';
+
 /**
  * The repositories that parse and sign transactions.
  *
@@ -19,20 +24,28 @@ import {
 const {
   txSignatureRequestRepository,
   eip712Repository,
+  casperTransactionsRepository,
   dexContractRepository,
-  casperTransactionsRepository
+  transactionStatusRepository
 } = setupSigningRepositories({
   httpDataProvider,
   accountInfoRepository,
   tokensRepository,
   contractPackageRepository,
   casperWalletApiByEnvUrl: CasperWalletApiByEnvUrl,
+  // Without this the DEX repository builds approvals and nothing else — the swap, wrap and
+  // unwrap builders all need the proxy bytes.
+  dexConfig: {
+    getProxyWasm,
+    expectedProxyWasmSha256: PROXY_CALLER_WASM_SHA256
+  },
   log
 });
 
 export {
   txSignatureRequestRepository,
   eip712Repository,
+  casperTransactionsRepository,
   dexContractRepository,
-  casperTransactionsRepository
+  transactionStatusRepository
 };

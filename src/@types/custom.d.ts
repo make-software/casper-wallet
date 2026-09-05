@@ -10,6 +10,12 @@ declare module '*.png' {
 
 declare module '*.css';
 
+declare module '*.wasm' {
+  /** Base64 of the file's bytes — see the `base64-loader` rule in webpack.config.js. */
+  const value: string;
+  export default value;
+}
+
 /**
  * Build-time CSP nonce, substituted by webpack's DefinePlugin.
  *
