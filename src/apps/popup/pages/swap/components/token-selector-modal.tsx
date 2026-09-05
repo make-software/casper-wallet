@@ -37,11 +37,9 @@ import { TokenSelectorRow } from './token-selector-row';
 
 const SKELETON_ROW_COUNT = 5;
 
-// The sheet chrome is local rather than `Modal` + `ModalSwitcher`: `ModalSwitcher` gives Cancel
-// and Done the same callback, so a draft selection cannot tell them apart (D10), and `Modal` owns
-// its open state behind a trigger this component does not have. `@libs/layout`'s Overlay is
-// likewise unusable — `height: 100vh` plus `margin-top: 72px` ends its box 72px past the popup's
-// fold, putting anything docked to its bottom off-screen.
+// The sheet chrome is local rather than `Modal` + `ModalSwitcher`: `Modal` owns its open state
+// behind a trigger this component does not have. `ModalSwitcher` now takes an `onDone` distinct
+// from Cancel, so this local chrome and overlay can go back to the shared components.
 const SheetOverlay = styled.div`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndex.modal};

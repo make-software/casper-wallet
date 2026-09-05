@@ -40,12 +40,16 @@ const CancelButton = styled(Typography)`
 interface SwitcherProps {
   label: string;
   closeSwitcher: (e: React.MouseEvent<Element, MouseEvent>) => void;
+  /** Runs when Done is pressed. Defaults to `closeSwitcher`, so a picker whose Done
+   *  only dismisses the sheet needs no change. */
+  onDone?: (e: React.MouseEvent<Element, MouseEvent>) => void;
   children: React.ReactNode;
 }
 
 export const ModalSwitcher = ({
   label,
   closeSwitcher,
+  onDone,
   children
 }: SwitcherProps) => {
   const { t } = useTranslation();
@@ -73,7 +77,7 @@ export const ModalSwitcher = ({
       </ContentContainer>
 
       <FooterButtonsContainer>
-        <Button onClick={closeSwitcher}>
+        <Button onClick={onDone ?? closeSwitcher}>
           <Trans t={t}>Done</Trans>
         </Button>
       </FooterButtonsContainer>

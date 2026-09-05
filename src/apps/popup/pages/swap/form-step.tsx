@@ -1,8 +1,5 @@
 import { WrappedCsprContractPackageHash } from 'casper-wallet-core/src/domain/constants/casperNetwork';
-import {
-  CSPR_NATIVE_TOKEN_ID,
-  DEFAULT_SLIPPAGE
-} from 'casper-wallet-core/src/domain/constants/config';
+import { CSPR_NATIVE_TOKEN_ID } from 'casper-wallet-core/src/domain/constants/config';
 import type { ISwapDependencies } from 'casper-wallet-core/src/react';
 import {
   useSwapTokens,
@@ -11,7 +8,10 @@ import {
 } from 'casper-wallet-core/src/react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+import { selectSwapSlippageSetting } from '@background/redux/settings/selectors';
 
 import {
   AlignedSpaceBetweenFlexRow,
@@ -23,6 +23,7 @@ import { Typography } from '@libs/ui/components';
 
 import { SwapBanner } from './components/swap-banner';
 import { SwapDetails } from './components/swap-details';
+import { SwapSettingsModal } from './components/swap-settings-modal';
 import { SwitchTokensButton } from './components/switch-tokens-button';
 import { TokenAmountCard } from './components/token-amount-card';
 import { TokenSelectorModal } from './components/token-selector-modal';
@@ -54,6 +55,8 @@ export function FormStep({
   setIsReviewDisabled
 }: FormStepProps) {
   const { t } = useTranslation();
+
+  const slippage = useSelector(selectSwapSlippageSetting);
 
   const wrappedCsprPackageHash =
     WrappedCsprContractPackageHash[swapDependencies.network];
@@ -104,7 +107,7 @@ export function FormStep({
     swapRepository: swapDependencies.swapRepository,
     dexContractRepository: swapDependencies.dexContractRepository,
     tokensRepository: swapDependencies.tokensRepository,
-    slippage: DEFAULT_SLIPPAGE,
+    slippage,
     tokenInHash
   });
 
@@ -247,9 +250,13 @@ export function FormStep({
         <Typography type="header">
           <Trans t={t}>Swap</Trans>
         </Typography>
-        <Typography type="body" color="contentAction">
-          <Trans t={t}>Settings</Trans>
-        </Typography>
+        <SwapSettingsModal>
+          {() => (
+            <Typography type="body" color="contentAction">
+              <Trans t={t}>Settings</Trans>
+            </Typography>
+          )}
+        </SwapSettingsModal>
       </AlignedSpaceBetweenFlexRow>
 
       <VerticalSpaceContainer top={SpacingSize.Large}>
