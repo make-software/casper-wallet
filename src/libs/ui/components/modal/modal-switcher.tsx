@@ -23,6 +23,11 @@ const ContentContainer = styled.div`
   padding: 0 16px;
 
   flex-grow: 1;
+  // The sheet's height is fixed, so content taller than it has to scroll here or it escapes
+  // past the footer and off-screen. The zero min-height is what lets this flex item shrink
+  // below its content at all; without it the overflow rule has nothing to clip against.
+  min-height: 0;
+  overflow-y: auto;
 `;
 
 const HeaderContainer = styled(AlignedFlexRow)`
