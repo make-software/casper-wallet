@@ -10,23 +10,21 @@ import { useClickAway } from '@hooks/use-click-away';
 import {
   AlignedFlexRow,
   FlexColumn,
-  FooterButtonsContainer,
   InputsContainer,
-  ParagraphContainer,
+  Overlay,
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
 import { useSwapDependencies } from '@libs/services/swap-service';
 import {
-  Button,
   Input,
   List,
+  ModalSwitcher,
   Skeleton,
   SvgIcon,
   Tile,
   Typography
 } from '@libs/ui/components';
-import { hexToRGBA } from '@libs/ui/utils/hex-to-rgba';
 
 import {
   filterDexTokens,
@@ -37,55 +35,20 @@ import { TokenSelectorRow } from './token-selector-row';
 
 const SKELETON_ROW_COUNT = 5;
 
-// The sheet chrome is local rather than `Modal` + `ModalSwitcher`: `Modal` owns its open state
-// behind a trigger this component does not have. `ModalSwitcher` now takes an `onDone` distinct
-// from Cancel, so this local chrome and overlay can go back to the shared components.
-const SheetOverlay = styled.div`
-  position: fixed;
-  z-index: ${({ theme }) => theme.zIndex.modal};
-  top: 72px;
-  bottom: 0;
-  left: 50%;
-  width: 360px;
-
-  transform: translateX(-50%);
-
-  background: ${({ theme }) => hexToRGBA(theme.color.black, '0.32')};
-`;
-
-const SheetContainer = styled(FlexColumn)`
+// `Modal` is not usable here even though `ModalSwitcher` is: `Modal` owns its open state behind
+// its own trigger, and this sheet's open state lives in core's `useSwapTokens`, so the parent
+// renders it conditionally instead.
+const SheetContainer = styled.div`
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  margin: 0;
+
   max-width: 360px;
 
-  height: 528px;
-
-  background-color: ${({ theme }) => theme.color.backgroundSecondary};
-  border-top-left-radius: ${({ theme }) => theme.borderRadius.sixteen}px;
-  border-top-right-radius: ${({ theme }) => theme.borderRadius.sixteen}px;
   box-shadow: ${({ theme }) => theme.shadow.contextMenu};
-`;
-
-const HeaderContainer = styled(AlignedFlexRow)`
-  padding: 16px;
-
-  background-color: ${({ theme }) => theme.color.backgroundPrimary};
-  border-top-right-radius: ${({ theme }) => theme.borderRadius.sixteen}px;
   border-top-left-radius: ${({ theme }) => theme.borderRadius.sixteen}px;
-`;
-
-const SheetContentContainer = styled.div`
-  padding: 0 16px;
-
-  flex-grow: 1;
-  overflow-y: auto;
-`;
-
-const CancelLabel = styled(Typography)`
-  cursor: pointer;
+  border-top-right-radius: ${({ theme }) => theme.borderRadius.sixteen}px;
 `;
 
 const MessageContainer = styled(VerticalSpaceContainer)`
@@ -279,25 +242,14 @@ export const TokenSelectorModal = ({
   };
 
   return (
-    <SheetOverlay>
+    <Overlay>
       <SheetContainer ref={clickAwayRef}>
-        <HeaderContainer>
-          <CancelLabel
-            type="bodySemiBold"
-            color="contentAction"
-            onClick={handleClose}
-          >
-            <Trans t={t}>Cancel</Trans>
-          </CancelLabel>
-        </HeaderContainer>
-
-        <SheetContentContainer>
-          <ParagraphContainer top={SpacingSize.XL}>
-            <Typography type="header">
-              <Trans t={t}>Choose token</Trans>
-            </Typography>
-          </ParagraphContainer>
-
+        {/* ModalSwitcher translates the label itself; pass the raw key. */}
+        <ModalSwitcher
+          label="Choose token"
+          closeSwitcher={handleClose}
+          onDone={handleDone}
+        >
           <InputsContainer>
             <Input
               prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
@@ -310,14 +262,8 @@ export const TokenSelectorModal = ({
           <VerticalSpaceContainer top={SpacingSize.Medium}>
             {renderBody()}
           </VerticalSpaceContainer>
-        </SheetContentContainer>
-
-        <FooterButtonsContainer>
-          <Button onClick={handleDone}>
-            <Trans t={t}>Done</Trans>
-          </Button>
-        </FooterButtonsContainer>
+        </ModalSwitcher>
       </SheetContainer>
-    </SheetOverlay>
+    </Overlay>
   );
 };
