@@ -30,6 +30,7 @@ import {
   ledgerNewWindowIdChanged,
   ledgerRecipientToSaveOnSuccessChanged,
   ledgerStateCleared,
+  ledgerSwapPayloadChanged,
   ledgerTransactionChanged
 } from '@background/redux/ledger/actions';
 import {
@@ -188,6 +189,7 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     ledgerDeployChanged,
     ledgerTransactionChanged,
     ledgerRecipientToSaveOnSuccessChanged,
+    ledgerSwapPayloadChanged,
     addWatchingAccount,
     dismissAppEvent,
     resetAppEventsDismission,

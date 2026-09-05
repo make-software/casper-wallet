@@ -1,4 +1,161 @@
-// Owned by WALLET-1315: review, signing and submission for the swap flow.
-export function ConfirmStep() {
-  return null;
+import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+
+import { isBundledAssetPath } from '@src/utils';
+
+import {
+  AlignedFlexRow,
+  AlignedSpaceBetweenFlexRow,
+  ContentContainer,
+  FlexColumn,
+  ParagraphContainer,
+  SpaceBetweenFlexRow,
+  SpacingSize
+} from '@libs/layout';
+import {
+  List,
+  RemoteIcon,
+  Spinner,
+  SvgIcon,
+  Typography
+} from '@libs/ui/components';
+
+import { ISwapReviewData } from './types';
+import {
+  ISwapAmountRow,
+  ISwapProgressRow,
+  buildSwapAmountRows,
+  buildSwapDetailRows
+} from './utils';
+
+const AmountRowContainer = styled(FlexColumn)`
+  padding: 12px 16px;
+`;
+
+const ListItemContainer = styled(SpaceBetweenFlexRow)`
+  padding: 12px 16px;
+`;
+
+const TokenIcon = ({ row }: { row: ISwapAmountRow }) =>
+  row.icon != null && isBundledAssetPath(row.icon) ? (
+    <SvgIcon src={row.icon} alt={row.symbol} size={32} />
+  ) : (
+    <RemoteIcon src={row.icon} size={32} alt={row.symbol} title={row.symbol} />
+  );
+
+/** The right-hand mark of a progress row: spinning while it runs, then a check or an error mark. */
+const ProgressStatusIndicator = ({
+  status
+}: {
+  status: ISwapProgressRow['status'];
+}) => {
+  switch (status) {
+    case 'pending':
+    case 'awaiting':
+      return <Spinner style={{ marginTop: 0 }} />;
+    case 'success':
+      return (
+        <SvgIcon
+          src="assets/icons/tick-in-circle.svg"
+          color="contentPositive"
+          size={16}
+        />
+      );
+    case 'error':
+      return (
+        <SvgIcon
+          src="assets/icons/error.svg"
+          color="contentActionCritical"
+          size={16}
+        />
+      );
+    default:
+      return null;
+  }
+};
+
+interface ConfirmStepProps {
+  review: ISwapReviewData;
+  /** The running flow's legs. Empty until a submission starts — see Task 5. */
+  progressRows: ISwapProgressRow[];
 }
+
+export const ConfirmStep = ({ review, progressRows }: ConfirmStepProps) => {
+  const { t } = useTranslation();
+
+  const amountRows = buildSwapAmountRows(review, t);
+  const detailRows = buildSwapDetailRows(review, t);
+
+  return (
+    <ContentContainer>
+      <ParagraphContainer top={SpacingSize.XL}>
+        <Typography type="header">
+          <Trans t={t}>Confirm swap</Trans>
+        </Typography>
+      </ParagraphContainer>
+
+      <List
+        rows={amountRows}
+        renderRow={row => (
+          <AmountRowContainer key={row.id}>
+            <Typography type="body" color="contentSecondary">
+              {row.label}
+            </Typography>
+            <AlignedSpaceBetweenFlexRow>
+              <AlignedFlexRow gap={SpacingSize.Small}>
+                <TokenIcon row={row} />
+                <Typography type="body">
+                  {row.amount} {row.symbol}
+                </Typography>
+              </AlignedFlexRow>
+            </AlignedSpaceBetweenFlexRow>
+            {row.fiat != null && (
+              <Typography type="captionMedium" color="contentSecondary">
+                {row.fiat}
+              </Typography>
+            )}
+          </AmountRowContainer>
+        )}
+        marginLeftForItemSeparatorLine={8}
+      />
+
+      {progressRows.length === 0 ? (
+        detailRows.length > 0 && (
+          <List
+            rows={detailRows}
+            renderRow={row => (
+              <ListItemContainer key={row.id}>
+                <Typography type="body" color="contentSecondary">
+                  {row.text}
+                </Typography>
+                <Typography type="captionHash">{row.value}</Typography>
+              </ListItemContainer>
+            )}
+            marginLeftForItemSeparatorLine={8}
+          />
+        )
+      ) : (
+        <List
+          rows={progressRows}
+          renderRow={row => (
+            <ListItemContainer key={row.id}>
+              <FlexColumn>
+                <Typography type="body" color="contentSecondary">
+                  {row.text}
+                </Typography>
+                {row.hint != null && (
+                  <Typography type="captionRegular" color="contentSecondary">
+                    {row.hint}
+                  </Typography>
+                )}
+              </FlexColumn>
+              <ProgressStatusIndicator status={row.status} />
+            </ListItemContainer>
+          )}
+          marginLeftForItemSeparatorLine={8}
+        />
+      )}
+    </ContentContainer>
+  );
+};

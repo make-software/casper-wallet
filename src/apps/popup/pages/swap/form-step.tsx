@@ -27,6 +27,7 @@ import { SwapSettingsModal } from './components/swap-settings-modal';
 import { SwitchTokensButton } from './components/switch-tokens-button';
 import { TokenAmountCard } from './components/token-amount-card';
 import { TokenSelectorModal } from './components/token-selector-modal';
+import { ISwapReviewData } from './types';
 import {
   SwapFormMode,
   getSelectableTokens,
@@ -37,7 +38,8 @@ import {
 interface FormStepProps {
   swapDependencies: ISwapDependencies;
   swapFromTokenId: string | null;
-  setIsReviewDisabled: React.Dispatch<React.SetStateAction<boolean>>;
+  /** Hands the composed review up whenever it changes, or `null` while the form is invalid. */
+  onReviewChange: (review: ISwapReviewData | null) => void;
 }
 
 const CardsGapContainer = styled.div`
@@ -52,7 +54,7 @@ const CardsGapContainer = styled.div`
 export function FormStep({
   swapDependencies,
   swapFromTokenId,
-  setIsReviewDisabled
+  onReviewChange
 }: FormStepProps) {
   const { t } = useTranslation();
 
@@ -99,6 +101,7 @@ export function FormStep({
     maxSlippage,
     path,
     quoteData,
+    quotedTrade,
     isFormValid: isSwapFormValid,
     setInitialTokens
   } = useSwapTokens({
@@ -125,6 +128,7 @@ export function FormStep({
     amount: wrapAmount,
     sourceToken,
     destinationToken,
+    sourceRawAmount,
     sourceTokenFiatAmount,
     isFormValid: isWrapFormValid,
     updateAmount: updateWrapAmount,
@@ -210,9 +214,67 @@ export function FormStep({
   const unlistedTokenPackageHash =
     swapFormMode === 'swap' ? (unlistedTokens[0]?.packageHash ?? null) : null;
 
+  // The one-quote rule: every field the swap arm carries comes off this single
+  // `quotedTrade` snapshot, with fiat amounts attached from the same render that produced it.
+  const swapReview = useMemo<ISwapReviewData | null>(() => {
+    if (!isFormValid) {
+      return null;
+    }
+
+    if (swapFormMode === 'swap') {
+      if (quotedTrade == null) {
+        return null;
+      }
+
+      return {
+        kind: 'swap',
+        trade: {
+          firstToken: {
+            ...quotedTrade.firstToken,
+            fiatAmount: firstTokenFiatAmount
+          },
+          secondToken: {
+            ...quotedTrade.secondToken,
+            fiatAmount: secondTokenFiatAmount
+          },
+          path: quotedTrade.path,
+          quoteType: quotedTrade.quoteType
+        },
+        rate: quote,
+        priceImpact,
+        protocolFee
+      };
+    }
+
+    return {
+      kind: 'wrap',
+      direction: wrapDirection,
+      sourceToken,
+      destinationToken,
+      amountFormatted: wrapAmount,
+      rawAmount: sourceRawAmount,
+      fiatAmount: sourceTokenFiatAmount
+    };
+  }, [
+    isFormValid,
+    swapFormMode,
+    quotedTrade,
+    firstTokenFiatAmount,
+    secondTokenFiatAmount,
+    quote,
+    priceImpact,
+    protocolFee,
+    wrapDirection,
+    sourceToken,
+    destinationToken,
+    wrapAmount,
+    sourceRawAmount,
+    sourceTokenFiatAmount
+  ]);
+
   useEffect(() => {
-    setIsReviewDisabled(!isFormValid);
-  }, [isFormValid, setIsReviewDisabled]);
+    onReviewChange(swapReview);
+  }, [swapReview, onReviewChange]);
 
   // In wrap/unwrap mode there is no quote: cards, the flip button and the CTA are the same
   // form, but the rate line, Swap details, and the quote/unlisted banners are all suppressed.

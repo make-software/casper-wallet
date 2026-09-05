@@ -8,7 +8,8 @@ const initialState: LedgerState = {
   openerRequestId: null,
   deploy: null,
   transaction: null,
-  recipientToSaveOnSuccess: null
+  recipientToSaveOnSuccess: null,
+  swapPayload: null
 };
 
 const slice = createSlice({
@@ -45,6 +46,10 @@ const slice = createSlice({
     ) => ({
       ...state,
       recipientToSaveOnSuccess: payload
+    }),
+    ledgerSwapPayloadChanged: (state, { payload }: PayloadAction<string>) => ({
+      ...state,
+      swapPayload: payload
     })
   }
 });
@@ -54,6 +59,7 @@ export const {
   ledgerNewWindowIdChanged,
   ledgerRecipientToSaveOnSuccessChanged,
   ledgerStateCleared,
+  ledgerSwapPayloadChanged,
   ledgerTransactionChanged
 } = slice.actions;
 export const reducer = slice.reducer;

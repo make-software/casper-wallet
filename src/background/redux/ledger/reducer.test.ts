@@ -3,6 +3,7 @@ import {
   ledgerNewWindowIdChanged,
   ledgerRecipientToSaveOnSuccessChanged,
   ledgerStateCleared,
+  ledgerSwapPayloadChanged,
   ledgerTransactionChanged
 } from './actions';
 import { reducer } from './reducer';
@@ -14,7 +15,8 @@ describe('ledger reducer', () => {
     openerRequestId: null,
     deploy: null,
     transaction: null,
-    recipientToSaveOnSuccess: null
+    recipientToSaveOnSuccess: null,
+    swapPayload: null
   };
 
   it('has the expected initial state', () => {
@@ -81,6 +83,12 @@ describe('ledger reducer', () => {
     ).toEqual({ ...initialState, recipientToSaveOnSuccess: '01deadbeef' });
   });
 
+  it('sets swapPayload on ledgerSwapPayloadChanged', () => {
+    expect(
+      reducer(initialState, ledgerSwapPayloadChanged('{"kind":"swap"}'))
+    ).toEqual({ ...initialState, swapPayload: '{"kind":"swap"}' });
+  });
+
   it('resets to initial state on ledgerStateCleared', () => {
     const populated = {
       windowId: 7,
@@ -88,7 +96,8 @@ describe('ledger reducer', () => {
       openerRequestId: 'r1',
       deploy: 'deploy-payload',
       transaction: 'tx-payload',
-      recipientToSaveOnSuccess: '01deadbeef'
+      recipientToSaveOnSuccess: '01deadbeef',
+      swapPayload: '{"kind":"swap"}'
     };
     expect(reducer(populated, ledgerStateCleared())).toEqual(initialState);
   });
