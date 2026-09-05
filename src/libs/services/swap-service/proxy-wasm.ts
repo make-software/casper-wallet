@@ -24,10 +24,11 @@ export const base64ToBytes = (base64: string): Uint8Array => {
 /**
  * The proxy-caller session code every swap, wrap and unwrap transaction carries.
  *
- * Loaded through a dynamic import so the ~70 KB of base64 lands in its own chunk: this module is
- * reached from `signing-repositories`, which every page that sends anything imports.
+ * The import is eager, so the bytes ship inside each entry that reaches this module rather than
+ * in a chunk of their own: the background entry is a service worker, which has no document to
+ * load an async chunk with, and `AssertSingleFileEntries` fails the build over one.
  */
 export const getProxyWasm = (): Promise<Uint8Array> =>
-  import('@src/assets/wasm/proxy_caller.wasm').then(module =>
-    base64ToBytes(module.default)
+  import(/* webpackMode: "eager" */ '@src/assets/wasm/proxy_caller.wasm').then(
+    module => base64ToBytes(module.default)
   );
