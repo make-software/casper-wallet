@@ -11,6 +11,7 @@ import {
 import { ISwapTradeReview, IWrapTradeReview } from '@popup/pages/swap/types';
 import {
   SwapSteps,
+  buildPayTokenBalance,
   buildSwapAmountRows,
   buildSwapDetailRows,
   buildSwapProgressRows,
@@ -373,5 +374,31 @@ describe('isWrapSubmitted', () => {
     expect(isWrapSubmitted(wrapFlow({ wrap: { status: 'error' } }))).toBe(
       false
     );
+  });
+});
+
+describe('buildPayTokenBalance', () => {
+  it('labels the balance with the pay token, not CSPR', () => {
+    expect(
+      buildPayTokenBalance(dexToken({ symbol: 'SHIBOO' }), '1234.5')
+    ).toEqual({ amount: '1,234.5', symbol: 'SHIBOO' });
+  });
+
+  it('truncates the balance to the displayed decimals', () => {
+    expect(buildPayTokenBalance(dexToken(), '0.1234567891')).toEqual({
+      amount: '0.12345',
+      symbol: 'CSPR'
+    });
+  });
+
+  it('keeps a zero balance', () => {
+    expect(buildPayTokenBalance(dexToken({ symbol: 'FATSO' }), '0')).toEqual({
+      amount: '0',
+      symbol: 'FATSO'
+    });
+  });
+
+  it('has no balance to show before a token is picked', () => {
+    expect(buildPayTokenBalance(null, '1234.5')).toBeNull();
   });
 });

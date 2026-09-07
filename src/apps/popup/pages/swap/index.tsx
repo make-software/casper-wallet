@@ -21,6 +21,7 @@ import {
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
+  NavLinkTokenBalance,
   PopupLayout,
   SpacingSize,
   VerticalSpaceContainer
@@ -89,6 +90,9 @@ export const SwapPage = () => {
   // may drive that screen: the amounts a user reviews must not move under them.
   const [liveReview, setLiveReview] = useState<ISwapReviewData | null>(null);
   const [review, setReview] = useState<ISwapReviewData | null>(null);
+  // The form owns the selected pair; the header showing the pay token's balance does not.
+  const [payTokenBalance, setPayTokenBalance] =
+    useState<NavLinkTokenBalance | null>(null);
 
   // Confirm without a snapshot cannot render; fall back to the form rather than a broken screen.
   const visibleStep =
@@ -147,6 +151,7 @@ export const SwapPage = () => {
       swapDependencies={swapDependencies}
       swapFromTokenId={swapFromTokenId}
       onReviewChange={setLiveReview}
+      onPayTokenBalanceChange={setPayTokenBalance}
     />
   );
 
@@ -180,6 +185,7 @@ export const SwapPage = () => {
       <HeaderSubmenuBarNavLink
         linkType="back"
         backTypeWithBalance
+        tokenBalance={payTokenBalance}
         onClick={goToPreviousStep}
       />
     ),

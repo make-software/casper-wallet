@@ -429,14 +429,25 @@ export const TransferPage = () => {
     )
   };
 
+  // A CEP-18 transfer spends the selected token, so the header states that token's balance.
+  const headerTokenBalance =
+    isErc20Transfer && selectedToken
+      ? { amount: selectedToken.amount, symbol: selectedToken.symbol }
+      : null;
+
   const headerButtons = {
     [TransactionSteps.Token]: (
-      <HeaderSubmenuBarNavLink linkType="back" backTypeWithBalance />
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        backTypeWithBalance
+        tokenBalance={headerTokenBalance}
+      />
     ),
     [TransactionSteps.Recipient]: (
       <HeaderSubmenuBarNavLink
         linkType="back"
         backTypeWithBalance
+        tokenBalance={headerTokenBalance}
         onClick={() => setTransferStep(TransactionSteps.Token)}
       />
     ),
@@ -444,6 +455,7 @@ export const TransferPage = () => {
       <HeaderSubmenuBarNavLink
         linkType="back"
         backTypeWithBalance
+        tokenBalance={headerTokenBalance}
         onClick={() => setTransferStep(TransactionSteps.Recipient)}
       />
     ),

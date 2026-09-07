@@ -17,6 +17,7 @@ import { selectSwapSlippageSetting } from '@background/redux/settings/selectors'
 import {
   AlignedSpaceBetweenFlexRow,
   ContentContainer,
+  NavLinkTokenBalance,
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
@@ -29,6 +30,7 @@ import { SwitchTokensButton } from './components/switch-tokens-button';
 import { TokenAmountCard } from './components/token-amount-card';
 import { TokenSelectorModal } from './components/token-selector-modal';
 import { ISwapReviewData } from './types';
+import { buildPayTokenBalance } from './utils';
 import {
   SwapFormMode,
   getSelectableTokens,
@@ -41,6 +43,8 @@ interface FormStepProps {
   swapFromTokenId: string | null;
   /** Hands the composed review up whenever it changes, or `null` while the form is invalid. */
   onReviewChange: (review: ISwapReviewData | null) => void;
+  /** Hands the pay leg's balance up for the header, which sits outside this step. */
+  onPayTokenBalanceChange: (balance: NavLinkTokenBalance | null) => void;
 }
 
 const CardsGapContainer = styled.div`
@@ -55,7 +59,8 @@ const CardsGapContainer = styled.div`
 export function FormStep({
   swapDependencies,
   swapFromTokenId,
-  onReviewChange
+  onReviewChange,
+  onPayTokenBalanceChange
 }: FormStepProps) {
   const { t } = useTranslation();
 
@@ -104,7 +109,8 @@ export function FormStep({
     quoteData,
     quotedTrade,
     isFormValid: isSwapFormValid,
-    setInitialTokens
+    setInitialTokens,
+    getTokenBalance
   } = useSwapTokens({
     network: swapDependencies.network,
     activePublicKey: swapDependencies.activePublicKey,
@@ -309,6 +315,19 @@ export function FormStep({
   const secondCardFiatAmount = isWrapMode
     ? sourceTokenFiatAmount
     : secondTokenFiatAmount;
+
+  const payTokenBalance = useMemo(
+    () =>
+      buildPayTokenBalance(
+        firstCardToken,
+        isWrapMode ? getWrapTokenBalance('first') : getTokenBalance('first')
+      ),
+    [firstCardToken, isWrapMode, getWrapTokenBalance, getTokenBalance]
+  );
+
+  useEffect(() => {
+    onPayTokenBalanceChange(payTokenBalance);
+  }, [payTokenBalance, onPayTokenBalanceChange]);
 
   return (
     <ContentContainer>

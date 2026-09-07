@@ -5,7 +5,14 @@ import {
   TransactionStatus,
   WrapDirection
 } from 'casper-wallet-core';
+import { TOKEN_DISPLAY_DECIMALS } from 'casper-wallet-core/src/domain/constants/config';
+import { IDexToken } from 'casper-wallet-core/src/domain/swap';
 
+// Deep path: the layout barrel reaches webextension-polyfill, which throws under the node-only
+// jest environment this module's tests run in.
+import type { NavLinkTokenBalance } from '@libs/layout/header/nav-link-balance';
+
+import { formatAmountForDisplay } from './amount-input-utils';
 import { ISwapReviewData } from './types';
 
 export enum SwapSteps {
@@ -188,3 +195,22 @@ export const isSwapSubmitted = (state: ISwapFlowState): boolean =>
 /** See {@link isSwapSubmitted} — the wrap flow's single leg is judged the same way. */
 export const isWrapSubmitted = (state: IWrapFlowState): boolean =>
   state.wrap.status === 'awaiting' || state.wrap.status === 'success';
+
+/**
+ * The pay leg's balance for the header, formatted like the amount cards. `null` until a token
+ * is selected, so the header keeps its CSPR default rather than labelling a balance with no
+ * symbol.
+ */
+export const buildPayTokenBalance = (
+  payToken: IDexToken | null,
+  formattedBalance: string
+): NavLinkTokenBalance | null =>
+  payToken == null
+    ? null
+    : {
+        amount: formatAmountForDisplay(
+          formattedBalance,
+          TOKEN_DISPLAY_DECIMALS
+        ),
+        symbol: payToken.symbol
+      };
