@@ -3,8 +3,6 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { isBundledAssetPath } from '@src/utils';
-
 // Deep paths, not the '@libs/layout' / '@libs/ui/components' barrels: both
 // re-export the header (via form-field.tsx), which pulls in
 // webextension-polyfill and throws outside a browser extension context —
@@ -17,9 +15,9 @@ import {
   SpacingSize
 } from '@libs/layout/containers';
 import { Checkbox } from '@libs/ui/components/checkbox/checkbox';
-import { RemoteIcon } from '@libs/ui/components/remote-icon/remote-icon';
-import { SvgIcon } from '@libs/ui/components/svg-icon/svg-icon';
 import { Typography } from '@libs/ui/components/typography/typography';
+
+import { DexTokenIcon } from './dex-token-icon';
 
 const Container = styled(AlignedSpaceBetweenFlexRow)`
   height: 72px;
@@ -47,17 +45,11 @@ export const TokenSelectorRow = ({
   return (
     <Container onClick={onSelect}>
       <AlignedFlexRow gap={SpacingSize.Medium}>
-        {token.icon != null && isBundledAssetPath(token.icon) ? (
-          <SvgIcon src={token.icon} alt={token.symbol} size={32} />
-        ) : (
-          <RemoteIcon
-            src={token.icon}
-            size={32}
-            alt={token.symbol}
-            title={token.name}
-            borderRadius={100}
-          />
-        )}
+        <DexTokenIcon
+          icon={token.icon}
+          symbol={token.symbol}
+          name={token.name}
+        />
         <FlexColumn>
           <Typography type="bodySemiBold" color="contentPrimary">
             {token.symbol}

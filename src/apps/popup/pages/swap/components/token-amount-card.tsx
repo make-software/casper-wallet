@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { isBundledAssetPath } from '@src/utils';
-
 // Deep paths: the barrels re-export the header, which loads webextension-polyfill
 // and throws under the node-only jest environment this file's render test uses.
 import {
@@ -15,7 +13,6 @@ import {
   SpacingSize
 } from '@libs/layout/containers';
 import { truncateKey } from '@libs/ui/components/hash/utils';
-import { RemoteIcon } from '@libs/ui/components/remote-icon/remote-icon';
 import { SvgIcon } from '@libs/ui/components/svg-icon/svg-icon';
 import { Typography } from '@libs/ui/components/typography/typography';
 
@@ -23,6 +20,7 @@ import {
   formatAmountForDisplay,
   sanitizeAmountInput
 } from '../amount-input-utils';
+import { DexTokenIcon } from './dex-token-icon';
 
 type TokenCardPosition = 'first' | 'second';
 
@@ -127,18 +125,13 @@ export const TokenAmountCard = ({
           onChange={e => handleChange(e.target.value)}
         />
         <TokenButton gap={SpacingSize.Small} onClick={onOpenSelector}>
-          {token != null &&
-            (token.icon != null && isBundledAssetPath(token.icon) ? (
-              <SvgIcon src={token.icon} alt={token.symbol} size={32} />
-            ) : (
-              <RemoteIcon
-                src={token.icon}
-                size={32}
-                alt={token.symbol}
-                title={token.name}
-                borderRadius={100}
-              />
-            ))}
+          {token != null && (
+            <DexTokenIcon
+              icon={token.icon}
+              symbol={token.symbol}
+              name={token.name}
+            />
+          )}
           {token == null ? (
             <Typography type="bodySemiBold" color="contentAction">
               <Trans t={t}>Token</Trans>

@@ -7,15 +7,15 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { isBundledAssetPath } from '@src/utils';
-
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
   FlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { RemoteIcon, SvgIcon, Typography } from '@libs/ui/components';
+import { SvgIcon, Typography } from '@libs/ui/components';
+
+import { DexTokenIcon } from './dex-token-icon';
 
 export interface SwapRouteRowProps extends Pick<
   ISwapDependencies,
@@ -28,7 +28,7 @@ export interface SwapRouteRowProps extends Pick<
 }
 
 const Container = styled(FlexColumn)`
-  padding: 12px 16px;
+  padding: 12px 16px 12px 0;
   gap: 8px;
 
   cursor: pointer;
@@ -85,17 +85,12 @@ export const SwapRouteRow = ({
                     color="contentSecondary"
                   />
                 )}
-                {token.icon != null && isBundledAssetPath(token.icon) ? (
-                  <SvgIcon src={token.icon} alt={token.symbol} size={20} />
-                ) : (
-                  <RemoteIcon
-                    src={token.icon}
-                    size={20}
-                    alt={token.symbol}
-                    title={token.name}
-                    borderRadius={100}
-                  />
-                )}
+                <DexTokenIcon
+                  icon={token.icon}
+                  symbol={token.symbol}
+                  name={token.name}
+                  size={20}
+                />
                 <Typography type="captionRegular">{token.symbol}</Typography>
                 {!token.isWhitelisted && !token.isBlacklisted && (
                   <SvgIcon

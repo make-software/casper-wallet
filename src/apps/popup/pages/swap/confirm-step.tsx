@@ -3,8 +3,6 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { isBundledAssetPath } from '@src/utils';
-
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
@@ -14,15 +12,10 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import {
-  List,
-  RemoteIcon,
-  Spinner,
-  SvgIcon,
-  Typography
-} from '@libs/ui/components';
+import { List, Spinner, SvgIcon, Typography } from '@libs/ui/components';
 
 import { formatAmountForDisplay } from './amount-input-utils';
+import { DexTokenIcon } from './components/dex-token-icon';
 import { ISwapReviewData } from './types';
 import {
   ISwapAmountRow,
@@ -39,12 +32,9 @@ const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
 `;
 
-const TokenIcon = ({ row }: { row: ISwapAmountRow }) =>
-  row.icon != null && isBundledAssetPath(row.icon) ? (
-    <SvgIcon src={row.icon} alt={row.symbol} size={32} />
-  ) : (
-    <RemoteIcon src={row.icon} size={32} alt={row.symbol} title={row.symbol} />
-  );
+const TokenIcon = ({ row }: { row: ISwapAmountRow }) => (
+  <DexTokenIcon icon={row.icon} symbol={row.symbol} />
+);
 
 /** The right-hand mark of a progress row: spinning while it runs, then a check or an error mark. */
 const ProgressStatusIndicator = ({
