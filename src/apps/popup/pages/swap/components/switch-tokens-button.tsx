@@ -10,21 +10,21 @@ const Button = styled.button`
   right: 16px;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 1;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  width: 60px;
-  height: 60px;
+  width: 72px;
+  height: 72px;
 
   padding: 0;
-  border: none;
+  border: 6px solid ${({ theme }) => theme.color.backgroundSecondary};
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
   cursor: pointer;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
-  box-shadow: ${({ theme }) => theme.shadow.contextMenu};
 `;
 
 export interface SwitchTokensButtonProps {
@@ -33,6 +33,6 @@ export interface SwitchTokensButtonProps {
 
 export const SwitchTokensButton = ({ onClick }: SwitchTokensButtonProps) => (
   <Button type="button" onClick={onClick}>
-    <SvgIcon src="assets/icons/arrows.svg" size={24} />
+    <SvgIcon src="assets/icons/arrows.svg" size={32} color={'contentAction'} />
   </Button>
 );

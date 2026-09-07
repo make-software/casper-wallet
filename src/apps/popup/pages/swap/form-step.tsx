@@ -46,7 +46,7 @@ interface FormStepProps {
 const CardsGapContainer = styled.div`
   position: relative;
   height: 48px;
-  padding-right: 76px;
+  padding-right: 88px;
 
   display: flex;
   align-items: center;
@@ -312,18 +312,20 @@ export function FormStep({
 
   return (
     <ContentContainer>
-      <AlignedSpaceBetweenFlexRow>
-        <Typography type="header">
-          <Trans t={t}>Swap</Trans>
-        </Typography>
-        <SwapSettingsModal>
-          {() => (
-            <Typography type="body" color="contentAction">
-              <Trans t={t}>Settings</Trans>
-            </Typography>
-          )}
-        </SwapSettingsModal>
-      </AlignedSpaceBetweenFlexRow>
+      <VerticalSpaceContainer top={SpacingSize.XL}>
+        <AlignedSpaceBetweenFlexRow>
+          <Typography type="header">
+            <Trans t={t}>Swap</Trans>
+          </Typography>
+          <SwapSettingsModal>
+            {() => (
+              <Typography type="body" color="contentAction">
+                <Trans t={t}>Settings</Trans>
+              </Typography>
+            )}
+          </SwapSettingsModal>
+        </AlignedSpaceBetweenFlexRow>
+      </VerticalSpaceContainer>
 
       <VerticalSpaceContainer top={SpacingSize.Large}>
         <TokenAmountCard
