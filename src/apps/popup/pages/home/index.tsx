@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { HomePageTabName, NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
@@ -50,10 +50,19 @@ const ButtonsContainer = styled(CenteredFlexRow)`
   margin-top: 24px;
 `;
 
-const ButtonContainer = styled(CenteredFlexColumn)`
-  cursor: pointer;
+const buttonSlot = css`
+  flex: 1 1 0;
+  max-width: 25%;
+`;
 
-  padding: 0 16px;
+const ButtonContainer = styled(CenteredFlexColumn)`
+  ${buttonSlot};
+
+  cursor: pointer;
+`;
+
+const MoreButtonContainer = styled(CenteredFlexRow)`
+  ${buttonSlot};
 `;
 
 const Container = styled(TileContainer)`
@@ -164,7 +173,9 @@ export function HomePageContent() {
                   </Typography>
                 </ButtonContainer>
               )}
-              <MoreButtonsModal />
+              <MoreButtonContainer>
+                <MoreButtonsModal />
+              </MoreButtonContainer>
             </ButtonsContainer>
           </Container>
         </Tile>
