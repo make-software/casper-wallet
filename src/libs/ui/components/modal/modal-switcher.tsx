@@ -48,6 +48,8 @@ interface SwitcherProps {
   /** Runs when Done is pressed. Defaults to `closeSwitcher`, so a picker whose Done
    *  only dismisses the sheet needs no change. */
   onDone?: (e: React.MouseEvent<Element, MouseEvent>) => void;
+  /** Drops the footer, for a sheet whose rows commit on tap and so has nothing for Done to do. */
+  hideDoneButton?: boolean;
   children: React.ReactNode;
 }
 
@@ -55,6 +57,7 @@ export const ModalSwitcher = ({
   label,
   closeSwitcher,
   onDone,
+  hideDoneButton,
   children
 }: SwitcherProps) => {
   const { t } = useTranslation();
@@ -81,11 +84,13 @@ export const ModalSwitcher = ({
         {children}
       </ContentContainer>
 
-      <FooterButtonsContainer>
-        <Button onClick={onDone ?? closeSwitcher}>
-          <Trans t={t}>Done</Trans>
-        </Button>
-      </FooterButtonsContainer>
+      {!hideDoneButton && (
+        <FooterButtonsContainer>
+          <Button onClick={onDone ?? closeSwitcher}>
+            <Trans t={t}>Done</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      )}
     </Container>
   );
 };

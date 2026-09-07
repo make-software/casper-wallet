@@ -1,6 +1,6 @@
 import { IDexToken } from 'casper-wallet-core/src/domain/swap';
 import { useFetchToken } from 'casper-wallet-core/src/react';
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -34,6 +34,10 @@ import {
 import { TokenSelectorRow } from './token-selector-row';
 
 const SKELETON_ROW_COUNT = 5;
+
+// The list scrolls, the sheet around it must not: 528px of sheet, less the 56px header,
+// the 52px title, the 64px search field and the 40px of gaps above the tile.
+const LIST_HEIGHT = 312;
 
 // `Modal` is not usable here even though `ModalSwitcher` is: `Modal` owns its open state behind
 // its own trigger, and this sheet's open state lives in core's `useSwapTokens`, so the parent
@@ -103,12 +107,6 @@ export const TokenSelectorModal = ({
   const { t } = useTranslation();
   const { network, swapRepository } = useSwapDependencies();
 
-  // Seeded once on mount: this component is only ever rendered while the
-  // sheet is open, so "when the sheet opens" (D10) is "on mount" here.
-  const [draftToken, setDraftToken] = useState<IDexToken | null>(
-    () => tokens?.find(token => token.id === selectedTokenId) ?? null
-  );
-
   const { register, control, setValue } = useForm({
     defaultValues: { tokenSearch: '' }
   });
@@ -122,10 +120,8 @@ export const TokenSelectorModal = ({
 
   const { ref: clickAwayRef } = useClickAway({ callback: handleClose });
 
-  const handleDone = () => {
-    if (draftToken) {
-      onSelect(draftToken);
-    }
+  const handleSelect = (token: IDexToken) => {
+    onSelect(token);
     handleClose();
   };
 
@@ -185,9 +181,9 @@ export const TokenSelectorModal = ({
               <Tile>
                 <TokenSelectorRow
                   token={token}
-                  isSelected={draftToken?.id === token.id}
+                  isSelected={token.id === selectedTokenId}
                   isUnlisted={status === 'unlisted'}
-                  onSelect={() => setDraftToken(token)}
+                  onSelect={() => handleSelect(token)}
                 />
               </Tile>
               {status === 'unlisted' && (
@@ -228,13 +224,13 @@ export const TokenSelectorModal = ({
     return (
       <List
         rows={filteredTokens}
-        height={280}
+        height={LIST_HEIGHT}
         marginLeftForItemSeparatorLine={64}
         renderRow={token => (
           <TokenSelectorRow
             token={token}
-            isSelected={draftToken?.id === token.id}
-            onSelect={() => setDraftToken(token)}
+            isSelected={token.id === selectedTokenId}
+            onSelect={() => handleSelect(token)}
           />
         )}
       />
@@ -248,7 +244,7 @@ export const TokenSelectorModal = ({
         <ModalSwitcher
           label="Choose token"
           closeSwitcher={handleClose}
-          onDone={handleDone}
+          hideDoneButton
         >
           <InputsContainer>
             <Input
