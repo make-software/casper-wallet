@@ -30,7 +30,7 @@ import { SwitchTokensButton } from './components/switch-tokens-button';
 import { TokenAmountCard } from './components/token-amount-card';
 import { TokenSelectorModal } from './components/token-selector-modal';
 import { ISwapReviewData } from './types';
-import { buildPayTokenBalance } from './utils';
+import { buildPayTokenBalance, resolveSwapBalanceBanner } from './utils';
 import {
   SwapFormMode,
   getSelectableTokens,
@@ -109,6 +109,9 @@ export function FormStep({
     quoteData,
     quotedTrade,
     isFormValid: isSwapFormValid,
+    isAmountEntered,
+    isAmountExceedsBalance,
+    isInsufficientCsprForFees,
     setInitialTokens,
     getTokenBalance
   } = useSwapTokens({
@@ -138,6 +141,9 @@ export function FormStep({
     sourceRawAmount,
     sourceTokenFiatAmount,
     isFormValid: isWrapFormValid,
+    isAmountEntered: isWrapAmountEntered,
+    isAmountExceedsBalance: isWrapAmountExceedsBalance,
+    isInsufficientCsprForFees: isWrapInsufficientCsprForFees,
     updateAmount: updateWrapAmount,
     switchDirection,
     getTokenBalance: getWrapTokenBalance
@@ -316,6 +322,21 @@ export function FormStep({
     ? sourceTokenFiatAmount
     : secondTokenFiatAmount;
 
+  // Both hooks compute affordability the same way; only the one driving the view may speak.
+  const balanceBanner = resolveSwapBalanceBanner(
+    isWrapMode
+      ? {
+          isAmountEntered: isWrapAmountEntered,
+          hasInsufficientBalance: isWrapAmountExceedsBalance('first'),
+          hasInsufficientCsprForFee: isWrapInsufficientCsprForFees()
+        }
+      : {
+          isAmountEntered,
+          hasInsufficientBalance: isAmountExceedsBalance('first'),
+          hasInsufficientCsprForFee: isInsufficientCsprForFees()
+        }
+  );
+
   const payTokenBalance = useMemo(
     () =>
       buildPayTokenBalance(
@@ -362,7 +383,7 @@ export function FormStep({
               ? updateWrapAmount(getWrapTokenBalance('first'))
               : updateAmount('first', getMaxUsableBalance('first'))
           }
-          hasError={false}
+          hasError={balanceBanner === 'insufficientBalance'}
         />
       </VerticalSpaceContainer>
 
@@ -387,6 +408,41 @@ export function FormStep({
         onOpenSelector={() => openTokenSelector('second')}
         hasError={false}
       />
+
+      {balanceBanner != null && (
+        <VerticalSpaceContainer top={SpacingSize.Large}>
+          {balanceBanner === 'insufficientBalance' ? (
+            <SwapBanner
+              variant="error"
+              icon="assets/icons/error.svg"
+              title={<Trans t={t}>Not enough liquid balance</Trans>}
+              body={
+                <Trans
+                  t={t}
+                  defaults="You don’t have enough liquid <t>{{symbol}}</t> to complete this transaction. You can adjust the transaction details to proceed."
+                  values={{ symbol: firstCardToken?.symbol ?? '' }}
+                  components={{
+                    t: (
+                      <Typography type="captionMedium" color="contentPrimary" />
+                    )
+                  }}
+                />
+              }
+            />
+          ) : (
+            <SwapBanner
+              variant="error"
+              icon="assets/icons/error.svg"
+              title={<Trans t={t}>Not enough CSPR</Trans>}
+              body={
+                <Trans t={t}>
+                  You don’t have enough CSPR to cover the network fee.
+                </Trans>
+              }
+            />
+          )}
+        </VerticalSpaceContainer>
+      )}
 
       {!isWrapMode &&
         (quoteData.error != null ? (

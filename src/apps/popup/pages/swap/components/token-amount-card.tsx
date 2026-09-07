@@ -33,19 +33,17 @@ export interface TokenAmountCardProps {
   onAmountChange: (value: string) => void;
   onOpenSelector: () => void;
   onSwapMax?: () => void; // pay card only
+  /** The typed amount is more than the card's token can cover: render it critical. */
   hasError: boolean;
 }
 
-const Card = styled(FlexColumn)<{ $hasError: boolean }>`
+const Card = styled(FlexColumn)`
   position: relative;
   min-height: 92px;
   padding: 16px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   border-radius: ${({ theme }) => theme.borderRadius.base}px;
-  border: 1px solid
-    ${({ theme, $hasError }) =>
-      $hasError ? theme.color.fillCritical : 'transparent'};
 `;
 
 const TopRow = styled(AlignedSpaceBetweenFlexRow)`
@@ -54,7 +52,7 @@ const TopRow = styled(AlignedSpaceBetweenFlexRow)`
 
 // Not `@libs/ui` Input: that renders a boxed 4rem field with its own background,
 // where the card needs a borderless amount sitting on the card's own surface.
-const AmountInput = styled.input`
+const AmountInput = styled.input<{ $hasError: boolean }>`
   flex-grow: 1;
   min-width: 0;
   padding: 0;
@@ -62,7 +60,8 @@ const AmountInput = styled.input`
   outline: none;
   background: inherit;
 
-  color: ${({ theme }) => theme.color.contentPrimary};
+  color: ${({ theme, $hasError }) =>
+    $hasError ? theme.color.contentActionCritical : theme.color.contentPrimary};
   font-family: ${({ theme }) => theme.typography.fontFamily.mono};
   font-size: 2rem;
   line-height: 2.8rem;
@@ -110,9 +109,10 @@ export const TokenAmountCard = ({
     token != null && !token.isWhitelisted && !token.isBlacklisted;
 
   return (
-    <Card $hasError={hasError} data-position={position}>
+    <Card data-position={position}>
       <TopRow>
         <AmountInput
+          $hasError={hasError}
           type="text"
           inputMode="decimal"
           placeholder="0.00"

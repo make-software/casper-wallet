@@ -1,7 +1,7 @@
 import { IDexToken } from 'casper-wallet-core/src/domain/swap';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { ThemeProvider } from 'styled-components';
+import { ServerStyleSheet, ThemeProvider } from 'styled-components';
 
 import { lightTheme } from '@libs/ui/theme-config';
 
@@ -47,6 +47,30 @@ describe('TokenAmountCard', () => {
         />
       </ThemeProvider>
     );
+
+  const renderCss = (props: Partial<TokenAmountCardProps> = {}) => {
+    const sheet = new ServerStyleSheet();
+
+    renderToStaticMarkup(
+      sheet.collectStyles(
+        <ThemeProvider theme={lightTheme}>
+          <TokenAmountCard
+            position="first"
+            token={listedToken}
+            amount="500"
+            fiatAmount="$1,000.00"
+            decimals={9}
+            onAmountChange={() => {}}
+            onOpenSelector={() => {}}
+            hasError={false}
+            {...props}
+          />
+        </ThemeProvider>
+      )
+    );
+
+    return sheet.getStyleTags();
+  };
 
   // Matrix: "No token chosen" — token button reads `Token` in `contentAction`.
   it('renders "Token" when no token is chosen', () => {
@@ -105,5 +129,19 @@ describe('TokenAmountCard', () => {
 
     expect(html).toContain('value="500"');
     expect(html).toContain('$1,000.00');
+  });
+
+  // Matrix: "Amount the balance cannot cover" — the typed amount turns critical.
+  it('renders the amount in the critical colour when the card has an error', () => {
+    expect(renderCss({ hasError: true })).toContain(
+      `color:${lightTheme.color.contentActionCritical}`
+    );
+  });
+
+  it('renders the amount in the primary colour when the card has no error', () => {
+    const css = renderCss();
+
+    expect(css).not.toContain(lightTheme.color.contentActionCritical);
+    expect(css).toContain(`color:${lightTheme.color.contentPrimary}`);
   });
 });

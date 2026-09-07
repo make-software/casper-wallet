@@ -214,3 +214,33 @@ export const buildPayTokenBalance = (
         ),
         symbol: payToken.symbol
       };
+
+/** What the form knows about the pay leg's affordability, from whichever hook drives it. */
+export interface ISwapBalanceFlags {
+  isAmountEntered: boolean;
+  hasInsufficientBalance: boolean;
+  hasInsufficientCsprForFee: boolean;
+}
+
+export type SwapBalanceBanner =
+  'insufficientBalance' | 'insufficientCsprForFee';
+
+/**
+ * The one affordability banner the form may show, or `null`. Both flags fire together when the
+ * pay leg is CSPR, and the balance is the half the user can act on by lowering the amount.
+ */
+export const resolveSwapBalanceBanner = ({
+  isAmountEntered,
+  hasInsufficientBalance,
+  hasInsufficientCsprForFee
+}: ISwapBalanceFlags): SwapBalanceBanner | null => {
+  if (!isAmountEntered) {
+    return null;
+  }
+
+  if (hasInsufficientBalance) {
+    return 'insufficientBalance';
+  }
+
+  return hasInsufficientCsprForFee ? 'insufficientCsprForFee' : null;
+};

@@ -10,6 +10,7 @@ import {
 
 import { ISwapTradeReview, IWrapTradeReview } from '@popup/pages/swap/types';
 import {
+  ISwapBalanceFlags,
   SwapSteps,
   buildPayTokenBalance,
   buildSwapAmountRows,
@@ -18,7 +19,8 @@ import {
   buildWrapProgressRows,
   getPreviousSwapStep,
   isSwapSubmitted,
-  isWrapSubmitted
+  isWrapSubmitted,
+  resolveSwapBalanceBanner
 } from '@popup/pages/swap/utils';
 
 const translate = (key: string) => key;
@@ -400,5 +402,47 @@ describe('buildPayTokenBalance', () => {
 
   it('has no balance to show before a token is picked', () => {
     expect(buildPayTokenBalance(null, '1234.5')).toBeNull();
+  });
+});
+
+describe('resolveSwapBalanceBanner', () => {
+  const flags = (overrides: Partial<ISwapBalanceFlags> = {}) => ({
+    isAmountEntered: true,
+    hasInsufficientBalance: false,
+    hasInsufficientCsprForFee: false,
+    ...overrides
+  });
+
+  it('says nothing before an amount is entered', () => {
+    expect(
+      resolveSwapBalanceBanner(
+        flags({ isAmountEntered: false, hasInsufficientCsprForFee: true })
+      )
+    ).toBeNull();
+  });
+
+  it('reports a pay leg the balance cannot cover', () => {
+    expect(
+      resolveSwapBalanceBanner(flags({ hasInsufficientBalance: true }))
+    ).toBe('insufficientBalance');
+  });
+
+  it('reports a CSPR balance that cannot cover the fee', () => {
+    expect(
+      resolveSwapBalanceBanner(flags({ hasInsufficientCsprForFee: true }))
+    ).toBe('insufficientCsprForFee');
+  });
+
+  // Paying in CSPR trips both at once; the amount is the part the user can act on.
+  it('prefers the balance over the fee when both are short', () => {
+    expect(
+      resolveSwapBalanceBanner(
+        flags({ hasInsufficientBalance: true, hasInsufficientCsprForFee: true })
+      )
+    ).toBe('insufficientBalance');
+  });
+
+  it('says nothing when the balance covers both', () => {
+    expect(resolveSwapBalanceBanner(flags())).toBeNull();
   });
 });
