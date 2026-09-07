@@ -1,5 +1,16 @@
-import { CSPR_NATIVE_TOKEN_ID } from 'casper-wallet-core/src/domain/constants/config';
+import { WrapDirection } from 'casper-wallet-core';
+import { CSPR_DECIMALS } from 'casper-wallet-core/src/domain/constants/casperNetwork';
+import {
+  CSPR_NATIVE_TOKEN_ID,
+  DEX_PAYMENT_AMOUNT,
+  FIAT_DECIMALS
+} from 'casper-wallet-core/src/domain/constants/config';
 import { IDexToken } from 'casper-wallet-core/src/domain/swap';
+import {
+  formatFiatBalance,
+  getDecimalTokenBalance
+} from 'casper-wallet-core/src/utils/common';
+import { AmountDecimal } from 'casper-wallet-core/src/utils/decimal';
 
 import { ISwapReviewData } from './types';
 
@@ -81,6 +92,8 @@ export interface ISwapModeLabels {
   confirmTitle: string;
   /** The pay card's "spend everything" shortcut. */
   maxLabel: string;
+  /** Heading over the form's costs card. */
+  detailsTitle: string;
   successTitle: string;
 }
 
@@ -89,18 +102,21 @@ export const swapModeLabels: Record<SwapFormMode, ISwapModeLabels> = {
     formTitle: 'Swap',
     confirmTitle: 'Confirm swap',
     maxLabel: 'Swap max',
+    detailsTitle: 'Swap details',
     successTitle: "You've swapped tokens"
   },
   wrap: {
     formTitle: 'Wrap',
     confirmTitle: 'Confirm wrap',
     maxLabel: 'Wrap max',
+    detailsTitle: 'Wrap details',
     successTitle: "You've wrapped CSPR"
   },
   unwrap: {
     formTitle: 'Unwrap',
     confirmTitle: 'Confirm unwrap',
     maxLabel: 'Unwrap max',
+    detailsTitle: 'Unwrap details',
     successTitle: "You've unwrapped WCSPR"
   }
 };
@@ -111,3 +127,32 @@ export const swapModeLabels: Record<SwapFormMode, ISwapModeLabels> = {
  */
 export const getReviewMode = (review: ISwapReviewData): SwapFormMode =>
   review.kind === 'wrap' ? review.direction : 'swap';
+
+/**
+ * What a wrap or unwrap costs in gas, worded like the swap arm's `networkCost`: the payment
+ * converted to the user's currency, falling back to the CSPR figure itself when no rate has
+ * loaded.
+ *
+ * Core's own `calculateSwapPaymentAmount` only ever picks between the two *swap* payments, so
+ * the wrap payments have no helper there to reuse.
+ */
+export const calculateWrapNetworkCost = (
+  direction: WrapDirection,
+  csprFiatRate: string | number | null | undefined,
+  currencyCode: string
+): string => {
+  const paymentInMotes =
+    direction === 'wrap' ? DEX_PAYMENT_AMOUNT.wrap : DEX_PAYMENT_AMOUNT.unwrap;
+  const amount = getDecimalTokenBalance(paymentInMotes, CSPR_DECIMALS);
+
+  if (!csprFiatRate) {
+    return `${amount} CSPR`;
+  }
+
+  return formatFiatBalance(
+    new AmountDecimal(amount).mul(csprFiatRate).toFixed(),
+    null,
+    FIAT_DECIMALS,
+    { currencyCode, minFractionDigits: FIAT_DECIMALS }
+  );
+};

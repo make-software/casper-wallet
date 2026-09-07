@@ -46,7 +46,7 @@ export interface ISwapAmountRow {
 
 /** One key/value line of the confirm screen's details card. */
 export interface ISwapDetailRow {
-  id: 'rate' | 'priceImpact' | 'fee';
+  id: 'rate' | 'priceImpact' | 'fee' | 'networkCost';
   text: string;
   value: string;
 }
@@ -109,15 +109,21 @@ export const buildSwapAmountRows = (
 
 /**
  * The three lines cspr.trade shows when reviewing a swap. A line whose value is unknown is left
- * out rather than shown empty. A wrap or unwrap has no rate, price impact or fee, so it always
- * returns an empty list — the caller renders no details card for it.
+ * out rather than shown empty. A wrap or unwrap has no rate, price impact or fee, so gas is all
+ * it has to show.
  */
 export const buildSwapDetailRows = (
   review: ISwapReviewData,
   translate: (key: string) => string
 ): ISwapDetailRow[] => {
   if (review.kind === 'wrap') {
-    return [];
+    return [
+      {
+        id: 'networkCost',
+        text: translate('Network Cost'),
+        value: review.networkCost
+      }
+    ];
   }
 
   const rows: ISwapDetailRow[] = [];

@@ -48,6 +48,8 @@ export interface SwapDetailsProps extends Pick<
   ISwapDependencies,
   'network' | 'swapRepository'
 > {
+  /** The section heading, worded for the mode — see `swapModeLabels`. */
+  title: string;
   /** `null` before a quote exists — the whole block, label included, is not rendered (D5). */
   quote: string | null;
   priceImpact: string | null;
@@ -63,6 +65,7 @@ export interface SwapDetailsProps extends Pick<
 export const SwapDetails = ({
   network,
   swapRepository,
+  title,
   quote,
   priceImpact,
   protocolFee,
@@ -81,7 +84,7 @@ export const SwapDetails = ({
   return (
     <VerticalSpaceContainer top={SpacingSize.Large}>
       <Typography type="bodySemiBold">
-        <Trans t={t}>Swap details</Trans>
+        <Trans t={t}>{title}</Trans>
       </Typography>
 
       {isHighPriceImpact(priceImpact) && (

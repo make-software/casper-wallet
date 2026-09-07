@@ -115,6 +115,7 @@ const wrapReview = (
   amountFormatted: '5',
   rawAmount: '5000000000',
   fiatAmount: '$1.23',
+  networkCost: '$0.12',
   ...overrides
 });
 
@@ -236,8 +237,22 @@ describe('buildSwapDetailRows', () => {
     ).toEqual([]);
   });
 
-  it('returns nothing for a wrap review', () => {
-    expect(buildSwapDetailRows(wrapReview(), translate)).toEqual([]);
+  it('shows gas alone for a wrap review — it has no rate, impact or protocol fee', () => {
+    expect(
+      buildSwapDetailRows(wrapReview(), translate).map(row => [
+        row.text,
+        row.value
+      ])
+    ).toEqual([['Network Cost', '$0.12']]);
+  });
+
+  it('carries the wrap review its own network cost rather than recomputing one', () => {
+    expect(
+      buildSwapDetailRows(
+        wrapReview({ direction: 'unwrap', networkCost: '5 CSPR' }),
+        translate
+      ).map(row => row.value)
+    ).toEqual(['5 CSPR']);
   });
 });
 

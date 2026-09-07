@@ -2,6 +2,7 @@ import { IDexToken } from 'casper-wallet-core/src/domain/swap';
 
 import { ISwapTradeReview, IWrapTradeReview } from './types';
 import {
+  calculateWrapNetworkCost,
   getReviewMode,
   getSelectableTokens,
   getSwapFormMode,
@@ -124,6 +125,7 @@ describe('swapModeLabels', () => {
       formTitle: 'Swap',
       confirmTitle: 'Confirm swap',
       maxLabel: 'Swap max',
+      detailsTitle: 'Swap details',
       successTitle: "You've swapped tokens"
     });
   });
@@ -133,6 +135,7 @@ describe('swapModeLabels', () => {
       formTitle: 'Wrap',
       confirmTitle: 'Confirm wrap',
       maxLabel: 'Wrap max',
+      detailsTitle: 'Wrap details',
       successTitle: "You've wrapped CSPR"
     });
   });
@@ -142,7 +145,34 @@ describe('swapModeLabels', () => {
       formTitle: 'Unwrap',
       confirmTitle: 'Confirm unwrap',
       maxLabel: 'Unwrap max',
+      detailsTitle: 'Unwrap details',
       successTitle: "You've unwrapped WCSPR"
     });
+  });
+});
+
+describe('calculateWrapNetworkCost', () => {
+  // Both DEX_PAYMENT_AMOUNT.wrap and .unwrap are 5 CSPR, so a rate of 0.1 makes either $0.50.
+  it('converts the wrap payment to the given currency', () => {
+    expect(calculateWrapNetworkCost('wrap', 0.1, 'USD')).toBe('$0.50');
+  });
+
+  it('converts the unwrap payment, which is charged separately from the wrap one', () => {
+    expect(calculateWrapNetworkCost('unwrap', 0.1, 'USD')).toBe('$0.50');
+  });
+
+  it('falls back to the CSPR figure when no rate has loaded', () => {
+    expect(calculateWrapNetworkCost('wrap', undefined, 'USD')).toBe('5 CSPR');
+    expect(calculateWrapNetworkCost('wrap', null, 'USD')).toBe('5 CSPR');
+  });
+
+  // A rate of 0 is real market data, not a missing one, but it prices gas at nothing — the CSPR
+  // figure is the honest thing to show rather than a confident "$0.00".
+  it('falls back to the CSPR figure on a zero rate', () => {
+    expect(calculateWrapNetworkCost('wrap', 0, 'USD')).toBe('5 CSPR');
+  });
+
+  it('honours a non-USD currency', () => {
+    expect(calculateWrapNetworkCost('wrap', 0.1, 'EUR')).toBe('€0.50');
   });
 });

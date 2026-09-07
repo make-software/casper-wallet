@@ -19,6 +19,8 @@ export interface IWrapTradeReview {
   amountFormatted: string;
   rawAmount: string;
   fiatAmount: string | null;
+  /** Already worded for display — fiat when a rate had loaded, otherwise the CSPR figure. */
+  networkCost: string;
 }
 
 /**

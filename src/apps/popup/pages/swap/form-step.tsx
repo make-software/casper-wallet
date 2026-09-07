@@ -1,12 +1,17 @@
 import { WrappedCsprContractPackageHash } from 'casper-wallet-core/src/domain/constants/casperNetwork';
+import { USD_CURRENCY_CODE } from 'casper-wallet-core/src/domain/constants/common';
 import { CSPR_NATIVE_TOKEN_ID } from 'casper-wallet-core/src/domain/constants/config';
 import type { ISwapDependencies } from 'casper-wallet-core/src/react';
 import {
+  useFetchCsprFiatRates,
   useSwapTokens,
   useTokenWarnings,
   useWrapTokens
 } from 'casper-wallet-core/src/react';
-import { calculateSwapFee } from 'casper-wallet-core/src/utils/swap';
+import {
+  calculateMaxUsableBalance,
+  calculateSwapFee
+} from 'casper-wallet-core/src/utils/swap';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -29,10 +34,12 @@ import { SwapSettingsModal } from './components/swap-settings-modal';
 import { SwitchTokensButton } from './components/switch-tokens-button';
 import { TokenAmountCard } from './components/token-amount-card';
 import { TokenSelectorModal } from './components/token-selector-modal';
+import { WrapDetails } from './components/wrap-details';
 import { ISwapReviewData } from './types';
 import { buildPayTokenBalance, resolveSwapBalanceBanner } from './utils';
 import {
   SwapFormMode,
+  calculateWrapNetworkCost,
   getSelectableTokens,
   getSwapFormMode,
   isUnwrapEntry,
@@ -155,6 +162,18 @@ export function FormStep({
     tokensRepository: swapDependencies.tokensRepository
   });
 
+  // Already in flight for the fiat amounts under both cards, and react-query keys it per
+  // network — this second caller is a cache read, not a second request.
+  const { csprFiatRates } = useFetchCsprFiatRates({
+    network: swapDependencies.network,
+    tokensRepository: swapDependencies.tokensRepository
+  });
+  const wrapNetworkCost = calculateWrapNetworkCost(
+    wrapDirection,
+    csprFiatRates,
+    USD_CURRENCY_CODE
+  );
+
   // useWrapTokens owns no concept of "which token the user picked first" - only its own
   // toggled `direction`. Align it once when the selected pair turns into a wrap pair; further
   // renders in the same pair leave the user's own flips alone.
@@ -271,7 +290,8 @@ export function FormStep({
       destinationToken,
       amountFormatted: wrapAmount,
       rawAmount: sourceRawAmount,
-      fiatAmount: sourceTokenFiatAmount
+      fiatAmount: sourceTokenFiatAmount,
+      networkCost: wrapNetworkCost
     };
   }, [
     isFormValid,
@@ -286,7 +306,8 @@ export function FormStep({
     destinationToken,
     wrapAmount,
     sourceRawAmount,
-    sourceTokenFiatAmount
+    sourceTokenFiatAmount,
+    wrapNetworkCost
   ]);
 
   useEffect(() => {
@@ -305,7 +326,12 @@ export function FormStep({
     handleSwitchTokens();
 
     if (isWrapMode) {
+      // `switchDirection` clears the amount, where the swap arm carries the pay amount over.
+      // A wrap is 1:1, so the same figure describes the flipped pair — put it back.
+      const enteredAmount = wrapAmount;
+
       switchDirection();
+      updateWrapAmount(enteredAmount);
     }
   };
 
@@ -339,6 +365,17 @@ export function FormStep({
         }
   );
 
+  // The wrap arm exposes no `getMaxUsableBalance`: reserve the wrap payment here the way the
+  // swap arm reserves the approve + swap ones, so the shortcut cannot fill in an amount that
+  // leaves nothing behind for the fee. Only a native CSPR leg is reduced, so unwrapping still
+  // offers the whole WCSPR balance.
+  const wrapMaxUsableBalance = () =>
+    calculateMaxUsableBalance({
+      balance: getWrapTokenBalance('first'),
+      symbol: sourceToken.symbol,
+      context: 'wrap'
+    });
+
   const payTokenBalance = useMemo(
     () =>
       buildPayTokenBalance(
@@ -359,13 +396,16 @@ export function FormStep({
           <Typography type="header">
             <Trans t={t}>{labels.formTitle}</Trans>
           </Typography>
-          <SwapSettingsModal>
-            {() => (
-              <Typography type="body" color="contentAction">
-                <Trans t={t}>Settings</Trans>
-              </Typography>
-            )}
-          </SwapSettingsModal>
+          {/* Slippage and deadline are quote settings; a wrap is 1:1 and reads neither. */}
+          {!isWrapMode && (
+            <SwapSettingsModal>
+              {() => (
+                <Typography type="body" color="contentAction">
+                  <Trans t={t}>Settings</Trans>
+                </Typography>
+              )}
+            </SwapSettingsModal>
+          )}
         </AlignedSpaceBetweenFlexRow>
       </VerticalSpaceContainer>
 
@@ -382,7 +422,7 @@ export function FormStep({
           onOpenSelector={() => openTokenSelector('first')}
           onSwapMax={() =>
             isWrapMode
-              ? updateWrapAmount(getWrapTokenBalance('first'))
+              ? updateWrapAmount(wrapMaxUsableBalance())
               : updateAmount('first', getMaxUsableBalance('first'))
           }
           maxLabel={labels.maxLabel}
@@ -447,6 +487,13 @@ export function FormStep({
         </VerticalSpaceContainer>
       )}
 
+      {isWrapMode && (
+        <WrapDetails
+          title={labels.detailsTitle}
+          networkCost={wrapNetworkCost}
+        />
+      )}
+
       {!isWrapMode &&
         (quoteData.error != null ? (
           <VerticalSpaceContainer top={SpacingSize.Large}>
@@ -480,6 +527,7 @@ export function FormStep({
             <SwapDetails
               network={swapDependencies.network}
               swapRepository={swapDependencies.swapRepository}
+              title={labels.detailsTitle}
               quote={quote}
               priceImpact={priceImpact}
               protocolFee={protocolFee}
