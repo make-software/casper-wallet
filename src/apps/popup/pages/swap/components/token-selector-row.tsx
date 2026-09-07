@@ -8,14 +8,15 @@ import { isBundledAssetPath } from '@src/utils';
 // Deep paths, not the '@libs/layout' / '@libs/ui/components' barrels: both
 // re-export the header (via form-field.tsx), which pulls in
 // webextension-polyfill and throws outside a browser extension context —
-// including this repo's node-only jest. RemoteIcon and SvgIcon already avoid
-// this for the same reason; Typography's own file has no barrel dependency.
+// including this repo's node-only jest. Every component below is barrel-free
+// for the same reason.
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
   FlexColumn,
   SpacingSize
 } from '@libs/layout/containers';
+import { Checkbox } from '@libs/ui/components/checkbox/checkbox';
 import { RemoteIcon } from '@libs/ui/components/remote-icon/remote-icon';
 import { SvgIcon } from '@libs/ui/components/svg-icon/svg-icon';
 import { Typography } from '@libs/ui/components/typography/typography';
@@ -26,21 +27,6 @@ const Container = styled(AlignedSpaceBetweenFlexRow)`
 
   cursor: pointer;
 `;
-
-// Checkbox's `variant="circle"` is the same radio icon this row draws, but
-// Checkbox always imports the '@libs/ui/components' barrel internally, so it
-// cannot be used here — see the import note above. Replicated directly.
-const RadioIcon = ({ checked }: { checked: boolean }) => (
-  <SvgIcon
-    src={
-      checked
-        ? 'assets/icons/radio-button-on.svg'
-        : 'assets/icons/radio-button-off.svg'
-    }
-    size={24}
-    color="contentAction"
-  />
-);
 
 export interface TokenSelectorRowProps {
   token: IDexToken;
@@ -81,7 +67,7 @@ export const TokenSelectorRow = ({
           </Typography>
         </FlexColumn>
       </AlignedFlexRow>
-      <RadioIcon checked={isSelected} />
+      <Checkbox checked={isSelected} />
     </Container>
   );
 };

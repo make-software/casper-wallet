@@ -1,7 +1,12 @@
 import React, { type JSX } from 'react';
 import styled from 'styled-components';
 
-import { SvgIcon, Typography } from '@libs/ui/components';
+// Deep paths, not the '@libs/ui/components' barrel: the barrel re-exports the
+// header, which pulls in webextension-polyfill and throws outside a browser
+// extension context — including this repo's node-only jest. Keeping this file
+// barrel-free lets swap's token selector reuse the checkbox.
+import { SvgIcon } from '@libs/ui/components/svg-icon/svg-icon';
+import { Typography } from '@libs/ui/components/typography/typography';
 import { BaseProps } from '@libs/ui/types';
 
 import FlexRow from '../flex-row/flex-row';
