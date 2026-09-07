@@ -47,6 +47,7 @@ import {
   buildWrapProgressRows,
   getPreviousSwapStep
 } from './utils';
+import { getReviewMode, swapModeLabels } from './wrap-utils';
 
 const ScrollContainer = styled(VerticalSpaceContainer)<{
   isHidden: boolean;
@@ -136,6 +137,9 @@ export const SwapPage = () => {
           : [];
   const hasStartedSubmission = progressRows.some(row => row.status !== 'idle');
 
+  const labels =
+    swapModeLabels[review == null ? 'swap' : getReviewMode(review)];
+
   const goToPreviousStep = () => {
     const previousStep = getPreviousSwapStep(swapStep);
 
@@ -176,7 +180,7 @@ export const SwapPage = () => {
       />
     ),
     [SwapSteps.Success]: (
-      <TransferSuccessScreen headerText="You've swapped tokens" />
+      <TransferSuccessScreen headerText={labels.successTitle} />
     )
   };
 
@@ -235,10 +239,10 @@ export const SwapPage = () => {
           {isProcessing ? (
             <CenteredFlexRow gap={SpacingSize.Small}>
               <Spinner style={{ marginTop: 0 }} />
-              <Trans t={t}>Confirm swap</Trans>
+              <Trans t={t}>{labels.confirmTitle}</Trans>
             </CenteredFlexRow>
           ) : (
-            <Trans t={t}>Confirm swap</Trans>
+            <Trans t={t}>{labels.confirmTitle}</Trans>
           )}
         </Button>
       </ConfirmButtonContainer>

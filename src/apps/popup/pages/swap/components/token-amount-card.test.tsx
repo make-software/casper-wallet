@@ -114,6 +114,14 @@ describe('TokenAmountCard', () => {
     expect(html).toContain('Swap max');
   });
 
+  // Matrix: "Wrap or unwrap" — the shortcut follows the mode the form is in.
+  it('renders the given maxLabel in place of "Swap max"', () => {
+    const html = render({ onSwapMax: () => {}, maxLabel: 'Unwrap max' });
+
+    expect(html).toContain('Unwrap max');
+    expect(html).not.toContain('Swap max');
+  });
+
   // Matrix: "Empty amount" — `0.00` placeholder, fiat `$0`.
   it('renders the placeholder and fiat amount when the amount is empty', () => {
     const html = render({ amount: '', fiatAmount: '$0' });

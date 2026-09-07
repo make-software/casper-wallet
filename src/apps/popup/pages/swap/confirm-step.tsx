@@ -22,6 +22,7 @@ import {
   buildSwapAmountRows,
   buildSwapDetailRows
 } from './utils';
+import { getReviewMode, swapModeLabels } from './wrap-utils';
 
 const AmountRowContainer = styled(FlexColumn)`
   padding: 12px 16px;
@@ -82,7 +83,9 @@ export const ConfirmStep = ({ review, progressRows }: ConfirmStepProps) => {
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>Confirm swap</Trans>
+          <Trans t={t}>
+            {swapModeLabels[getReviewMode(review)].confirmTitle}
+          </Trans>
         </Typography>
       </ParagraphContainer>
 

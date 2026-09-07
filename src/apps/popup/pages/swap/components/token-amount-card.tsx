@@ -33,6 +33,8 @@ export interface TokenAmountCardProps {
   onAmountChange: (value: string) => void;
   onOpenSelector: () => void;
   onSwapMax?: () => void; // pay card only
+  /** i18n key for the shortcut's label, so it can follow a wrap or unwrap. Pay card only. */
+  maxLabel?: string;
   /** The typed amount is more than the card's token can cover: render it critical. */
   hasError: boolean;
 }
@@ -93,6 +95,7 @@ export const TokenAmountCard = ({
   onAmountChange,
   onOpenSelector,
   onSwapMax,
+  maxLabel = 'Swap max',
   hasError
 }: TokenAmountCardProps) => {
   const { t } = useTranslation();
@@ -166,7 +169,7 @@ export const TokenAmountCard = ({
             color="contentAction"
             onClick={onSwapMax}
           >
-            <Trans t={t}>Swap max</Trans>
+            <Trans t={t}>{maxLabel}</Trans>
           </SwapMaxLabel>
         )}
       </BottomRow>

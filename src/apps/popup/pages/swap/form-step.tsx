@@ -35,7 +35,8 @@ import {
   SwapFormMode,
   getSelectableTokens,
   getSwapFormMode,
-  isUnwrapEntry
+  isUnwrapEntry,
+  swapModeLabels
 } from './wrap-utils';
 
 interface FormStepProps {
@@ -295,6 +296,7 @@ export function FormStep({
   // In wrap/unwrap mode there is no quote: cards, the flip button and the CTA are the same
   // form, but the rate line, Swap details, and the quote/unlisted banners are all suppressed.
   const isWrapMode = swapFormMode !== 'swap';
+  const labels = swapModeLabels[swapFormMode];
 
   // Both hooks keep their own copy of the pair, and only `useSwapTokens`' copy feeds the token
   // selector. Flipping both keeps them aligned, so the selector highlights — and replaces — the
@@ -355,7 +357,7 @@ export function FormStep({
       <VerticalSpaceContainer top={SpacingSize.XL}>
         <AlignedSpaceBetweenFlexRow>
           <Typography type="header">
-            <Trans t={t}>Swap</Trans>
+            <Trans t={t}>{labels.formTitle}</Trans>
           </Typography>
           <SwapSettingsModal>
             {() => (
@@ -383,6 +385,7 @@ export function FormStep({
               ? updateWrapAmount(getWrapTokenBalance('first'))
               : updateAmount('first', getMaxUsableBalance('first'))
           }
+          maxLabel={labels.maxLabel}
           hasError={balanceBanner === 'insufficientBalance'}
         />
       </VerticalSpaceContainer>

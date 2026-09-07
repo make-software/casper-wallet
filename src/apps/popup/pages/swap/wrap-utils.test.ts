@@ -1,9 +1,12 @@
 import { IDexToken } from 'casper-wallet-core/src/domain/swap';
 
+import { ISwapTradeReview, IWrapTradeReview } from './types';
 import {
+  getReviewMode,
   getSelectableTokens,
   getSwapFormMode,
-  isUnwrapEntry
+  isUnwrapEntry,
+  swapModeLabels
 } from './wrap-utils';
 
 const WCSPR = 'wcspr-hash';
@@ -97,5 +100,49 @@ describe('isUnwrapEntry', () => {
   it('never matches on a network with no wrapped-CSPR deployment', () => {
     expect(isUnwrapEntry('', '')).toBe(false);
     expect(isUnwrapEntry(null, '')).toBe(false);
+  });
+});
+
+describe('getReviewMode', () => {
+  it('is swap for a traded pair', () => {
+    expect(getReviewMode({ kind: 'swap' } as ISwapTradeReview)).toBe('swap');
+  });
+
+  it('follows the wrap arm’s own direction', () => {
+    expect(
+      getReviewMode({ kind: 'wrap', direction: 'wrap' } as IWrapTradeReview)
+    ).toBe('wrap');
+    expect(
+      getReviewMode({ kind: 'wrap', direction: 'unwrap' } as IWrapTradeReview)
+    ).toBe('unwrap');
+  });
+});
+
+describe('swapModeLabels', () => {
+  it('words every screen of a swap', () => {
+    expect(swapModeLabels.swap).toEqual({
+      formTitle: 'Swap',
+      confirmTitle: 'Confirm swap',
+      maxLabel: 'Swap max',
+      successTitle: "You've swapped tokens"
+    });
+  });
+
+  it('words every screen of a wrap', () => {
+    expect(swapModeLabels.wrap).toEqual({
+      formTitle: 'Wrap',
+      confirmTitle: 'Confirm wrap',
+      maxLabel: 'Wrap max',
+      successTitle: "You've wrapped CSPR"
+    });
+  });
+
+  it('words every screen of an unwrap', () => {
+    expect(swapModeLabels.unwrap).toEqual({
+      formTitle: 'Unwrap',
+      confirmTitle: 'Confirm unwrap',
+      maxLabel: 'Unwrap max',
+      successTitle: "You've unwrapped WCSPR"
+    });
   });
 });
