@@ -130,6 +130,14 @@ export const SwapDetails = ({
             </Row>
             <Row>
               <Typography type="body" color="contentSecondary">
+                <Trans t={t}>Price impact</Trans>
+              </Typography>
+              <Typography type="captionRegular" color="contentPrimary">
+                {priceImpact != null ? `-${priceImpact}%` : null}
+              </Typography>
+            </Row>
+            <Row>
+              <Typography type="body" color="contentSecondary">
                 {t('Fee ({{percent}}%)', {
                   percent: formatProtocolFeePercent(SWAP_PROTOCOL_FEE)
                 })}
