@@ -5,7 +5,6 @@ import styled from 'styled-components';
 
 import {
   AlignedFlexRow,
-  AlignedSpaceBetweenFlexRow,
   ContentContainer,
   FlexColumn,
   ParagraphContainer,
@@ -90,24 +89,24 @@ export const ConfirmStep = ({ review, progressRows }: ConfirmStepProps) => {
       <List
         rows={amountRows}
         renderRow={row => (
-          <AmountRowContainer key={row.id}>
+          <AmountRowContainer key={row.id} gap={SpacingSize.Tiny}>
             <Typography type="body" color="contentSecondary">
               {row.label}
             </Typography>
-            <AlignedSpaceBetweenFlexRow>
-              <AlignedFlexRow gap={SpacingSize.Small}>
-                <TokenIcon row={row} />
-                <Typography type="body">
+            <AlignedFlexRow gap={SpacingSize.Small}>
+              <TokenIcon row={row} />
+              <FlexColumn>
+                <Typography type="bodyHash">
                   {formatAmountForDisplay(row.amount, TOKEN_DISPLAY_DECIMALS)}{' '}
                   {row.symbol}
                 </Typography>
-              </AlignedFlexRow>
-            </AlignedSpaceBetweenFlexRow>
-            {row.fiat != null && (
-              <Typography type="captionMedium" color="contentSecondary">
-                {row.fiat}
-              </Typography>
-            )}
+                {row.fiat != null && (
+                  <Typography type="captionMedium" color="contentSecondary">
+                    {row.fiat}
+                  </Typography>
+                )}
+              </FlexColumn>
+            </AlignedFlexRow>
           </AmountRowContainer>
         )}
         marginLeftForItemSeparatorLine={8}
