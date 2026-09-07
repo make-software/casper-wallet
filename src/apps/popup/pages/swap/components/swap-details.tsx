@@ -33,10 +33,15 @@ const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
   & > *:not(:last-child) {
     ${borderBottomPseudoElementRules};
   }
+
+  & > *:last-child {
+    padding-left: ${({ marginLeftForSeparatorLine }) =>
+      marginLeftForSeparatorLine}px;
+  }
 `;
 
 const Row = styled(AlignedSpaceBetweenFlexRow)`
-  padding: 12px 16px;
+  padding: 12px 16px 12px 0;
 `;
 
 export interface SwapDetailsProps extends Pick<
