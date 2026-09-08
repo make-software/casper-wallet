@@ -52,7 +52,9 @@ popup.describe('Popup UI: Home tabs', () => {
 
       await popupExpect(popupPage.getByTitle('Activity')).toBeVisible();
 
-      await popupPage.getByText('Tokens').click();
+      // Matched exactly: the Activity list this tab sits above renders deploy
+      // names like `swap_exact_cspr_for_tokens`, which a substring match hits.
+      await popupPage.getByText('Tokens', { exact: true }).click();
       await popupPage.getByText('Casper', { exact: true }).first().click();
       await popupExpect(
         popupPage.getByRole('heading', { name: 'Token' })
