@@ -247,6 +247,10 @@ export const useLedger = ({
   // third (`openerWindowId` qualified by `openerRequestId`) rides in the slice
   // so a remounted popup still owns the window its predecessor opened.
   const openedPermissionWindowIdRef = useRef<number | null>(null);
+  // Latched, not derived from the slice: `windowId` is null both before the
+  // window opens and after it closes, and the id lands in the slice through an
+  // async round-trip the render cannot wait for.
+  const [permissionWindowClosed, setPermissionWindowClosed] = useState(false);
   const [hostWindowId, setHostWindowId] = useState<number | null>(null);
   // Mirror for the open effect below, which must not re-run when the state lands.
   const hostWindowIdRef = useRef<number | null>(null);
@@ -328,7 +332,16 @@ export const useLedger = ({
 
         triggeredRef.current = true;
 
-        closeTracker.arm(w.id);
+        // The permission screen instructs the user to act in a window that no
+        // longer exists once this fires. Nothing else lowers it: the flow runs
+        // in the window's own document, whose `ledger` service is a different
+        // instance, so this one never sees the connection succeed. WALLET-1249.
+        closeTracker.arm(w.id, () => {
+          setPermissionWindowClosed(true);
+          setLedgerEventStatusToRender({
+            status: LedgerEventStatus.Disconnected
+          });
+        });
       }
     })().catch(error => {
       // `openNewSeparateWindow` is an awaited call that can reject, and without
@@ -439,6 +452,7 @@ export const useLedger = ({
     closeNewLedgerWindowsAndClearState,
     // Deliberately not the raw slot: a page that branches on "is there a
     // permission window" must not see a foreign flow's.
-    ownPermissionWindowId
+    ownPermissionWindowId,
+    permissionWindowClosed
   };
 };

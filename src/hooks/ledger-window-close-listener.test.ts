@@ -99,3 +99,48 @@ it('drops the previous listener when armed again', () => {
   armedListener(1)(11);
   expect(dispatchMock).toHaveBeenCalledTimes(1);
 });
+
+it('notifies the owner when the tracked window is removed', () => {
+  const tracker = createLedgerWindowCloseTracker();
+  const onClosed = jest.fn();
+  tracker.arm(9, onClosed);
+
+  armedListener()(9);
+
+  expect(onClosed).toHaveBeenCalledTimes(1);
+});
+
+it('does not notify the owner about someone else’s window', () => {
+  const tracker = createLedgerWindowCloseTracker();
+  const onClosed = jest.fn();
+  tracker.arm(9, onClosed);
+
+  armedListener()(10);
+
+  expect(onClosed).not.toHaveBeenCalled();
+});
+
+it('does not notify the owner when the tracker is detached', () => {
+  const tracker = createLedgerWindowCloseTracker();
+  const onClosed = jest.fn();
+  tracker.arm(9, onClosed);
+
+  tracker.detach();
+
+  // Detaching is not the window closing: the flow was taken over or the
+  // document is unmounting, and the owner must not be told its window went.
+  expect(onClosed).not.toHaveBeenCalled();
+});
+
+it('notifies only the owner that armed the current window', () => {
+  const tracker = createLedgerWindowCloseTracker();
+  const first = jest.fn();
+  const second = jest.fn();
+  tracker.arm(9, first);
+  tracker.arm(11, second);
+
+  armedListener(1)(11);
+
+  expect(first).not.toHaveBeenCalled();
+  expect(second).toHaveBeenCalledTimes(1);
+});
