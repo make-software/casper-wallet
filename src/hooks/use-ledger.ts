@@ -17,6 +17,10 @@ import {
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { runWithDeviceConfirmationReported } from '@hooks/ledger-device-confirmation';
+import {
+  isLedgerPermissionWindowDocument,
+  needsLedgerPermissionWindow
+} from '@hooks/ledger-permission-window-trigger';
 import { createLedgerWindowCloseTracker } from '@hooks/ledger-window-close-listener';
 import { resolveOwnPermissionWindowId } from '@hooks/ledger-window-ownership';
 import { registerLedgerPermissionWindow } from '@hooks/register-ledger-permission-window';
@@ -147,6 +151,29 @@ export const useLedger = ({
       }
     } else {
       shouldTrySignAfterConnectRef.current = true;
+
+      const transportToOpen = selectedTransportRef.current;
+
+      // The popup cannot host the device chooser; the window opened by the
+      // effect below can. Checked before connecting because the shared core
+      // service reports a failed open as a device error, not as a permission
+      // one.
+      if (
+        transportToOpen &&
+        needsLedgerPermissionWindow({
+          transport: transportToOpen,
+          hasPermittedUsbDevice: (await getPreferredTransport()) === 'USB',
+          isPermissionWindow: isLedgerPermissionWindowDocument(
+            document.location.search
+          )
+        })
+      ) {
+        setLedgerEventStatusToRender({
+          status: LedgerEventStatus.LedgerPermissionRequired
+        });
+
+        return;
+      }
 
       try {
         if (selectedTransportRef.current === 'USB') {
