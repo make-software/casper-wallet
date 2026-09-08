@@ -18,6 +18,7 @@ const {
   onRampRepository,
   appEventsRepository,
   contractPackageRepository,
+  swapRepository,
   httpDataProvider,
   log
 } = setupDataRepositories();
@@ -31,6 +32,7 @@ export {
   onRampRepository,
   appEventsRepository,
   contractPackageRepository,
+  swapRepository,
   // Shared with `./signing-repositories` so both halves talk through one provider and one logger.
   httpDataProvider,
   log

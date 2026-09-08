@@ -1,4 +1,5 @@
 import { Deploy } from 'casper-js-sdk';
+import { buildNftTransferTransactions } from 'casper-wallet-core';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -7,9 +8,9 @@ import { useParams } from 'react-router-dom';
 import {
   ErrorMessages,
   HomePageTabName,
-  networkNameToSdkNetworkNameMap
+  getCasperNetwork
 } from '@src/constants';
-import { NFTTokenStandard } from '@src/utils';
+import { NFTTokenStandard, coreNftStandardMap } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import { useHomeTab } from '@popup/hooks/use-home-tab';
@@ -36,9 +37,8 @@ import {
 } from '@background/redux/rate-app/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import {
-  selectApiConfigBasedOnActiveNetwork,
-  selectCasperNetworkApiVersion,
-  selectIsCasper2Network
+  selectActiveNetworkSetting,
+  selectCasperNetworkApiVersion
 } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
@@ -62,12 +62,15 @@ import {
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
 import {
+  getTransactionErrorCopy,
+  isLedgerFailure
+} from '@libs/services/core-errors';
+import {
   getDateForDeploy,
   sendSignedTx,
   signTx
 } from '@libs/services/deployer-service';
 import { useFetchNftTokens } from '@libs/services/nft-service';
-import { buildNftTransferTransactions } from '@libs/services/tx-builders';
 import {
   Button,
   LedgerEventView,
@@ -93,7 +96,8 @@ export const TransferNftPage = () => {
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(false);
   const [isRecipientFormButtonDisabled, setIsRecipientFormButtonDisabled] =
     useState(true);
-  const isCasper2Network = useSelector(selectIsCasper2Network);
+  const activeNetworkSetting = useSelector(selectActiveNetworkSetting);
+  const network = getCasperNetwork(activeNetworkSetting);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
   const { setActiveHomeTab } = useHomeTab();
@@ -103,9 +107,6 @@ export const TransferNftPage = () => {
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
     selectIsActiveAccountFromLedger
-  );
-  const { networkName, nodeUrl } = useSelector(
-    selectApiConfigBasedOnActiveNetwork
   );
   const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
   const walletPublicKeys = useSelector(selectVaultAccountsPublicKeys);
@@ -119,7 +120,7 @@ export const TransferNftPage = () => {
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
 
-  const { nftData } = location.state;
+  const nftData = location.state?.nftData;
 
   const nftToken = useMemo(
     () =>
@@ -138,7 +139,7 @@ export const TransferNftPage = () => {
   }, [navigate, nftToken]);
 
   useEffect(() => {
-    if (nftToken?.owner_reverse_lookup_mode) {
+    if (nftToken?.ownerReverseLookupMode) {
       setHaveReverseOwnerLookUp(true);
     }
   }, [nftToken]);
@@ -178,90 +179,118 @@ export const TransferNftPage = () => {
 
     setIsSubmitButtonDisable(true);
 
-    if (activeAccount && tokenStandard) {
-      const { recipientPublicKey } = recipientForm.getValues();
-      const { paymentAmount } = amountForm.getValues();
+    try {
+      if (activeAccount && tokenStandard) {
+        const { recipientPublicKey } = recipientForm.getValues();
+        const { paymentAmount } = amountForm.getValues();
 
-      const secretKey = await fetchAccountSecretKey(activeAccount.name);
+        const secretKey = await fetchAccountSecretKey(activeAccount.name);
 
-      // Ledger accounts legitimately have no secret key here too (see transfer/index.tsx).
-      if (!secretKey && activeAccount.hardware == null) {
-        setIsSubmitButtonDisable(false);
-        navigate(
-          ErrorPath,
-          createErrorLocationState({
-            errorHeaderText: t(ErrorMessages.common.UNKNOWN_ERROR.message),
-            errorContentText: t(ErrorMessages.common.UNKNOWN_ERROR.description),
-            errorPrimaryButtonLabel: t('Close'),
-            errorRedirectPath: RouterPath.Home
-          })
-        );
-        return;
-      }
-
-      const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
-
-      const timestamp = await getDateForDeploy(nodeUrl);
-
-      const { transaction, fallbackDeploy } = buildNftTransferTransactions(
-        {
-          chainName: networkNameToSdkNetworkNameMap[networkName],
-          contractPackageHash: nftToken.contractPackageHash,
-          nftStandard: NFTTokenStandard[tokenStandard],
-          paymentAmount: CSPRtoMotes(paymentAmount),
-          recipientPublicKeyHex: recipientPublicKey,
-          senderPublicKeyHex: KEYS.publicKey.toHex(),
-          tokenId:
-            nftToken.tokenIdType === 'uint' ? nftToken.tokenId : undefined,
-          tokenHash:
-            nftToken.tokenIdType === 'hash' ? nftToken.tokenId : undefined,
-          timestamp
-        },
-        casperNetworkApiVersion
-      );
-
-      const signedTx = await signTx(
-        transaction,
-        KEYS,
-        activeAccount,
-        fallbackDeploy,
-        changeActiveAccountSupportsWithEvent
-      );
-
-      sendSignedTx(signedTx, nodeUrl, isCasper2Network)
-        .then(hash => {
-          dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
-
-          dispatchToMainStore(
-            accountTrackingIdOfSentNftTokensChanged({
-              trackingId: nftToken.trackingId,
-              deployHash: hash
-            })
-          );
-
-          dispatchToMainStore(accountPendingDeployHashesChanged(hash));
-
-          setTransferNFTStep(TransferNFTSteps.Success);
-        })
-        .catch(error => {
-          console.error(error, 'nft transfer request error');
-
+        // Ledger accounts legitimately have no secret key here too (see transfer/index.tsx).
+        if (!secretKey && activeAccount.hardware == null) {
+          setIsSubmitButtonDisable(false);
           navigate(
             ErrorPath,
             createErrorLocationState({
-              errorHeaderText:
-                error.sourceErr?.message ||
-                error.message ||
-                t(ErrorMessages.common.UNKNOWN_ERROR.message),
-              errorContentText:
-                typeof error?.sourceErr?.data === 'string'
-                  ? error.sourceErr.data
-                  : t(ErrorMessages.common.UNKNOWN_ERROR.description),
+              errorHeaderText: t(ErrorMessages.common.UNKNOWN_ERROR.message),
+              errorContentText: t(
+                ErrorMessages.common.UNKNOWN_ERROR.description
+              ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })
           );
-        });
+          return;
+        }
+
+        const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
+
+        const timestamp = await getDateForDeploy(network);
+
+        const { transaction, fallbackDeploy } = buildNftTransferTransactions(
+          {
+            network,
+            contractPackageHash: nftToken.contractPackageHash,
+            nftStandard: coreNftStandardMap[NFTTokenStandard[tokenStandard]],
+            paymentAmountMotes: CSPRtoMotes(paymentAmount),
+            recipientPublicKeyHex: recipientPublicKey,
+            senderPublicKeyHex: KEYS.publicKey.toHex(),
+            tokenId:
+              nftToken.tokenIdType === 'uint' ? nftToken.tokenId : undefined,
+            tokenHash:
+              nftToken.tokenIdType === 'hash' ? nftToken.tokenId : undefined,
+            timestamp
+          },
+          casperNetworkApiVersion
+        );
+
+        const signedTx = await signTx(
+          transaction,
+          KEYS,
+          activeAccount,
+          fallbackDeploy,
+          changeActiveAccountSupportsWithEvent
+        );
+
+        sendSignedTx(signedTx, network, casperNetworkApiVersion)
+          .then(hash => {
+            dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
+
+            dispatchToMainStore(
+              accountTrackingIdOfSentNftTokensChanged({
+                trackingId: nftToken.trackingId,
+                deployHash: hash
+              })
+            );
+
+            dispatchToMainStore(accountPendingDeployHashesChanged(hash));
+
+            setTransferNFTStep(TransferNFTSteps.Success);
+          })
+          .catch(error => {
+            console.error(error, 'nft transfer request error');
+
+            const { header, content } = getTransactionErrorCopy(
+              error,
+              (key: string) => t(key)
+            );
+
+            navigate(
+              ErrorPath,
+              createErrorLocationState({
+                errorHeaderText: header,
+                errorContentText: content,
+                errorPrimaryButtonLabel: t('Close'),
+                errorRedirectPath: RouterPath.Home
+              })
+            );
+          });
+      }
+    } catch (error) {
+      // The Ledger views render their own failures, and the hook that runs this handler for
+      // a Ledger account swallows what it throws — so this must leave by the same door.
+      if (isLedgerFailure(error)) {
+        throw error;
+      }
+
+      console.error(error, 'nft transfer signing error');
+
+      setIsSubmitButtonDisable(false);
+
+      const { header, content } = getTransactionErrorCopy(
+        error,
+        (key: string) => t(key)
+      );
+
+      navigate(
+        ErrorPath,
+        createErrorLocationState({
+          errorHeaderText: header,
+          errorContentText: content,
+          errorPrimaryButtonLabel: t('Close'),
+          errorRedirectPath: RouterPath.Home
+        })
+      );
     }
   };
 
@@ -276,14 +305,14 @@ export const TransferNftPage = () => {
     const secretKey = await fetchAccountSecretKey(activeAccount.name);
     const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
 
-    const timestamp = await getDateForDeploy(nodeUrl);
+    const timestamp = await getDateForDeploy(network);
 
     const { transaction, fallbackDeploy } = buildNftTransferTransactions(
       {
-        chainName: networkNameToSdkNetworkNameMap[networkName],
+        network,
         contractPackageHash: nftToken.contractPackageHash,
-        nftStandard: NFTTokenStandard[tokenStandard],
-        paymentAmount: CSPRtoMotes(paymentAmount),
+        nftStandard: coreNftStandardMap[NFTTokenStandard[tokenStandard]],
+        paymentAmountMotes: CSPRtoMotes(paymentAmount),
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: KEYS.publicKey.toHex(),
         tokenId: nftToken.tokenIdType === 'uint' ? nftToken.tokenId : undefined,

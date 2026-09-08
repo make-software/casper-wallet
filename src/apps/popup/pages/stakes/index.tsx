@@ -1,5 +1,8 @@
-import { CasperNetworkName, Deploy } from 'casper-js-sdk';
-import { formatNumber } from 'casper-wallet-core';
+import { Deploy } from 'casper-js-sdk';
+import {
+  buildAuctionManagerTransactions,
+  formatNumber
+} from 'casper-wallet-core';
 import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -12,7 +15,8 @@ import {
   HomePageTabName,
   STAKE_COST_MOTES,
   StakeSteps,
-  networkNameToSdkNetworkNameMap
+  coreAuctionEntryPointMap,
+  getCasperNetwork
 } from '@src/constants';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
@@ -41,9 +45,8 @@ import {
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
 import {
-  selectApiConfigBasedOnActiveNetwork,
-  selectCasperNetworkApiVersion,
-  selectIsCasper2Network
+  selectActiveNetworkSetting,
+  selectCasperNetworkApiVersion
 } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
@@ -71,11 +74,14 @@ import {
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
 import {
+  getTransactionErrorCopy,
+  isLedgerFailure
+} from '@libs/services/core-errors';
+import {
   getDateForDeploy,
   sendSignedTx,
   signTx
 } from '@libs/services/deployer-service';
-import { buildAuctionTransactions } from '@libs/services/tx-builders';
 import {
   Button,
   LedgerEventView,
@@ -114,7 +120,8 @@ export const StakesPage = () => {
   const [validator, setValidator] = useState<ValidatorDto | null>(null);
   const [newValidator, setNewValidator] = useState<ValidatorDto | null>(null);
   const [maxAmountMotesForStaking, setMaxAmountMotesForStaking] = useState('');
-  const isCasper2Network = useSelector(selectIsCasper2Network);
+  const activeNetworkSetting = useSelector(selectActiveNetworkSetting);
+  const network = getCasperNetwork(activeNetworkSetting);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
   const { setActiveHomeTab } = useHomeTab();
@@ -122,9 +129,6 @@ export const StakesPage = () => {
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
     selectIsActiveAccountFromLedger
-  );
-  const { networkName, nodeUrl } = useSelector(
-    selectApiConfigBasedOnActiveNetwork
   );
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
@@ -172,79 +176,104 @@ export const StakesPage = () => {
   const submitStake = async () => {
     setIsSubmitButtonDisable(true);
 
-    if (activeAccount) {
-      const motesAmount = CSPRtoMotes(inputAmountCSPR);
+    try {
+      if (activeAccount) {
+        const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
-      const secretKey = await fetchAccountSecretKey(activeAccount.name);
+        const secretKey = await fetchAccountSecretKey(activeAccount.name);
 
-      // Ledger accounts legitimately have no secret key here too (see transfer/index.tsx).
-      if (!secretKey && activeAccount.hardware == null) {
-        setIsSubmitButtonDisable(false);
-        navigate(
-          ErrorPath,
-          createErrorLocationState({
-            errorHeaderText: t(ErrorMessages.common.UNKNOWN_ERROR.message),
-            errorContentText: t(ErrorMessages.common.UNKNOWN_ERROR.description),
-            errorPrimaryButtonLabel: t('Close'),
-            errorRedirectPath: RouterPath.Home
-          })
-        );
-        return;
-      }
-
-      const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
-
-      const timestamp = await getDateForDeploy(nodeUrl);
-
-      const { transaction, fallbackDeploy } = buildAuctionTransactions(
-        {
-          amount: motesAmount,
-          // The map is typed as the enum's string values so @src/constants stays SDK-free;
-          // the core API asks for the nominal enum, which the same string satisfies.
-          chainName: networkNameToSdkNetworkNameMap[
-            networkName
-          ] as CasperNetworkName,
-          contractEntryPoint: stakeType,
-          delegatorPublicKeyHex: activeAccount.publicKey,
-          newValidatorPublicKeyHex: newValidatorPublicKey,
-          validatorPublicKeyHex: validatorPublicKey,
-          timestamp
-        },
-        casperNetworkApiVersion
-      );
-
-      const signedTx = await signTx(
-        transaction,
-        KEYS,
-        activeAccount,
-        fallbackDeploy,
-        changeActiveAccountSupportsWithEvent
-      );
-
-      sendSignedTx(signedTx, nodeUrl, isCasper2Network)
-        .then(hash => {
-          dispatchToMainStore(accountPendingDeployHashesChanged(hash));
-          setStakeStep(StakeSteps.Success);
-        })
-        .catch(error => {
-          console.error(error, 'staking request error');
-
+        // Ledger accounts legitimately have no secret key here too (see transfer/index.tsx).
+        if (!secretKey && activeAccount.hardware == null) {
+          setIsSubmitButtonDisable(false);
           navigate(
             ErrorPath,
             createErrorLocationState({
-              errorHeaderText:
-                error.sourceErr?.message ||
-                error.message ||
-                t(ErrorMessages.common.UNKNOWN_ERROR.message),
-              errorContentText:
-                typeof error?.sourceErr?.data === 'string'
-                  ? error.sourceErr.data
-                  : t(ErrorMessages.common.UNKNOWN_ERROR.description),
+              errorHeaderText: t(ErrorMessages.common.UNKNOWN_ERROR.message),
+              errorContentText: t(
+                ErrorMessages.common.UNKNOWN_ERROR.description
+              ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })
           );
-        });
+          return;
+        }
+
+        const KEYS = createAsymmetricKeys(activeAccount.publicKey, secretKey);
+
+        const timestamp = await getDateForDeploy(network);
+
+        const { transaction, fallbackDeploy } = buildAuctionManagerTransactions(
+          {
+            network,
+            amountMotes: motesAmount,
+            paymentAmountMotes: STAKE_COST_MOTES,
+            entryPoint: coreAuctionEntryPointMap[stakeType],
+            delegatorPublicKeyHex: activeAccount.publicKey,
+            newValidatorPublicKeyHex: newValidatorPublicKey,
+            validatorPublicKeyHex: validatorPublicKey,
+            timestamp
+          },
+          casperNetworkApiVersion
+        );
+
+        const signedTx = await signTx(
+          transaction,
+          KEYS,
+          activeAccount,
+          fallbackDeploy,
+          changeActiveAccountSupportsWithEvent
+        );
+
+        sendSignedTx(signedTx, network, casperNetworkApiVersion)
+          .then(hash => {
+            dispatchToMainStore(accountPendingDeployHashesChanged(hash));
+            setStakeStep(StakeSteps.Success);
+          })
+          .catch(error => {
+            console.error(error, 'staking request error');
+
+            const { header, content } = getTransactionErrorCopy(
+              error,
+              (key: string) => t(key)
+            );
+
+            navigate(
+              ErrorPath,
+              createErrorLocationState({
+                errorHeaderText: header,
+                errorContentText: content,
+                errorPrimaryButtonLabel: t('Close'),
+                errorRedirectPath: RouterPath.Home
+              })
+            );
+          });
+      }
+    } catch (error) {
+      // The Ledger views render their own failures, and the hook that runs this handler for
+      // a Ledger account swallows what it throws — so this must leave by the same door.
+      if (isLedgerFailure(error)) {
+        throw error;
+      }
+
+      console.error(error, 'staking signing error');
+
+      setIsSubmitButtonDisable(false);
+
+      const { header, content } = getTransactionErrorCopy(
+        error,
+        (key: string) => t(key)
+      );
+
+      navigate(
+        ErrorPath,
+        createErrorLocationState({
+          errorHeaderText: header,
+          errorContentText: content,
+          errorPrimaryButtonLabel: t('Close'),
+          errorRedirectPath: RouterPath.Home
+        })
+      );
     }
   };
 
@@ -254,17 +283,14 @@ export const StakesPage = () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
-      const timestamp = await getDateForDeploy(nodeUrl);
+      const timestamp = await getDateForDeploy(network);
 
-      const { transaction, fallbackDeploy } = buildAuctionTransactions(
+      const { transaction, fallbackDeploy } = buildAuctionManagerTransactions(
         {
-          amount: motesAmount,
-          // The map is typed as the enum's string values so @src/constants stays SDK-free;
-          // the core API asks for the nominal enum, which the same string satisfies.
-          chainName: networkNameToSdkNetworkNameMap[
-            networkName
-          ] as CasperNetworkName,
-          contractEntryPoint: stakeType,
+          network,
+          amountMotes: motesAmount,
+          paymentAmountMotes: STAKE_COST_MOTES,
+          entryPoint: coreAuctionEntryPointMap[stakeType],
           delegatorPublicKeyHex: activeAccount.publicKey,
           newValidatorPublicKeyHex: newValidatorPublicKey,
           validatorPublicKeyHex: validatorPublicKey,

@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { HomePageTabName, NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
@@ -28,6 +28,7 @@ import {
   useFetchCsprNameExpirations
 } from '@libs/services/account-info';
 import { useGetActiveAppMarketingEvent } from '@libs/services/app-events';
+import { isSwapAvailable, toSwapTokenId } from '@libs/services/swap-service';
 import {
   Button,
   SvgIcon,
@@ -49,10 +50,19 @@ const ButtonsContainer = styled(CenteredFlexRow)`
   margin-top: 24px;
 `;
 
-const ButtonContainer = styled(CenteredFlexColumn)`
-  cursor: pointer;
+const buttonSlot = css`
+  flex: 1 1 0;
+  max-width: 25%;
+`;
 
-  padding: 0 16px;
+const ButtonContainer = styled(CenteredFlexColumn)`
+  ${buttonSlot};
+
+  cursor: pointer;
+`;
+
+const MoreButtonContainer = styled(CenteredFlexRow)`
+  ${buttonSlot};
 `;
 
 const Container = styled(TileContainer)`
@@ -143,7 +153,29 @@ export function HomePageContent() {
                   <Trans t={t}>Send</Trans>
                 </Typography>
               </ButtonContainer>
-              <MoreButtonsModal />
+              {isSwapAvailable(network, isSafariBuild) && (
+                <ButtonContainer
+                  gap={SpacingSize.Small}
+                  onClick={() =>
+                    navigate(RouterPath.Swap, {
+                      state: { swapFromTokenId: toSwapTokenId() }
+                    })
+                  }
+                >
+                  <Button circle>
+                    <SvgIcon
+                      src="assets/icons/swap.svg"
+                      color="contentOnFill"
+                    />
+                  </Button>
+                  <Typography type="captionMedium" color="contentAction">
+                    <Trans t={t}>Swap</Trans>
+                  </Typography>
+                </ButtonContainer>
+              )}
+              <MoreButtonContainer>
+                <MoreButtonsModal />
+              </MoreButtonContainer>
             </ButtonsContainer>
           </Container>
         </Tile>

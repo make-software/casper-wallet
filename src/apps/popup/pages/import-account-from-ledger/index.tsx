@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { RouterPath } from '@popup/router';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { useLedger } from '@hooks/use-ledger';
 
@@ -15,10 +15,13 @@ export const ImportAccountFromLedgerPage = () => {
     (searchParams.get('initialEventToRender') as LedgerEventStatus) ??
     LedgerEventStatus.Disconnected;
 
+  const navigate = useTypedNavigate();
+
   const {
     ledgerEventStatusToRender,
     makeSubmitLedgerAction,
-    closeNewLedgerWindowsAndClearState
+    closeNewLedgerWindowsAndClearState,
+    permissionWindowClosed
   } = useLedger({
     ledgerAction: async () => {},
     shouldLoadAccountList: true,
@@ -31,6 +34,16 @@ export const ImportAccountFromLedgerPage = () => {
       hash: RouterPath.ImportAccountFromLedger
     }
   });
+
+  // The accounts this page exists to import are added by the permission
+  // window, not here, so once that window is gone this page has nothing left
+  // to show — and the window closing is the only signal of it. Home is where
+  // the imported accounts are. WALLET-1249.
+  useEffect(() => {
+    if (permissionWindowClosed) {
+      navigate(RouterPath.Home);
+    }
+  }, [navigate, permissionWindowClosed]);
 
   return ledgerEventStatusToRender.status ===
     LedgerEventStatus.AccountListUpdated ||

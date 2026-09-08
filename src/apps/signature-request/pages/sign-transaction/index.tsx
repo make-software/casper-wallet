@@ -1,5 +1,7 @@
 import { Transaction } from 'casper-js-sdk';
 import {
+  createLedgerSigner,
+  createPrivateKeySigner,
   isTxSignatureRequestWasmAction,
   isTxSignatureRequestWasmProxyAction
 } from 'casper-wallet-core';
@@ -53,8 +55,7 @@ import { useLedger } from '@hooks/use-ledger';
 
 import { sdkMethod } from '@content/sdk-method';
 
-import { signDeployForProviderResponse } from '@libs/crypto';
-import { convertBytesToHex } from '@libs/crypto/utils';
+import { toProviderSignatureHex } from '@libs/crypto/provider-signature';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AlignedFlexRow,
@@ -66,6 +67,7 @@ import {
 } from '@libs/layout';
 import { useFetchAccountsInfo } from '@libs/services/account-info';
 import { useFetchAccountsBalances } from '@libs/services/balance-service';
+import { getCoreErrorCopy, isLedgerFailure } from '@libs/services/core-errors';
 import { LedgerEventStatus, ledger } from '@libs/services/ledger';
 import { useFetchDataForSignatureRequest } from '@libs/services/signature-request-service';
 import { HardwareWalletType } from '@libs/types/account';
@@ -232,7 +234,7 @@ export function SignTransactionPage() {
   ]);
 
   const handleSign = useCallback(async () => {
-    let signature: Uint8Array | null = null;
+    let signatureHex: string | null = null;
 
     if (!transaction) {
       // Every signing route funnels through here, including the Ledger footer's
@@ -255,48 +257,69 @@ export function SignTransactionPage() {
       return;
     }
 
-    if (signingAccount.hardware === HardwareWalletType.Ledger) {
-      const resp = await ledger.signTransaction(
-        transaction,
-        {
-          index: signingAccount.derivationIndex,
-          publicKey: signingAccount.publicKey
-        },
-        changeActiveAccountSupportsWithEvent
-      );
-
-      signature = resp.signature;
-    } else {
-      const secretKey = await fetchAccountSecretKey(signingAccount.name);
-
-      if (!secretKey) {
-        const error = Error(
-          ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
+    try {
+      if (signingAccount.hardware === HardwareWalletType.Ledger) {
+        const signer = createLedgerSigner({
+          service: ledger,
+          publicKeyHex: signingAccount.publicKey,
+          derivationIndex: signingAccount.derivationIndex,
+          supportsTransactionV1Cb: changeActiveAccountSupportsWithEvent
+        });
+        signatureHex = toProviderSignatureHex(
+          await signer.signTransaction(transaction)
         );
-        sendSdkResponseToSpecificTab(
-          sdkMethod.signError(error, { requestId }),
-          requestTabId
+      } else {
+        const secretKey = await fetchAccountSecretKey(signingAccount.name);
+
+        if (!secretKey) {
+          const error = Error(
+            ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
+          );
+          sendSdkResponseToSpecificTab(
+            sdkMethod.signError(error, { requestId }),
+            requestTabId
+          );
+          closeCurrentWindow();
+          return;
+        }
+
+        const signer = createPrivateKeySigner({
+          publicKeyHex: signingAccount.publicKey,
+          secretKeyBase64: secretKey
+        });
+        signatureHex = toProviderSignatureHex(
+          await signer.signTransaction(transaction)
         );
-        closeCurrentWindow();
-        return;
+      }
+    } catch (caught) {
+      // The Ledger views render their own failures; answering the dapp here as well would
+      // close the window out from under the error the user is being shown.
+      if (isLedgerFailure(caught)) {
+        throw caught;
       }
 
-      signature = signDeployForProviderResponse(
-        transaction.hash.toBytes(),
-        signingAccount.publicKey,
-        secretKey
+      console.error(caught, 'sign transaction error');
+
+      const error = Error(
+        getCoreErrorCopy(caught)?.description ??
+          ErrorMessages.common.UNKNOWN_ERROR.description
       );
+
+      sendSdkResponseToSpecificTab(
+        sdkMethod.signError(error, { requestId }),
+        requestTabId
+      );
+      closeCurrentWindow();
+
+      return;
     }
 
-    if (!signature) {
+    if (!signatureHex) {
       return;
     }
 
     sendSdkResponseToSpecificTab(
-      sdkMethod.signResponse(
-        { signatureHex: convertBytesToHex(signature), cancelled: false },
-        { requestId }
-      ),
+      sdkMethod.signResponse({ signatureHex, cancelled: false }, { requestId }),
       requestTabId
     );
     closeCurrentWindow();

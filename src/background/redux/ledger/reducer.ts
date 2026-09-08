@@ -8,9 +8,16 @@ const initialState: LedgerState = {
   openerRequestId: null,
   deploy: null,
   transaction: null,
-  recipientToSaveOnSuccess: null
+  recipientToSaveOnSuccess: null,
+  swapPayload: null
 };
 
+/**
+ * The permission window signs exactly one parked thing, and resolves it by branch order —
+ * `swapPayload` first. Parking either kind therefore clears the other here, so the window
+ * cannot pick up a swap the user reviewed minutes ago instead of the transfer they just
+ * confirmed. Do not add a park action that leaves the opposite slot standing.
+ */
 const slice = createSlice({
   name: 'ledger',
   initialState,
@@ -33,11 +40,13 @@ const slice = createSlice({
     ledgerStateCleared: () => initialState,
     ledgerDeployChanged: (state, { payload }: PayloadAction<string>) => ({
       ...state,
-      deploy: payload
+      deploy: payload,
+      swapPayload: null
     }),
     ledgerTransactionChanged: (state, { payload }: PayloadAction<string>) => ({
       ...state,
-      transaction: payload
+      transaction: payload,
+      swapPayload: null
     }),
     ledgerRecipientToSaveOnSuccessChanged: (
       state,
@@ -45,6 +54,16 @@ const slice = createSlice({
     ) => ({
       ...state,
       recipientToSaveOnSuccess: payload
+    }),
+    ledgerSwapPayloadChanged: (
+      state,
+      { payload }: PayloadAction<string | null>
+    ) => ({
+      ...state,
+      swapPayload: payload,
+      deploy: null,
+      transaction: null,
+      recipientToSaveOnSuccess: null
     })
   }
 });
@@ -54,6 +73,7 @@ export const {
   ledgerNewWindowIdChanged,
   ledgerRecipientToSaveOnSuccessChanged,
   ledgerStateCleared,
+  ledgerSwapPayloadChanged,
   ledgerTransactionChanged
 } = slice.actions;
 export const reducer = slice.reducer;

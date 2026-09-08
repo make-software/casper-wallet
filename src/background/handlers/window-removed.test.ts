@@ -6,6 +6,7 @@ import {
   ledgerNewWindowIdChanged,
   ledgerRecipientToSaveOnSuccessChanged,
   ledgerStateCleared,
+  ledgerSwapPayloadChanged,
   ledgerTransactionChanged
 } from '@background/redux/ledger/actions';
 import { reducer as ledger } from '@background/redux/ledger/reducer';
@@ -189,6 +190,7 @@ it('the clear is the whole-slice reset', async () => {
   testStore.dispatch(ledgerDeployChanged('d'));
   testStore.dispatch(ledgerTransactionChanged('t'));
   testStore.dispatch(ledgerRecipientToSaveOnSuccessChanged('r'));
+  testStore.dispatch(ledgerSwapPayloadChanged('p'));
 
   await handleWindowRemoved(testStore as unknown as MainStore, 7);
 
@@ -198,6 +200,7 @@ it('the clear is the whole-slice reset', async () => {
     openerRequestId: null,
     deploy: null,
     transaction: null,
-    recipientToSaveOnSuccess: null
+    recipientToSaveOnSuccess: null,
+    swapPayload: null
   });
 });

@@ -1,3 +1,7 @@
+import {
+  DEFAULT_DEADLINE,
+  DEFAULT_SLIPPAGE
+} from 'casper-wallet-core/src/domain/constants/config';
 import { createSelector } from 'reselect';
 
 import {
@@ -80,3 +84,10 @@ export const selectIsCasper2Network = (state: RootState) =>
 
 export const selectSystemColorScheme = (state: RootState) =>
   state.settings.systemColorScheme;
+
+// The defaults below are load-bearing, not defensive — see `SettingsState.swapSlippage`.
+export const selectSwapSlippageSetting = (state: RootState) =>
+  state.settings.swapSlippage ?? DEFAULT_SLIPPAGE;
+
+export const selectSwapDeadlineSetting = (state: RootState) =>
+  state.settings.swapDeadline ?? DEFAULT_DEADLINE;

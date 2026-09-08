@@ -2,8 +2,11 @@ module.exports = {
   preset: 'ts-jest/presets/js-with-ts',
   testEnvironment: 'node',
   transform: {
-    '^.+\\.(j|t)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }]
+    '^.+\\.(j|t)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.jest.json' }]
   },
+  // Half the cores, not all-but-one: several agent sessions run this suite at once on a
+  // 10-core machine, and the wall clock of a lone run is the same either way.
+  maxWorkers: '50%',
   transformIgnorePatterns: [
     '<rootDir>/node_modules/(?!(@lapo/asn1js|@noble/ciphers|@formatjs|intl-messageformat|casper-wallet-core|uuid)/)'
   ],

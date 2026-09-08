@@ -1,0 +1,11 @@
+{
+  // ts-jest only. Type-checking the whole program in every worker duplicates the `tsc` step
+  // of `check:static` and costs the test run ~2x; transpiling each file on its own drops it.
+  // `rootDir` is not optional here: TS6 rejects an isolated transpile whose root it has to
+  // infer (TS5011), and the inferred root moves with whichever file a worker picks up.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "isolatedModules": true,
+    "rootDir": "."
+  }
+}

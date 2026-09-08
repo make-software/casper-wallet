@@ -17,6 +17,10 @@ import {
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { runWithDeviceConfirmationReported } from '@hooks/ledger-device-confirmation';
+import {
+  isLedgerPermissionWindowDocument,
+  needsLedgerPermissionWindow
+} from '@hooks/ledger-permission-window-trigger';
 import { createLedgerWindowCloseTracker } from '@hooks/ledger-window-close-listener';
 import { resolveOwnPermissionWindowId } from '@hooks/ledger-window-ownership';
 import { registerLedgerPermissionWindow } from '@hooks/register-ledger-permission-window';
@@ -148,6 +152,29 @@ export const useLedger = ({
     } else {
       shouldTrySignAfterConnectRef.current = true;
 
+      const transportToOpen = selectedTransportRef.current;
+
+      // The popup cannot host the device chooser; the window opened by the
+      // effect below can. Checked before connecting because the shared core
+      // service reports a failed open as a device error, not as a permission
+      // one.
+      if (
+        transportToOpen &&
+        needsLedgerPermissionWindow({
+          transport: transportToOpen,
+          hasPermittedUsbDevice: (await getPreferredTransport()) === 'USB',
+          isPermissionWindow: isLedgerPermissionWindowDocument(
+            document.location.search
+          )
+        })
+      ) {
+        setLedgerEventStatusToRender({
+          status: LedgerEventStatus.LedgerPermissionRequired
+        });
+
+        return;
+      }
+
       try {
         if (selectedTransportRef.current === 'USB') {
           await ledger.connect(usbTransportCreator, isTransportAvailable);
@@ -169,7 +196,7 @@ export const useLedger = ({
   };
 
   useEffect(() => {
-    const sub = ledger.subscribeToLedgerEventStatuss(event => {
+    const sub = ledger.subscribeToLedgerEventStatus(event => {
       if (event.status === LedgerEventStatus.Connected) {
         setIsLedgerConnected(true);
       } else if (event.status === LedgerEventStatus.Disconnected) {
@@ -220,6 +247,10 @@ export const useLedger = ({
   // third (`openerWindowId` qualified by `openerRequestId`) rides in the slice
   // so a remounted popup still owns the window its predecessor opened.
   const openedPermissionWindowIdRef = useRef<number | null>(null);
+  // Latched, not derived from the slice: `windowId` is null both before the
+  // window opens and after it closes, and the id lands in the slice through an
+  // async round-trip the render cannot wait for.
+  const [permissionWindowClosed, setPermissionWindowClosed] = useState(false);
   const [hostWindowId, setHostWindowId] = useState<number | null>(null);
   // Mirror for the open effect below, which must not re-run when the state lands.
   const hostWindowIdRef = useRef<number | null>(null);
@@ -301,7 +332,16 @@ export const useLedger = ({
 
         triggeredRef.current = true;
 
-        closeTracker.arm(w.id);
+        // The permission screen instructs the user to act in a window that no
+        // longer exists once this fires. Nothing else lowers it: the flow runs
+        // in the window's own document, whose `ledger` service is a different
+        // instance, so this one never sees the connection succeed. WALLET-1249.
+        closeTracker.arm(w.id, () => {
+          setPermissionWindowClosed(true);
+          setLedgerEventStatusToRender({
+            status: LedgerEventStatus.Disconnected
+          });
+        });
       }
     })().catch(error => {
       // `openNewSeparateWindow` is an awaited call that can reject, and without
@@ -388,7 +428,7 @@ export const useLedger = ({
 
   useEffect(() => {
     if (windowId && askPermissionUrlData?.domain !== 'popup.html') {
-      const sub = ledger.subscribeToLedgerEventStatuss(event => {
+      const sub = ledger.subscribeToLedgerEventStatus(event => {
         if (
           event.status === LedgerEventStatus.SignatureCompleted ||
           event.status === LedgerEventStatus.MsgSignatureCompleted
@@ -412,6 +452,7 @@ export const useLedger = ({
     closeNewLedgerWindowsAndClearState,
     // Deliberately not the raw slot: a page that branches on "is there a
     // permission window" must not see a foreign flow's.
-    ownPermissionWindowId
+    ownPermissionWindowId,
+    permissionWindowClosed
   };
 };

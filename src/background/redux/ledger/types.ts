@@ -11,4 +11,6 @@ export interface LedgerState {
   deploy: string | null;
   transaction: string | null;
   recipientToSaveOnSuccess: string | null;
+  /** A composed swap or wrap awaiting a device signature, as JSON — see `parseLedgerSwapPayload`. */
+  swapPayload: string | null;
 }

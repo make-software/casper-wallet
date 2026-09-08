@@ -1,4 +1,12 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import {
+  DEFAULT_DEADLINE,
+  DEFAULT_SLIPPAGE
+} from 'casper-wallet-core/src/domain/constants/config';
+import {
+  clampDeadlineValue,
+  clampSlippageValue
+} from 'casper-wallet-core/src/utils/swap';
 
 import { NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
@@ -13,7 +21,9 @@ const initialState: SettingsState = {
   activeTimeoutDuration: TimeoutDurationSetting['5 min'],
   isDarkMode: false, // Deprecated
   themeMode: isSafariBuild ? ThemeMode.LIGHT : ThemeMode.SYSTEM,
-  systemColorScheme: null
+  systemColorScheme: null,
+  swapSlippage: DEFAULT_SLIPPAGE,
+  swapDeadline: DEFAULT_DEADLINE
 };
 
 const slice = createSlice({
@@ -40,7 +50,15 @@ const slice = createSlice({
     systemColorSchemeChanged: (
       state,
       { payload }: PayloadAction<'dark' | 'light'>
-    ) => ({ ...state, systemColorScheme: payload })
+    ) => ({ ...state, systemColorScheme: payload }),
+    swapSlippageSettingChanged: (
+      state,
+      { payload }: PayloadAction<number>
+    ) => ({ ...state, swapSlippage: clampSlippageValue(payload) }),
+    swapDeadlineSettingChanged: (
+      state,
+      { payload }: PayloadAction<number>
+    ) => ({ ...state, swapDeadline: clampDeadlineValue(payload) })
   }
 });
 
@@ -48,6 +66,8 @@ export const {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
   casperNetworkApiVersionChanged,
+  swapDeadlineSettingChanged,
+  swapSlippageSettingChanged,
   systemColorSchemeChanged,
   themeModeSettingChanged,
   vaultSettingsReseted

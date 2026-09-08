@@ -83,12 +83,16 @@ export const SelectAccountsToRecoverPage = () => {
   }, [accountsBalances, derivedAccounts, isLoadingBalances]);
 
   const onLoadMore = () => {
+    const secretPhrase = location.state?.secretPhrase;
+
+    if (!secretPhrase) return;
+
     try {
       setIsLoadingMore(true);
       const keyPairs = getKeyPairList({
         size: 5,
         offset: derivedAccounts.length,
-        secretPhrase: location.state?.secretPhrase
+        secretPhrase
       });
 
       setDerivedAccounts(prevState => [...prevState, ...keyPairs]);

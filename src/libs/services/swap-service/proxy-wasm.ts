@@ -1,0 +1,39 @@
+/**
+ * SHA-256 of `src/assets/wasm/proxy_caller.wasm`, `shasum -a 256`.
+ *
+ * `casper-wallet-core` verifies the loaded bytes against this once and refuses to build a swap
+ * on a mismatch. The check is worth having because the bytes run as session code in the user's
+ * account context with access to their main purse, and both the wallet UI and the Ledger prompt
+ * show only "ModuleBytes".
+ *
+ * The bytes were copied from the cspr.trade web app's own `src/assets/proxy_caller.wasm`, which
+ * is why they satisfy the router's contract. The hash attests only that the file on disk is the
+ * one this line was written for, so changing either is a trust decision, not a refresh — record
+ * the new source (repository, commit, build command) here when you do.
+ */
+export const PROXY_CALLER_WASM_SHA256 =
+  '6f25e7a3098d8301a36327ec17e70570004f30985e3682d61bd849ee4c24548d';
+
+/** Decodes what the `base64-loader` webpack rule hands back for a `.wasm` import. */
+export const base64ToBytes = (base64: string): Uint8Array => {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return bytes;
+};
+
+/**
+ * The proxy-caller session code every swap, wrap and unwrap transaction carries.
+ *
+ * The import is eager, so the bytes ship inside each entry that reaches this module rather than
+ * in a chunk of their own: the background entry is a service worker, which has no document to
+ * load an async chunk with, and `AssertSingleFileEntries` fails the build over one.
+ */
+export const getProxyWasm = (): Promise<Uint8Array> =>
+  import(/* webpackMode: "eager" */ '@src/assets/wasm/proxy_caller.wasm').then(
+    module => base64ToBytes(module.default)
+  );

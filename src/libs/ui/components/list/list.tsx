@@ -52,7 +52,7 @@ const RowContainer = styled(FlexColumn)<{ rowContainerColor?: string }>`
 const ListHeaderContainer = styled(FlexColumn)<ListHeaderContainerProps>`
   ${({ stickyHeader, theme }) =>
     stickyHeader
-      ? `position: sticky; top: 72px; z-index: 2; background: ${theme.color.backgroundSecondary}};`
+      ? `position: sticky; top: 72px; z-index: 2; background: ${theme.color.backgroundSecondary};`
       : ''};
 
   &::after {
