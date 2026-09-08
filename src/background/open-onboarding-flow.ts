@@ -17,8 +17,22 @@ export async function disableOnboardingFlow() {
 }
 
 export async function enableOnboardingFlow() {
+  // An empty string detaches the popup and routes clicks to `onClicked`; `null` would restore
+  // the manifest's `default_popup` instead, which is the opposite of what this call means.
   action?.setPopup && action.setPopup({ popup: '' });
   browserAction?.setPopup && browserAction.setPopup({ popup: '' });
+}
+
+/**
+ * Points the toolbar icon at the flow the vault's state calls for. The manifest opens
+ * `popup.html` by default, so an unfinished onboarding has to detach it explicitly: whatever
+ * the icon does before this resolves is what the manifest says, and the store it reads from
+ * only exists after a storage round-trip.
+ */
+export async function syncOnboardingFlow(isOnboardingCompleted: boolean) {
+  return isOnboardingCompleted
+    ? disableOnboardingFlow()
+    : enableOnboardingFlow();
 }
 
 export async function openOnboardingUi() {
