@@ -38,7 +38,7 @@
     "start:firefox": "npm run dev:firefox",
     "format:check": "prettier --check 'src/*.{js,jsx,ts,tsx,json,md}'",
     "format:write": "prettier --write 'src/*.{js,jsx,ts,tsx,json,md}'",
-    "lint": "eslint ./src",
+    "lint": "eslint ./src --cache --cache-location node_modules/.cache/eslint/",
     "check:casper-sdk-version": "node -e \"const a=require('./package.json').dependencies['casper-js-sdk'],b=require('casper-wallet-core/package.json').dependencies['casper-js-sdk'];if(a!==b){console.error('casper-js-sdk version drift: root pins '+a+', casper-wallet-core pins '+b);process.exit(1)}console.log('casper-js-sdk versions match: '+a)\"",
     "semgrep": "semgrep --config=./.semgrep.yml --metrics=off src/",
     "semgrep:test": "node scripts/semgrep-test.mjs",
