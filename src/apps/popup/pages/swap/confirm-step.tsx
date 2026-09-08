@@ -69,7 +69,7 @@ const ProgressStatusIndicator = ({
 
 interface ConfirmStepProps {
   review: ISwapReviewData;
-  /** The running flow's legs. Empty until a submission starts — see Task 5. */
+  /** The running flow's legs. Empty until the first event, so the details card stays up. */
   progressRows: ISwapProgressRow[];
 }
 

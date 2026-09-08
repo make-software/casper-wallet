@@ -1,8 +1,10 @@
 import {
+  CORE_ERROR_MESSAGE_KEYS,
   IDexToken,
   IDexTokenWithAmount,
   ISwapFlowState,
   IWrapFlowState,
+  LedgerEventStatus,
   SwapQuoteType,
   initialSwapFlowState,
   initialWrapFlowState
@@ -18,8 +20,7 @@ import {
   buildSwapProgressRows,
   buildWrapProgressRows,
   getPreviousSwapStep,
-  isSwapSubmitted,
-  isWrapSubmitted,
+  resolveLegErrorHint,
   resolveSwapBalanceBanner
 } from '@popup/pages/swap/utils';
 
@@ -340,57 +341,37 @@ describe('buildWrapProgressRows', () => {
   });
 });
 
-describe('isSwapSubmitted', () => {
-  it('is false before anything is sent', () => {
-    expect(isSwapSubmitted(flow())).toBe(false);
+describe('resolveLegErrorHint', () => {
+  it('never renders a Ledger status enum', () => {
+    const hint = resolveLegErrorHint(LedgerEventStatus.DeviceLocked, translate);
+
+    expect(hint).toBe('The Ledger device is locked');
+    expect(hint).not.toContain('ledger-');
   });
 
-  it('is false while only the approval has been sent', () => {
-    expect(
-      isSwapSubmitted(
-        flow({ approval: { isRequired: true, status: 'awaiting' } })
-      )
-    ).toBe(false);
+  it('never renders a raw core error key', () => {
+    const [key] = CORE_ERROR_MESSAGE_KEYS;
+    const hint = resolveLegErrorHint(key, translate);
+
+    expect(hint).not.toBeNull();
+    expect(hint).not.toContain('errors:');
   });
 
-  it('is true once the swap leg has been accepted by a node', () => {
-    expect(
-      isSwapSubmitted(flow({ swap: { status: 'awaiting', hash: 'ab' } }))
-    ).toBe(true);
-  });
+  it.each(CORE_ERROR_MESSAGE_KEYS.map(key => [key]))(
+    'has copy for the core key %s',
+    key => {
+      expect(resolveLegErrorHint(key, translate)).not.toContain('errors:');
+    }
+  );
 
-  it('stays true if the swap leg later reports success', () => {
-    expect(
-      isSwapSubmitted(flow({ swap: { status: 'success', hash: 'ab' } }))
-    ).toBe(true);
-  });
-
-  it('is false when the swap leg failed', () => {
-    expect(isSwapSubmitted(flow({ swap: { status: 'error' } }))).toBe(false);
-  });
-});
-
-describe('isWrapSubmitted', () => {
-  it('is false before anything is sent', () => {
-    expect(isWrapSubmitted(wrapFlow())).toBe(false);
-  });
-
-  it('is true once the wrap leg has been accepted by a node', () => {
-    expect(
-      isWrapSubmitted(wrapFlow({ wrap: { status: 'awaiting', hash: 'ab' } }))
-    ).toBe(true);
-  });
-
-  it('stays true if the wrap leg later reports success', () => {
-    expect(
-      isWrapSubmitted(wrapFlow({ wrap: { status: 'success', hash: 'ab' } }))
-    ).toBe(true);
-  });
-
-  it('is false when the wrap leg failed', () => {
-    expect(isWrapSubmitted(wrapFlow({ wrap: { status: 'error' } }))).toBe(
-      false
+  it('shows a node message as it arrived', () => {
+    expect(resolveLegErrorHint('deploy is invalid: expired', translate)).toBe(
+      'deploy is invalid: expired'
     );
+  });
+
+  it.each([[undefined], ['']])('has no hint for %p', error => {
+    expect(resolveLegErrorHint(error, translate)).toBeNull();
   });
 });
 

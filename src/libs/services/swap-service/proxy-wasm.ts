@@ -5,6 +5,11 @@
  * on a mismatch. The check is worth having because the bytes run as session code in the user's
  * account context with access to their main purse, and both the wallet UI and the Ledger prompt
  * show only "ModuleBytes".
+ *
+ * The bytes were copied from the cspr.trade web app's own `src/assets/proxy_caller.wasm`, which
+ * is why they satisfy the router's contract. The hash attests only that the file on disk is the
+ * one this line was written for, so changing either is a trust decision, not a refresh — record
+ * the new source (repository, commit, build command) here when you do.
  */
 export const PROXY_CALLER_WASM_SHA256 =
   '6f25e7a3098d8301a36327ec17e70570004f30985e3682d61bd849ee4c24548d';

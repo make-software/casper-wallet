@@ -56,8 +56,8 @@ export function getCustomTokenStatus({
     return 'idle';
   }
 
-  // A blacklisted token is deliberately reported as not-found — see the
-  // Task 3 Intent for why "blacklisted" is never surfaced to the user.
+  // Reported as not-found, never as blacklisted: such a token is deliberately unreachable, and
+  // naming the list is an invitation to look for a way around it.
   if (token.isBlacklisted) {
     return 'not-found';
   }

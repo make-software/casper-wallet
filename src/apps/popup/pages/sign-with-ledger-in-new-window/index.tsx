@@ -6,11 +6,17 @@ import {
   createWrapFlowRunner
 } from 'casper-wallet-core';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { getCasperNetwork } from '@src/constants';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import {
+  SwapFlowOutcome,
+  resolveSwapFlowOutcome,
+  resolveWrapFlowOutcome
+} from '@popup/pages/swap/flow-events';
 import { parseLedgerSwapPayload } from '@popup/pages/swap/ledger-trade';
 
 import { fetchAccountSecretKey } from '@background/handlers/vault-secrets';
@@ -40,13 +46,19 @@ import { useLedger } from '@hooks/use-ledger';
 import { CasperWalletSupports } from '@content/sdk-types';
 
 import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
+import {
+  getTransactionErrorCopy,
+  isLedgerFailure
+} from '@libs/services/core-errors';
 import { sendSignedTx, signTx } from '@libs/services/deployer-service';
 import { LedgerEventStatus, ledger } from '@libs/services/ledger';
 import { LedgerConnectionView } from '@libs/ui/components';
 
+import { FailureView } from './failure-view';
 import { SuccessView } from './success-view';
 
 export const SignWithLedgerInNewWindowPage = () => {
+  const { t } = useTranslation();
   const deployJson = useSelector(selectLedgerDeploy);
   const txJson = useSelector(selectLedgerTransaction);
   const recipient = useSelector(selectLedgerRecipientToSaveOnSuccess);
@@ -55,9 +67,47 @@ export const SignWithLedgerInNewWindowPage = () => {
   const activeNetworkSetting = useSelector(selectActiveNetworkSetting);
   const network = getCasperNetwork(activeNetworkSetting);
   const [isSuccess, setIsSuccess] = useState(false);
+  // Non-null once a submission has failed for a reason the device cannot show. Ledger failures
+  // are left to `LedgerConnectionView`, which renders them from the status channel.
+  const [failure, setFailure] = useState<{
+    header: string;
+    content: string;
+  } | null>(null);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
+
+  const reportFailure = (error: unknown) => {
+    if (isLedgerFailure(error)) {
+      return;
+    }
+
+    console.error(error, 'ledger permission window submission error');
+    setFailure(getTransactionErrorCopy(error, key => t(key)));
+  };
+
+  const applyOutcome = (outcome: SwapFlowOutcome) => {
+    switch (outcome.kind) {
+      case 'sent':
+        dispatchToMainStore(accountPendingDeployHashesChanged(outcome.hash));
+
+        if (outcome.isSubmitted) {
+          setIsSuccess(true);
+        }
+
+        break;
+
+      case 'failed':
+        reportFailure(outcome.error);
+
+        break;
+
+      default:
+        // `cancelled` reaches the user through the device status the Ledger view renders; the
+        // remaining events are progress this window does not draw.
+        break;
+    }
+  };
 
   const ledgerAction = async () => {
     const parkedPayload = parseLedgerSwapPayload(swapPayloadJson);
@@ -95,15 +145,8 @@ export const SignWithLedgerInNewWindowPage = () => {
         });
 
         handle.events$.subscribe({
-          next: event => {
-            if (event.type === 'wrap:sent') {
-              dispatchToMainStore(
-                accountPendingDeployHashesChanged(event.hash)
-              );
-              setIsSuccess(true);
-            }
-          },
-          error: error => console.error(error, 'wrap signing error')
+          next: event => applyOutcome(resolveWrapFlowOutcome(event)),
+          error: reportFailure
         });
       } else {
         const handle = createSwapFlowRunner(deps).start({
@@ -114,19 +157,8 @@ export const SignWithLedgerInNewWindowPage = () => {
         });
 
         handle.events$.subscribe({
-          next: event => {
-            // Both legs are the user's own transactions, so both belong in Activity right away.
-            if (event.type === 'approval:sent' || event.type === 'swap:sent') {
-              dispatchToMainStore(
-                accountPendingDeployHashesChanged(event.hash)
-              );
-
-              if (event.type === 'swap:sent') {
-                setIsSuccess(true);
-              }
-            }
-          },
-          error: error => console.error(error, 'swap signing error')
+          next: event => applyOutcome(resolveSwapFlowOutcome(event)),
+          error: reportFailure
         });
       }
 
@@ -162,9 +194,7 @@ export const SignWithLedgerInNewWindowPage = () => {
 
         setIsSuccess(true);
       })
-      .catch(error => {
-        console.error(error, 'transfer request error');
-      });
+      .catch(reportFailure);
   };
 
   const {
@@ -177,6 +207,16 @@ export const SignWithLedgerInNewWindowPage = () => {
     initialEventToRender: { status: LedgerEventStatus.LedgerAskPermission },
     withWaitingEventOnDisconnect: false
   });
+
+  if (failure) {
+    return (
+      <FailureView
+        header={failure.header}
+        content={failure.content}
+        onClose={closeNewLedgerWindowsAndClearState}
+      />
+    );
+  }
 
   return isSuccess ? (
     <SuccessView onClose={closeNewLedgerWindowsAndClearState} />

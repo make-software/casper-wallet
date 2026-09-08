@@ -55,7 +55,7 @@ import { useLedger } from '@hooks/use-ledger';
 
 import { sdkMethod } from '@content/sdk-method';
 
-import { convertBytesToHex } from '@libs/crypto/utils';
+import { toProviderSignatureHex } from '@libs/crypto/provider-signature';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AlignedFlexRow,
@@ -234,7 +234,7 @@ export function SignTransactionPage() {
   ]);
 
   const handleSign = useCallback(async () => {
-    let signature: Uint8Array | null = null;
+    let signatureHex: string | null = null;
 
     if (!transaction) {
       // Every signing route funnels through here, including the Ledger footer's
@@ -265,9 +265,9 @@ export function SignTransactionPage() {
           derivationIndex: signingAccount.derivationIndex,
           supportsTransactionV1Cb: changeActiveAccountSupportsWithEvent
         });
-        const resp = await signer.signTransaction(transaction);
-
-        signature = resp.signature;
+        signatureHex = toProviderSignatureHex(
+          await signer.signTransaction(transaction)
+        );
       } else {
         const secretKey = await fetchAccountSecretKey(signingAccount.name);
 
@@ -287,9 +287,9 @@ export function SignTransactionPage() {
           publicKeyHex: signingAccount.publicKey,
           secretKeyBase64: secretKey
         });
-        const resp = await signer.signTransaction(transaction);
-
-        signature = resp.signature;
+        signatureHex = toProviderSignatureHex(
+          await signer.signTransaction(transaction)
+        );
       }
     } catch (caught) {
       // The Ledger views render their own failures; answering the dapp here as well would
@@ -314,15 +314,12 @@ export function SignTransactionPage() {
       return;
     }
 
-    if (!signature) {
+    if (!signatureHex) {
       return;
     }
 
     sendSdkResponseToSpecificTab(
-      sdkMethod.signResponse(
-        { signatureHex: convertBytesToHex(signature), cancelled: false },
-        { requestId }
-      ),
+      sdkMethod.signResponse({ signatureHex, cancelled: false }, { requestId }),
       requestTabId
     );
     closeCurrentWindow();

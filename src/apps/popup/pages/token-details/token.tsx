@@ -23,7 +23,10 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { useFetchCep18Tokens } from '@libs/services/cep18-service';
-import { useIsTokenSwappable } from '@libs/services/swap-service';
+import {
+  toSwapTokenId,
+  useIsTokenSwappable
+} from '@libs/services/swap-service';
 import {
   Button,
   Hash,
@@ -214,7 +217,9 @@ export const Token = () => {
               onClick={() =>
                 navigate(RouterPath.Swap, {
                   state: {
-                    swapFromTokenId: tokenData?.contractPackageHash ?? 'cspr'
+                    swapFromTokenId: toSwapTokenId(
+                      tokenData?.contractPackageHash
+                    )
                   }
                 })
               }

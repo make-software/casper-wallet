@@ -40,7 +40,10 @@ const buildTransferDeploy = (senderPrivateKey: PrivateKey) =>
     '1.5.8'
   ).fallbackDeploy;
 
-describe('sign-deploy', () => {
+// Exercises `casper-wallet-core`'s private-key signer, not wallet code: the wallet's own
+// decision — which of the two signatures a dapp receives — lives in `provider-signature.ts` and
+// is tested there.
+describe('casper-wallet-core transaction signer', () => {
   it('should get correct signature for Ed25519 keyPair', async () => {
     const privateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
     const tx = Transaction.fromDeploy(buildTransferDeploy(privateKey));

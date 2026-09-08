@@ -1,4 +1,4 @@
-import React, { type JSX, useState } from 'react';
+import React, { type JSX, useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -12,6 +12,8 @@ import {
   selectAskForReviewAfter,
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
+import { selectActiveNetworkSetting } from '@background/redux/settings/selectors';
+import { selectIsActiveAccountFromLedger } from '@background/redux/vault/selectors';
 
 import { useLedger } from '@hooks/use-ledger';
 import { useSubmitButton } from '@hooks/use-submit-button';
@@ -84,6 +86,8 @@ export const SwapPage = () => {
 
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
+  const isLedgerAccount = useSelector(selectIsActiveAccountFromLedger);
+  const activeNetworkSetting = useSelector(selectActiveNetworkSetting);
 
   const [swapStep, setSwapStep] = useState<SwapSteps>(SwapSteps.Form);
   // What the form currently quotes, and the snapshot taken when the user pressed Review. The
@@ -105,11 +109,11 @@ export const SwapPage = () => {
     visibleStep === SwapSteps.Confirm
   );
 
-  const { submit, flowState, isProcessing } = useSwapSubmit({
+  const { submit, parkLedgerPayload, flowState, isProcessing } = useSwapSubmit({
     review,
     onSubmitted: () => setSwapStep(SwapSteps.Success),
     // A software-key account never emits a `ledger` event, so this only ever fires for a
-    // Ledger one — `submit` itself parks the payload before calling it.
+    // Ledger one.
     onLedgerStep: () => setSwapStep(SwapSteps.ConfirmWithLedger)
   });
 
@@ -117,7 +121,12 @@ export const SwapPage = () => {
   // the device needs it, regardless of which code path is driving the Ledger interaction.
   const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
     ledgerAction: submit,
-    beforeLedgerActionCb: async () => {}
+    // Parking lives here, not in `submit`: the Connect CTA below dispatches `ledgerStateCleared`
+    // before calling this, and with no device connected `submit` never runs at all.
+    beforeLedgerActionCb: async () => {
+      setSwapStep(SwapSteps.ConfirmWithLedger);
+      parkLedgerPayload();
+    }
   });
   const ledgerFooterButton = renderLedgerFooter({
     onConnect: makeSubmitLedgerAction,
@@ -139,6 +148,19 @@ export const SwapPage = () => {
 
   const labels =
     swapModeLabels[review == null ? 'swap' : getReviewMode(review)];
+
+  // The switcher is hidden past the form, but the setting is global: another surface can change
+  // it mid-review. Start over rather than submit one network's quote to the other's router.
+  const entryNetworkRef = useRef(activeNetworkSetting);
+  useEffect(() => {
+    if (entryNetworkRef.current === activeNetworkSetting) {
+      return;
+    }
+
+    entryNetworkRef.current = activeNetworkSetting;
+    setReview(null);
+    setSwapStep(SwapSteps.Form);
+  }, [activeNetworkSetting]);
 
   const goToPreviousStep = () => {
     const previousStep = getPreviousSwapStep(swapStep);
@@ -234,11 +256,11 @@ export const SwapPage = () => {
           color="primaryBlue"
           type="button"
           disabled={isSubmitButtonDisable || isProcessing}
-          onClick={submit}
+          onClick={isLedgerAccount ? makeSubmitLedgerAction() : submit}
         >
           {isProcessing ? (
             <CenteredFlexRow gap={SpacingSize.Small}>
-              <Spinner style={{ marginTop: 0 }} />
+              <Spinner style={{ marginTop: 0, marginRight: 12 }} />
               <Trans t={t}>{labels.confirmTitle}</Trans>
             </CenteredFlexRow>
           ) : (
@@ -285,7 +307,9 @@ export const SwapPage = () => {
     <PopupLayout
       renderHeader={() => (
         <HeaderPopup
-          withNetworkSwitcher
+          // Past the form, `review` holds a quote whose package hashes and route are specific to
+          // the network that produced it, and switching would submit it against the other chain.
+          withNetworkSwitcher={visibleStep === SwapSteps.Form}
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={

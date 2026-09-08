@@ -47,7 +47,7 @@ describe('buildSwapDependencies', () => {
     expect(deps.activePublicKey).toBeNull();
   });
 
-  it('never wires a flow runner, on any account state', () => {
+  it('leaves core’s review-hook runners unwired, on any account state', () => {
     const connected = buildSwapDependencies({
       network: 'mainnet',
       activePublicKey: '0123456789abcdef'

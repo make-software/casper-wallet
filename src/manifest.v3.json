@@ -37,6 +37,8 @@
     "https://api.integration.casperwallet.io/*",
     "https://node.integration.cspr.cloud/*",
     "https://onramp-api.cspr.click/api/*",
+    "https://api.cspr.trade/*",
+    "https://api.testnet.cspr.trade/*",
     "https://*.bringweb3.io/*"
   ],
   "background": {

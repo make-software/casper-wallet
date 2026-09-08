@@ -30,7 +30,8 @@ export const buildSwapDependencies = ({
   dexContractRepository,
   tokensRepository,
   network,
-  // Signing belongs to WALLET-1315; the review hooks are never called here.
+  // Read only by core hooks this app never mounts: `useSwapSubmit` builds a runner per
+  // submission instead, so the secret key's lifetime matches the flow's.
   swapFlowRunner: null,
   wrapFlowRunner: null,
   activePublicKey

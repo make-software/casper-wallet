@@ -1,4 +1,5 @@
 import { IDexToken } from 'casper-wallet-core';
+import { CSPR_NATIVE_TOKEN_ID } from 'casper-wallet-core/src/domain/constants/config';
 
 import { NetworkSetting } from '@src/constants';
 
@@ -6,7 +7,8 @@ import { TokenType } from '@hooks/use-casper-token';
 
 import {
   isSwapAvailable,
-  isTokenSwappable
+  isTokenSwappable,
+  toSwapTokenId
 } from '@libs/services/swap-service/utils';
 
 const dexToken = (packageHash: string): IDexToken => ({
@@ -86,6 +88,18 @@ describe('isTokenSwappable', () => {
     );
   });
 
+  it('matches a wallet-side hash that carries the hash- prefix', () => {
+    expect(isTokenSwappable([dexToken(HASH)], cep18(`hash-${HASH}`))).toBe(
+      true
+    );
+  });
+
+  it('matches a list hash that carries the hash- prefix', () => {
+    expect(isTokenSwappable([dexToken(`hash-${HASH}`)], cep18(HASH))).toBe(
+      true
+    );
+  });
+
   it('rejects a CEP-18 token absent from the list', () => {
     expect(isTokenSwappable([dexToken(HASH)], cep18('f'.repeat(64)))).toBe(
       false
@@ -102,5 +116,32 @@ describe('isTokenSwappable', () => {
 
   it('rejects a missing token', () => {
     expect(isTokenSwappable([dexToken(HASH)], null)).toBe(false);
+  });
+});
+
+describe('toSwapTokenId', () => {
+  it('reports a token with no package hash as the native CSPR id', () => {
+    expect(toSwapTokenId()).toBe(CSPR_NATIVE_TOKEN_ID);
+    expect(toSwapTokenId(undefined)).toBe(CSPR_NATIVE_TOKEN_ID);
+  });
+
+  it('lower-cases the package hash, so the unwrap deep link matches the core constant', () => {
+    expect(toSwapTokenId(HASH.toUpperCase())).toBe(HASH);
+  });
+
+  it('strips the hash- prefix', () => {
+    expect(toSwapTokenId(`hash-${HASH}`)).toBe(HASH);
+    expect(toSwapTokenId(`HASH-${HASH.toUpperCase()}`)).toBe(HASH);
+  });
+
+  it('passes an already normalized hash through unchanged', () => {
+    expect(toSwapTokenId(HASH)).toBe(HASH);
+  });
+
+  it('produces an id every token the Swap button is offered for can be found by', () => {
+    expect(isTokenSwappable([dexToken(HASH)], cep18(`hash-${HASH}`))).toBe(
+      true
+    );
+    expect(toSwapTokenId(`hash-${HASH}`)).toBe(dexToken(HASH).packageHash);
   });
 });

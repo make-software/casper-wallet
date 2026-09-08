@@ -28,7 +28,7 @@ import {
   useFetchCsprNameExpirations
 } from '@libs/services/account-info';
 import { useGetActiveAppMarketingEvent } from '@libs/services/app-events';
-import { isSwapAvailable } from '@libs/services/swap-service';
+import { isSwapAvailable, toSwapTokenId } from '@libs/services/swap-service';
 import {
   Button,
   SvgIcon,
@@ -158,7 +158,7 @@ export function HomePageContent() {
                   gap={SpacingSize.Small}
                   onClick={() =>
                     navigate(RouterPath.Swap, {
-                      state: { swapFromTokenId: 'cspr' }
+                      state: { swapFromTokenId: toSwapTokenId() }
                     })
                   }
                 >

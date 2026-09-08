@@ -48,12 +48,9 @@ describe('TokenSelectorRow', () => {
   it('renders "Unlisted token" instead of the name when the token is unlisted', () => {
     const html = render({ isUnlisted: true });
 
-    // The name still appears as the icon's title/tooltip; only the secondary
-    // line (captionRegular) is asserted here, per the token's listed status.
-    expect(html).toContain(
-      '<span type="captionRegular" color="contentSecondary"'
-    );
-    expect(html).toContain('Unlisted token');
-    expect(html).not.toMatch(/captionRegular"[^<]*>Shiboo Coin</);
+    // Asserted as rendered text: the name still reaches the markup as the icon's title
+    // attribute, so only its absence as element content says the secondary line was replaced.
+    expect(html).toContain('>Unlisted token<');
+    expect(html).not.toContain('>Shiboo Coin<');
   });
 });

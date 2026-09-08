@@ -85,9 +85,7 @@ export const selectIsCasper2Network = (state: RootState) =>
 export const selectSystemColorScheme = (state: RootState) =>
   state.settings.systemColorScheme;
 
-// `settings` is hydrated from storage.local as preloadedState, which Redux does not
-// merge with the slice's initialState — a vault written before these fields existed
-// reaches here without them.
+// The defaults below are load-bearing, not defensive — see `SettingsState.swapSlippage`.
 export const selectSwapSlippageSetting = (state: RootState) =>
   state.settings.swapSlippage ?? DEFAULT_SLIPPAGE;
 

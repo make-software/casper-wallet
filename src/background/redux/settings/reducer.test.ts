@@ -2,6 +2,8 @@ import { NetworkSetting } from '@src/constants';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 
+import { RootState } from '@background/redux/store-types';
+
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
@@ -138,7 +140,7 @@ describe('swap settings', () => {
   it('falls back to the defaults for a settings shape persisted before swap existed', () => {
     const legacy = {
       settings: { activeNetwork: NetworkSetting.Mainnet }
-    } as any;
+    } as unknown as RootState;
     expect(selectSwapSlippageSetting(legacy)).toBe(3);
     expect(selectSwapDeadlineSetting(legacy)).toBe(20);
   });

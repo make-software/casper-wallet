@@ -38,8 +38,6 @@ describe('SwapBanner', () => {
   });
 
   it('omits the body when none is given', () => {
-    const html = render();
-
-    expect(html).not.toContain('captionRegular');
+    expect(render()).not.toContain('Please select a different trading pair.');
   });
 });

@@ -1,6 +1,7 @@
 import { WrappedCsprContractPackageHash } from 'casper-wallet-core/src/domain/constants/casperNetwork';
 import { USD_CURRENCY_CODE } from 'casper-wallet-core/src/domain/constants/common';
 import { CSPR_NATIVE_TOKEN_ID } from 'casper-wallet-core/src/domain/constants/config';
+import type { IDexTokenWithAmount } from 'casper-wallet-core/src/domain/swap';
 import type { ISwapDependencies } from 'casper-wallet-core/src/react';
 import {
   useFetchCsprFiatRates,
@@ -10,7 +11,8 @@ import {
 } from 'casper-wallet-core/src/react';
 import {
   calculateMaxUsableBalance,
-  calculateSwapFee
+  calculateSwapFee,
+  calculateTokenFiatAmount
 } from 'casper-wallet-core/src/utils/swap';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -247,8 +249,8 @@ export function FormStep({
   const unlistedTokenPackageHash =
     swapFormMode === 'swap' ? (unlistedTokens[0]?.packageHash ?? null) : null;
 
-  // The one-quote rule: every field the swap arm carries comes off this single
-  // `quotedTrade` snapshot, with fiat amounts attached from the same render that produced it.
+  // The one-quote rule: every field the swap arm carries comes off this single `quotedTrade`
+  // snapshot, fiat included — the form's own fiat amounts lag it and would disagree on the row.
   const swapReview = useMemo<ISwapReviewData | null>(() => {
     if (!isFormValid) {
       return null;
@@ -259,16 +261,25 @@ export function FormStep({
         return null;
       }
 
+      const quotedFiatAmount = (token: IDexTokenWithAmount) =>
+        calculateTokenFiatAmount(
+          token,
+          token.amountFormatted,
+          USD_CURRENCY_CODE,
+          token.fiatRates,
+          csprFiatRates
+        );
+
       return {
         kind: 'swap',
         trade: {
           firstToken: {
             ...quotedTrade.firstToken,
-            fiatAmount: firstTokenFiatAmount
+            fiatAmount: quotedFiatAmount(quotedTrade.firstToken)
           },
           secondToken: {
             ...quotedTrade.secondToken,
-            fiatAmount: secondTokenFiatAmount
+            fiatAmount: quotedFiatAmount(quotedTrade.secondToken)
           },
           path: quotedTrade.path,
           quoteType: quotedTrade.quoteType
@@ -297,8 +308,7 @@ export function FormStep({
     isFormValid,
     swapFormMode,
     quotedTrade,
-    firstTokenFiatAmount,
-    secondTokenFiatAmount,
+    csprFiatRates,
     quote,
     priceImpact,
     wrapDirection,

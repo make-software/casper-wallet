@@ -5,12 +5,15 @@ import {
   TransactionStatus,
   WrapDirection
 } from 'casper-wallet-core';
+import type { LedgerEventStatus } from 'casper-wallet-core';
 import { TOKEN_DISPLAY_DECIMALS } from 'casper-wallet-core/src/domain/constants/config';
 import { IDexToken } from 'casper-wallet-core/src/domain/swap';
 
-// Deep path: the layout barrel reaches webextension-polyfill, which throws under the node-only
-// jest environment this module's tests run in.
+// Deep paths: the layout barrel reaches webextension-polyfill, which throws under the node-only
+// jest environment this module's tests run in, and the ledger barrel reaches its transports.
 import type { NavLinkTokenBalance } from '@libs/layout/header/nav-link-balance';
+import { getCoreErrorCopy } from '@libs/services/core-errors';
+import { ledgerErrorsData } from '@libs/services/ledger/errors';
 
 import { formatAmountForDisplay } from './amount-input-utils';
 import { ISwapReviewData } from './types';
@@ -151,6 +154,36 @@ export const buildSwapDetailRows = (
   return rows;
 };
 
+const isLedgerEventStatus = (value: string): value is LedgerEventStatus =>
+  Object.prototype.hasOwnProperty.call(ledgerErrorsData, value);
+
+/**
+ * Wallet copy for a leg error, which core has already flattened to a string: a device status
+ * enum, an `errors:*` key, or a node message. i18next runs here with `nsSeparator: false`, so
+ * the first two would otherwise render verbatim; the third is shown as it arrived, being the
+ * only text that says what the network actually objected to.
+ */
+export const resolveLegErrorHint = (
+  error: string | undefined,
+  translate: (key: string) => string
+): string | null => {
+  if (error == null || error === '') {
+    return null;
+  }
+
+  const ledgerCopy = isLedgerEventStatus(error)
+    ? ledgerErrorsData[error].title
+    : null;
+
+  if (ledgerCopy != null) {
+    return translate(ledgerCopy);
+  }
+
+  const coreCopy = getCoreErrorCopy(new Error(error));
+
+  return coreCopy == null ? error : translate(coreCopy.message);
+};
+
 export const buildSwapProgressRows = (
   state: ISwapFlowState,
   translate: (key: string) => string
@@ -160,14 +193,14 @@ export const buildSwapProgressRows = (
     text: translate('Approval'),
     status: state.approval.status,
     hint:
-      state.approval.error ??
+      resolveLegErrorHint(state.approval.error, translate) ??
       (state.approval.isRequired ? null : translate('Not needed'))
   },
   {
     id: 'swap',
     text: translate('Swap'),
     status: state.swap.status,
-    hint: state.swap.error ?? null
+    hint: resolveLegErrorHint(state.swap.error, translate)
   }
 ];
 
@@ -184,23 +217,9 @@ export const buildWrapProgressRows = (
     id: 'wrap',
     text: translate(direction === 'wrap' ? 'Wrap' : 'Unwrap'),
     status: state.wrap.status,
-    hint: state.wrap.error ?? null
+    hint: resolveLegErrorHint(state.wrap.error, translate)
   }
 ];
-
-/**
- * Whether the swap leg has been accepted by a node — the wallet's definition of a submitted
- * transaction, and the gate on the success screen.
- *
- * Not `state.step === 'success'`: core only reaches that on a `swap:confirmed` event, which is
- * never emitted while the flow runs with `awaitSettlement: false`.
- */
-export const isSwapSubmitted = (state: ISwapFlowState): boolean =>
-  state.swap.status === 'awaiting' || state.swap.status === 'success';
-
-/** See {@link isSwapSubmitted} — the wrap flow's single leg is judged the same way. */
-export const isWrapSubmitted = (state: IWrapFlowState): boolean =>
-  state.wrap.status === 'awaiting' || state.wrap.status === 'success';
 
 /**
  * The pay leg's balance for the header, formatted like the amount cards. `null` until a token

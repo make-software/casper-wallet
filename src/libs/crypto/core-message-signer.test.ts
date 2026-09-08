@@ -15,7 +15,8 @@ const getMessageSignature = async (message: string, privateKey: PrivateKey) => {
   return signer.signMessage(message);
 };
 
-describe('sign-message', () => {
+// See core-transaction-signer.test.ts: this covers the vendored signer, not wallet code.
+describe('casper-wallet-core message signer', () => {
   const message = 'Correct';
   const wrongMessage = 'asdfsad';
 
