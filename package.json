@@ -95,7 +95,7 @@
     "@zondax/ledger-casper": "^2.6.4",
     "big.js": "^7.0.1",
     "casper-js-sdk": "5.1.1",
-    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#e6bd4e9622da70537206ab71136c6be0dc49ddb6",
+    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#931238e3d488811ac4a919e7a8cb76dae0fbfd31",
     "date-fns": "^4.1.0",
     "i18next": "^26.4.0",
     "i18next-browser-languagedetector": "^8.2.1",
