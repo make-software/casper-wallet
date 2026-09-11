@@ -5,11 +5,7 @@ import type {
 } from '@ledgerhq/device-management-kit';
 import { webBleIdentifier } from '@ledgerhq/device-transport-kit-web-ble';
 import { webHidIdentifier } from '@ledgerhq/device-transport-kit-web-hid';
-import { ledgerUSBVendorId } from '@ledgerhq/devices';
 import BluetoothTransport from '@ledgerhq/hw-transport-web-ble';
-import TransportWebHID from '@ledgerhq/hw-transport-webhid';
-import TransportWebUsb from '@ledgerhq/hw-transport-webusb';
-import { getLedgerDevices } from '@ledgerhq/hw-transport-webusb/lib/webusb';
 import { LedgerError, type TransportCreator } from 'casper-wallet-core';
 import { type Subscription, firstValueFrom } from 'rxjs';
 
@@ -142,36 +138,15 @@ export const usbTransportCreator: TransportCreator = () =>
 export const bluetoothTransportCreator: TransportCreator = () =>
   connectLedgerTransport(getDmk(), webBleIdentifier);
 
-export const getPreferredTransport = async (): Promise<SelectedTransport> => {
-  if (await TransportWebHID.isSupported()) {
-    // Copy from TransportWebHID.getLedgerDevices source code
-    const getHID = (): null | Record<'getDevices', () => Promise<any[]>> => {
-      // @ts-ignore
-      const { hid } = navigator;
+/**
+ * Answers "is a Ledger already permitted?" without prompting, via `listPermittedDevices`. Only
+ * ever probes USB — paired BLE devices cannot be silently enumerated the way
+ * `navigator.hid.getDevices()` can, so the return type excludes `'Bluetooth'`.
+ */
+export const getPreferredTransport = async (
+  dmk: Pick<DeviceManagementKit, 'listenToAvailableDevices'> = getDmk()
+): Promise<SelectedTransport> => {
+  const devices = await listPermittedDevices(dmk, webHidIdentifier);
 
-      if (!hid) return null;
-
-      return hid;
-    };
-
-    async function getHiDLedgerDevices(): Promise<any[]> {
-      const devices = (await getHID()?.getDevices()) ?? [];
-
-      return devices.filter((d: any) => d.vendorId === ledgerUSBVendorId);
-    }
-
-    const devices = await getHiDLedgerDevices();
-
-    if (devices.length) {
-      return 'USB';
-    }
-  } else if (await TransportWebUsb.isSupported()) {
-    const devices = await getLedgerDevices();
-
-    if (devices.length) {
-      return 'USB';
-    }
-  }
-
-  return undefined;
+  return devices.length ? 'USB' : undefined;
 };

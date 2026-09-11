@@ -2,10 +2,15 @@ import type {
   DeviceManagementKit,
   DiscoveredDevice
 } from '@ledgerhq/device-management-kit';
+import { webHidIdentifier } from '@ledgerhq/device-transport-kit-web-hid';
 import type { ILedgerTransport } from 'casper-wallet-core';
 import { EMPTY, Observable, of } from 'rxjs';
 
-import { KNOWN_DEVICES_WAIT_MS, connectLedgerTransport } from './transport';
+import {
+  KNOWN_DEVICES_WAIT_MS,
+  connectLedgerTransport,
+  getPreferredTransport
+} from './transport';
 import { LedgerEventStatus } from './types';
 
 const fakeDevice = { id: 'device-1' } as unknown as DiscoveredDevice;
@@ -212,6 +217,111 @@ describe('connectLedgerTransport', () => {
     await jest.advanceTimersByTimeAsync(0);
     await second;
     expect(unsubscribeSpy).toHaveBeenCalledTimes(2);
+  });
+});
+
+function createFakeProbeDmk(
+  overrides: {
+    knownDevices?: DiscoveredDevice[];
+    neverUpdatesKnownDevices?: boolean;
+    errorsKnownDevices?: boolean;
+    unsubscribeSpy?: () => void;
+  } = {}
+) {
+  const listenToAvailableDevices = jest.fn(() =>
+    overrides.errorsKnownDevices
+      ? new Observable<DiscoveredDevice[]>(subscriber => {
+          subscriber.error(new Error('boom'));
+        })
+      : createSeededDevicesObservable(overrides.knownDevices ?? [], {
+          neverUpdates: overrides.neverUpdatesKnownDevices,
+          unsubscribeSpy: overrides.unsubscribeSpy
+        })
+  );
+  const startDiscovering = jest.fn(() => EMPTY);
+
+  return { listenToAvailableDevices, startDiscovering };
+}
+
+describe('getPreferredTransport', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  // Row: A permitted device exists / Never prompts
+  it('resolves USB when a permitted device exists, without prompting', async () => {
+    const dmk = createFakeProbeDmk({ knownDevices: [fakeDevice] });
+
+    await expect(getPreferredTransport(dmk)).resolves.toBe('USB');
+    expect(dmk.startDiscovering).not.toHaveBeenCalled();
+  });
+
+  // Row: Several permitted devices / Never prompts
+  it('resolves USB when several permitted devices exist, without prompting', async () => {
+    const dmk = createFakeProbeDmk({
+      knownDevices: [
+        fakeDevice,
+        { id: 'device-2' } as unknown as DiscoveredDevice
+      ]
+    });
+
+    await expect(getPreferredTransport(dmk)).resolves.toBe('USB');
+    expect(dmk.startDiscovering).not.toHaveBeenCalled();
+  });
+
+  // Row: No permitted device / Never prompts
+  it('resolves undefined when no device is permitted, without prompting', async () => {
+    const dmk = createFakeProbeDmk({ knownDevices: [] });
+
+    await expect(getPreferredTransport(dmk)).resolves.toBeUndefined();
+    expect(dmk.startDiscovering).not.toHaveBeenCalled();
+  });
+
+  // Row: The observable never emits / Falls back after a bounded wait
+  it('resolves undefined after the bounded wait when listenToAvailableDevices never gets past the seeded value', async () => {
+    jest.useFakeTimers();
+    const dmk = createFakeProbeDmk({ neverUpdatesKnownDevices: true });
+
+    const result = getPreferredTransport(dmk);
+    await jest.advanceTimersByTimeAsync(KNOWN_DEVICES_WAIT_MS);
+
+    await expect(result).resolves.toBeUndefined();
+    expect(dmk.startDiscovering).not.toHaveBeenCalled();
+  });
+
+  // Row: The observable errors / Swallowed
+  it('resolves undefined when listenToAvailableDevices errors', async () => {
+    const dmk = createFakeProbeDmk({ errorsKnownDevices: true });
+
+    await expect(getPreferredTransport(dmk)).resolves.toBeUndefined();
+    expect(dmk.startDiscovering).not.toHaveBeenCalled();
+  });
+
+  // Row: Subscription is released
+  it('unsubscribes from listenToAvailableDevices before resolving, with no leak across repeated calls', async () => {
+    const unsubscribeSpy = jest.fn();
+    const dmk = createFakeProbeDmk({
+      knownDevices: [fakeDevice],
+      unsubscribeSpy
+    });
+
+    await getPreferredTransport(dmk);
+    expect(unsubscribeSpy).toHaveBeenCalledTimes(1);
+
+    await getPreferredTransport(dmk);
+    expect(unsubscribeSpy).toHaveBeenCalledTimes(2);
+  });
+
+  // Row: Bluetooth is never returned
+  it('always probes with the USB identifier and never resolves Bluetooth', async () => {
+    const dmk = createFakeProbeDmk({ knownDevices: [fakeDevice] });
+
+    const result = await getPreferredTransport(dmk);
+
+    expect(dmk.listenToAvailableDevices).toHaveBeenCalledWith({
+      transport: webHidIdentifier
+    });
+    expect(result).not.toBe('Bluetooth');
   });
 });
 
