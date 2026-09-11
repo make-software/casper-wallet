@@ -8,7 +8,7 @@ module.exports = {
   // 10-core machine, and the wall clock of a lone run is the same either way.
   maxWorkers: '50%',
   transformIgnorePatterns: [
-    '<rootDir>/node_modules/(?!(@lapo/asn1js|@noble/ciphers|@formatjs|intl-messageformat|casper-wallet-core|uuid)/)'
+    '<rootDir>/node_modules/(?!(@lapo/asn1js|@noble/ciphers|@formatjs|intl-messageformat|casper-wallet-core|uuid|@ledgerhq/device-transport-kit-web-hid|@ledgerhq/device-transport-kit-web-ble)/)'
   ],
   // __CSP_NONCE__ is substituted by webpack's DefinePlugin, which never runs under
   // jest. Without this the free variable would throw ReferenceError in any test that
@@ -24,6 +24,12 @@ module.exports = {
   // own node_modules; without this jest crawls and compiles all of them.
   modulePathIgnorePatterns: ['<rootDir>/e2e-tests', '<rootDir>/.claude'],
   moduleNameMapper: {
+    // Both kits export only an `import` condition, which jest's CJS resolver
+    // cannot satisfy; transformIgnorePatterns above transpiles the ESM entry.
+    '^@ledgerhq/device-transport-kit-web-hid$':
+      '<rootDir>/node_modules/@ledgerhq/device-transport-kit-web-hid/lib/esm/index.js',
+    '^@ledgerhq/device-transport-kit-web-ble$':
+      '<rootDir>/node_modules/@ledgerhq/device-transport-kit-web-ble/lib/esm/index.js',
     // ts-jest compiles to CommonJS, where the `import.meta.url` that webpack
     // needs to emit the worker chunk is a syntax error.
     '^(.*)/spawn-scrypt-worker$':
