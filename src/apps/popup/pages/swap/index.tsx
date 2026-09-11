@@ -119,7 +119,11 @@ export const SwapPage = () => {
 
   // Mounted unconditionally, mirroring `transfer`: it opens the permission window itself when
   // the device needs it, regardless of which code path is driving the Ledger interaction.
-  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+  const {
+    ledgerEventStatusToRender,
+    makeSubmitLedgerAction,
+    cancelPendingLedgerAction
+  } = useLedger({
     ledgerAction: submit,
     // Parking lives here, not in `submit`: the Connect CTA below dispatches `ledgerStateCleared`
     // before calling this, and with no device connected `submit` never runs at all.
@@ -131,7 +135,10 @@ export const SwapPage = () => {
   const ledgerFooterButton = renderLedgerFooter({
     onConnect: makeSubmitLedgerAction,
     event: ledgerEventStatusToRender,
-    onErrorCtaPressed: () => setSwapStep(SwapSteps.Confirm)
+    onErrorCtaPressed: () => {
+      cancelPendingLedgerAction();
+      setSwapStep(SwapSteps.Confirm);
+    }
   });
 
   // Empty until the flow's first event lands, so `ConfirmStep` keeps showing the details card —

@@ -336,7 +336,11 @@ export const TransferNftPage = () => {
     ]);
   };
 
-  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+  const {
+    ledgerEventStatusToRender,
+    makeSubmitLedgerAction,
+    cancelPendingLedgerAction
+  } = useLedger({
     ledgerAction: submitTransfer,
     beforeLedgerActionCb
   });
@@ -402,6 +406,7 @@ export const TransferNftPage = () => {
     onConnect: makeSubmitLedgerAction,
     event: ledgerEventStatusToRender,
     onErrorCtaPressed: () => {
+      cancelPendingLedgerAction();
       setTransferNFTStep(TransferNFTSteps.Confirm);
       setIsSubmitButtonDisable(false);
     }

@@ -17,6 +17,7 @@ import {
 } from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
+import { connectLedgerOnce } from '@hooks/ledger-connect-once';
 import { runWithDeviceConfirmationReported } from '@hooks/ledger-device-confirmation';
 import { decideOpenerHandoff } from '@hooks/ledger-opener-handoff';
 import {
@@ -184,12 +185,16 @@ export const useLedger = ({
 
       try {
         if (selectedTransportRef.current === 'USB') {
-          await ledger.connect(usbTransportCreator, isTransportAvailable);
+          await connectLedgerOnce(() =>
+            ledger.connect(usbTransportCreator, isTransportAvailable)
+          );
         } else if (selectedTransportRef.current === 'Bluetooth') {
-          await ledger.connect(
-            bluetoothTransportCreator,
-            IsBluetoothLedgerTransportAvailable,
-            true
+          await connectLedgerOnce(() =>
+            ledger.connect(
+              bluetoothTransportCreator,
+              IsBluetoothLedgerTransportAvailable,
+              true
+            )
           );
         } else {
           setLedgerEventStatusToRender({
@@ -244,6 +249,15 @@ export const useLedger = ({
       shouldTrySignAfterConnectRef.current = false;
     }
   }, [isLedgerConnected, makeSubmitLedgerAction]);
+
+  /**
+   * Drops a submit still waiting for the device. `DeviceLocked` keeps polling
+   * behind the error screen, so a dismissed flow would otherwise sign the moment
+   * the device is unlocked, from a page the user already left. WALLET-1452.
+   */
+  const cancelPendingLedgerAction = useCallback(() => {
+    shouldTrySignAfterConnectRef.current = false;
+  }, []);
 
   // One per hook instance, stable across renders: the effect below arms it and
   // the two effects after it are the only things that take it back down.
@@ -477,6 +491,7 @@ export const useLedger = ({
     ledgerEventStatusToRender,
     isLedgerConnected,
     makeSubmitLedgerAction,
+    cancelPendingLedgerAction,
     closeNewLedgerWindowsAndClearState,
     // Deliberately not the raw slot: a page that branches on "is there a
     // permission window" must not see a foreign flow's.

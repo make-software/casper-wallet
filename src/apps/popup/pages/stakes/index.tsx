@@ -310,7 +310,11 @@ export const StakesPage = () => {
     }
   };
 
-  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+  const {
+    ledgerEventStatusToRender,
+    makeSubmitLedgerAction,
+    cancelPendingLedgerAction
+  } = useLedger({
     ledgerAction: submitStake,
     beforeLedgerActionCb
   });
@@ -456,7 +460,10 @@ export const StakesPage = () => {
   const ledgerFooterButton = renderLedgerFooter({
     onConnect: makeSubmitLedgerAction,
     event: ledgerEventStatusToRender,
-    onErrorCtaPressed: () => setStakeStep(StakeSteps.Confirm)
+    onErrorCtaPressed: () => {
+      cancelPendingLedgerAction();
+      setStakeStep(StakeSteps.Confirm);
+    }
   });
 
   const footerButtons = {

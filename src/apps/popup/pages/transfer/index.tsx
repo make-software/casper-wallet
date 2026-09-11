@@ -381,7 +381,11 @@ export const TransferPage = () => {
     }
   };
 
-  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+  const {
+    ledgerEventStatusToRender,
+    makeSubmitLedgerAction,
+    cancelPendingLedgerAction
+  } = useLedger({
     ledgerAction: onSubmitSending,
     beforeLedgerActionCb
   });
@@ -481,6 +485,7 @@ export const TransferPage = () => {
     onConnect: makeSubmitLedgerAction,
     event: ledgerEventStatusToRender,
     onErrorCtaPressed: () => {
+      cancelPendingLedgerAction();
       setTransferStep(TransactionSteps.Confirm);
     }
   });
