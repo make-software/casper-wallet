@@ -52,7 +52,7 @@ const ModalContainer = styled.div<{
     }),
 
     ...(placement === 'bottom' && {
-      bottom: '88px'
+      bottom: '16px'
     }),
 
     left: 0,
