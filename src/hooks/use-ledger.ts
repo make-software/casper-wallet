@@ -17,6 +17,7 @@ import {
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { runWithDeviceConfirmationReported } from '@hooks/ledger-device-confirmation';
+import { shouldCloseOpenerAfterHandoff } from '@hooks/ledger-opener-handoff';
 import {
   isLedgerPermissionWindowDocument,
   needsLedgerPermissionWindow
@@ -56,6 +57,11 @@ interface LedgerPermissionParams {
 
 interface IUseLedgerParams {
   ledgerAction: () => Promise<void>;
+  /**
+   * Must have finished parking whatever the permission window will sign by the
+   * time it resolves — a popup opener closes itself once that window exists, and
+   * an undelivered park dies with the document.
+   */
   beforeLedgerActionCb: () => Promise<void>;
   initialEventToRender?: ILedgerEvent;
   shouldLoadAccountList?: boolean;
@@ -247,10 +253,6 @@ export const useLedger = ({
   // third (`openerWindowId` qualified by `openerRequestId`) rides in the slice
   // so a remounted popup still owns the window its predecessor opened.
   const openedPermissionWindowIdRef = useRef<number | null>(null);
-  // Latched, not derived from the slice: `windowId` is null both before the
-  // window opens and after it closes, and the id lands in the slice through an
-  // async round-trip the render cannot wait for.
-  const [permissionWindowClosed, setPermissionWindowClosed] = useState(false);
   const [hostWindowId, setHostWindowId] = useState<number | null>(null);
   // Mirror for the open effect below, which must not re-run when the state lands.
   const hostWindowIdRef = useRef<number | null>(null);
@@ -316,7 +318,10 @@ export const useLedger = ({
 
         openedPermissionWindowIdRef.current = w.id;
 
-        dispatchToMainStore(
+        // Awaited only so the popup below cannot close over an undelivered
+        // `sendMessage`: this id is what lets `handleWindowRemoved` recognise
+        // the permission window and clear the slice it parked the payload in.
+        await dispatchToMainStore(
           ledgerNewWindowIdChanged({
             windowId: w.id,
             openerWindowId: hostWindowIdRef.current,
@@ -332,12 +337,22 @@ export const useLedger = ({
 
         triggeredRef.current = true;
 
-        // The permission screen instructs the user to act in a window that no
-        // longer exists once this fires. Nothing else lowers it: the flow runs
-        // in the window's own document, whose `ledger` service is a different
-        // instance, so this one never sees the connection succeed. WALLET-1249.
+        if (
+          shouldCloseOpenerAfterHandoff({
+            permissionWindowDomain: askPermissionUrlData.domain,
+            isPermissionWindow: isLedgerPermissionWindowDocument(
+              document.location.search
+            )
+          })
+        ) {
+          window.close();
+          return;
+        }
+
+        // Reached only by an opener that stays — an approval window. Nothing
+        // else lowers the permission screen there: the flow runs in the window's
+        // own document, so this one never sees it end.
         closeTracker.arm(w.id, () => {
-          setPermissionWindowClosed(true);
           setLedgerEventStatusToRender({
             status: LedgerEventStatus.Disconnected
           });
@@ -452,7 +467,6 @@ export const useLedger = ({
     closeNewLedgerWindowsAndClearState,
     // Deliberately not the raw slot: a page that branches on "is there a
     // permission window" must not see a foreign flow's.
-    ownPermissionWindowId,
-    permissionWindowClosed
+    ownPermissionWindowId
   };
 };

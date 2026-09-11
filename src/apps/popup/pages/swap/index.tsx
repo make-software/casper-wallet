@@ -125,7 +125,7 @@ export const SwapPage = () => {
     // before calling this, and with no device connected `submit` never runs at all.
     beforeLedgerActionCb: async () => {
       setSwapStep(SwapSteps.ConfirmWithLedger);
-      parkLedgerPayload();
+      await parkLedgerPayload();
     }
   });
   const ledgerFooterButton = renderLedgerFooter({

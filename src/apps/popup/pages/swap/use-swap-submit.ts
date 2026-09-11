@@ -76,7 +76,7 @@ export interface ISwapSubmitApi {
    * Stores the reviewed trade for the Ledger permission window. Must run from the page's
    * `beforeLedgerActionCb`: the Connect CTA clears the whole ledger slice before calling it.
    */
-  parkLedgerPayload: () => void;
+  parkLedgerPayload: () => Promise<void>;
   flowState: SwapSubmitState;
   isProcessing: boolean;
 }
@@ -215,7 +215,7 @@ export const useSwapSubmit = ({
     [clearParkedPayload, onLedgerStep, onSubmitted, reportFailure]
   );
 
-  const parkLedgerPayload = useCallback(() => {
+  const parkLedgerPayload = useCallback(async () => {
     if (!isLedgerAccount || review == null) {
       return;
     }
@@ -231,7 +231,7 @@ export const useSwapSubmit = ({
           }
         : { kind: 'swap', trade: review.trade, slippage, deadline };
 
-    dispatchToMainStore(
+    await dispatchToMainStore(
       ledgerSwapPayloadChanged(serializeLedgerSwapPayload(payload))
     );
   }, [deadline, isLedgerAccount, review, slippage]);

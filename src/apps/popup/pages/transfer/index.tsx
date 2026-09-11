@@ -339,15 +339,17 @@ export const TransferPage = () => {
           casperNetworkApiVersion
         );
 
-        dispatchToMainStore(
-          ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
-        );
-        dispatchToMainStore(
-          ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
-        );
-        dispatchToMainStore(
-          ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
-        );
+        await Promise.all([
+          dispatchToMainStore(
+            ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
+          ),
+          dispatchToMainStore(
+            ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
+          ),
+          dispatchToMainStore(
+            ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+          )
+        ]);
       } else {
         const motesAmount = CSPRtoMotes(amount);
         const memoForTransfer = transferIdMemo || Date.now().toString();
@@ -364,15 +366,17 @@ export const TransferPage = () => {
           casperNetworkApiVersion
         );
 
-        dispatchToMainStore(
-          ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
-        );
-        dispatchToMainStore(
-          ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
-        );
-        dispatchToMainStore(
-          ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
-        );
+        await Promise.all([
+          dispatchToMainStore(
+            ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
+          ),
+          dispatchToMainStore(
+            ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
+          ),
+          dispatchToMainStore(
+            ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+          )
+        ]);
       }
     }
   };

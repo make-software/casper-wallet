@@ -323,15 +323,17 @@ export const TransferNftPage = () => {
       casperNetworkApiVersion
     );
 
-    dispatchToMainStore(
-      ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
-    );
-    dispatchToMainStore(
-      ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
-    );
-    dispatchToMainStore(
-      ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
-    );
+    await Promise.all([
+      dispatchToMainStore(
+        ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
+      ),
+      dispatchToMainStore(
+        ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
+      ),
+      dispatchToMainStore(
+        ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+      )
+    ]);
   };
 
   const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({

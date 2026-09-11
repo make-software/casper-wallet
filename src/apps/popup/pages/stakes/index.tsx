@@ -299,12 +299,14 @@ export const StakesPage = () => {
         casperNetworkApiVersion
       );
 
-      dispatchToMainStore(
-        ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
-      );
-      dispatchToMainStore(
-        ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
-      );
+      await Promise.all([
+        dispatchToMainStore(
+          ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
+        ),
+        dispatchToMainStore(
+          ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
+        )
+      ]);
     }
   };
 
