@@ -39,6 +39,7 @@
     "https://onramp-api.cspr.click/api/*",
     "https://api.cspr.trade/*",
     "https://api.testnet.cspr.trade/*",
+    "https://cspr-trade-api.dev.make.services/*",
     "https://*.bringweb3.io/*"
   ],
   "background": {
