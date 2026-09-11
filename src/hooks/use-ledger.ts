@@ -4,6 +4,7 @@ import { windows } from 'webextension-polyfill';
 
 import { RouterPath } from '@popup/router';
 
+import { closeCurrentWindow } from '@background/close-current-window';
 import { openNewSeparateWindow } from '@background/create-open-window';
 import {
   closeLedgerFlowWindows,
@@ -17,7 +18,7 @@ import {
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { runWithDeviceConfirmationReported } from '@hooks/ledger-device-confirmation';
-import { shouldCloseOpenerAfterHandoff } from '@hooks/ledger-opener-handoff';
+import { decideOpenerHandoff } from '@hooks/ledger-opener-handoff';
 import {
   isLedgerPermissionWindowDocument,
   needsLedgerPermissionWindow
@@ -58,9 +59,9 @@ interface LedgerPermissionParams {
 interface IUseLedgerParams {
   ledgerAction: () => Promise<void>;
   /**
-   * Must have finished parking whatever the permission window will sign by the
-   * time it resolves — a popup opener closes itself once that window exists, and
-   * an undelivered park dies with the document.
+   * Must have parked whatever the permission window will sign by the time it
+   * resolves — a popup opener closes itself once that window exists, taking any
+   * undelivered park with it.
    */
   beforeLedgerActionCb: () => Promise<void>;
   initialEventToRender?: ILedgerEvent;
@@ -318,9 +319,8 @@ export const useLedger = ({
 
         openedPermissionWindowIdRef.current = w.id;
 
-        // Awaited only so the popup below cannot close over an undelivered
-        // `sendMessage`: this id is what lets `handleWindowRemoved` recognise
-        // the permission window and clear the slice it parked the payload in.
+        // Awaited so the close below cannot drop it: this id is what lets
+        // `handleWindowRemoved` clear the slice when the window goes.
         await dispatchToMainStore(
           ledgerNewWindowIdChanged({
             windowId: w.id,
@@ -329,7 +329,7 @@ export const useLedger = ({
           })
         );
 
-        registerLedgerPermissionWindow({
+        const permissionWindowAttached = await registerLedgerPermissionWindow({
           domain: askPermissionUrlData.domain,
           requestId: askPermissionUrlData.params?.requestId,
           windowId: w.id
@@ -337,21 +337,34 @@ export const useLedger = ({
 
         triggeredRef.current = true;
 
-        if (
-          shouldCloseOpenerAfterHandoff({
-            permissionWindowDomain: askPermissionUrlData.domain,
-            isPermissionWindow: isLedgerPermissionWindowDocument(
-              document.location.search
-            )
-          })
-        ) {
+        const handoff = decideOpenerHandoff({
+          permissionWindowDomain: askPermissionUrlData.domain,
+          isPermissionWindow: isLedgerPermissionWindowDocument(
+            document.location.search
+          ),
+          permissionWindowAttached
+        });
+
+        if (handoff === 'close-popup') {
           window.close();
           return;
         }
 
-        // Reached only by an opener that stays — an approval window. Nothing
-        // else lowers the permission screen there: the flow runs in the window's
-        // own document, so this one never sees it end.
+        if (handoff === 'close-approval-window') {
+          try {
+            await closeCurrentWindow();
+            return;
+          } catch (error) {
+            // The opener is still standing, so it still needs the recovery below.
+            console.error(
+              'useLedger: dismissing the opener window failed',
+              error
+            );
+          }
+        }
+
+        // Reached only by an opener that stays — the flow runs in the window's
+        // own document, so nothing else here ever lowers the permission screen.
         closeTracker.arm(w.id, () => {
           setLedgerEventStatusToRender({
             status: LedgerEventStatus.Disconnected

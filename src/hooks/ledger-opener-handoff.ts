@@ -1,36 +1,39 @@
-/** The one opener surface with nothing left to do once the window exists. */
 const POPUP_DOMAIN = 'popup.html';
+const APPROVAL_DOMAIN = 'signature-request.html';
+
+export type LedgerOpenerHandoff =
+  'close-popup' | 'close-approval-window' | 'keep';
 
 export interface LedgerOpenerHandoffInputs {
-  /**
-   * `askPermissionUrlData.domain` — the surface the flow continues on, which at
-   * every call site is also the surface the opener renders in.
-   */
+  /** `askPermissionUrlData.domain`, which at every call site is the opener's own surface too. */
   permissionWindowDomain: string;
   isPermissionWindow: boolean;
+  /** The permission window is a display of the opener's request — `registerLedgerPermissionWindow` resolved true. */
+  permissionWindowAttached: boolean;
 }
 
 /**
- * Whether the document that opened the permission window should close itself.
+ * What the document that opened the permission window should do with itself.
  *
- * The flow runs from here on in the window's document, whose `ledger` service is
- * a different instance — so an opener left standing cannot learn that the device
- * connected, signed or sent, and goes on instructing the user to grant a
- * permission that was granted elsewhere. WALLET-1249, WALLET-1451.
- *
- * Only the popup may go: every popup flow parks its payload before the
- * permission check, so the window finishes alone, success and failure screens
- * included. An approval window is the display of an open dapp request and
- * closing it answers that request (`cancelOpenRequestsForClosedWindow`) — those
- * are taken down at the end instead, by `closeLedgerFlowWindows`.
+ * The flow continues in that window, whose `ledger` service is a different
+ * instance, so an opener left standing goes on demanding a permission granted
+ * elsewhere. An approval window may go only once `permissionWindowAttached`:
+ * closing a request's last display answers the dapp with a cancel (WALLET-1416).
  */
-export function shouldCloseOpenerAfterHandoff({
+export function decideOpenerHandoff({
   permissionWindowDomain,
-  isPermissionWindow
-}: LedgerOpenerHandoffInputs): boolean {
+  isPermissionWindow,
+  permissionWindowAttached
+}: LedgerOpenerHandoffInputs): LedgerOpenerHandoff {
   if (isPermissionWindow) {
-    return false;
+    return 'keep';
   }
 
-  return permissionWindowDomain === POPUP_DOMAIN;
+  if (permissionWindowDomain === POPUP_DOMAIN) {
+    return 'close-popup';
+  }
+
+  return permissionWindowDomain === APPROVAL_DOMAIN && permissionWindowAttached
+    ? 'close-approval-window'
+    : 'keep';
 }

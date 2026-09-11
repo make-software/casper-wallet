@@ -1,39 +1,53 @@
-import { shouldCloseOpenerAfterHandoff } from './ledger-opener-handoff';
+import { decideOpenerHandoff } from './ledger-opener-handoff';
 
-describe('shouldCloseOpenerAfterHandoff', () => {
+describe('decideOpenerHandoff', () => {
   it('closes a popup opener: the permission window finishes the flow alone', () => {
     expect(
-      shouldCloseOpenerAfterHandoff({
+      decideOpenerHandoff({
         permissionWindowDomain: 'popup.html',
-        isPermissionWindow: false
+        isPermissionWindow: false,
+        permissionWindowAttached: false
       })
-    ).toBe(true);
+    ).toBe('close-popup');
   });
 
-  it('keeps an approval-window opener: closing it cancels the dapp request', () => {
+  it('dismisses an approval-window opener once the window shares its request', () => {
     expect(
-      shouldCloseOpenerAfterHandoff({
+      decideOpenerHandoff({
         permissionWindowDomain: 'signature-request.html',
-        isPermissionWindow: false
+        isPermissionWindow: false,
+        permissionWindowAttached: true
       })
-    ).toBe(false);
+    ).toBe('close-approval-window');
+  });
+
+  it('keeps an approval-window opener whose request has no second display', () => {
+    expect(
+      decideOpenerHandoff({
+        permissionWindowDomain: 'signature-request.html',
+        isPermissionWindow: false,
+        permissionWindowAttached: false
+      })
+    ).toBe('keep');
   });
 
   it('keeps a permission window that opened one of its own', () => {
     expect(
-      shouldCloseOpenerAfterHandoff({
+      decideOpenerHandoff({
         permissionWindowDomain: 'popup.html',
-        isPermissionWindow: true
+        isPermissionWindow: true,
+        permissionWindowAttached: true
       })
-    ).toBe(false);
+    ).toBe('keep');
   });
 
   it('keeps an unrecognised opener surface', () => {
     expect(
-      shouldCloseOpenerAfterHandoff({
+      decideOpenerHandoff({
         permissionWindowDomain: 'connect-to-app.html',
-        isPermissionWindow: false
+        isPermissionWindow: false,
+        permissionWindowAttached: true
       })
-    ).toBe(false);
+    ).toBe('keep');
   });
 });
