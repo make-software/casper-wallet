@@ -109,7 +109,7 @@ export const KNOWN_DEVICES_WAIT_MS = 500;
  * and waits for the first real read, bounded by `KNOWN_DEVICES_WAIT_MS` so a stalled or erroring
  * observable still resolves empty rather than hanging. Never calls `startDiscovering`.
  */
-export function listPermittedDevices(
+function listPermittedDevices(
   dmk: Pick<DeviceManagementKit, 'listenToAvailableDevices'>,
   transport: TransportIdentifier
 ): Promise<DiscoveredDevice[]> {

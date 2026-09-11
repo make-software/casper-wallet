@@ -1,4 +1,9 @@
-import { ApduSender, ApduStatusError, createApduSend } from './dmk-apdu';
+import {
+  ApduSender,
+  ApduStatusError,
+  MAX_APDU_DATA_LENGTH,
+  createApduSend
+} from './dmk-apdu';
 
 const okResponse = {
   statusCode: new Uint8Array([0x90, 0x00]),
@@ -6,6 +11,10 @@ const okResponse = {
 };
 
 describe('createApduSend', () => {
+  it('caps APDU data at the 256-byte limit hw-transport enforced', () => {
+    expect(MAX_APDU_DATA_LENGTH).toBe(256);
+  });
+
   // Row: Frames the APDU header
   it('frames cla, ins, p1, p2, Lc and data into a single APDU', async () => {
     const sendApdu = jest.fn<ReturnType<ApduSender>, Parameters<ApduSender>>(
