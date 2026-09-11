@@ -1,8 +1,12 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { ThemeProvider } from 'styled-components';
+import {
+  DefaultTheme,
+  ServerStyleSheet,
+  ThemeProvider
+} from 'styled-components';
 
-import { lightTheme } from '@libs/ui/theme-config';
+import { darkTheme, lightTheme } from '@libs/ui/theme-config';
 
 import { SwapBanner } from './swap-banner';
 
@@ -39,5 +43,43 @@ describe('SwapBanner', () => {
 
   it('omits the body when none is given', () => {
     expect(render()).not.toContain('Please select a different trading pair.');
+  });
+
+  const renderCss = (
+    props: Partial<Parameters<typeof SwapBanner>[0]> = {},
+    theme: DefaultTheme = lightTheme
+  ) => {
+    const sheet = new ServerStyleSheet();
+
+    renderToStaticMarkup(
+      sheet.collectStyles(
+        <ThemeProvider theme={theme}>
+          <SwapBanner variant="warning" title="Important" {...props} />
+        </ThemeProvider>
+      )
+    );
+
+    const css = sheet.getStyleTags();
+    sheet.seal();
+
+    return css;
+  };
+
+  it('tints the warning variant with the warning background', () => {
+    expect(renderCss({ variant: 'warning' })).toContain(
+      `background-color:${lightTheme.color.backgroundWarning}`
+    );
+  });
+
+  it('tints the error variant with the critical background', () => {
+    expect(renderCss({ variant: 'error' })).toContain(
+      `background-color:${lightTheme.color.backgroundCritical}`
+    );
+  });
+
+  it('takes the tint from the active theme', () => {
+    expect(renderCss({ variant: 'warning' }, darkTheme)).toContain(
+      `background-color:${darkTheme.color.backgroundWarning}`
+    );
   });
 });

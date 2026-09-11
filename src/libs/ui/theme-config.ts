@@ -48,6 +48,8 @@ export const lightTheme = {
   color: {
     backgroundPrimary: '#FFFFFF',
     backgroundSecondary: '#F5F6F7',
+    backgroundWarning: '#FFF2E0',
+    backgroundCritical: '#F9E0E2',
     backgroundRed: {
       deg: '180deg',
       from: 'rgb(232.69, 50.42, 63.73) 0%',
@@ -105,6 +107,8 @@ export const darkTheme = {
   color: {
     backgroundPrimary: '#262730',
     backgroundSecondary: '#18181F',
+    backgroundWarning: '#40352B',
+    backgroundCritical: '#402832',
     backgroundRed: {
       deg: '180deg',
       from: 'rgb(183.6, 39.78, 50.28) 0%',

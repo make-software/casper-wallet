@@ -11,7 +11,7 @@ import {
 } from '@libs/layout/containers';
 import { SvgIcon } from '@libs/ui/components/svg-icon/svg-icon';
 import { Typography } from '@libs/ui/components/typography/typography';
-import { Color } from '@libs/ui/utils/get-color-from-theme';
+import { Color, getColorFromTheme } from '@libs/ui/utils/get-color-from-theme';
 
 type SwapBannerVariant = 'warning' | 'error';
 
@@ -20,14 +20,17 @@ const ICON_COLOR: Record<SwapBannerVariant, Color> = {
   error: 'contentActionCritical'
 };
 
-// Severity reads from the icon colour, not a tinted background — the same shape as the
-// warning tile in `connect-another-account`. A tint would need a theme token that does not
-// exist, and hardcoding one is illegible in dark mode.
-const Container = styled(FlexColumn)`
+const TINT: Record<SwapBannerVariant, Color> = {
+  warning: 'backgroundWarning',
+  error: 'backgroundCritical'
+};
+
+const Container = styled(FlexColumn)<{ $variant: SwapBannerVariant }>`
   padding: 12px 16px;
   gap: 8px;
 
-  background-color: ${({ theme }) => theme.color.backgroundPrimary};
+  background-color: ${({ theme, $variant }) =>
+    getColorFromTheme(theme, TINT[$variant])};
   border-radius: ${({ theme }) => theme.borderRadius.base}px;
 `;
 
@@ -39,7 +42,7 @@ export interface SwapBannerProps {
 }
 
 export const SwapBanner = ({ variant, icon, title, body }: SwapBannerProps) => (
-  <Container>
+  <Container $variant={variant}>
     <AlignedFlexRow gap={SpacingSize.Tiny}>
       {icon != null && (
         <SvgIcon src={icon} color={ICON_COLOR[variant]} size={24} />
