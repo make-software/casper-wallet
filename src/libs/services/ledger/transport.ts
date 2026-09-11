@@ -5,7 +5,6 @@ import type {
 } from '@ledgerhq/device-management-kit';
 import { webBleIdentifier } from '@ledgerhq/device-transport-kit-web-ble';
 import { webHidIdentifier } from '@ledgerhq/device-transport-kit-web-hid';
-import BluetoothTransport from '@ledgerhq/hw-transport-web-ble';
 import { LedgerError, type TransportCreator } from 'casper-wallet-core';
 import { type Subscription, firstValueFrom } from 'rxjs';
 
@@ -36,8 +35,49 @@ export const IsBluetoothLedgerTransportAvailable = (
   > = getBluetoothAvailabilityDmk()
 ): Promise<boolean> => Promise.resolve(dmk.isEnvironmentSupported());
 
-export const subscribeToBluetoothAvailability =
-  BluetoothTransport.observeAvailability;
+/** The `navigator.bluetooth` surface this module needs; untyped in TS's DOM lib. */
+interface BluetoothAvailabilitySource {
+  getAvailability(): Promise<boolean>;
+  addEventListener(
+    type: 'availabilitychanged',
+    listener: (event: { value: boolean }) => void
+  ): void;
+  removeEventListener(
+    type: 'availabilitychanged',
+    listener: (event: { value: boolean }) => void
+  ): void;
+}
+
+const getRealBluetoothAvailabilitySource = ():
+  BluetoothAvailabilitySource | undefined =>
+  (navigator as unknown as { bluetooth?: BluetoothAvailabilitySource })
+    .bluetooth;
+
+/**
+ * Reimplements `BluetoothTransport.observeAvailability` (DMK has no equivalent) over the web
+ * standard it wrapped: `navigator.bluetooth.getAvailability()` plus `availabilitychanged`.
+ */
+export const subscribeToBluetoothAvailability = (
+  observer: (available: boolean) => void,
+  bluetooth:
+    | BluetoothAvailabilitySource
+    | undefined = getRealBluetoothAvailabilitySource()
+): { unsubscribe: () => void } => {
+  if (!bluetooth) {
+    observer(false);
+    return { unsubscribe: () => {} };
+  }
+
+  const handleChange = (event: { value: boolean }) => observer(event.value);
+
+  bluetooth.getAvailability().then(observer, () => observer(false));
+  bluetooth.addEventListener('availabilitychanged', handleChange);
+
+  return {
+    unsubscribe: () =>
+      bluetooth.removeEventListener('availabilitychanged', handleChange)
+  };
+};
 
 export const isTransportAvailable = async () => {
   try {

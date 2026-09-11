@@ -9,9 +9,42 @@ import { EMPTY, Observable, of } from 'rxjs';
 import {
   KNOWN_DEVICES_WAIT_MS,
   connectLedgerTransport,
-  getPreferredTransport
+  getPreferredTransport,
+  subscribeToBluetoothAvailability
 } from './transport';
 import { LedgerEventStatus } from './types';
+
+/** Flushes pending microtasks, including chained `.then()` callbacks. */
+const flushMicrotasks = () => new Promise(resolve => setImmediate(resolve));
+
+function createFakeBluetoothSource(
+  overrides: { available?: boolean; rejects?: boolean } = {}
+) {
+  const listeners = new Set<(event: { value: boolean }) => void>();
+
+  const source = {
+    getAvailability: jest.fn(() =>
+      overrides.rejects
+        ? Promise.reject(new Error('boom'))
+        : Promise.resolve(overrides.available ?? true)
+    ),
+    addEventListener: jest.fn(
+      (_type: string, listener: (event: { value: boolean }) => void) => {
+        listeners.add(listener);
+      }
+    ),
+    removeEventListener: jest.fn(
+      (_type: string, listener: (event: { value: boolean }) => void) => {
+        listeners.delete(listener);
+      }
+    )
+  };
+
+  return {
+    source,
+    emit: (value: boolean) => listeners.forEach(listener => listener({ value }))
+  };
+}
 
 const fakeDevice = { id: 'device-1' } as unknown as DiscoveredDevice;
 
@@ -396,5 +429,100 @@ describe('isTransportAvailable', () => {
 
     jest.dontMock('./dmk');
     jest.resetModules();
+  });
+});
+
+describe('subscribeToBluetoothAvailability', () => {
+  // Row: Initial availability delivered
+  it('delivers true when the adapter is available at subscribe time', async () => {
+    const observer = jest.fn();
+    const { source } = createFakeBluetoothSource({ available: true });
+
+    subscribeToBluetoothAvailability(observer, source);
+    await flushMicrotasks();
+
+    expect(observer).toHaveBeenCalledWith(true);
+  });
+
+  // Row: Initial unavailability delivered
+  it('delivers false when the adapter is unavailable at subscribe time', async () => {
+    const observer = jest.fn();
+    const { source } = createFakeBluetoothSource({ available: false });
+
+    subscribeToBluetoothAvailability(observer, source);
+    await flushMicrotasks();
+
+    expect(observer).toHaveBeenCalledWith(false);
+  });
+
+  // Row: Change delivered
+  it('delivers the new value when availability flips after subscribe', async () => {
+    const observer = jest.fn();
+    const { source, emit } = createFakeBluetoothSource({ available: true });
+
+    subscribeToBluetoothAvailability(observer, source);
+    await flushMicrotasks();
+    observer.mockClear();
+
+    emit(false);
+
+    expect(observer).toHaveBeenCalledWith(false);
+  });
+
+  // Row: Unsubscribe stops delivery
+  it('delivers nothing further once unsubscribed', async () => {
+    const observer = jest.fn();
+    const { source, emit } = createFakeBluetoothSource({ available: true });
+
+    const { unsubscribe } = subscribeToBluetoothAvailability(observer, source);
+    await flushMicrotasks();
+    unsubscribe();
+    observer.mockClear();
+
+    emit(false);
+
+    expect(observer).not.toHaveBeenCalled();
+  });
+
+  // Row: Unsubscribe removes the listener
+  it('removes the same listener reference it registered', async () => {
+    const observer = jest.fn();
+    const { source } = createFakeBluetoothSource({ available: true });
+
+    const { unsubscribe } = subscribeToBluetoothAvailability(observer, source);
+    unsubscribe();
+
+    expect(source.addEventListener).toHaveBeenCalledWith(
+      'availabilitychanged',
+      expect.any(Function)
+    );
+    expect(source.removeEventListener).toHaveBeenCalledWith(
+      'availabilitychanged',
+      source.addEventListener.mock.calls[0][1]
+    );
+  });
+
+  // Row: Web Bluetooth absent
+  it('delivers false and stays callable without throwing when navigator.bluetooth is absent', () => {
+    const observer = jest.fn();
+
+    const { unsubscribe } = subscribeToBluetoothAvailability(
+      observer,
+      undefined
+    );
+
+    expect(observer).toHaveBeenCalledWith(false);
+    expect(() => unsubscribe()).not.toThrow();
+  });
+
+  // Row: getAvailability rejects
+  it('delivers false and swallows the rejection when getAvailability rejects', async () => {
+    const observer = jest.fn();
+    const { source } = createFakeBluetoothSource({ rejects: true });
+
+    subscribeToBluetoothAvailability(observer, source);
+    await flushMicrotasks();
+
+    expect(observer).toHaveBeenCalledWith(false);
   });
 });
