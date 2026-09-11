@@ -72,13 +72,20 @@ describe('TokenAmountCard', () => {
     return sheet.getStyleTags();
   };
 
-  // Matrix: "No token chosen" — token button reads `Token` in `contentAction`.
-  it('renders "Token" when no token is chosen', () => {
+  // Matrix: "No token chosen" — token button reads `Choose token` in `contentAction`,
+  // behind the same placeholder logo the slot shows once a token is chosen.
+  it('renders "Choose token" when no token is chosen', () => {
     const html = render();
 
     expect(html).toContain('<span type="bodySemiBold" color="contentAction"');
-    expect(html).toContain('Token');
+    expect(html).toContain('Choose token');
     expect(html).not.toContain('Unlisted token');
+  });
+
+  // react-inlinesvg fetches the bundled placeholder in the browser, so only the
+  // sized box it renders into is visible from here — the 32px icon slot.
+  it('keeps the icon slot filled when no token is chosen', () => {
+    expect(render()).toContain('size="32"');
   });
 
   // Matrix: "Token chosen" — symbol in `contentPrimary`.

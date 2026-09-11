@@ -128,16 +128,14 @@ export const TokenAmountCard = ({
           onChange={e => handleChange(e.target.value)}
         />
         <TokenButton gap={SpacingSize.Small} onClick={onOpenSelector}>
-          {token != null && (
-            <DexTokenIcon
-              icon={token.icon}
-              symbol={token.symbol}
-              name={token.name}
-            />
-          )}
+          <DexTokenIcon
+            icon={token?.icon ?? null}
+            symbol={token?.symbol ?? ''}
+            name={token?.name}
+          />
           {token == null ? (
             <Typography type="bodySemiBold" color="contentAction">
-              <Trans t={t}>Token</Trans>
+              <Trans t={t}>Choose token</Trans>
             </Typography>
           ) : (
             <FlexColumn>
