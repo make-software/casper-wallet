@@ -107,6 +107,7 @@ function createFakeConnectDmk(overrides: {
   const getDeviceSessionState = jest.fn(() => ({
     subscribe: jest.fn(() => ({ unsubscribe: jest.fn() }))
   }));
+  const disableDeviceSessionRefresher = jest.fn(() => jest.fn());
 
   return {
     listenToAvailableDevices,
@@ -114,7 +115,8 @@ function createFakeConnectDmk(overrides: {
     connect,
     sendApdu,
     disconnect,
-    getDeviceSessionState
+    getDeviceSessionState,
+    disableDeviceSessionRefresher
   };
 }
 

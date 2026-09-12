@@ -37,14 +37,27 @@ function createFakeDmk() {
     ReturnType<DmkSessionHandle['disconnect']>,
     Parameters<DmkSessionHandle['disconnect']>
   >(() => Promise.resolve(undefined));
+  const releaseRefresherBlocker = jest.fn<void, []>();
+  const disableDeviceSessionRefresher = jest.fn<
+    ReturnType<DmkSessionHandle['disableDeviceSessionRefresher']>,
+    Parameters<DmkSessionHandle['disableDeviceSessionRefresher']>
+  >(() => releaseRefresherBlocker);
 
   const dmk: DmkSessionHandle = {
     sendApdu,
     disconnect,
-    getDeviceSessionState: () => sessionState
+    getDeviceSessionState: () => sessionState,
+    disableDeviceSessionRefresher
   };
 
-  return { dmk, sendApdu, disconnect, sessionState };
+  return {
+    dmk,
+    sendApdu,
+    disconnect,
+    sessionState,
+    disableDeviceSessionRefresher,
+    releaseRefresherBlocker
+  };
 }
 
 describe('createDmkLedgerTransport', () => {

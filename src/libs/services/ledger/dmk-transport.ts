@@ -19,6 +19,10 @@ export interface DmkSessionHandle {
       unsubscribe(): void;
     };
   };
+  disableDeviceSessionRefresher(args: {
+    sessionId: string;
+    blockerId: string;
+  }): () => void;
 }
 
 export interface DmkLedgerTransport extends ILedgerTransport {
