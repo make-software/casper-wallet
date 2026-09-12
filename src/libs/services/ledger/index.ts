@@ -5,3 +5,4 @@ export * from './errors';
 export * from './dmk';
 export * from './dmk-apdu';
 export * from './dmk-transport';
+export * from './dmk-state';
