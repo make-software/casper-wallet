@@ -98,16 +98,11 @@ type LedgerConnectDmk = Pick<
 > &
   DmkSessionHandle;
 
-/**
- * Bounds how long {@link listPermittedDevices} waits for a real device-list read. Shared with
- * Task 5's `getPreferredTransport`, which reuses the same helper.
- */
 export const KNOWN_DEVICES_WAIT_MS = 500;
 
 /**
- * Ignores the transport's synchronous seeded emission (e.g. WebHID's empty `BehaviorSubject`)
- * and waits for the first real read, bounded by `KNOWN_DEVICES_WAIT_MS` so a stalled or erroring
- * observable still resolves empty rather than hanging. Never calls `startDiscovering`.
+ * Waits for the first real read past the transport's synchronous seeded emission, bounded by
+ * `KNOWN_DEVICES_WAIT_MS` so a stalled observable resolves empty. Never calls `startDiscovering`.
  */
 function listPermittedDevices(
   dmk: Pick<DeviceManagementKit, 'listenToAvailableDevices'>,

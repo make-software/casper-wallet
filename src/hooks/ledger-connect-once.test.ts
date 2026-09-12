@@ -11,8 +11,6 @@ const deferred = () => {
   return { promise, resolve, reject };
 };
 
-// WALLET-1452: two attempts leave two pollers on the one transport, and the
-// survivor's poll fails the signature exchange as a race.
 it('joins an attempt that is already in flight', async () => {
   const first = deferred();
   const connect = jest.fn(() => first.promise);

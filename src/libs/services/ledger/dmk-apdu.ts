@@ -1,6 +1,4 @@
-/**
- * The slice of DMK this adapter needs, injected so the adapter is testable without a device.
- */
+/** The slice of DMK this adapter needs. Injected so it is testable without a device. */
 export type ApduSender = (args: {
   apdu: Uint8Array;
   abortTimeout?: number;

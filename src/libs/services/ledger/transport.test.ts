@@ -123,7 +123,6 @@ describe('connectLedgerTransport', () => {
     jest.useRealTimers();
   });
 
-  // Row: Connect disables the refresher
   it('connects with the session refresher disabled', async () => {
     const dmk = createFakeConnectDmk({ knownDevices: [fakeDevice] });
 
@@ -135,7 +134,6 @@ describe('connectLedgerTransport', () => {
     });
   });
 
-  // Row: Connect returns an adapter
   it('resolves an object that satisfies ILedgerTransport and has send', async () => {
     const dmk = createFakeConnectDmk({ knownDevices: [fakeDevice] });
 
@@ -146,7 +144,6 @@ describe('connectLedgerTransport', () => {
     expect(typeof transport.send).toBe('function');
   });
 
-  // Row: Already-permitted device connects silently
   it('uses listenToAvailableDevices and never calls startDiscovering when a device is already known', async () => {
     const dmk = createFakeConnectDmk({ knownDevices: [fakeDevice] });
 
@@ -158,7 +155,6 @@ describe('connectLedgerTransport', () => {
     expect(dmk.startDiscovering).not.toHaveBeenCalled();
   });
 
-  // Row: No permitted device
   it('calls startDiscovering when no device is already known', async () => {
     const dmk = createFakeConnectDmk({
       knownDevices: [],
@@ -175,7 +171,6 @@ describe('connectLedgerTransport', () => {
     );
   });
 
-  // Row: Bluetooth creator
   it('threads the given transport identifier through to a web-ble style connect', async () => {
     const dmk = createFakeConnectDmk({ knownDevices: [fakeDevice] });
 
@@ -281,7 +276,6 @@ describe('getPreferredTransport', () => {
     jest.useRealTimers();
   });
 
-  // Row: A permitted device exists / Never prompts
   it('resolves USB when a permitted device exists, without prompting', async () => {
     const dmk = createFakeProbeDmk({ knownDevices: [fakeDevice] });
 
@@ -289,7 +283,6 @@ describe('getPreferredTransport', () => {
     expect(dmk.startDiscovering).not.toHaveBeenCalled();
   });
 
-  // Row: Several permitted devices / Never prompts
   it('resolves USB when several permitted devices exist, without prompting', async () => {
     const dmk = createFakeProbeDmk({
       knownDevices: [
@@ -302,7 +295,6 @@ describe('getPreferredTransport', () => {
     expect(dmk.startDiscovering).not.toHaveBeenCalled();
   });
 
-  // Row: No permitted device / Never prompts
   it('resolves undefined when no device is permitted, without prompting', async () => {
     const dmk = createFakeProbeDmk({ knownDevices: [] });
 
@@ -310,7 +302,6 @@ describe('getPreferredTransport', () => {
     expect(dmk.startDiscovering).not.toHaveBeenCalled();
   });
 
-  // Row: The observable never emits / Falls back after a bounded wait
   it('resolves undefined after the bounded wait when listenToAvailableDevices never gets past the seeded value', async () => {
     jest.useFakeTimers();
     const dmk = createFakeProbeDmk({ neverUpdatesKnownDevices: true });
@@ -322,7 +313,6 @@ describe('getPreferredTransport', () => {
     expect(dmk.startDiscovering).not.toHaveBeenCalled();
   });
 
-  // Row: The observable errors / Swallowed
   it('resolves undefined when listenToAvailableDevices errors', async () => {
     const dmk = createFakeProbeDmk({ errorsKnownDevices: true });
 
@@ -330,7 +320,6 @@ describe('getPreferredTransport', () => {
     expect(dmk.startDiscovering).not.toHaveBeenCalled();
   });
 
-  // Row: Subscription is released
   it('unsubscribes from listenToAvailableDevices before resolving, with no leak across repeated calls', async () => {
     const unsubscribeSpy = jest.fn();
     const dmk = createFakeProbeDmk({
@@ -345,7 +334,6 @@ describe('getPreferredTransport', () => {
     expect(unsubscribeSpy).toHaveBeenCalledTimes(2);
   });
 
-  // Row: Bluetooth is never returned
   it('always probes with the USB identifier and never resolves Bluetooth', async () => {
     const dmk = createFakeProbeDmk({ knownDevices: [fakeDevice] });
 
@@ -365,7 +353,6 @@ describe('IsUsbLedgerTransportAvailable / IsBluetoothLedgerTransportAvailable', 
     return { isEnvironmentSupported: () => isSupported };
   }
 
-  // Row: USB availability, WebHID present
   it('IsUsbLedgerTransportAvailable resolves true when the injected dmk reports support', async () => {
     const { IsUsbLedgerTransportAvailable } = await import('./transport');
 
@@ -374,7 +361,6 @@ describe('IsUsbLedgerTransportAvailable / IsBluetoothLedgerTransportAvailable', 
     ).resolves.toBe(true);
   });
 
-  // Row: USB availability, WebHID absent
   it('IsUsbLedgerTransportAvailable resolves false when the injected dmk reports no support', async () => {
     const { IsUsbLedgerTransportAvailable } = await import('./transport');
 
@@ -385,7 +371,6 @@ describe('IsUsbLedgerTransportAvailable / IsBluetoothLedgerTransportAvailable', 
 });
 
 describe('isTransportAvailable', () => {
-  // Row: Combined availability
   it('resolves true when only one of USB or Bluetooth is available', async () => {
     jest.resetModules();
     jest.doMock('./dmk', () => ({
@@ -405,7 +390,6 @@ describe('isTransportAvailable', () => {
     jest.resetModules();
   });
 
-  // Row: Combined availability, both fail
   it('resolves false and swallows errors when both checks reject', async () => {
     jest.resetModules();
     jest.doMock('./dmk', () => ({
@@ -433,7 +417,6 @@ describe('isTransportAvailable', () => {
 });
 
 describe('subscribeToBluetoothAvailability', () => {
-  // Row: Initial availability delivered
   it('delivers true when the adapter is available at subscribe time', async () => {
     const observer = jest.fn();
     const { source } = createFakeBluetoothSource({ available: true });
@@ -444,7 +427,6 @@ describe('subscribeToBluetoothAvailability', () => {
     expect(observer).toHaveBeenCalledWith(true);
   });
 
-  // Row: Initial unavailability delivered
   it('delivers false when the adapter is unavailable at subscribe time', async () => {
     const observer = jest.fn();
     const { source } = createFakeBluetoothSource({ available: false });
@@ -455,7 +437,6 @@ describe('subscribeToBluetoothAvailability', () => {
     expect(observer).toHaveBeenCalledWith(false);
   });
 
-  // Row: Change delivered
   it('delivers the new value when availability flips after subscribe', async () => {
     const observer = jest.fn();
     const { source, emit } = createFakeBluetoothSource({ available: true });
@@ -469,7 +450,6 @@ describe('subscribeToBluetoothAvailability', () => {
     expect(observer).toHaveBeenCalledWith(false);
   });
 
-  // Row: Unsubscribe stops delivery
   it('delivers nothing further once unsubscribed', async () => {
     const observer = jest.fn();
     const { source, emit } = createFakeBluetoothSource({ available: true });
@@ -484,7 +464,6 @@ describe('subscribeToBluetoothAvailability', () => {
     expect(observer).not.toHaveBeenCalled();
   });
 
-  // Row: Unsubscribe removes the listener
   it('removes the same listener reference it registered', async () => {
     const observer = jest.fn();
     const { source } = createFakeBluetoothSource({ available: true });
@@ -502,7 +481,6 @@ describe('subscribeToBluetoothAvailability', () => {
     );
   });
 
-  // Row: Web Bluetooth absent
   it('delivers false and stays callable without throwing when navigator.bluetooth is absent', () => {
     const observer = jest.fn();
 
@@ -515,7 +493,6 @@ describe('subscribeToBluetoothAvailability', () => {
     expect(() => unsubscribe()).not.toThrow();
   });
 
-  // Row: getAvailability rejects
   it('delivers false and swallows the rejection when getAvailability rejects', async () => {
     const observer = jest.fn();
     const { source } = createFakeBluetoothSource({ rejects: true });

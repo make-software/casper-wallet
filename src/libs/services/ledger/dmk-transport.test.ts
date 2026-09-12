@@ -48,7 +48,6 @@ function createFakeDmk() {
 }
 
 describe('createDmkLedgerTransport', () => {
-  // Row: Satisfies both interfaces
   it('satisfies ILedgerTransport', () => {
     const { dmk } = createFakeDmk();
 
@@ -61,7 +60,6 @@ describe('createDmkLedgerTransport', () => {
   });
 
   describe('close', () => {
-    // Row: Close ends the session
     it('disconnects the session using the sessionId from construction', async () => {
       const { dmk, disconnect } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -72,7 +70,6 @@ describe('createDmkLedgerTransport', () => {
       expect(disconnect).toHaveBeenCalledWith({ sessionId: 'session-1' });
     });
 
-    // Row: Close unsubscribes
     it('tears down the device-session-state subscription', async () => {
       const { dmk, sessionState } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -83,7 +80,6 @@ describe('createDmkLedgerTransport', () => {
       expect(sessionState.unsubscribe).toHaveBeenCalledTimes(1);
     });
 
-    // Row: Close is idempotent
     it('calls dmk.disconnect once across two close() calls, and the second resolves', async () => {
       const { dmk, disconnect } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -94,7 +90,6 @@ describe('createDmkLedgerTransport', () => {
       expect(disconnect).toHaveBeenCalledTimes(1);
     });
 
-    // Row: Close swallows a DMK failure
     it('resolves even when dmk.disconnect rejects', async () => {
       const { dmk, disconnect } = createFakeDmk();
       disconnect.mockImplementation(() =>
@@ -107,7 +102,6 @@ describe('createDmkLedgerTransport', () => {
   });
 
   describe('disconnect event', () => {
-    // Row: Disconnect fires on NOT_CONNECTED
     it('calls the handler once when the state becomes NOT_CONNECTED', () => {
       const { dmk, sessionState } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -119,7 +113,6 @@ describe('createDmkLedgerTransport', () => {
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    // Row: Disconnect does not fire on other states
     it('does not call the handler for CONNECTED, BUSY or LOCKED', () => {
       const { dmk, sessionState } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -133,7 +126,6 @@ describe('createDmkLedgerTransport', () => {
       expect(fn).not.toHaveBeenCalled();
     });
 
-    // Row: Disconnect fires at most once
     it('calls the handler exactly once when NOT_CONNECTED is emitted twice', () => {
       const { dmk, sessionState } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -146,7 +138,6 @@ describe('createDmkLedgerTransport', () => {
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    // Row: Unsubscribing stops delivery
     it('stops calling the handler after off()', () => {
       const { dmk, sessionState } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -159,7 +150,6 @@ describe('createDmkLedgerTransport', () => {
       expect(fn).not.toHaveBeenCalled();
     });
 
-    // Row: `off` with an unknown function
     it('does not throw when off() is called with an unregistered function, and the real handler still fires', () => {
       const { dmk, sessionState } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -173,7 +163,6 @@ describe('createDmkLedgerTransport', () => {
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    // Row: Ignores other event names
     it('does not call a handler registered under a different event name', () => {
       const { dmk, sessionState } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -188,7 +177,6 @@ describe('createDmkLedgerTransport', () => {
   });
 
   describe('setExchangeTimeout', () => {
-    // Row: Timeout latches
     it('passes the latched timeout as abortTimeout on send', async () => {
       const { dmk, sendApdu } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -201,7 +189,6 @@ describe('createDmkLedgerTransport', () => {
       );
     });
 
-    // Row: Timeout persists
     it('applies the latched timeout to two subsequent send calls', async () => {
       const { dmk, sendApdu } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -220,7 +207,6 @@ describe('createDmkLedgerTransport', () => {
       );
     });
 
-    // Row: No timeout set
     it('omits abortTimeout when setExchangeTimeout was never called', async () => {
       const { dmk, sendApdu } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
@@ -231,7 +217,6 @@ describe('createDmkLedgerTransport', () => {
       expect(callArgs.abortTimeout).toBeUndefined();
     });
 
-    // Row: Explicit call option wins
     it('lets an explicit abortTimeoutMs override the latched timeout for that call', async () => {
       const { dmk, sendApdu } = createFakeDmk();
       const transport = createDmkLedgerTransport(dmk, 'session-1');
