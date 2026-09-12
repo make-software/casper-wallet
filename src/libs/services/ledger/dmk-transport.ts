@@ -1,7 +1,13 @@
-import { DeviceStatus } from '@ledgerhq/device-management-kit';
-import type { ILedgerTransport } from 'casper-wallet-core';
+import {
+  type DeviceSessionState,
+  DeviceStatus
+} from '@ledgerhq/device-management-kit';
+import type { ILedgerTransport, LedgerDeviceState } from 'casper-wallet-core';
+import { Observable, share } from 'rxjs';
 
 import { ApduSender, createApduSend } from './dmk-apdu';
+import { createRefresherGate } from './dmk-refresher';
+import { toLedgerDeviceState } from './dmk-state';
 
 /** The slice of the DMK instance this adapter needs. Injected so it is testable without a device. */
 export interface DmkSessionHandle {
@@ -15,7 +21,10 @@ export interface DmkSessionHandle {
   }>;
   disconnect(args: { sessionId: string }): Promise<void>;
   getDeviceSessionState(args: { sessionId: string }): {
-    subscribe(observer: { next: (state: { deviceStatus: string }) => void }): {
+    subscribe(observer: {
+      next: (state: DeviceSessionState) => void;
+      error?: (error: unknown) => void;
+    }): {
       unsubscribe(): void;
     };
   };
@@ -26,6 +35,7 @@ export interface DmkSessionHandle {
 }
 
 export interface DmkLedgerTransport extends ILedgerTransport {
+  observeState(): Observable<LedgerDeviceState>;
   send(
     cla: number,
     ins: number,
@@ -40,8 +50,9 @@ export interface DmkLedgerTransport extends ILedgerTransport {
 /**
  * Makes a DMK session look like the `ILedgerTransport` core drives: a synthetic `'disconnect'`
  * event derived from the session-state observable (fired at most once, so core's 3600 ms
- * reconnection gate is never re-armed), and a latched exchange timeout applied to every
- * subsequent `send` until overridden per call.
+ * reconnection gate is never re-armed), a latched exchange timeout applied to every subsequent
+ * `send` until overridden per call, and an `observeState()` channel whose subscription is what
+ * lets the session refresher run, so device state keeps moving while core sends nothing.
  */
 export function createDmkLedgerTransport(
   dmk: DmkSessionHandle,
@@ -73,9 +84,28 @@ export function createDmkLedgerTransport(
 
   const send = createApduSend(apduSender);
 
+  const gate = createRefresherGate(dmk, sessionId);
+
+  // Shared so a second reader costs no extra device traffic, and reset at zero subscribers so
+  // the refresher stops with the last one.
+  const state$ = new Observable<LedgerDeviceState>(subscriber => {
+    const releaseObservation = gate.beginObserving();
+
+    const subscription = dmk.getDeviceSessionState({ sessionId }).subscribe({
+      next: state => subscriber.next(toLedgerDeviceState(state)),
+      error: error => subscriber.error(error)
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      releaseObservation();
+    };
+  }).pipe(share({ resetOnRefCountZero: true }));
+
   return {
     async close() {
       stateSubscription?.unsubscribe();
+      gate.dispose();
 
       if (!disconnectPromise) {
         disconnectPromise = dmk
@@ -101,17 +131,22 @@ export function createDmkLedgerTransport(
     setExchangeTimeout(exchangeTimeout) {
       latchedAbortTimeout = exchangeTimeout;
     },
+    observeState() {
+      return state$;
+    },
     send(cla, ins, p1, p2, data, statusList, options = {}) {
       const abortTimeoutMs = options.abortTimeoutMs ?? latchedAbortTimeout;
 
-      return send(
-        cla,
-        ins,
-        p1,
-        p2,
-        data,
-        statusList,
-        abortTimeoutMs === undefined ? {} : { abortTimeoutMs }
+      return gate.duringExchange(() =>
+        send(
+          cla,
+          ins,
+          p1,
+          p2,
+          data,
+          statusList,
+          abortTimeoutMs === undefined ? {} : { abortTimeoutMs }
+        )
       );
     }
   };

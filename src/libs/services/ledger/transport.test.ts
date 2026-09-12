@@ -125,14 +125,14 @@ describe('connectLedgerTransport', () => {
     jest.useRealTimers();
   });
 
-  it('connects with the session refresher disabled', async () => {
+  it('connects with the session refresher left enabled', async () => {
     const dmk = createFakeConnectDmk({ knownDevices: [fakeDevice] });
 
     await connectLedgerTransport(dmk, 'usb-identifier');
 
     expect(dmk.connect).toHaveBeenCalledWith({
       device: fakeDevice,
-      sessionRefresherOptions: { isRefresherDisabled: true }
+      sessionRefresherOptions: { isRefresherDisabled: false }
     });
   });
 
@@ -183,7 +183,7 @@ describe('connectLedgerTransport', () => {
     });
     expect(dmk.connect).toHaveBeenCalledWith({
       device: fakeDevice,
-      sessionRefresherOptions: { isRefresherDisabled: true }
+      sessionRefresherOptions: { isRefresherDisabled: false }
     });
   });
 

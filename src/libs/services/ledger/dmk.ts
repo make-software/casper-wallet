@@ -37,12 +37,16 @@ export const getBluetoothAvailabilityDmk = (): DeviceManagementKit =>
     .addTransport(webBleTransportFactory)
     .build());
 
-/** Every DMK session disables the refresher: a per-signature popup must not hold the device busy. */
+/**
+ * The session refresher is left enabled here and governed by the transport instead: it runs
+ * only while the device state is being observed, and is suppressed for the span of each
+ * exchange.
+ */
 export const connectSession = (
   dmk: Pick<DeviceManagementKit, 'connect'>,
   device: DiscoveredDevice
 ): Promise<DeviceSessionId> =>
   dmk.connect({
     device,
-    sessionRefresherOptions: { isRefresherDisabled: true }
+    sessionRefresherOptions: { isRefresherDisabled: false }
   });

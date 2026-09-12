@@ -1,5 +1,10 @@
-import { DeviceStatus } from '@ledgerhq/device-management-kit';
-import type { ILedgerTransport } from 'casper-wallet-core';
+import {
+  DeviceModelId,
+  type DeviceSessionState,
+  DeviceSessionStateType,
+  DeviceStatus
+} from '@ledgerhq/device-management-kit';
+import type { ILedgerTransport, LedgerDeviceState } from 'casper-wallet-core';
 
 import { DmkSessionHandle, createDmkLedgerTransport } from './dmk-transport';
 
@@ -8,20 +13,32 @@ const okResponse = {
   data: new Uint8Array([])
 };
 
+type SessionStateObserver = Parameters<
+  ReturnType<DmkSessionHandle['getDeviceSessionState']>['subscribe']
+>[0];
+
+const connectedState = (deviceStatus: DeviceStatus): DeviceSessionState => ({
+  sessionStateType: DeviceSessionStateType.Connected,
+  deviceStatus,
+  deviceModelId: DeviceModelId.NANO_X
+});
+
 function createSessionState() {
-  const observers: Array<{ next: (state: { deviceStatus: string }) => void }> =
-    [];
+  const observers: SessionStateObserver[] = [];
   const unsubscribe = jest.fn();
 
   return {
-    subscribe: jest.fn(
-      (observer: { next: (state: { deviceStatus: string }) => void }) => {
-        observers.push(observer);
-        return { unsubscribe };
-      }
-    ),
-    emit(deviceStatus: string) {
-      observers.forEach(observer => observer.next({ deviceStatus }));
+    subscribe: jest.fn((observer: SessionStateObserver) => {
+      observers.push(observer);
+      return { unsubscribe };
+    }),
+    emit(deviceStatus: DeviceStatus) {
+      observers.forEach(observer =>
+        observer.next(connectedState(deviceStatus))
+      );
+    },
+    emitError(error: unknown) {
+      observers.forEach(observer => observer.error?.(error));
     },
     unsubscribe
   };
@@ -242,6 +259,162 @@ describe('createDmkLedgerTransport', () => {
       expect(sendApdu).toHaveBeenCalledWith(
         expect.objectContaining({ abortTimeout: 500 })
       );
+    });
+  });
+
+  describe('observeState', () => {
+    it('exposes observeState as a function on a value that satisfies ILedgerTransport', () => {
+      const { dmk } = createFakeDmk();
+
+      const asCoreTransport: ILedgerTransport = createDmkLedgerTransport(
+        dmk,
+        'session-1'
+      );
+
+      expect(typeof asCoreTransport.observeState).toBe('function');
+    });
+
+    it('translates a LOCKED session state into a locked device state', () => {
+      const { dmk, sessionState } = createFakeDmk();
+      const transport = createDmkLedgerTransport(dmk, 'session-1');
+      const states: LedgerDeviceState[] = [];
+      transport.observeState().subscribe(state => states.push(state));
+
+      sessionState.emit(DeviceStatus.LOCKED);
+
+      expect(states).toEqual([{ status: 'locked' }]);
+    });
+
+    it('releases the standing refresher blocker on the first subscription', () => {
+      const { dmk, releaseRefresherBlocker } = createFakeDmk();
+      const transport = createDmkLedgerTransport(dmk, 'session-1');
+
+      expect(releaseRefresherBlocker).not.toHaveBeenCalled();
+
+      transport.observeState().subscribe();
+
+      expect(releaseRefresherBlocker).toHaveBeenCalledTimes(1);
+    });
+
+    it('takes a refresher blocker again when the only subscription is torn down', () => {
+      const { dmk, disableDeviceSessionRefresher } = createFakeDmk();
+      const transport = createDmkLedgerTransport(dmk, 'session-1');
+      const subscription = transport.observeState().subscribe();
+      const blockersWhileObserving =
+        disableDeviceSessionRefresher.mock.calls.length;
+
+      subscription.unsubscribe();
+
+      expect(disableDeviceSessionRefresher).toHaveBeenCalledTimes(
+        blockersWhileObserving + 1
+      );
+    });
+
+    it('subscribes to the session state once for two subscribers and feeds both', () => {
+      const { dmk, sessionState } = createFakeDmk();
+      const transport = createDmkLedgerTransport(dmk, 'session-1');
+      const first: LedgerDeviceState[] = [];
+      const second: LedgerDeviceState[] = [];
+      transport.observeState().subscribe(state => first.push(state));
+      transport.observeState().subscribe(state => second.push(state));
+
+      sessionState.emit(DeviceStatus.LOCKED);
+
+      expect(sessionState.subscribe).toHaveBeenCalledTimes(1);
+      expect(first).toEqual([{ status: 'locked' }]);
+      expect(second).toEqual(first);
+    });
+
+    it('releases the standing blocker once and retakes it once across two subscribers', () => {
+      const { dmk, disableDeviceSessionRefresher, releaseRefresherBlocker } =
+        createFakeDmk();
+      const transport = createDmkLedgerTransport(dmk, 'session-1');
+      const blockersBefore = disableDeviceSessionRefresher.mock.calls.length;
+
+      const first = transport.observeState().subscribe();
+      const second = transport.observeState().subscribe();
+
+      expect(releaseRefresherBlocker).toHaveBeenCalledTimes(1);
+
+      first.unsubscribe();
+
+      expect(disableDeviceSessionRefresher).toHaveBeenCalledTimes(
+        blockersBefore
+      );
+
+      second.unsubscribe();
+
+      expect(releaseRefresherBlocker).toHaveBeenCalledTimes(1);
+      expect(disableDeviceSessionRefresher).toHaveBeenCalledTimes(
+        blockersBefore + 1
+      );
+    });
+
+    it('propagates a session-state error to the subscriber without throwing', () => {
+      const { dmk, sessionState } = createFakeDmk();
+      const transport = createDmkLedgerTransport(dmk, 'session-1');
+      const error = jest.fn();
+      transport.observeState().subscribe({ next: jest.fn(), error });
+
+      expect(() =>
+        sessionState.emitError(new Error('session lost'))
+      ).not.toThrow();
+
+      expect(error).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'session lost' })
+      );
+    });
+
+    it('holds a refresher blocker for the span of an exchange and releases it after', async () => {
+      const {
+        dmk,
+        sendApdu,
+        disableDeviceSessionRefresher,
+        releaseRefresherBlocker
+      } = createFakeDmk();
+      const transport = createDmkLedgerTransport(dmk, 'session-1');
+      const blockersBefore = disableDeviceSessionRefresher.mock.calls.length;
+      let blockersDuringExchange = 0;
+      let releasesDuringExchange = 0;
+      sendApdu.mockImplementation(() => {
+        blockersDuringExchange =
+          disableDeviceSessionRefresher.mock.calls.length;
+        releasesDuringExchange = releaseRefresherBlocker.mock.calls.length;
+
+        return Promise.resolve(okResponse);
+      });
+
+      await transport.send(0x11, 0x01, 0x00, 0x00);
+
+      expect(blockersDuringExchange).toBe(blockersBefore + 1);
+      expect(releaseRefresherBlocker).toHaveBeenCalledTimes(
+        releasesDuringExchange + 1
+      );
+    });
+
+    it('releases the exchange blocker when the exchange rejects', async () => {
+      const { dmk, sendApdu, releaseRefresherBlocker } = createFakeDmk();
+      sendApdu.mockImplementation(() =>
+        Promise.reject(new Error('apdu failed'))
+      );
+      const transport = createDmkLedgerTransport(dmk, 'session-1');
+
+      await expect(transport.send(0x11, 0x01, 0x00, 0x00)).rejects.toThrow(
+        'apdu failed'
+      );
+
+      expect(releaseRefresherBlocker).toHaveBeenCalledTimes(1);
+    });
+
+    it('tears down the session subscription and disposes the gate on close', async () => {
+      const { dmk, sessionState, releaseRefresherBlocker } = createFakeDmk();
+      const transport = createDmkLedgerTransport(dmk, 'session-1');
+      transport.on('disconnect', jest.fn());
+
+      await transport.close();
+
+      expect(sessionState.unsubscribe).toHaveBeenCalledTimes(1);
+      expect(releaseRefresherBlocker).toHaveBeenCalledTimes(1);
     });
   });
 });
