@@ -6,7 +6,8 @@ import {
   ILedgerEvent,
   LedgerEventStatus,
   LedgerTransport,
-  isLedgerError
+  isLedgerError,
+  isLedgerWaiting
 } from '@libs/services/ledger';
 import { Button } from '@libs/ui/components';
 
@@ -28,11 +29,31 @@ export const renderLedgerFooter = ({
     event?.status === LedgerEventStatus.LedgerAskPermission
   ) {
     return () => <LedgerDisconnectedFooter onConnect={onConnect} />;
+  } else if (isLedgerWaiting(event)) {
+    return () => <LedgerWaitingFooter onErrorCtaPressed={onErrorCtaPressed} />;
   } else if (isLedgerError(event)) {
     return () => <LedgerErrorFooter onErrorCtaPressed={onErrorCtaPressed} />;
   }
 
   return undefined;
+};
+
+/**
+ * The flow behind this screen is still live and resumes on its own, so the button is the way
+ * out of it rather than an acknowledgement.
+ */
+const LedgerWaitingFooter: React.FC<
+  Pick<IRenderLedgerFooterParams, 'onErrorCtaPressed'>
+> = ({ onErrorCtaPressed }) => {
+  const { t } = useTranslation();
+
+  return (
+    <FooterButtonsContainer>
+      <Button color="secondaryBlue" onClick={onErrorCtaPressed}>
+        <Trans t={t}>Cancel and start over</Trans>
+      </Button>
+    </FooterButtonsContainer>
+  );
 };
 
 const LedgerErrorFooter: React.FC<

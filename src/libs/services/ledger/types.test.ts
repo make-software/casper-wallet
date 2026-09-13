@@ -1,4 +1,4 @@
-import { isLedgerError, ledgerErrorsData } from './errors';
+import { isLedgerError, isLedgerWaiting, ledgerErrorsData } from './errors';
 import { LedgerEventStatus } from './types';
 
 describe('LedgerEventStatus', () => {
@@ -29,6 +29,38 @@ describe('LedgerEventStatus', () => {
     Object.values(LedgerEventStatus).forEach(status => {
       expect(ledgerErrorsData[status]).toBeDefined();
     });
+  });
+
+  it('treats a locked device as a state the flow waits out, not a failure', () => {
+    expect(isLedgerWaiting({ status: LedgerEventStatus.DeviceLocked })).toBe(
+      true
+    );
+  });
+
+  it('treats every other status with copy as a failure, not a wait', () => {
+    [
+      LedgerEventStatus.SignatureFailed,
+      LedgerEventStatus.SignatureCanceled,
+      LedgerEventStatus.CasperAppNotLoaded,
+      LedgerEventStatus.NotAvailable,
+      LedgerEventStatus.Timeout
+    ].forEach(status => {
+      expect(isLedgerWaiting({ status })).toBe(false);
+    });
+  });
+
+  // The waiting screen is still rendered by the error view, so it has to keep
+  // reporting as one — only its copy and its footer differ.
+  it('keeps a locked device on the path that renders its copy', () => {
+    expect(isLedgerError({ status: LedgerEventStatus.DeviceLocked })).toBe(
+      true
+    );
+  });
+
+  it('does not tell a locked device to start over', () => {
+    const { description } = ledgerErrorsData[LedgerEventStatus.DeviceLocked];
+
+    expect(description).not.toMatch(/try again/i);
   });
 
   it('treats the two mobile-only statuses as non-errors here', () => {
