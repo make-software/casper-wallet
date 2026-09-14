@@ -1,3 +1,5 @@
+import { LedgerError } from 'casper-wallet-core';
+
 import { dispatchToMainStore } from '@background/redux/utils';
 import { windowRequestDeviceConfirmationChanged } from '@background/redux/windowManagement/actions';
 
@@ -83,11 +85,12 @@ export async function runWithDeviceConfirmationReported(
   try {
     await run();
   } catch (error) {
-    // Name only: a Ledger error carries the public key and transaction hash it
-    // failed on, and this line is a diagnostic, not the user-facing surface —
-    // the same failure already reaches the screen through the event subject.
+    // Status, never the message: core names every one of these `Error` and puts the whole event
+    // — public key and transaction hash included — in the message it carries.
     console.error('useLedger: the device action failed', {
-      errorName: (error as Error)?.name
+      errorName: (error as Error)?.name,
+      ledgerStatus:
+        error instanceof LedgerError ? error.ledgerEvent.status : undefined
     });
   } finally {
     report(false);
