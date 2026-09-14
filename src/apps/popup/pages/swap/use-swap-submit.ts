@@ -331,11 +331,10 @@ export const useSwapSubmit = ({
 
         subscriptionRef.current = subscription;
 
-        handle.done
-          .finally(() => {
-            isSubmittingRef.current = false;
-          })
-          .catch(() => undefined);
+        // Awaited so this call spans the flow instead of its start: a Ledger resume keys off
+        // the action still being outstanding. Rejections are the subscription's to report.
+        await handle.done.catch(() => undefined);
+        isSubmittingRef.current = false;
       } else {
         const runner = createSwapFlowRunner(deps);
         const handle = runner.start({
@@ -358,11 +357,10 @@ export const useSwapSubmit = ({
 
         subscriptionRef.current = subscription;
 
-        handle.done
-          .finally(() => {
-            isSubmittingRef.current = false;
-          })
-          .catch(() => undefined);
+        // Awaited so this call spans the flow instead of its start: a Ledger resume keys off
+        // the action still being outstanding. Rejections are the subscription's to report.
+        await handle.done.catch(() => undefined);
+        isSubmittingRef.current = false;
       }
     } catch (error) {
       isSubmittingRef.current = false;
