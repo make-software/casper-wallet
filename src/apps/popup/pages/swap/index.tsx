@@ -19,6 +19,7 @@ import { useLedger } from '@hooks/use-ledger';
 import { useSubmitButton } from '@hooks/use-submit-button';
 
 import {
+  AlignedFlexRow,
   CenteredFlexRow,
   FooterButtonsContainer,
   HeaderPopup,
@@ -28,12 +29,12 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { LedgerEventStatus } from '@libs/services/ledger';
 import { useSwapDependencies } from '@libs/services/swap-service';
 import {
   Button,
   LedgerEventView,
   Spinner,
+  SvgIcon,
   TransferSuccessScreen,
   Typography,
   renderLedgerFooter
@@ -199,14 +200,11 @@ export const SwapPage = () => {
       ) : (
         <></>
       ),
+    // Driven by the hook, not by `flowState.ledgerEvent`: a device that is locked or absent
+    // when the user presses Confirm is reported before any flow runner exists, and the footer
+    // below reads the same source.
     [SwapSteps.ConfirmWithLedger]: (
-      <LedgerEventView
-        event={
-          flowState.state.ledgerEvent ?? {
-            status: LedgerEventStatus.WaitingResponseFromDevice
-          }
-        }
-      />
+      <LedgerEventView event={ledgerEventStatusToRender} />
     ),
     [SwapSteps.Success]: (
       <TransferSuccessScreen headerText={labels.successTitle} />
@@ -260,7 +258,7 @@ export const SwapPage = () => {
           </CenteredFlexRow>
         </ScrollContainer>
         <Button
-          color="primaryBlue"
+          color={isLedgerAccount ? 'primaryRed' : 'primaryBlue'}
           type="button"
           disabled={isSubmitButtonDisable || isProcessing}
           onClick={isLedgerAccount ? makeSubmitLedgerAction() : submit}
@@ -270,6 +268,11 @@ export const SwapPage = () => {
               <Spinner style={{ marginTop: 0, marginRight: 12 }} />
               <Trans t={t}>{labels.confirmTitle}</Trans>
             </CenteredFlexRow>
+          ) : isLedgerAccount ? (
+            <AlignedFlexRow gap={SpacingSize.Small}>
+              <SvgIcon src="assets/icons/ledger-white.svg" />
+              <Trans t={t}>{labels.confirmTitle}</Trans>
+            </AlignedFlexRow>
           ) : (
             <Trans t={t}>{labels.confirmTitle}</Trans>
           )}
