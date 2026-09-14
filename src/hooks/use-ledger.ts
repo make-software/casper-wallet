@@ -201,19 +201,24 @@ export const useLedger = ({
             status: LedgerEventStatus.Disconnected
           });
         }
-      } catch (e) {
-        setIsLedgerConnected(false);
+      } catch {
+        // Nothing to add: core pushes the failure onto the event stream before it rejects, and
+        // the subscription below renders it.
       }
     }
   };
 
+  // Core clears its own connection flag on states it does not report as `Disconnected` — a
+  // locked device is one — so the flag is subscribed, never derived from the event stream.
+  useEffect(() => {
+    const sub = ledger.connected$.subscribe(setIsLedgerConnected);
+
+    return () => sub.unsubscribe();
+  }, []);
+
   useEffect(() => {
     const sub = ledger.subscribeToLedgerEventStatus(event => {
-      if (event.status === LedgerEventStatus.Connected) {
-        setIsLedgerConnected(true);
-      } else if (event.status === LedgerEventStatus.Disconnected) {
-        setIsLedgerConnected(false);
-
+      if (event.status === LedgerEventStatus.Disconnected) {
         if (withWaitingEventOnDisconnect) {
           setLedgerEventStatusToRender({
             status: LedgerEventStatus.WaitingResponseFromDevice
@@ -234,7 +239,6 @@ export const useLedger = ({
         setLedgerEventStatusToRender({
           status: LedgerEventStatus.Disconnected
         });
-        setIsLedgerConnected(false);
       }
 
       isFirstEventRef.current = false;
