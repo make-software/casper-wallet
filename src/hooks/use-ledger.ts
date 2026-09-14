@@ -102,6 +102,7 @@ export const useLedger = ({
   const selectedTransportRef = useRef<SelectedTransport>(undefined);
   const isFirstEventRef = useRef<boolean>(true);
   const triggeredRef = useRef(false);
+  const deviceActionInFlightRef = useRef(false);
 
   // Built key by key (rather than spread into the constructor) because
   // `LedgerPermissionParams` has optional members: an absent one must be left
@@ -144,13 +145,15 @@ export const useLedger = ({
     await beforeLedgerActionCb();
 
     if (isLedgerConnected) {
-      // Fire-and-forget as before — the status below must render while the
-      // device is being read — but bracketed so the background knows this
-      // request is on the device and leaves the window it runs in alone.
+      // Fire-and-forget: the status below must render while the device is read.
+      // Bracketed so the background leaves the window this request runs in alone.
+      deviceActionInFlightRef.current = true;
       void runWithDeviceConfirmationReported(
         askPermissionUrlData.params?.requestId,
         ledgerAction
-      );
+      ).finally(() => {
+        deviceActionInFlightRef.current = false;
+      });
 
       if (shouldLoadAccountList) {
         setLedgerEventStatusToRender({
@@ -211,7 +214,15 @@ export const useLedger = ({
   // Core clears its own connection flag on states it does not report as `Disconnected` — a
   // locked device is one — so the flag is subscribed, never derived from the event stream.
   useEffect(() => {
-    const sub = ledger.connected$.subscribe(setIsLedgerConnected);
+    const sub = ledger.connected$.subscribe(connected => {
+      setIsLedgerConnected(connected);
+
+      // A device that leaves mid-action takes the submit with it; the connect branch only
+      // covers one that was already away when the user pressed submit.
+      if (!connected && deviceActionInFlightRef.current) {
+        shouldTrySignAfterConnectRef.current = true;
+      }
+    });
 
     return () => sub.unsubscribe();
   }, []);
