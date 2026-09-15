@@ -85,7 +85,8 @@ export const initialStateForPopupTests: RootState = {
     openerRequestId: null,
     deploy: null,
     transaction: null,
-    recipientToSaveOnSuccess: null
+    recipientToSaveOnSuccess: null,
+    swapPayload: null
   },
   vaultCipher:
     'G89IRk1Zc+l46uPzkhTwSy09IUM5Q4R1JoIfOCeyMZEn47OnFK7Rk1fSPJ9gsSVsiq+d00AqKuW/lTV+s1OTGOucftVqKBF6XSyR9tG7P2sgRyJ6o5vS/h+tVSyqHt6wHFuTcee1IResAfxPJEjiKbMMm7gN1eFosvqM8utdBOgIkR17+HiojfvdI0Q07kWZXy0SuUceSxnXGHZU2LdMikZI2JmkaEgk+Qgm/nNzqlN2hAKxQRhr+68opUiIN/lpOYPLS64nZou6vuqSKu+Uogd8znNZOcFA+4+1zXlbJEp8HksSqy+fblAxDALpauljIogoPfwLIaSPU1GSwTfG63yuCiMVlAE+FwOAt31J+m0N++obOTomfp6ZjN0uOG700Kfm5NSWMMXqCp/f/M8C466/ONqsl0og/R1KXOw0nPYybzmgXCyS35yZyOXmxzKrKtXRdYVTBz79pjMbR8p1CCDnVLHJyKKIGbsGrX3ADjwkJHmBEjGPL2Qb4Ez7ATzcQ/XEdcK+VfzbNkJivssPMBV+6ETNWrwPbIR4BxfN12TbmdAej7nbP+oaM1plKhcoW1hp0oD60Ngwh8D1ztD9i+3R9yDGVNwjh56ytvk5E1Fo7e02NYBJgjvHFoBz+fX4iHlliHczRRVC3OVceZcPPMCeVuigkz7wirqscxBfnrc+EBXrziOrEc4NobSKJI33UEZAMLjxLZSD8CR9J9RrJzFCrda44P65uSypiSyw49EPdsG4etW9Eop2iHNO5Ny7oCr7mITsFvFkGtXDh+tQ4r6D4b7ZGe2AD2Jm/4t9jcBsPO3wHxPfS7eIHq8RUJZUK7DL90s8gt0wXzIFgIeMIc+mcK0HigU+zYaBHO9O+PUfetEHZANmSwsRu3nmiHogEZaPJAT+ATY3+3GjNMQ=',
@@ -99,7 +100,9 @@ export const initialStateForPopupTests: RootState = {
     activeTimeoutDuration: TimeoutDurationSetting['5 min'],
     isDarkMode: false,
     themeMode: ThemeMode.SYSTEM,
-    systemColorScheme: null
+    systemColorScheme: null,
+    swapSlippage: 3,
+    swapDeadline: 20
   },
   recentRecipientPublicKeys: [],
   accountInfo: {

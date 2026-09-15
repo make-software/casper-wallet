@@ -78,7 +78,7 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
   }, []);
 
   useEffect(() => {
-    const sub = ledger.subscribeToLedgerEventStatuss(event => {
+    const sub = ledger.subscribeToLedgerEventStatus(event => {
       if (event.status === LedgerEventStatus.AccountListUpdated) {
         setAccountsFromLedger(prev => {
           return [...prev, ...(event.accounts ?? [])];

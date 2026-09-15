@@ -1,11 +1,12 @@
-import { useLocation } from 'react-router-dom';
+import { Location, useLocation } from 'react-router-dom';
 
 import { LocationState } from './types';
 
-export function useTypedLocation() {
-  const location = useLocation();
+interface UseTypedLocation extends Location {
+  /** `null` when the entry carries no state: a direct URL, or a reload. Guard every read. */
+  state: LocationState | null;
+}
 
-  return location as typeof location & {
-    state?: LocationState;
-  };
+export function useTypedLocation(): UseTypedLocation {
+  return useLocation();
 }

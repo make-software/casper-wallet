@@ -1,14 +1,14 @@
-import { HttpHandler, InfoGetStatusResult, RpcClient } from 'casper-js-sdk';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 
-import { REFERRER_URL } from '@src/constants';
+import { NetworkSetting, getCasperNetwork } from '@src/constants';
 
 import { sagaError } from '@background/redux/app-events/actions';
 import {
   activeNetworkSettingChanged,
   casperNetworkApiVersionChanged
 } from '@background/redux/settings/actions';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { selectActiveNetworkSetting } from '@background/redux/settings/selectors';
+import { casperTransactionsRepository } from '@background/signing-repositories';
 
 import { unlockVault } from './actions';
 import { errorToMessage } from './utils';
@@ -22,20 +22,16 @@ export function* watchCasper2NetworkSaga() {
 
 function* checkCasper2NetworkSaga() {
   try {
-    const { nodeUrl }: { nodeUrl: string } = yield select(
-      selectApiConfigBasedOnActiveNetwork
+    const activeNetworkSetting: NetworkSetting = yield select(
+      selectActiveNetworkSetting
     );
 
-    const handler = new HttpHandler(nodeUrl, 'fetch');
-    handler.setReferrer(REFERRER_URL);
-    const rpcClient = new RpcClient(handler);
+    const apiVersion: string = yield call(
+      [casperTransactionsRepository, 'getNetworkApiVersion'],
+      getCasperNetwork(activeNetworkSetting)
+    );
 
-    const status: InfoGetStatusResult = yield call([
-      rpcClient,
-      rpcClient.getStatus
-    ]);
-
-    yield put(casperNetworkApiVersionChanged(status.apiVersion));
+    yield put(casperNetworkApiVersionChanged(apiVersion));
   } catch (err) {
     console.error(err);
     yield put(

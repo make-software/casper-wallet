@@ -1,4 +1,5 @@
 import Big from 'big.js';
+import type { NftStandard } from 'casper-wallet-core';
 import { Maybe } from 'casper-wallet-core/src/typings/common';
 import { getAccountHashFromPublicKey } from 'casper-wallet-core/src/utils/casperSdk/accountHash';
 
@@ -132,6 +133,12 @@ export enum NFTTokenStandard {
   CEP78 = 'CEP78',
   CEP95 = 'CEP95'
 }
+
+export const coreNftStandardMap: Record<NFTTokenStandard, NftStandard> = {
+  [NFTTokenStandard.CEP47]: 'CEP47',
+  [NFTTokenStandard.CEP78]: 'CEP78',
+  [NFTTokenStandard.CEP95]: 'CEP95'
+};
 
 export const getImageProxyUrl = (
   url: string | undefined,

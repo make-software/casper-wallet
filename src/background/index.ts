@@ -32,8 +32,8 @@ import { handleVaultSecrets } from '@background/handlers/vault-secrets';
 import { handleWindowRemoved } from '@background/handlers/window-removed';
 import { initKeepAlive } from '@background/keep-alive';
 import {
-  disableOnboardingFlow,
-  openOnboardingUi
+  openOnboardingUi,
+  syncOnboardingFlow
 } from '@background/open-onboarding-flow';
 import { activeOriginFaviconChanged } from '@background/redux/active-origin-favicon/actions';
 import { getExistingMainStoreSingletonOrInit } from '@background/redux/get-main-store';
@@ -75,12 +75,7 @@ async function isOnboardingCompleted() {
 }
 
 const init = () => {
-  // check if onboarding is completed and then disable
-  isOnboardingCompleted().then(yes => {
-    if (yes) {
-      disableOnboardingFlow();
-    }
-  });
+  isOnboardingCompleted().then(syncOnboardingFlow);
 };
 runtime.onStartup.addListener(init);
 management?.onEnabled?.addListener(init);
@@ -92,10 +87,10 @@ runtime.onInstalled.addListener(async () => {
   // storage.local.remove([REDUX_STORAGE_KEY]);
   //
   // after installation/update check if onboarding is completed
-  isOnboardingCompleted().then(yes => {
-    if (yes) {
-      disableOnboardingFlow();
-    } else {
+  isOnboardingCompleted().then(async yes => {
+    await syncOnboardingFlow(yes);
+
+    if (!yes) {
       openOnboardingUi();
     }
   });

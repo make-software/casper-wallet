@@ -280,20 +280,19 @@ export const BorderContainer = styled.div<BorderBottomPseudoElementProps>`
 export const Overlay = styled.div`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndex.modal};
-  top: 50%;
-  left: 50%;
+  // Spanned top-to-bottom rather than centred with a height: vertical centring
+  // resolves the bottom edge to 50vh + height / 2, so any height that clears the
+  // 72px header overhangs the fold by half of what it skips — which puts a
+  // sheet's footer buttons off-screen and unclickable.
+  top: 72px;
   bottom: 0;
-  right: 0;
+  left: 50%;
 
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
 
   overflow: auto;
 
-  height: 100vh;
   width: 360px;
-
-  // this remove overlay from header
-  margin-top: 72px;
 
   background: ${({ theme }) => hexToRGBA(theme.color.black, '0.32')};
 `;

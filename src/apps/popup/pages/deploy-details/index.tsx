@@ -13,7 +13,7 @@ import {
 export const DeployDetailsPage = () => {
   const location = useTypedLocation();
 
-  const { deploy } = location.state;
+  const deploy = location.state?.deploy;
 
   return (
     <PopupLayout

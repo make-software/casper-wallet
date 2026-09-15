@@ -7,6 +7,7 @@ import { BaseProps } from '@libs/ui/types';
 
 export enum FormFieldStatus {
   Error = 'error',
+  Warning = 'warning',
   Success = 'success'
 }
 
@@ -17,6 +18,7 @@ const getThemeColor = (status?: FormFieldStatus | null) => {
 
   return {
     [FormFieldStatus.Error]: 'fillCritical',
+    [FormFieldStatus.Warning]: 'contentWarning',
     [FormFieldStatus.Success]: 'fillPositive'
   }[status];
 };

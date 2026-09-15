@@ -18,3 +18,6 @@ export const selectLedgerTransaction = (state: RootState): string | null =>
 export const selectLedgerRecipientToSaveOnSuccess = (
   state: RootState
 ): string | null => state.ledger.recipientToSaveOnSuccess;
+
+export const selectLedgerSwapPayload = (state: RootState): string | null =>
+  state.ledger.swapPayload;

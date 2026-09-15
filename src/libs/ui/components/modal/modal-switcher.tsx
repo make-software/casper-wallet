@@ -23,6 +23,11 @@ const ContentContainer = styled.div`
   padding: 0 16px;
 
   flex-grow: 1;
+  // The sheet's height is fixed, so content taller than it has to scroll here or it escapes
+  // past the footer and off-screen. The zero min-height is what lets this flex item shrink
+  // below its content at all; without it the overflow rule has nothing to clip against.
+  min-height: 0;
+  overflow-y: auto;
 `;
 
 const HeaderContainer = styled(AlignedFlexRow)`
@@ -40,12 +45,19 @@ const CancelButton = styled(Typography)`
 interface SwitcherProps {
   label: string;
   closeSwitcher: (e: React.MouseEvent<Element, MouseEvent>) => void;
+  /** Runs when Done is pressed. Defaults to `closeSwitcher`, so a picker whose Done
+   *  only dismisses the sheet needs no change. */
+  onDone?: (e: React.MouseEvent<Element, MouseEvent>) => void;
+  /** Drops the footer, for a sheet whose rows commit on tap and so has nothing for Done to do. */
+  hideDoneButton?: boolean;
   children: React.ReactNode;
 }
 
 export const ModalSwitcher = ({
   label,
   closeSwitcher,
+  onDone,
+  hideDoneButton,
   children
 }: SwitcherProps) => {
   const { t } = useTranslation();
@@ -72,11 +84,13 @@ export const ModalSwitcher = ({
         {children}
       </ContentContainer>
 
-      <FooterButtonsContainer>
-        <Button onClick={closeSwitcher}>
-          <Trans t={t}>Done</Trans>
-        </Button>
-      </FooterButtonsContainer>
+      {!hideDoneButton && (
+        <FooterButtonsContainer>
+          <Button onClick={onDone ?? closeSwitcher}>
+            <Trans t={t}>Done</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      )}
     </Container>
   );
 };

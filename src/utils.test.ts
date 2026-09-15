@@ -4,6 +4,8 @@ import path from 'path';
 import { Browser } from '@src/constants';
 
 import {
+  NFTTokenStandard,
+  coreNftStandardMap,
   getSafariCspContent,
   hasHttpPrefix,
   isBundledAssetPath,
@@ -189,7 +191,9 @@ describe('getSafariCspContent', () => {
         'https://cspr-wallet-api.stg.make.services/',
         'https://api.casperwallet.io/',
         'https://api.integration.casperwallet.io/',
-        'https://node.integration.cspr.cloud/'
+        'https://node.integration.cspr.cloud/',
+        'https://api.cspr.trade/',
+        'https://api.testnet.cspr.trade/'
       ].join(' ')
     });
   });
@@ -440,5 +444,24 @@ describe('app entrypoints', () => {
       /import\s*\{[^}]*\bsetCSPForSafari\b[^}]*\}\s*from\s*'@src\/utils'/
     );
     expect(source).toMatch(/^\s*setCSPForSafari\(\);$/m);
+  });
+});
+
+/** See `coreAuctionEntryPointMap` in constants.test.ts — same shape, same unchecked pairing. */
+describe('coreNftStandardMap', () => {
+  it.each([
+    [NFTTokenStandard.CEP47, 'CEP47'],
+    [NFTTokenStandard.CEP78, 'CEP78'],
+    [NFTTokenStandard.CEP95, 'CEP95']
+  ])('sends %s to core as %s', (standard, coreStandard) => {
+    expect(coreNftStandardMap[standard]).toBe(coreStandard);
+  });
+
+  it('never sends two standards to the same core standard', () => {
+    const coreStandards = Object.values(NFTTokenStandard).map(
+      standard => coreNftStandardMap[standard]
+    );
+
+    expect(new Set(coreStandards).size).toBe(coreStandards.length);
   });
 });

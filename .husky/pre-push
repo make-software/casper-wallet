@@ -1,4 +1,4 @@
 npx lint-staged
-# The unit suite is gated on CI (.github/workflows/ci-check.yml). Locally it
-# costs minutes on every push, so the hook keeps only the fast static checks.
-npm run check:static
+# The whole CI gate, e2e aside. It was static-checks-only while the unit suite
+# cost minutes; it now runs in well under one (see jest.config.js, tsconfig.jest.json).
+npm run ci-check

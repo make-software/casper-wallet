@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
@@ -16,8 +16,10 @@ import { LazyPageFallback } from '@popup/lazy-page-fallback';
 import { BringWeb3Unlock } from '@popup/pages/bring-web3-unlock';
 import { HomePageContent } from '@popup/pages/home';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
+import { PopupLoadingView } from '@popup/popup-loading-view';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
+import { openOnboardingUi } from '@background/open-onboarding-flow';
 import { selectKeysDoesExist } from '@background/redux/keys/selectors';
 import { selectVaultIsLocked } from '@background/redux/session/selectors';
 import { selectVaultHasAccounts } from '@background/redux/vault/selectors';
@@ -143,6 +145,9 @@ const SignWithLedgerInNewWindowPage = lazy(() =>
 const StakesPage = lazy(() =>
   import('@popup/pages/stakes').then(m => ({ default: m.StakesPage }))
 );
+const SwapPage = lazy(() =>
+  import('@popup/pages/swap').then(m => ({ default: m.SwapPage }))
+);
 const TimeoutPageContent = lazy(() =>
   import('@popup/pages/timeout').then(m => ({
     default: m.TimeoutPageContent
@@ -169,7 +174,22 @@ const WalletQrCodePage = lazy(() =>
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
+  const keysDoesExist = useSelector(selectKeysDoesExist);
   useUserActivityTracker();
+
+  // The icon opens this popup straight from the manifest, before the background has read the
+  // vault and detached it for an unfinished onboarding. Reaching it with no keys would
+  // otherwise draw an unlock prompt for a wallet that does not exist.
+  useEffect(() => {
+    if (!keysDoesExist) {
+      openOnboardingUi();
+      window.close();
+    }
+  }, [keysDoesExist]);
+
+  if (!keysDoesExist) {
+    return <PopupLoadingView />;
+  }
 
   if (isLocked) {
     return <LockedRouter popupLayout />;
@@ -358,6 +378,7 @@ function AppRoutes() {
         <Route path={RouterPath.Delegate} element={<StakesPage />} />
         <Route path={RouterPath.Undelegate} element={<StakesPage />} />
         <Route path={RouterPath.Redelegate} element={<StakesPage />} />
+        <Route path={RouterPath.Swap} element={<SwapPage />} />
         <Route
           path={ErrorPath}
           element={

@@ -4,8 +4,14 @@ import { ledgerStateCleared } from '@background/redux/ledger/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 export interface LedgerWindowCloseTracker {
-  /** Watch `permissionWindowId`, replacing whatever was watched before. */
-  arm(permissionWindowId: number): void;
+  /**
+   * Watch `permissionWindowId`, replacing whatever was watched before.
+   *
+   * `onClosed` runs only for that window actually being removed — never on
+   * `detach`, which means the flow was taken over or the document is going
+   * away, not that the window the owner is rendering for has gone.
+   */
+  arm(permissionWindowId: number, onClosed?: () => void): void;
   /** Stop watching. Safe to call when nothing is armed. */
   detach(): void;
 }
@@ -40,7 +46,7 @@ export function createLedgerWindowCloseTracker(): LedgerWindowCloseTracker {
   };
 
   return {
-    arm(permissionWindowId: number) {
+    arm(permissionWindowId: number, onClosed?: () => void) {
       // Never hold two: a second registration would outlive the first window
       // and clear the slice out from under whatever replaced it.
       detach();
@@ -50,6 +56,7 @@ export function createLedgerWindowCloseTracker(): LedgerWindowCloseTracker {
 
         dispatchToMainStore(ledgerStateCleared());
         detach();
+        onClosed?.();
       };
 
       armed = handleCloseWindow;

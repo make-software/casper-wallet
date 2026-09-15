@@ -3,6 +3,7 @@ import {
   ledgerNewWindowIdChanged,
   ledgerRecipientToSaveOnSuccessChanged,
   ledgerStateCleared,
+  ledgerSwapPayloadChanged,
   ledgerTransactionChanged
 } from './actions';
 import { reducer } from './reducer';
@@ -14,7 +15,8 @@ describe('ledger reducer', () => {
     openerRequestId: null,
     deploy: null,
     transaction: null,
-    recipientToSaveOnSuccess: null
+    recipientToSaveOnSuccess: null,
+    swapPayload: null
   };
 
   it('has the expected initial state', () => {
@@ -81,6 +83,61 @@ describe('ledger reducer', () => {
     ).toEqual({ ...initialState, recipientToSaveOnSuccess: '01deadbeef' });
   });
 
+  it('sets swapPayload on ledgerSwapPayloadChanged', () => {
+    expect(
+      reducer(initialState, ledgerSwapPayloadChanged('{"kind":"swap"}'))
+    ).toEqual({ ...initialState, swapPayload: '{"kind":"swap"}' });
+  });
+
+  it('clears the parked swap when a transaction is parked instead', () => {
+    const parkedSwap = { ...initialState, swapPayload: '{"kind":"swap"}' };
+
+    expect(reducer(parkedSwap, ledgerTransactionChanged('tx-payload'))).toEqual(
+      { ...initialState, transaction: 'tx-payload' }
+    );
+    expect(reducer(parkedSwap, ledgerDeployChanged('deploy-payload'))).toEqual({
+      ...initialState,
+      deploy: 'deploy-payload'
+    });
+  });
+
+  it('clears a parked transaction when a swap is parked instead', () => {
+    const parkedTransfer = {
+      ...initialState,
+      deploy: 'deploy-payload',
+      transaction: 'tx-payload',
+      recipientToSaveOnSuccess: '01deadbeef'
+    };
+
+    expect(
+      reducer(parkedTransfer, ledgerSwapPayloadChanged('{"kind":"swap"}'))
+    ).toEqual({ ...initialState, swapPayload: '{"kind":"swap"}' });
+  });
+
+  it('keeps the transaction pair intact across the three parks a transfer makes', () => {
+    const parked = [
+      ledgerTransactionChanged('tx-payload'),
+      ledgerDeployChanged('deploy-payload'),
+      ledgerRecipientToSaveOnSuccessChanged('01deadbeef')
+    ].reduce(reducer, initialState);
+
+    expect(parked).toEqual({
+      ...initialState,
+      transaction: 'tx-payload',
+      deploy: 'deploy-payload',
+      recipientToSaveOnSuccess: '01deadbeef'
+    });
+  });
+
+  it('drops the parked swap on ledgerSwapPayloadChanged(null)', () => {
+    expect(
+      reducer(
+        { ...initialState, windowId: 7, swapPayload: '{"kind":"swap"}' },
+        ledgerSwapPayloadChanged(null)
+      )
+    ).toEqual({ ...initialState, windowId: 7 });
+  });
+
   it('resets to initial state on ledgerStateCleared', () => {
     const populated = {
       windowId: 7,
@@ -88,7 +145,8 @@ describe('ledger reducer', () => {
       openerRequestId: 'r1',
       deploy: 'deploy-payload',
       transaction: 'tx-payload',
-      recipientToSaveOnSuccess: '01deadbeef'
+      recipientToSaveOnSuccess: '01deadbeef',
+      swapPayload: '{"kind":"swap"}'
     };
     expect(reducer(populated, ledgerStateCleared())).toEqual(initialState);
   });

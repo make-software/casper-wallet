@@ -9,8 +9,6 @@ import { ModalButtons } from './modal-buttons';
 
 const MoreButton = styled(CenteredFlexColumn)`
   cursor: pointer;
-
-  padding: 0 16px;
 `;
 
 export const MoreButtonsModal = () => {

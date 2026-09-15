@@ -35,5 +35,6 @@ export enum RouterPath {
   DeployDetails = '/deploys-details',
   AddWatchAccount = '/add-watch-account',
   BringWeb3Unlock = '/bring-web3-unlock',
-  ExpiringCsprNames = '/expiring-cspr-names'
+  ExpiringCsprNames = '/expiring-cspr-names',
+  Swap = '/swap'
 }

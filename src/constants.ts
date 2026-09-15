@@ -2,7 +2,10 @@
 // `casper-js-sdk` UMD bundle into every consumer of these constants, and `@src/constants` is on
 // the startup path of every page entry. The chain-name strings are spelled out literally below.
 import type { CasperNetworkName } from 'casper-js-sdk';
-import { CasperNetwork } from 'casper-wallet-core';
+import type {
+  AuctionManagerEntryPointType,
+  CasperNetwork
+} from 'casper-wallet-core';
 
 const SECOND = 1000;
 
@@ -38,8 +41,6 @@ export const TERMS_URLS = {
   privacy: 'https://www.casperwallet.io/privacy'
 };
 export const CASHBACK_URL = 'https://www.cspr.shopping';
-export const REFERRER_URL = 'https://casperwallet.io';
-
 export const MY_CSPR_NAME_URL = 'https://cspr.name/my-names';
 
 export const CSPR_NAME_EXPIRATION_NOTICE_DAYS = 14;
@@ -164,6 +165,15 @@ export enum AuctionManagerEntryPoint {
   undelegate = 'undelegate',
   redelegate = 'redelegate'
 }
+
+export const coreAuctionEntryPointMap: Record<
+  AuctionManagerEntryPoint,
+  AuctionManagerEntryPointType
+> = {
+  [AuctionManagerEntryPoint.delegate]: 'DELEGATE',
+  [AuctionManagerEntryPoint.undelegate]: 'UNDELEGATE',
+  [AuctionManagerEntryPoint.redelegate]: 'REDELEGATE'
+};
 
 export const ExecutionTypesMap: { [key in number]: string } = {
   1: 'WASM deploy', //"ModuleBytes"

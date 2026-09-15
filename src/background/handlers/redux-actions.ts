@@ -30,6 +30,7 @@ import {
   ledgerNewWindowIdChanged,
   ledgerRecipientToSaveOnSuccessChanged,
   ledgerStateCleared,
+  ledgerSwapPayloadChanged,
   ledgerTransactionChanged
 } from '@background/redux/ledger/actions';
 import {
@@ -98,6 +99,8 @@ import {
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
+  swapDeadlineSettingChanged,
+  swapSlippageSettingChanged,
   systemColorSchemeChanged,
   themeModeSettingChanged,
   vaultSettingsReseted
@@ -152,6 +155,8 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     activeNetworkSettingChanged,
     vaultSettingsReseted,
     themeModeSettingChanged,
+    swapSlippageSettingChanged,
+    swapDeadlineSettingChanged,
     lastActivityTimeRefreshed,
     siteConnected,
     anotherAccountConnected,
@@ -184,6 +189,7 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     ledgerDeployChanged,
     ledgerTransactionChanged,
     ledgerRecipientToSaveOnSuccessChanged,
+    ledgerSwapPayloadChanged,
     addWatchingAccount,
     dismissAppEvent,
     resetAppEventsDismission,

@@ -118,6 +118,13 @@ const getCSP = () => {
 // the setter prepended.
 const NONCE_SETTER = path.join(__dirname, 'src', 'set-webpack-nonce.ts');
 
+// HotModuleReplacementPlugin — added only by utils/webserver.js, so only in `npm run dev:*`
+// — registers each rebuild's hot-update chunk as a file of the chunk it patches. The HMR
+// runtime applies those; nothing loads them as part of the entry, so the assertions below
+// would otherwise fail every watch rebuild that touches a single-file entry.
+const isBundleJs = file =>
+  file.endsWith('.js') && !file.includes('.hot-update.');
+
 // The two kinds of entry this config produces, split by how the browser loads them.
 //
 // PAGE entries are HTML pages. Each gets a <script> per file from
@@ -216,7 +223,7 @@ const assertNonceIntegrity = (compiler, compilation) => {
     const carriesNonce = compilation.entrypoints
       .get(name)
       .getFiles()
-      .filter(file => file.endsWith('.js'))
+      .filter(isBundleJs)
       .some(file =>
         compilation.getAsset(file)?.source.source().toString().includes(pinned)
       );
@@ -261,7 +268,7 @@ const assertSingleFileEntries = compilation => {
     }
 
     // Initial files only — chunks behind a dynamic import are checked below.
-    const files = entrypoint.getFiles().filter(file => file.endsWith('.js'));
+    const files = entrypoint.getFiles().filter(isBundleJs);
 
     if (files.length !== 1) {
       throw new Error(
@@ -298,7 +305,7 @@ const collectAsyncFiles = (group, seen = new Set()) => {
     }
 
     seen.add(child);
-    files.push(...child.getFiles().filter(file => file.endsWith('.js')));
+    files.push(...child.getFiles().filter(isBundleJs));
     files.push(...collectAsyncFiles(child, seen));
   }
 

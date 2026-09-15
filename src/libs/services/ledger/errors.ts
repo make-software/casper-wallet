@@ -81,7 +81,13 @@ export const ledgerErrorsData: Record<LedgerEventStatus, ILedgerErrorData> = {
   'ledger-msg-signature-requested-to-user': { title: null, description: null },
   'ledger-signature-completed': { title: null, description: null },
   'ledger-signature-requested-to-user': { title: null, description: null },
-  'ledger-waiting-response-from-device': { title: null, description: null }
+  'ledger-waiting-response-from-device': { title: null, description: null },
+  // Mobile-only statuses, never emitted by this extension.
+  [LedgerEventStatus.BleDeviceSelection]: { title: null, description: null },
+  [LedgerEventStatus.BluetoothPairingInvalidated]: {
+    title: null,
+    description: null
+  }
 };
 
 export const isLedgerError = (event: ILedgerEvent) =>

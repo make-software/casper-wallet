@@ -50,7 +50,7 @@ export const BuyCSPRPage = () => {
     {
       id: 0,
       code: '',
-      type_id: '',
+      typeId: '',
       rate: 0
     }
   );

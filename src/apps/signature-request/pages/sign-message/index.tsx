@@ -1,3 +1,4 @@
+import { createLedgerSigner, createPrivateKeySigner } from 'casper-wallet-core';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
@@ -28,7 +29,6 @@ import { useLedger } from '@hooks/use-ledger';
 
 import { sdkMethod } from '@content/sdk-method';
 
-import { signMessageForProviderResponse } from '@libs/crypto/sign-message';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
@@ -41,6 +41,7 @@ import {
 } from '@libs/layout';
 import { useFetchAccountsInfo } from '@libs/services/account-info';
 import { useFetchAccountsBalances } from '@libs/services/balance-service';
+import { getCoreErrorCopy, isLedgerFailure } from '@libs/services/core-errors';
 import { LedgerEventStatus, ledger } from '@libs/services/ledger';
 import { HardwareWalletType } from '@libs/types/account';
 import {
@@ -143,33 +144,56 @@ export function SignMessagePage() {
 
     let signature: Uint8Array;
 
-    if (signingAccount.hardware === HardwareWalletType.Ledger) {
-      const resp = await ledger.signMessage(message, {
-        index: signingAccount.derivationIndex,
-        publicKey: signingAccount.publicKey
-      });
+    try {
+      if (signingAccount.hardware === HardwareWalletType.Ledger) {
+        const signer = createLedgerSigner({
+          service: ledger,
+          publicKeyHex: signingAccount.publicKey,
+          derivationIndex: signingAccount.derivationIndex
+        });
 
-      signature = resp.signature;
-    } else {
-      const secretKey = await fetchAccountSecretKey(signingAccount.name);
+        signature = await signer.signMessage(message);
+      } else {
+        const secretKey = await fetchAccountSecretKey(signingAccount.name);
 
-      if (!secretKey) {
-        const error = Error(
-          ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
-        );
-        sendSdkResponseToSpecificTab(
-          sdkMethod.signMessageError(error, { requestId }),
-          requestTabId
-        );
-        closeCurrentWindow();
-        return;
+        if (!secretKey) {
+          const error = Error(
+            ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
+          );
+          sendSdkResponseToSpecificTab(
+            sdkMethod.signMessageError(error, { requestId }),
+            requestTabId
+          );
+          closeCurrentWindow();
+          return;
+        }
+
+        const signer = createPrivateKeySigner({
+          publicKeyHex: signingAccount.publicKey,
+          secretKeyBase64: secretKey
+        });
+
+        signature = await signer.signMessage(message);
+      }
+    } catch (caught) {
+      if (isLedgerFailure(caught)) {
+        throw caught;
       }
 
-      signature = signMessageForProviderResponse(
-        message,
-        signingAccount.publicKey,
-        secretKey
+      console.error(caught, 'sign message error');
+
+      const error = Error(
+        getCoreErrorCopy(caught)?.description ??
+          ErrorMessages.common.UNKNOWN_ERROR.description
       );
+
+      sendSdkResponseToSpecificTab(
+        sdkMethod.signMessageError(error, { requestId }),
+        requestTabId
+      );
+      closeCurrentWindow();
+
+      return;
     }
 
     if (!signature) {

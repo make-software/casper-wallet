@@ -7,13 +7,20 @@ import { useTypedNavigate } from '@popup/router/use-typed-navigate';
 
 import { closeCurrentWindow } from '@background/close-current-window';
 
-import { AlignedFlexRow, SpacingSize } from '@libs/layout';
+import { AlignedFlexRow, SpacingSize, getSpacingSize } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { Link, SvgIcon, Typography } from '@libs/ui/components';
+
+import { NavLinkTokenBalance, resolveNavLinkBalance } from './nav-link-balance';
 
 const LinkWithIconContainer = styled.div`
   display: flex;
   align-items: center;
+`;
+
+// A long balance wraps onto the Back link, which the row's space-between alone does not prevent.
+const BalanceContainer = styled(AlignedFlexRow)`
+  margin-left: ${getSpacingSize(SpacingSize.Tiny)};
 `;
 
 type LinkType =
@@ -23,17 +30,25 @@ interface HeaderSubmenuBarNavLinkProps {
   linkType: LinkType;
   onClick?: () => void;
   backTypeWithBalance?: boolean;
+  /** Balance of the token the flow spends; without it the link shows the CSPR balance. */
+  tokenBalance?: NavLinkTokenBalance | null;
 }
 
 export function HeaderSubmenuBarNavLink({
   linkType,
   onClick,
-  backTypeWithBalance
+  backTypeWithBalance,
+  tokenBalance
 }: HeaderSubmenuBarNavLinkProps) {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
   const { accountBalance } = useFetchWalletBalance();
+
+  const balance = resolveNavLinkBalance(
+    tokenBalance,
+    accountBalance.liquidFormattedDecimalBalance
+  );
 
   switch (linkType) {
     case 'close':
@@ -70,15 +85,15 @@ export function HeaderSubmenuBarNavLink({
             }}
             withLeftChevronIcon
           />
-          {accountBalance.liquidFormattedDecimalBalance && (
-            <AlignedFlexRow gap={SpacingSize.Small}>
+          {balance && (
+            <BalanceContainer gap={SpacingSize.Small}>
               <Typography type="captionRegular" color="contentSecondary">
                 <Trans t={t}>Balance:</Trans>
               </Typography>
               <Typography type="captionHash">
-                {`${accountBalance.liquidFormattedDecimalBalance} CSPR`}
+                {`${balance.amount} ${balance.symbol}`}
               </Typography>
-            </AlignedFlexRow>
+            </BalanceContainer>
           )}
         </>
       ) : (

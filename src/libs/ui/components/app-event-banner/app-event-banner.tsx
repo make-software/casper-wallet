@@ -123,8 +123,8 @@ export const AppEventBanner: React.FC<IAppEventBannerProps> = ({
   const isCasper2event = activeMarketingEvent.id === 1;
   const isCaspyEvent = activeMarketingEvent.id === 3;
 
-  const bgImage = activeMarketingEvent?.image_url
-    ? `url('${activeMarketingEvent.image_url}')`
+  const bgImage = activeMarketingEvent?.imageUrl
+    ? `url('${activeMarketingEvent.imageUrl}')`
     : undefined;
 
   if (isCaspyEvent) {

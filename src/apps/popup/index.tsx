@@ -30,6 +30,7 @@ import {
 import { SagaErrorBanner } from '@libs/ui/components/saga-error-banner/saga-error-banner';
 
 import { AppRouter } from './app-router';
+import { PopupLoadingView } from './popup-loading-view';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
@@ -43,8 +44,19 @@ const Tree = () => {
     setPopupState: setState
   });
 
+  // No replica yet means no stored theme preference to honour, so this frame follows the
+  // system — except on Safari, which pins light the same way the default below does.
   if (state == null) {
-    return null;
+    return (
+      <CspStyleSheetManager>
+        <ThemeProvider
+          theme={!isSafariBuild && isSystemDarkTheme ? darkTheme : lightTheme}
+        >
+          <GlobalStyle />
+          <PopupLoadingView />
+        </ThemeProvider>
+      </CspStyleSheetManager>
+    );
   }
 
   const store = createMainStoreReplica(state);

@@ -1,9 +1,11 @@
 import { CasperNetworkName } from 'casper-js-sdk';
 
 import {
+  AuctionManagerEntryPoint,
   NetworkName,
   NetworkSetting,
   chainNameToNetworkSettingsMap,
+  coreAuctionEntryPointMap,
   networkNameToSdkNetworkNameMap
 } from './constants';
 
@@ -49,5 +51,39 @@ describe('network name maps', () => {
     const chainNames = NETWORKS.map(n => networkNameToSdkNetworkNameMap[n]);
 
     expect(new Set(chainNames).size).toBe(NETWORKS.length);
+  });
+});
+
+/**
+ * The type system cannot check the pairing: `Record<enum, Union>` enforces exhaustive keys and a
+ * member of the union, not that `delegate` maps to `'DELEGATE'`. Mapping it to `'UNDELEGATE'` is
+ * a one-token edit that type-checks and moves the stake the opposite way from the confirmed
+ * screen — the deploy the Ledger shows is a contract call either way.
+ */
+describe('coreAuctionEntryPointMap', () => {
+  it('delegates on delegate', () => {
+    expect(coreAuctionEntryPointMap[AuctionManagerEntryPoint.delegate]).toBe(
+      'DELEGATE'
+    );
+  });
+
+  it('undelegates on undelegate', () => {
+    expect(coreAuctionEntryPointMap[AuctionManagerEntryPoint.undelegate]).toBe(
+      'UNDELEGATE'
+    );
+  });
+
+  it('redelegates on redelegate', () => {
+    expect(coreAuctionEntryPointMap[AuctionManagerEntryPoint.redelegate]).toBe(
+      'REDELEGATE'
+    );
+  });
+
+  it('never sends two stake types to the same entry point', () => {
+    const entryPoints = Object.values(AuctionManagerEntryPoint).map(
+      stakeType => coreAuctionEntryPointMap[stakeType]
+    );
+
+    expect(new Set(entryPoints).size).toBe(entryPoints.length);
   });
 });

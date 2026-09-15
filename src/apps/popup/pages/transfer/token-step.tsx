@@ -89,7 +89,11 @@ export const TokenStep = ({
       <Modal
         style={{ height: '528px' }}
         renderContent={({ closeModal }) => (
-          <ModalSwitcher label="Token" closeSwitcher={closeModal}>
+          <ModalSwitcher
+            label="Token"
+            closeSwitcher={closeModal}
+            hideDoneButton
+          >
             <List
               rows={tokenList}
               renderRow={token => {

@@ -6,7 +6,8 @@
     "@types/chrome",
     "@noble/curves",
     "@noble/hashes",
-    "@lavamoat/preinstall-always-fail"
+    "@lavamoat/preinstall-always-fail",
+    "rxjs"
   ],
   "ignoreBinaries": ["semgrep"],
   "exclude": ["enumMembers"],
