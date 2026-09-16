@@ -1,3 +1,4 @@
+import { LedgerError, createLedgerSubmitResume } from 'casper-wallet-core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { windows } from 'webextension-polyfill';
@@ -98,11 +99,10 @@ export const useLedger = ({
   const windowId = useSelector(selectLedgerNewWindowId);
   const openerWindowId = useSelector(selectLedgerOpenerWindowId);
   const openerRequestId = useSelector(selectLedgerOpenerRequestId);
-  const shouldTrySignAfterConnectRef = useRef<boolean>(false);
   const selectedTransportRef = useRef<SelectedTransport>(undefined);
   const isFirstEventRef = useRef<boolean>(true);
   const triggeredRef = useRef(false);
-  const deviceActionInFlightRef = useRef(false);
+  const submitResume = useMemo(() => createLedgerSubmitResume(), []);
 
   // Built key by key (rather than spread into the constructor) because
   // `LedgerPermissionParams` has optional members: an absent one must be left
@@ -147,13 +147,11 @@ export const useLedger = ({
     if (isLedgerConnected) {
       // Fire-and-forget: the status below must render while the device is read.
       // Bracketed so the background leaves the window this request runs in alone.
-      deviceActionInFlightRef.current = true;
+      const settleSubmit = submitResume.issued();
       void runWithDeviceConfirmationReported(
         askPermissionUrlData.params?.requestId,
         ledgerAction
-      ).finally(() => {
-        deviceActionInFlightRef.current = false;
-      });
+      ).finally(settleSubmit);
 
       if (shouldLoadAccountList) {
         setLedgerEventStatusToRender({
@@ -161,7 +159,7 @@ export const useLedger = ({
         });
       }
     } else {
-      shouldTrySignAfterConnectRef.current = true;
+      submitResume.awaitingConnect();
 
       const transportToOpen = selectedTransportRef.current;
 
@@ -204,9 +202,15 @@ export const useLedger = ({
             status: LedgerEventStatus.Disconnected
           });
         }
-      } catch {
-        // Nothing to add: core pushes the failure onto the event stream before it rejects, and
-        // the subscription below renders it.
+      } catch (error) {
+        // The subscription below already renders this. Logged because every transport-open
+        // failure arrives as the same status; the message is left out, it carries the key.
+        console.error('useLedger: connecting to the device failed', {
+          transport: selectedTransportRef.current,
+          errorName: (error as Error)?.name,
+          ledgerStatus:
+            error instanceof LedgerError ? error.ledgerEvent.status : undefined
+        });
       }
     }
   };
@@ -219,16 +223,19 @@ export const useLedger = ({
 
       // A device that leaves mid-action takes the submit with it; the connect branch only
       // covers one that was already away when the user pressed submit.
-      if (!connected && deviceActionInFlightRef.current) {
-        shouldTrySignAfterConnectRef.current = true;
+      if (!connected) {
+        submitResume.deviceLeft();
       }
     });
 
     return () => sub.unsubscribe();
-  }, []);
+  }, [submitResume]);
 
   useEffect(() => {
     const sub = ledger.subscribeToLedgerEventStatus(event => {
+      // The device has answered for the submit, so recovery must not re-issue it.
+      submitResume.outcomeReported(event.status);
+
       if (event.status === LedgerEventStatus.Disconnected) {
         if (withWaitingEventOnDisconnect) {
           setLedgerEventStatusToRender({
@@ -256,14 +263,14 @@ export const useLedger = ({
     });
 
     return () => sub.unsubscribe();
-  }, [withWaitingEventOnDisconnect]);
+  }, [withWaitingEventOnDisconnect, submitResume]);
 
   useEffect(() => {
-    if (isLedgerConnected && shouldTrySignAfterConnectRef.current) {
+    if (isLedgerConnected && submitResume.shouldResume()) {
       makeSubmitLedgerAction(selectedTransportRef.current)();
-      shouldTrySignAfterConnectRef.current = false;
+      submitResume.resumed();
     }
-  }, [isLedgerConnected, makeSubmitLedgerAction]);
+  }, [isLedgerConnected, makeSubmitLedgerAction, submitResume]);
 
   /**
    * Drops a submit still waiting for the device. `DeviceLocked` keeps polling
@@ -271,8 +278,8 @@ export const useLedger = ({
    * the device is unlocked, from a page the user already left. WALLET-1452.
    */
   const cancelPendingLedgerAction = useCallback(() => {
-    shouldTrySignAfterConnectRef.current = false;
-  }, []);
+    submitResume.dropped();
+  }, [submitResume]);
 
   // One per hook instance, stable across renders: the effect below arms it and
   // the two effects after it are the only things that take it back down.
