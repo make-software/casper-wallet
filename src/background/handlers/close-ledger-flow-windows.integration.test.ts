@@ -68,10 +68,8 @@ beforeEach(() => {
   sendMessageMock.mockResolvedValue(undefined);
 });
 
-// The unit suite mocks the polyfill down to `windows.remove` and never drives
-// `handleWindowRemoved`, so it cannot see whether the dapp is ever answered — a
-// change inside the handler that tombstoned the descriptor instead of leaving it
-// open would build no cancel candidate and leave the promise pending forever.
+// The unit suite never drives `handleWindowRemoved`, so it cannot see whether
+// the dapp is ever answered at all.
 it('the abandoned request is still answered once its windows are gone', async () => {
   jest.useFakeTimers();
   try {

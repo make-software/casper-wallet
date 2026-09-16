@@ -71,9 +71,8 @@ it('does NOT retarget the tracked window id for an isNewWindow open', async () =
   expect(setWindowId).not.toHaveBeenCalled();
 });
 
-// getUrlByWindowApp is the one hand-written branch table in this module: the
-// hash routes and the `?`-vs-`&` joining for SwitchAccount are both easy to
-// break and invisible until a window opens on the wrong screen.
+// getUrlByWindowApp is the one hand-written branch table in this module, and a
+// wrong route is invisible until a window opens on the wrong screen.
 describe('window URLs', () => {
   const urlFor = async (
     windowApp: WindowApp,

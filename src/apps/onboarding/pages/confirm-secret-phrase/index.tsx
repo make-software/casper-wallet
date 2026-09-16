@@ -45,15 +45,8 @@ export function ConfirmSecretPhrasePage({
   function handleSubmit() {
     try {
       if (isConfirmationSuccess && phrase) {
-        // Only navigate once the vault actually exists: keys and encryption key
-        // are already in place here, so the success page renders regardless of
-        // whether this dispatch arrived.
-        //
-        // `isSubmitting` closes the window that awaiting the verdict opens:
-        // nothing else disables the button, `initVaultSaga` runs to completion
-        // inside one delivery, and `accountAdded` appends without a dedupe — so
-        // a second click would leave the new wallet with two identical
-        // "Account 1" entries on one key pair.
+        // `isSubmitting` closes the window that awaiting the verdict opens: nothing
+        // else disables the button, and `accountAdded` appends without a dedupe.
         setIsSubmitting(true);
         dispatchToMainStore(initVault({ secretPhrase: phrase })).then(
           dispatched => {

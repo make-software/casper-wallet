@@ -4,13 +4,7 @@ import React from 'react';
 import { DeployIcon } from '@src/constants';
 import { isBundledAssetPath } from '@src/utils';
 
-// Imported by path, not through the '@libs/ui/components' barrel, and kept in
-// its own module rather than inline in deploy-container.tsx: that file also
-// pulls in '@libs/layout', whose header re-export chain touches
-// webextension-polyfill at module load — fine at runtime (an extension
-// context), but it means deploy-container.tsx can't be imported standalone by
-// a node-environment test. This routing branch is small enough to be worth
-// testing on its own.
+// By path, and in its own module: both other routes reach webextension-polyfill at module load.
 import { RemoteIcon } from '@libs/ui/components/remote-icon/remote-icon';
 import { SvgIcon } from '@libs/ui/components/svg-icon/svg-icon';
 

@@ -41,8 +41,6 @@ const slice = createSlice({
         )
       );
 
-      // A failed resolution is not evidence the name is gone — keep the
-      // stored record (and its dismissed flag) instead of dropping it.
       failedPublicKeys?.forEach(publicKey => {
         const prev = prevForNetwork[publicKey];
 

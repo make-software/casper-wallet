@@ -11,16 +11,12 @@ import {
   unknownSdkMessageError
 } from './unknown-message-errors';
 
-// The private port handed to the page-world SDK during the handshake. Both the
-// direct `runtime.sendMessage` response and the delayed `runtime.onMessage`
-// response ride this port back to the SDK — never the public window bus.
+// The private port handed to the page-world SDK during the handshake; both the
+// direct and the delayed background response ride it back, never the window bus.
 let activePort: MessagePort | null = null;
 
-// Only genuine page → background SDK *requests* may cross the relay. Pinning the
-// exact request-direction type strings (instead of trusting `isSDKMethod`'s
-// shape check alone) means a forged `*:Response`/`*:Error` envelope or a redux
-// action `type` can never be relayed to the background — independent of the
-// background router's branch ordering (defense-in-depth for P0.2).
+// Pinning the exact request-direction type strings means a forged `*:Response` /
+// `*:Error` envelope or a redux action can never be relayed to the background.
 const SDK_REQUEST_TYPES: ReadonlySet<string> = new Set([
   sdkMethod.connectRequest.type,
   sdkMethod.switchAccountRequest.type,
@@ -37,7 +33,6 @@ const SDK_REQUEST_TYPES: ReadonlySet<string> = new Set([
 ]);
 
 async function handleSdkMessage(message: unknown) {
-  // delayed sdk request response
   if (isSDKMethod(message)) {
     switch (message.type) {
       case sdkMethod.connectResponse.type:
@@ -55,13 +50,9 @@ async function handleSdkMessage(message: unknown) {
       case sdkMethod.encryptMessageResponse.type:
       case sdkMethod.encryptMessageError.type:
       case sdkMethod.getActivePublicKeySupportsResponse.type:
-        // route the delayed response over the private port (not a window event)
         if (activePort == null) {
-          // No port: cleanup() ran on an extension reload, or this response
-          // raced the handshake. Dropping it silently can discard a deploy the
-          // user just signed and leave the dapp hanging until its own timeout.
-          // SECURITY: type + requestId only — the payload of these envelopes
-          // carries signatureHex / encryptedMessage.
+          // Log type + requestId only — these payloads carry signatureHex /
+          // encryptedMessage. A silent drop leaves the dapp hanging until its timeout.
           console.error(
             'Content: dropped a delayed SDK response, no active port:',
             message.type,
@@ -81,7 +72,6 @@ async function handleSdkMessage(message: unknown) {
   }
 }
 
-// Proxy Wallet Events to connected site
 function emitSdkEvent(message: SdkEvent) {
   let eventType: string;
   switch (message.type) {
@@ -123,20 +113,13 @@ function emitSdkEvent(message: SdkEvent) {
   window.dispatchEvent(event);
 }
 
-// SDK Message proxy to the backend, over the private MessageChannel.
-//
-// The content script keeps `port1`; requests that arrive on it are shaped-checked
-// with `isSDKMethod` and forwarded to the background. Direct responses ride back
-// on the same port. `port2` is transferred to the page-world SDK during the
-// handshake, so only the holder of that port (the injected SDK) can drive this
-// path — a script that forges the old `Request` window CustomEvent gets nothing,
-// because that window listener no longer exists.
+// `port2` is transferred to the page-world SDK during the handshake, so only the
+// holder of that port can drive this path; there is no window listener to forge.
 function establishSdkPort() {
   const channel = new MessageChannel();
 
   channel.port1.onmessage = event => {
     const requestAction = event.data;
-    // only genuine SDK requests may cross into the background
     if (
       !isSDKMethod(requestAction) ||
       !SDK_REQUEST_TYPES.has(requestAction.type)
@@ -147,18 +130,14 @@ function establishSdkPort() {
     runtime
       .sendMessage(requestAction)
       .then(message => {
-        // if valid message send back response over the private port
         if (isSDKMethod(message)) {
           channel.port1.postMessage(message);
         }
       })
       .catch(err => {
         console.error('Content: sdk request received error: ', err);
-        // The send failed (e.g. the MV3 service-worker restart race). Tell the
-        // SDK now over the private port so its promise rejects immediately,
-        // instead of letting the dapp wait out the per-request timeout (up to
-        // 30 min). `error: true` + the request's `meta` route it back to the
-        // right pending promise on the SDK side.
+        // Reject the SDK's promise now, instead of letting the dapp wait out the
+        // per-request timeout (up to 30 min).
         channel.port1.postMessage({
           type: `${requestAction.type}:Error`,
           payload: err instanceof Error ? err : Error(String(err)),
@@ -170,23 +149,18 @@ function establishSdkPort() {
 
   activePort = channel.port1;
 
-  // hand port2 to the page-world SDK; origin-scoped so it is never delivered
-  // cross-origin.
+  // origin-scoped so the port is never delivered cross-origin
   try {
     window.postMessage({ type: SDK_HANDSHAKE_TYPE }, window.location.origin, [
       channel.port2
     ]);
   } catch (e) {
-    // An opaque-origin document (e.g. a page served with a CSP `sandbox`
-    // header) reports `window.location.origin` as the string "null", which is
-    // not a valid `targetOrigin` — `postMessage` throws. Match the injection
-    // error handling in `injectSdkScript` rather than letting the exception
-    // escape this `onload` handler uncaught.
+    // An opaque-origin document (CSP `sandbox`) reports its origin as the string
+    // "null", which is not a valid `targetOrigin`, so `postMessage` throws.
     console.error('CasperWalletSdk handshake failed. ', e);
   }
 }
 
-// inject sdk script - idempotent, doesn't need cleanup
 function injectSdkScript() {
   try {
     const documentHeadOrRoot = document.head || document.documentElement;
@@ -197,9 +171,8 @@ function injectSdkScript() {
     scriptTag.src = runtime.getURL(inpageScriptPath);
     scriptTag.onload = function () {
       documentHeadOrRoot.removeChild(scriptTag);
-      // The SDK bundle has now evaluated and registered its handshake `message`
-      // listener, so handing over the port here closes the race that posting
-      // synchronously from `init()` (before the SDK loads) would open.
+      // The SDK bundle has registered its handshake listener by now, so handing
+      // over the port here closes the race a synchronous post would open.
       establishSdkPort();
     };
     documentHeadOrRoot.insertBefore(scriptTag, documentHeadOrRoot.children[0]);
@@ -215,7 +188,6 @@ function init() {
   runtime.onMessage.addListener(handleSdkMessage);
 }
 
-// cleanup logic
 export const cleanupEventType = 'CasperWalletProvider:Cleanup';
 window.dispatchEvent(new CustomEvent(cleanupEventType));
 function cleanup() {

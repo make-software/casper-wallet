@@ -2,14 +2,12 @@ export enum DownloadAccountKeysSteps {
   Instruction = 'instruction',
   Download = 'download',
   Success = 'success',
-  // Reached only when the export throws. Deliberately a step of its own rather
-  // than a banner on Success: the user must never see "your keys were saved"
-  // alongside a failure (WALLET-1345).
+  // Its own step rather than a banner on Success, which would show a failure
+  // alongside "your keys were saved".
   Failure = 'failure'
 }
 
 export const downloadFile = (content: Blob, filename: string): void => {
-  // allocation
   const url = window.URL.createObjectURL(content);
 
   const downloadFileLink = document.createElement('a');
@@ -18,7 +16,6 @@ export const downloadFile = (content: Blob, filename: string): void => {
   downloadFileLink.click();
   downloadFileLink.remove();
 
-  // cleanup
   window.URL.revokeObjectURL(url);
 };
 

@@ -13,10 +13,9 @@ const initialState: LedgerState = {
 };
 
 /**
- * The permission window signs exactly one parked thing, and resolves it by branch order —
- * `swapPayload` first. Parking either kind therefore clears the other here, so the window
- * cannot pick up a swap the user reviewed minutes ago instead of the transfer they just
- * confirmed. Do not add a park action that leaves the opposite slot standing.
+ * The permission window signs exactly one parked thing and resolves it by branch order —
+ * `swapPayload` first — so parking either kind clears the other here. Do not add a park
+ * action that leaves the opposite slot standing.
  */
 const slice = createSlice({
   name: 'ledger',

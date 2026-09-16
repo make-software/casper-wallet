@@ -63,8 +63,7 @@ const ScrollContainer = styled(VerticalSpaceContainer)<{
     height 0.5s ease-in-out;
 `;
 
-// The form step stays mounted behind the later steps: its quote hooks own the selected pair
-// and the typed amount, and unmounting them empties the form the user comes back to.
+// The form step stays mounted behind the later steps: unmounting its quote hooks empties the form.
 const MountedStepContainer = styled.div<{ isHidden: boolean }>`
   display: ${({ isHidden }) => (isHidden ? 'none' : 'contents')};
 `;
@@ -91,16 +90,12 @@ export const SwapPage = () => {
   const activeNetworkSetting = useSelector(selectActiveNetworkSetting);
 
   const [swapStep, setSwapStep] = useState<SwapSteps>(SwapSteps.Form);
-  // What the form currently quotes, and the snapshot taken when the user pressed Review. The
-  // form keeps requoting while it sits mounted behind the confirm screen, so only the snapshot
-  // may drive that screen: the amounts a user reviews must not move under them.
+  // The form keeps requoting behind the confirm screen, so only the Review snapshot may drive it.
   const [liveReview, setLiveReview] = useState<ISwapReviewData | null>(null);
   const [review, setReview] = useState<ISwapReviewData | null>(null);
-  // The form owns the selected pair; the header showing the pay token's balance does not.
   const [payTokenBalance, setPayTokenBalance] =
     useState<NavLinkTokenBalance | null>(null);
 
-  // Confirm without a snapshot cannot render; fall back to the form rather than a broken screen.
   const visibleStep =
     swapStep === SwapSteps.Confirm && review == null
       ? SwapSteps.Form
@@ -113,21 +108,18 @@ export const SwapPage = () => {
   const { submit, parkLedgerPayload, flowState, isProcessing } = useSwapSubmit({
     review,
     onSubmitted: () => setSwapStep(SwapSteps.Success),
-    // A software-key account never emits a `ledger` event, so this only ever fires for a
-    // Ledger one.
+    // A software-key account never emits a `ledger` event.
     onLedgerStep: () => setSwapStep(SwapSteps.ConfirmWithLedger)
   });
 
-  // Mounted unconditionally, mirroring `transfer`: it opens the permission window itself when
-  // the device needs it, regardless of which code path is driving the Ledger interaction.
+  // Mounted unconditionally: it opens the permission window itself when the device needs it.
   const {
     ledgerEventStatusToRender,
     makeSubmitLedgerAction,
     cancelPendingLedgerAction
   } = useLedger({
     ledgerAction: submit,
-    // Parking lives here, not in `submit`: the Connect CTA below dispatches `ledgerStateCleared`
-    // before calling this, and with no device connected `submit` never runs at all.
+    // Parking lives here, not in `submit`: with no device connected `submit` never runs at all.
     beforeLedgerActionCb: async () => {
       setSwapStep(SwapSteps.ConfirmWithLedger);
       await parkLedgerPayload();
@@ -142,8 +134,6 @@ export const SwapPage = () => {
     }
   });
 
-  // Empty until the flow's first event lands, so `ConfirmStep` keeps showing the details card —
-  // see its `progressRows` contract.
   const progressRows =
     review == null
       ? []
@@ -157,8 +147,7 @@ export const SwapPage = () => {
   const labels =
     swapModeLabels[review == null ? 'swap' : getReviewMode(review)];
 
-  // The switcher is hidden past the form, but the setting is global: another surface can change
-  // it mid-review. Start over rather than submit one network's quote to the other's router.
+  // The setting is global, so another surface can change it mid-review; the quote is per network.
   const entryNetworkRef = useRef(activeNetworkSetting);
   useEffect(() => {
     if (entryNetworkRef.current === activeNetworkSetting) {
@@ -200,9 +189,8 @@ export const SwapPage = () => {
       ) : (
         <></>
       ),
-    // Driven by the hook, not by `flowState.ledgerEvent`: a device that is locked or absent
-    // when the user presses Confirm is reported before any flow runner exists, and the footer
-    // below reads the same source.
+    // Driven by the hook, not `flowState.ledgerEvent`: a locked device is reported before any
+    // flow runner exists.
     [SwapSteps.ConfirmWithLedger]: (
       <LedgerEventView event={ledgerEventStatusToRender} />
     ),
@@ -295,9 +283,7 @@ export const SwapPage = () => {
             const shouldAskForReview =
               askForReviewAfter == null || currentDate > askForReviewAfter;
 
-            // Set once here, before the branch: every exit from RateApp is a
-            // post-submission exit, and its `navigate(RouterPath.Home)` calls would
-            // otherwise return the user to whatever tab they started the swap from.
+            // Every exit from RateApp is a post-submission exit, and sets no tab itself.
             setActiveHomeTab(HomePageTabName.Activity);
 
             if (ratedInStore || !shouldAskForReview) {
@@ -317,8 +303,7 @@ export const SwapPage = () => {
     <PopupLayout
       renderHeader={() => (
         <HeaderPopup
-          // Past the form, `review` holds a quote whose package hashes and route are specific to
-          // the network that produced it, and switching would submit it against the other chain.
+          // Past the form, `review` holds a quote specific to the network that produced it.
           withNetworkSwitcher={visibleStep === SwapSteps.Form}
           withMenu
           withConnectionStatus

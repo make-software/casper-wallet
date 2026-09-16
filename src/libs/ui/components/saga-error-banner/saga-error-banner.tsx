@@ -71,19 +71,8 @@ const DismissButton = styled.button`
   cursor: pointer;
 `;
 
-// The channel carries a `kind`, not a string, so the copy lives here where `t`
-// does. Unlike `SagaError.message` — produced in the background and rendered
-// verbatim and untranslated — these lines are ours to write.
-//
-// Literal `<Trans>` per kind rather than a lookup keyed on `kind`: a dynamic key
-// is invisible to i18next-parser, so these two strings would never reach any
-// catalog.
-//
-// The dispatch copy claims neither that nothing changed nor that retrying helps.
-// Both would be false somewhere: `handleReduxAction` dispatches `resetVault`
-// before awaiting `enableOnboardingFlow`, so a rejection can arrive with the
-// vault already wiped, and `use-ledger` sets `triggeredRef` right after its
-// dispatch, so that effect cannot re-run.
+// The channel carries a `kind`, so the copy lives here where `t` does. Literal
+// `<Trans>` per kind: a dynamic key is invisible to i18next-parser.
 const UiErrorMessage = ({ kind }: { kind: UiErrorKind }) => {
   const { t } = useTranslation();
 

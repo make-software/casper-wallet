@@ -9,13 +9,8 @@ export function publicKeyBytesToHex(publicKeyBytes: Uint8Array): string {
   return `${prefix}${publicKeyHex}`;
 }
 
-// Report the TYPE, never the value: these throw exactly when the argument is
-// not what was expected, so the value in hand is the unexpected one — a secret
-// key in the worst case. Saga errors reach a broadcast, user-visible banner,
-// so an accidental type confusion must not render key material into a toast.
-// (Not reachable under the current TypeScript contract — but the most sensitive
-// caller, decrypt-message -> decryptEncryptedBase64PrivateKey, hands this
-// validator a raw account secret key, so it is one type-confusion bug away.)
+// Report the TYPE, never the value: these throw when the argument is not what was expected, so
+// the value in hand may be a secret key, and saga errors reach a user-visible banner.
 function describeType(val: unknown): string {
   if (val === null) return 'null';
   if (typeof val !== 'object') return typeof val;

@@ -24,7 +24,6 @@ export const test = base.extend<{
   // eslint-disable-next-line no-empty-pattern
   context: async ({}, use) => {
     // For now playwright only support chrome extensions
-    // https://github.com/microsoft/playwright/issues/7297
     const pathToExtension = path.join(__dirname, `../build/chrome`);
     const context = await chromium.launchPersistentContext('', {
       headless: false,
@@ -36,23 +35,14 @@ export const test = base.extend<{
       ]
     });
 
-    // e2e is the only job that exercises a production Chrome artifact, and therefore
-    // the only one where the manifest CSP is the nonce-pinned one. A broken nonce
-    // blocks every stylesheet while leaving the DOM intact, so the existing
-    // getByRole/toBeVisible assertions all still pass against an unstyled page —
-    // the page has to report the violation itself for the suite to notice.
-    //
-    // Both markers are explicit, self-authored prefixes rather than a blanket
-    // page-error assertion: the suite has never been held to that bar, and a
-    // flood of unrelated failures would bury this signal.
+    // A broken nonce blocks every stylesheet while leaving the DOM intact, so the
+    // assertions still pass — the page has to report the violation itself.
     const policyViolations: string[] = [];
     const VIOLATION_MARKERS = ['[CSP]', '[SvgIcon]'];
 
     await context.addInitScript(() => {
-      // Extension documents only. The suite also drives pages this repo does not
-      // control — the Topper on-ramp the buy-CSPR flow redirects to, and the
-      // playground dapp — and those enforce a CSP of their own. Topper's blocks
-      // its own analytics on every load, which says nothing about this extension.
+      // Extension documents only: the suite also drives pages this repo does not
+      // control, whose own CSP violations say nothing about this extension.
       if (window.location.protocol !== 'chrome-extension:') {
         return;
       }
@@ -76,18 +66,8 @@ export const test = base.extend<{
       });
     });
 
-    // `checkCasper2NetworkSaga` asks the node for its api_version on every unlock
-    // and on every network switch. It runs in the background service worker, and
-    // `page.route` does not cover service-worker requests — only `context.route`
-    // does. Until this route existed the suite therefore reached the live
-    // cspr.cloud node on every test. Once that node began answering 429 (daily
-    // organization quota), the probe failed, `casperNetworkApiVersion` stayed on
-    // the pre-2.0 default, `sendSignedTx` fell back to `putDeploy`, and every
-    // submitting test died on a transaction-shaped mock with
-    // "Cannot read properties of undefined (reading 'toHex')".
-    //
-    // Only the status probe is answered here: the per-test `popupPage.route` that
-    // fulfils the submit is a page route, and page routes are matched first.
+    // `page.route` does not cover service-worker requests, only `context.route`
+    // does; page routes match first, so a per-test route still wins.
     await context.route(URLS.anyRpcNode, async route => {
       if (route.request().postDataJSON()?.method === 'info_get_status') {
         await route.fulfill(RPC_RESPONSE.getStatus);
@@ -122,7 +102,6 @@ export const test = base.extend<{
       throw new Error('Failed to retrieve the service worker.');
     }
 
-    // Extract extension ID from the worker URL (if it's a Chrome extension)
     const extensionId = new URL(background.url()).host;
 
     await use(extensionId);
@@ -345,7 +324,6 @@ export const popup = test.extend<{
     const connectAccounts = async () => {
       await page.goto(PLAYGROUND_URL);
       await page.waitForLoadState('networkidle');
-      // Wait for the extension content script to inject
       await page.waitForFunction(
         () => typeof (window as any).CasperWalletProvider !== 'undefined',
         null,
@@ -396,7 +374,6 @@ export const popup = test.extend<{
 
       await currentPage.getByRole('button', { name: 'Next' }).click();
 
-      // Scroll to the bottom
       await currentPage.evaluate(() => {
         const container = document.querySelector('#ms-container');
 

@@ -62,10 +62,8 @@ popup.describe('Popup UI: lock/unlock/reset wallet', () => {
   popup(
     'should keep the user on the confirmation page when the reset dispatch is dropped',
     async ({ popupPage }) => {
-      // Without the guard on the verdict, `closeWindowByReloadExtension` runs
-      // regardless: the extension reloads into onboarding and tells the user
-      // their wallet was reset while the vault cipher is still on disk — and
-      // takes the banner down with the page.
+      // Without the guard on the verdict the extension reloads into onboarding
+      // and claims the wallet was reset while the vault cipher is still on disk.
       await popupPage.getByRole('button', { name: 'Reset wallet' }).click();
       await popupPage.getByText('I’ve read and understand the above').click();
 

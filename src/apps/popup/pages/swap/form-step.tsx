@@ -53,7 +53,6 @@ interface FormStepProps {
   swapFromTokenId: string | null;
   /** Hands the composed review up whenever it changes, or `null` while the form is invalid. */
   onReviewChange: (review: ISwapReviewData | null) => void;
-  /** Hands the pay leg's balance up for the header, which sits outside this step. */
   onPayTokenBalanceChange: (balance: NavLinkTokenBalance | null) => void;
 }
 
@@ -79,12 +78,8 @@ export function FormStep({
   const wrappedCsprPackageHash =
     WrappedCsprContractPackageHash[swapDependencies.network];
 
-  // Two entry-point ids core cannot resolve from `tokenInHash`, for opposite reasons:
-  // CSPR_NATIVE_TOKEN_ID has no packageHash at all, so it would match no listed token and fire
-  // a wasted lookup for a contract literally named 'cspr' (core's own default already
-  // preselects CSPR); the wrapped-CSPR hash matches too well, because the synthetic native row
-  // carries it, so core would resolve it straight back to CSPR. The effect below seeds the
-  // unwrap pair for the second case.
+  // Neither entry id resolves through `tokenInHash`: native CSPR has no packageHash, WCSPR's
+  // resolves back to CSPR.
   const isUnwrapDeepLink = isUnwrapEntry(
     swapFromTokenId,
     wrappedCsprPackageHash
@@ -134,9 +129,7 @@ export function FormStep({
     tokenInHash
   });
 
-  // CSPR/WCSPR has no DEX pool, so that pair routes through useWrapTokens instead. Both
-  // hooks are always called — React forbids a conditional hook call — and the mode below
-  // picks which one drives the view.
+  // CSPR/WCSPR has no DEX pool, so that pair routes through useWrapTokens; both hooks always run.
   const swapFormMode = getSwapFormMode({
     first: selectedTokens.first,
     second: selectedTokens.second,
@@ -164,8 +157,7 @@ export function FormStep({
     tokensRepository: swapDependencies.tokensRepository
   });
 
-  // Already in flight for the fiat amounts under both cards, and react-query keys it per
-  // network — this second caller is a cache read, not a second request.
+  // Already in flight for the fiat amounts, and keyed per network — a cache read, not a request.
   const { csprFiatRates } = useFetchCsprFiatRates({
     network: swapDependencies.network,
     tokensRepository: swapDependencies.tokensRepository
@@ -176,9 +168,7 @@ export function FormStep({
     USD_CURRENCY_CODE
   );
 
-  // useWrapTokens owns no concept of "which token the user picked first" - only its own
-  // toggled `direction`. Align it once when the selected pair turns into a wrap pair; further
-  // renders in the same pair leave the user's own flips alone.
+  // useWrapTokens knows only its own toggled `direction`: align it once per pair, not per render.
   const syncedWrapModeRef = useRef<SwapFormMode | null>(null);
   useEffect(() => {
     if (swapFormMode === 'swap') {
@@ -202,13 +192,10 @@ export function FormStep({
       ? selectedTokens.first
       : selectedTokens.second;
 
-  // `useWrapTokens` rebuilds both legs itself, so its own tokens are the only place a real
-  // WCSPR row exists — the listed tokens never carry one.
+  // `useWrapTokens` rebuilds both legs itself; the listed tokens never carry a real WCSPR row.
   const wcsprToken = wrapDirection === 'wrap' ? destinationToken : sourceToken;
 
-  // Entering from WCSPR's token details means "unwrap this": seed both legs directly, once the
-  // list has loaded enough to supply the native row. The mode effect above then aligns
-  // `useWrapTokens`' own direction to the resulting pair.
+  // Entering from WCSPR's token details means "unwrap this": seed both legs from the native row.
   const hasSeededUnwrapPairRef = useRef(false);
   useEffect(() => {
     if (hasSeededUnwrapPairRef.current || !isUnwrapDeepLink) {
@@ -249,8 +236,7 @@ export function FormStep({
   const unlistedTokenPackageHash =
     swapFormMode === 'swap' ? (unlistedTokens[0]?.packageHash ?? null) : null;
 
-  // The one-quote rule: every field the swap arm carries comes off this single `quotedTrade`
-  // snapshot, fiat included — the form's own fiat amounts lag it and would disagree on the row.
+  // The one-quote rule: every swap field comes off this single `quotedTrade` snapshot, fiat too.
   const swapReview = useMemo<ISwapReviewData | null>(() => {
     if (!isFormValid) {
       return null;
@@ -286,10 +272,7 @@ export function FormStep({
         },
         rate: quote,
         priceImpact,
-        // Core's own `protocolFee` arrives as "<amount> <symbol>", but this field is contracted
-        // symbol-free — the detail row appends the symbol itself. Recomputing off the quoted
-        // amount also keeps the fee on the same quote as the two legs, where core's value reads
-        // the debounced form amount.
+        // This field is contracted symbol-free, where core's `protocolFee` is "<amount> <symbol>".
         protocolFee: calculateSwapFee(quotedTrade.firstToken.amountFormatted)
       };
     }
@@ -324,20 +307,15 @@ export function FormStep({
     onReviewChange(swapReview);
   }, [swapReview, onReviewChange]);
 
-  // In wrap/unwrap mode there is no quote: cards, the flip button and the CTA are the same
-  // form, but the rate line, Swap details, and the quote/unlisted banners are all suppressed.
   const isWrapMode = swapFormMode !== 'swap';
   const labels = swapModeLabels[swapFormMode];
 
-  // Both hooks keep their own copy of the pair, and only `useSwapTokens`' copy feeds the token
-  // selector. Flipping both keeps them aligned, so the selector highlights — and replaces — the
-  // leg the card actually shows; flipping only the direction inverts the two.
+  // Only `useSwapTokens`' copy of the pair feeds the selector; flipping just the direction inverts them.
   const handleFlip = () => {
     handleSwitchTokens();
 
     if (isWrapMode) {
-      // `switchDirection` clears the amount, where the swap arm carries the pay amount over.
-      // A wrap is 1:1, so the same figure describes the flipped pair — put it back.
+      // `switchDirection` clears the amount, but a wrap is 1:1 — the same figure still describes it.
       const enteredAmount = wrapAmount;
 
       switchDirection();
@@ -375,10 +353,7 @@ export function FormStep({
         }
   );
 
-  // The wrap arm exposes no `getMaxUsableBalance`: reserve the wrap payment here the way the
-  // swap arm reserves the approve + swap ones, so the shortcut cannot fill in an amount that
-  // leaves nothing behind for the fee. Only a native CSPR leg is reduced, so unwrapping still
-  // offers the whole WCSPR balance.
+  // The wrap arm exposes no `getMaxUsableBalance`: reserve the fee here, on a native CSPR leg only.
   const wrapMaxUsableBalance = () =>
     calculateMaxUsableBalance({
       balance: getWrapTokenBalance('first'),

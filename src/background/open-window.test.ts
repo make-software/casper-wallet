@@ -77,14 +77,11 @@ describe('openWindow (background store routing)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     createOpenWindowMock.mockReset();
-    // Return an inner opener so `openWindow` can invoke it fire-and-forget.
     createOpenWindowMock.mockReturnValue(
       jest.fn().mockResolvedValue({ window: { id: 1 }, reused: false })
     );
-    // The post-attach liveness check calls `windows.get`; default it to
-    // "still alive" so tests unrelated to that check don't trip it. When it
-    // rejects, the probe confirms against the window list rather than trusting
-    // the rejection's wording — default that list to empty, i.e. "really gone".
+    // The post-attach liveness check calls `windows.get`; default it to "still
+    // alive", and the list it confirms a rejection against to "really gone".
     (windows.get as jest.Mock).mockResolvedValue({ id: 1 });
     (windows.getAll as jest.Mock).mockResolvedValue([]);
   });
@@ -99,9 +96,8 @@ describe('openWindow (background store routing)', () => {
     expect(config.windowId).toBe(42);
   });
 
-  // WALLET-1394. Not the permission-window flow, which #1427/#1462 already
-  // cover: there the device call runs in a SECOND window and the request
-  // survives a reuse by still being displayed in it.
+  // Not the permission-window flow: there the device call runs in a SECOND
+  // window, and the request survives a reuse by still being displayed in it.
   it('withholds the tracked window while a device confirmation runs in it', () => {
     const { store } = makeStore(42, awaitingDeviceIn([42]));
 
@@ -239,7 +235,6 @@ describe('openWindow (background store routing)', () => {
     await flush();
 
     expect(failRequestOnWindowError).toHaveBeenCalledWith(store, 'r4');
-    // Neither of the "there IS a window" outcomes should fire.
     expect(cancelRequestsDisplacedBy).not.toHaveBeenCalled();
     expect(dispatch).not.toHaveBeenCalledWith(
       expect.objectContaining({
@@ -252,9 +247,8 @@ describe('openWindow (background store routing)', () => {
     createOpenWindowMock.mockReturnValue(
       jest.fn().mockResolvedValue({ window: { id: 55 }, reused: false })
     );
-    // Simulates window 55 having closed in the gap between `createOpenWindow`
-    // resolving and this liveness check running: `windows.get` rejects the
-    // way it does for a window id that no longer exists.
+    // Window 55 closed in the gap between `createOpenWindow` resolving and the
+    // liveness check: `windows.get` rejects as it does for a missing window.
     (windows.get as jest.Mock).mockRejectedValue(new Error('no such window'));
     const { store, dispatch } = makeStore(null);
 
@@ -265,13 +259,11 @@ describe('openWindow (background store routing)', () => {
     await flush();
     await flush();
 
-    // The attach still happens (it raced, it wasn't wrong at the time)...
     expect(dispatch).toHaveBeenCalledWith(
       windowRequestWindowAttached({ requestId: 'r5', windowId: 55 })
     );
-    // ...but since the window turned out to be gone, the same cancellation
-    // `windows.onRemoved` would have run must run here instead, or request r5
-    // would stay 'open' forever.
+    // The window is gone, so the cancellation `windows.onRemoved` would have
+    // run must run here instead, or request r5 stays 'open' forever.
     expect(cancelRequestsDisplacedBy).toHaveBeenCalledWith(
       store,
       55,
@@ -280,12 +272,8 @@ describe('openWindow (background store routing)', () => {
   });
 
   it('keeps the cause of an open failure while redacting the URL query', async () => {
-    // This is the sole cause-bearing diagnostic on the "no approval window
-    // could be opened" path. Logging only `error.name` kept the secret out but
-    // threw the diagnosis out with it: `.name` is the string "Error" in every
-    // realistic case here. Redacting from the first `?` keeps both properties —
-    // a `signMessage` window URL carries the user's plaintext message as a
-    // query param, and a rejection's text can echo the URL it failed on.
+    // The sole cause-bearing diagnostic on this path, and a `signMessage`
+    // window URL carries the user's plaintext message as a query param.
     const consoleError = jest
       .spyOn(console, 'error')
       .mockImplementation(() => {});
@@ -321,12 +309,8 @@ describe('openWindow (background store routing)', () => {
   });
 
   it('logs a throw from the post-open handling instead of leaving it unhandled', async () => {
-    // The two-arm `.then(onFulfilled, onRejected)` form is deliberate — the
-    // recovery must not catch itself — but it leaves the success arm covered by
-    // nothing. If `attachWindowToRequest` throws, the window is open and never
-    // attached: `windowIds` stays `[]`, which the `length === 1` candidate
-    // filter can never select, so no window event will ever cancel the request
-    // and the dapp hangs for its full timeout with nothing logged.
+    // The two-arm `.then` form leaves its success arm uncovered: a throw in the
+    // attach leaves the request unattachable, and the dapp hangs to its timeout.
     const consoleError = jest
       .spyOn(console, 'error')
       .mockImplementation(() => {});

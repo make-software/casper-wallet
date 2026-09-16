@@ -17,10 +17,7 @@ interface PrivateStateErrorPageProps {
   onRetry: () => void;
 }
 
-/**
- * Shown when a vault-secrets fetch fails after timeout + retries, on the
- * backup-secret-phrase, create-account and wallet-qr-code pages.
- */
+/** Shown when a vault-secrets fetch fails after timeout + retries. */
 export function PrivateStateErrorPage({
   layout,
   onRetry

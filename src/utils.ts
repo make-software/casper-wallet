@@ -20,25 +20,15 @@ const httpPrefixRegex = /^https?:\/\//;
 
 export const hasHttpPrefix = (url: string) => httpPrefixRegex.test(url);
 
-// Anchored at BOTH ends, over a charset that cannot express markup. A bare
-// `^/?assets/` prefix test puts no constraint on the remainder, so an
-// API-supplied `assets/<svg onload=…></svg>` satisfies it and reaches the
-// inliner — `<`, `>`, spaces, quotes, `?`, `#`, `:` and `,` are all excluded,
-// and requiring a final `.ext` also rejects `..` traversal segments.
+// Anchored at BOTH ends, over a charset that cannot express markup: a bare
+// `^/?assets/` prefix leaves the remainder free for `assets/<svg onload=…>`.
 const bundledAssetPathRegex = /^\/?assets\/(?:[\w-]+\/)*[\w.-]+\.[a-z0-9]+$/i;
 
 /**
- * Whether a src points at a file webpack bundled into the extension.
- *
- * This is an allow-list on purpose, and it is the inverse of how the routing
- * used to work. SvgIcon is react-inlinesvg, which injects `data:image/svg+xml`
- * payloads and raw `<svg …>` strings straight into the DOM without any fetch —
- * so connect-src never sees them. Deciding "is this ours" rather than "is this
- * remote" keeps every unrecognised shape out of the inliner by default.
- *
- * The allow-list has to constrain the WHOLE string, not just its prefix: the
- * shape it is guarding against is markup, and `assets/<svg …>` is both a valid
- * prefix match and a payload react-inlinesvg inlines verbatim.
+ * Whether a src points at a file webpack bundled into the extension. An
+ * allow-list on purpose — SvgIcon inlines `data:` payloads and raw `<svg …>`
+ * with no fetch, so connect-src never sees them — and it must constrain the
+ * WHOLE string, not just the `assets/` prefix.
  */
 export const isBundledAssetPath = (src: string) =>
   bundledAssetPathRegex.test(src);
@@ -58,9 +48,8 @@ export const isLedgerAvailable =
   process.env.BROWSER === Browser.Chrome ||
   process.env.BROWSER === Browser.Edge;
 
-// Named for the property rather than the vendor: `Browser.Edge` is Chromium
-// too, and an `isChromeBuild` gate would silently ship an Edge build without
-// the request mirror. Build-time, so DefinePlugin still eliminates dead code.
+// Named for the property rather than the vendor: `Browser.Edge` is Chromium too,
+// and an `isChromeBuild` gate would ship Edge without the request mirror.
 export const isEphemeralBackgroundBuild =
   process.env.BROWSER === Browser.Chrome ||
   process.env.BROWSER === Browser.Edge;
@@ -101,9 +90,8 @@ export const isValidPublicKey = (
   }
 
   try {
-    // Same accept/reject set as `PublicKey.fromHex`, without linking the SDK: core's derivation
-    // throws on exactly the inputs the SDK rejects, and its parity with the SDK is pinned by
-    // tests that use the SDK itself as the oracle.
+    // Same accept/reject set as `PublicKey.fromHex` without linking the SDK; parity
+    // is pinned by tests that use the SDK itself as the oracle.
     getAccountHashFromPublicKey(publicKey);
     return true;
   } catch (error) {
@@ -176,10 +164,8 @@ export const getSigningAccount = (
   );
 
 /**
- * Safari ships no manifest CSP — getCSP() in webpack.config.js has no Safari
- * branch, so the <meta> this builds IS the whole policy. Exported so a test can
- * pin it: sharing `baseDirectives` with the other targets is what keeps the
- * policies from drifting, but it also means an edit to src/csp.json silently
+ * Safari ships no manifest CSP, so the <meta> this builds IS the whole policy.
+ * Exported so a test can pin it: an edit to the shared `baseDirectives` silently
  * changes what Safari enforces.
  */
 export const getSafariCspContent = () =>
@@ -193,11 +179,8 @@ export const setCSPForSafari = () => {
       const meta = document.createElement('meta');
 
       meta.setAttribute('http-equiv', 'Content-Security-Policy');
-      // Shared directives (img-src/media-src included) come from src/csp.json
-      // so they cannot drift from the other targets again; only the style
-      // arm is Safari-specific.
-      // Note: frame-ancestors inside a <meta http-equiv> is ignored by browsers;
-      // it is present for parity with the built manifests, not as protection.
+      // frame-ancestors inside a <meta http-equiv> is ignored by browsers; it is
+      // present for parity with the built manifests, not as protection.
       meta.setAttribute('content', getSafariCspContent());
 
       document.getElementsByTagName('head')[0].appendChild(meta);

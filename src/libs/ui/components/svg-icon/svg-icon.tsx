@@ -76,10 +76,8 @@ const Container = styled('div').withConfig({
   })
 );
 
-// Only the three props the callback below actually reads. Typing this with the
-// full SvgIconProps pulls in HTMLAttributes' `onError?: ReactEventHandler`,
-// which intersects with react-inlinesvg's `onError?: (error: Error) => void`
-// and leaves no handler able to satisfy both.
+// Only the three props the callback below reads: the full SvgIconProps pulls in
+// HTMLAttributes' `onError`, which no handler can satisfy alongside the library's.
 const StyledReactSVG = styled(ReactSVG)<{
   size: number;
   width?: number | string;
@@ -91,21 +89,9 @@ const StyledReactSVG = styled(ReactSVG)<{
 }));
 
 /**
- * Stands in for an icon whose file failed to fetch or parse. Written as
- * literal JSX rather than pointed at an asset path on purpose: it must not
- * fetch anything and it must not route back through SvgIcon. RemoteIcon's
- * error-recovery path already ends in an SvgIcon, so an asset-backed fallback
- * here could fail in turn and loop.
- *
- * Container already fixes the width and height, so a failed icon never shifted
- * the layout — this changes nothing geometrically, it only makes the breakage
- * visible instead of leaving a hole.
- *
- * react-inlinesvg's FAILED branch (`react-inlinesvg/src/index.tsx:46-48`)
- * returns `children` verbatim — unlike its success branch, it does not
- * `cloneElement` them with StyledReactSVG's generated class. So this
- * placeholder never receives that class; its effective parent is Container,
- * and the `width="100%" height="100%"` below resolve against Container's box.
+ * Literal JSX rather than an asset path: it must not fetch and must not route
+ * back through SvgIcon, whose RemoteIcon error path could loop. The FAILED
+ * branch drops StyledReactSVG's class, so the 100% sizes resolve on Container.
  */
 const BrokenIconPlaceholder = () => (
   <svg

@@ -1,9 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-// Deep paths, not the '@libs/layout' / '@libs/ui/components' barrels — see
-// token-selector-row.tsx for why that barrel is unsafe in this file's
-// render-tested, node-only jest tree.
+// Deep paths, not the '@libs/layout' / '@libs/ui/components' barrels — see token-selector-row.tsx.
 import {
   AlignedFlexRow,
   FlexColumn,

@@ -41,15 +41,7 @@ export function getSwapFormMode(params: {
   return 'swap';
 }
 
-/**
- * The rows the token selector offers for the position being edited.
- *
- * WCSPR has no DEX pool of its own, and the trade API's list folds its record into the synthetic
- * native CSPR row, so it never arrives as a listed token. It is only ever the other half of a
- * CSPR wrap or unwrap — so offer it exactly when the opposite card already holds native CSPR,
- * which makes both `CSPR -> WCSPR` and `WCSPR -> CSPR` reachable and keeps it out of every
- * ordinary pair.
- */
+/** WCSPR never arrives as a listed token, so offer it exactly when the opposite card holds CSPR. */
 export function getSelectableTokens(params: {
   tokens: IDexToken[] | undefined;
   wcsprToken: IDexToken | undefined;
@@ -69,13 +61,8 @@ export function getSelectableTokens(params: {
 }
 
 /**
- * Whether an entry point's token id is the wrapped-CSPR contract, which is the one deep link
- * that cannot be resolved by handing it to core as `tokenInHash`: the listed tokens carry that
- * same `packageHash` on the synthetic native CSPR row, so core's preselection resolves it back
- * to CSPR. The caller seeds the `WCSPR -> CSPR` pair itself instead.
- *
- * The empty-hash guard matters on networks with no wrapped-CSPR deployment, where the constant
- * is `''` and would otherwise match an empty id.
+ * Core's preselection resolves this hash back to CSPR, so the caller seeds the `WCSPR -> CSPR`
+ * pair itself. The empty-hash guard matters where there is no wrapped-CSPR deployment.
  */
 export function isUnwrapEntry(
   swapFromTokenId: string | null,
@@ -86,13 +73,10 @@ export function isUnwrapEntry(
   );
 }
 
-/** The i18n keys one mode of the flow uses, so its form, confirm and success steps agree. */
 export interface ISwapModeLabels {
   formTitle: string;
   confirmTitle: string;
-  /** The pay card's "spend everything" shortcut. */
   maxLabel: string;
-  /** Heading over the form's costs card. */
   detailsTitle: string;
   successTitle: string;
 }
@@ -121,21 +105,11 @@ export const swapModeLabels: Record<SwapFormMode, ISwapModeLabels> = {
   }
 };
 
-/**
- * The mode a review snapshot describes. The later steps word themselves off the snapshot rather
- * than off live form state: the title must not move under a user who is reviewing.
- */
+/** Off the review snapshot, not live form state: the title must not move under a user reviewing. */
 export const getReviewMode = (review: ISwapReviewData): SwapFormMode =>
   review.kind === 'wrap' ? review.direction : 'swap';
 
-/**
- * What a wrap or unwrap costs in gas, worded like the swap arm's `networkCost`: the payment
- * converted to the user's currency, falling back to the CSPR figure itself when no rate has
- * loaded.
- *
- * Core's own `calculateSwapPaymentAmount` only ever picks between the two *swap* payments, so
- * the wrap payments have no helper there to reuse.
- */
+/** Fiat when a rate has loaded, otherwise the CSPR figure, like the swap arm's `networkCost`. */
 export const calculateWrapNetworkCost = (
   direction: WrapDirection,
   csprFiatRate: string | number | null | undefined,

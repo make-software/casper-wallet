@@ -11,8 +11,7 @@ const token: IDexToken = {
   id: 'pkg-hash-1',
   name: 'Shiboo Coin',
   symbol: 'SHIBOO',
-  // A remote (non-bundled) url so the row goes through RemoteIcon's <img>
-  // branch, which renders in this repo's node-only jest without further setup.
+  // A remote (non-bundled) url so the row goes through RemoteIcon's <img> branch.
   icon: 'https://example.com/shiboo.png',
   decimals: 9,
   packageHash: 'aa',
@@ -48,8 +47,7 @@ describe('TokenSelectorRow', () => {
   it('renders "Unlisted token" instead of the name when the token is unlisted', () => {
     const html = render({ isUnlisted: true });
 
-    // Asserted as rendered text: the name still reaches the markup as the icon's title
-    // attribute, so only its absence as element content says the secondary line was replaced.
+    // The name still reaches the markup as the icon's title, so assert on element content.
     expect(html).toContain('>Unlisted token<');
     expect(html).not.toContain('>Shiboo Coin<');
   });

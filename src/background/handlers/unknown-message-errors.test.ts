@@ -7,8 +7,7 @@ import {
 } from './unknown-message-errors';
 
 // A payload marker that must never reach a message: these are handed to
-// `sendError`, which returns them across the boundary — to `dispatchToMainStore`
-// for the redux branch, into the dapp's own SDK for the sdk branch.
+// `sendError`, which returns them across the boundary into the dapp's own SDK.
 const SECRET = 'deadbeef';
 
 const REQUEST_ID = 'req-1';

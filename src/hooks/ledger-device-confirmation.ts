@@ -5,18 +5,9 @@ import { windowRequestDeviceConfirmationChanged } from '@background/redux/window
 
 /**
  * How many brackets currently hold each request, so overlapping ones report the
- * flag once between them rather than each releasing it for the others.
- *
- * They do overlap: neither signing page disables its submit control while a
- * call is in flight, and the page state that hides it is only flipped after
- * `getPreferredTransport()` and `beforeLedgerActionCb()` resolve — so a second
- * click lands, fails fast on the busy transport (`TransportRaceCondition`) and
- * would otherwise unprotect the window while the first call is still on the
- * device.
- *
- * Module scope is the right scope: a transport is per document, so brackets can
- * only overlap within one, and the reducer's equality guard already absorbs a
- * repeated `true` from anywhere else.
+ * flag once between them rather than each releasing it for the others. They do
+ * overlap: neither signing page disables its submit control while a call is in
+ * flight, so a second click lands while the first is still on the device.
  */
 const heldByRequest = new Map<string, number>();
 
@@ -46,19 +37,9 @@ function release(requestId: string): boolean {
 
 /**
  * Runs a Ledger device call with the background told, for its whole duration,
- * that this request is on the device — which is what keeps the window it runs
- * in out of the reuse rotation (`awaitingDeviceConfirmation` in
- * windowManagement/types).
- *
- * The bracket lives here rather than as two calls in `useLedger` for the reason
- * `register-ledger-permission-window.ts` exists: the repo has no React-hook
- * harness, so inside the hook the pairing would be two lines that can drift
- * apart — and a start without its end withholds the shared window from every
- * later request for the rest of that request's life.
- *
- * Never rejects. `run` is invoked fire-and-forget by the hook, exactly as the
- * bare `ledgerAction()` it replaces was; a rejection propagated from here would
- * be the unhandled rejection that call site already produced.
+ * that this request is on the device — which keeps the window it runs in out of
+ * the reuse rotation. A start without its end withholds the shared window from
+ * every later request. Never rejects: `run` is invoked fire-and-forget.
  */
 export async function runWithDeviceConfirmationReported(
   requestId: string | undefined,

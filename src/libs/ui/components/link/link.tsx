@@ -5,7 +5,6 @@ import { getColorFromTheme } from '@libs/ui/utils';
 
 type LinkColor = 'contentAction' | 'fillCritical' | 'inherit';
 
-// TODO: do we need this?
 const getStateColor = (theme: DefaultTheme, color: LinkColor) => {
   return (
     // @ts-ignore

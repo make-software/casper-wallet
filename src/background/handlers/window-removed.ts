@@ -6,11 +6,6 @@ import { selectExportKeysWindowId } from '@background/redux/windowManagement/sel
 
 import { cancelOpenRequestsForClosedWindow } from './cancel-open-requests-on-close';
 
-// Everything `windows.onRemoved` does, as one testable unit. It used to live
-// inline in the background entry point, which no test imports — so the listener
-// shape, its error handling and the removal of the old tracked-id guard were
-// all unverified, and reverting them left the suite green.
-//
 // Never rejects: the listener is fire-and-forget, and an unhandled rejection in
 // a service worker is invisible.
 export async function handleWindowRemoved(
@@ -33,9 +28,8 @@ export async function handleWindowRemoved(
     console.error('cancel-on-close: failed to cancel open requests', error);
   }
 
-  // Independent of the above, and deliberately in its own try: if the cancel
-  // throws, leaving the tracked export-keys id set means the next export-keys
-  // open focuses a window that no longer exists.
+  // Its own try: if the cancel throws, a stale export-keys id makes the next
+  // open focus a window that no longer exists.
   try {
     if (removedWindowId === selectExportKeysWindowId(store.getState())) {
       store.dispatch(exportKeysWindowIdCleared());

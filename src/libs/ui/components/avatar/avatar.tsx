@@ -170,7 +170,6 @@ export const Avatar = ({
           <Logo size={size} brandingLogo={brandingLogo} publicKey={publicKey} />
         ) : (
           <Identicon
-            // in the case of public key is with uppercase characters
             value={publicKey?.toLowerCase() || ''}
             size={size}
             background={theme.color.contentOnFill}
@@ -194,7 +193,6 @@ export const Avatar = ({
     return (
       <AvatarContainer top={top}>
         <Identicon
-          // in the case of public key is with uppercase characters
           value={publicKey.toLowerCase()}
           size={size}
           background={theme.color.contentOnFill}

@@ -10,13 +10,11 @@ const network = 'mainnet' as const;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const now = Date.parse('2026-07-17T00:00:00Z');
-/** Comfortably outside the notice window (rule 2) */
+/** Comfortably outside the notice window */
 const farFutureDate = new Date(
   now + (CSPR_NAME_EXPIRATION_NOTICE_DAYS + 30) * DAY_MS
 ).toISOString();
-/** Inside the notice window, still in the future (rules 3/4) */
 const withinWindowDate = new Date(now + 5 * DAY_MS).toISOString();
-/** Already past (rule 1) */
 const expiredDate = new Date(now - DAY_MS).toISOString();
 
 const makeInfo = (overrides: Record<string, unknown>) => ({

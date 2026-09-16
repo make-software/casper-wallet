@@ -87,7 +87,6 @@ export const ValidatorDropdownInput = ({
     if (formState.isValid) {
       setShowValidatorPlate(true);
     }
-    //   This should trigger only once
     //   eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -127,7 +126,6 @@ export const ValidatorDropdownInput = ({
         fee={validator.fee}
         name={validator?.name}
         logo={validator?.svgLogo || validator?.imgLogo}
-        // TODO: remove user_stake after we merge recipient and amount steps for undelegation
         formattedTotalStake={
           stakeType === AuctionManagerEntryPoint.delegate
             ? validator.formattedTotalStake

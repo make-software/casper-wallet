@@ -85,7 +85,6 @@ popup.describe('Popup UI:  review flow', () => {
 
       // Every exit from RateApp is a post-submission exit, so the Activity
       // override set at submission time has to survive the round trip.
-      // `getByTitle` observes activeness: only `ActiveTabContainer` carries it.
       await popupExpect(popupPage.getByTitle('Activity')).toBeVisible();
     }
   );

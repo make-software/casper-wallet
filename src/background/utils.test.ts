@@ -147,7 +147,6 @@ describe('emitSdkEventToActiveTabsWithOrigin', () => {
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
     expect(sendMessageMock).toHaveBeenCalledWith(1, testAction);
-    // Delivered to exactly the one matching tab.
     expect(delivered).toBe(1);
   });
 
@@ -170,7 +169,6 @@ describe('emitSdkEventToActiveTabsWithOrigin', () => {
       return undefined;
     });
 
-    // Only the second tab's send succeeded → count is 1, not 2.
     await expect(
       emitSdkEventToActiveTabsWithOrigin('https://foo.com', testAction)
     ).resolves.toBe(1);
@@ -195,9 +193,7 @@ describe('emitSdkEventToActiveTabsWithOrigin', () => {
     expect(errorSpy).toHaveBeenCalled();
   });
 
-  // Response delivery (`handleSdkResponseToTab`) passes `frameId` to scope the
-  // send to the requesting frame — frame 0 is the top frame, exactly what the
-  // security fix targets, so a falsy check (`frameId ? … : …`) instead of a
+  // Frame 0 is the top frame, so a falsy check (`frameId ? … : …`) instead of a
   // null check would silently drop scoping for it.
   it('scopes delivery to frame 0 when frameId is 0', async () => {
     const tab = makeTab({ id: 1, url: 'https://foo.com/page' });

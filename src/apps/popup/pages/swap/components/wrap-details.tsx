@@ -14,16 +14,11 @@ const Row = styled(AlignedSpaceBetweenFlexRow)`
 `;
 
 export interface WrapDetailsProps {
-  /** The section heading, worded for the mode — see `swapModeLabels`. */
   title: string;
   networkCost: string;
 }
 
-/**
- * The wrap arm's counterpart to {@link SwapDetails}. A wrap is 1:1 off-quote, so rate, price
- * impact, protocol fee, route and slippage all have nothing to say — gas is the one cost the
- * user still pays, and it is the whole card.
- */
+/** The wrap arm's counterpart to {@link SwapDetails}: a wrap is 1:1, so gas is the only cost. */
 export const WrapDetails = ({ title, networkCost }: WrapDetailsProps) => {
   const { t } = useTranslation();
 

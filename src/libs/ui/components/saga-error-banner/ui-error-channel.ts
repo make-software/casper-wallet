@@ -1,8 +1,5 @@
-// Errors that never reach the background store, and so can never arrive as a
-// `sagaError`: the transport to the background is the thing that failed. The
-// replica store cannot hold them either — `createMainStoreReplica(state)` runs
-// in the render body of every app's `Tree`, so a local dispatch is discarded on
-// the next broadcast. Hence a module store the banner reads directly.
+// Errors that can never arrive as a `sagaError` — the transport to the background is
+// what failed — and that the replica store discards on the next broadcast.
 export type UiErrorKind = 'dispatch-failed' | 'window-open-failed';
 
 export interface UiError {
@@ -19,9 +16,7 @@ function emit() {
   listeners.forEach(listener => listener());
 }
 
-// Carries a `kind`, not a message: the callers (`dispatchToMainStore`, the
-// window-manager hook) are plain functions with no access to `t()`. The banner
-// owns the copy.
+// Carries a `kind`, not a message: the callers cannot reach `t()`, so the banner owns the copy.
 export function reportUiError(kind: UiErrorKind, detail: string) {
   const key = `${kind}:${detail}`;
 
@@ -33,11 +28,7 @@ export function reportUiError(kind: UiErrorKind, detail: string) {
   emit();
 }
 
-// The counterpart of `reportUiError`, called from the same callers' success
-// paths. Without it a row outlives the failure it describes: the guards keep the
-// user on the page to retry, and the retry that works renders the success screen
-// under a banner still saying the wallet didn't respond — the key dedupe means it
-// would not even be refreshed, just left.
+// Without this, a row outlives the failure it describes: the key dedupe never refreshes it.
 export function clearUiError(kind: UiErrorKind, detail: string) {
   const key = `${kind}:${detail}`;
 

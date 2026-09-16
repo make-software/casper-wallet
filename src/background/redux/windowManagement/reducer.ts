@@ -3,28 +3,16 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { getRequest, isStorableRequestId } from './request-map';
 import { CancellableMethod, WindowManagementState } from './types';
 
-// How many answered requests keep a tombstone. Large enough that a late
-// duplicate — which arrives within a request's own lifetime, not hours later —
-// is still deduped; small enough to bound the map on the two targets whose
-// background page never restarts.
+// How many answered requests keep a tombstone: enough that a late duplicate is
+// still deduped, small enough to bound the map where nothing else does.
 export const MAX_RESPONDED_TOMBSTONES = 50;
 
-// One shared approval window plus the Ledger second window keeps steady-state
-// open-request concurrency at ~1-2; this only needs to bound the 250 ms
-// `CANCEL_GRACE_MS` burst, not any sustained load. Binding floor, scoped to
-// the two payload-bearing methods (`sign`, `signTypedData`) only: this must
-// stay >= 2 * `MAX_STORED_PAYLOADS` (vault/reducer.ts) — below that, this cap
-// would fire before either payload cap on those two paths, and the payload
-// already accepted by then is stranded with no window to show it. The four
-// capless methods (`connect`, `switchAccount`, `signMessage`,
-// `decryptMessage`) consume open slots from this SAME cap too, but have no
-// payload map of their own to strand — this floor's quantifier says nothing
-// about them.
+// Binding floor on the payload-bearing methods: must stay >= 2 *
+// `MAX_STORED_PAYLOADS` (vault/reducer.ts), or an accepted payload is stranded.
 export const MAX_OPEN_REQUESTS = 20;
 
-// Derived from the map rather than kept in a counter field: a counter is state
-// the session record does not carry, so after a service-worker restart it would
-// resume at zero and re-issue ordinals the restored map still holds.
+// Derived from the map rather than a counter field: the session record carries
+// no counter, so a worker restart would re-issue ordinals the map still holds.
 const nextSeq = (requests: WindowManagementState['requests']): number => {
   const stamped = Object.values(requests).flatMap(request =>
     request == null ? [] : [request.seq]
@@ -61,8 +49,7 @@ const slice = createSlice({
     connectWindowInit: state => state,
     importWindowInit: state => state,
     signWindowInit: state => state,
-    // The descriptor is written ONCE. `requestId` is page-generated
-    // (`generateRequestId`, src/content/sdk.ts) i.e. dapp-controlled, so a
+    // The descriptor is written ONCE: `requestId` is dapp-controlled, so a
     // repeated id must not overwrite a live request nor resurrect a tombstone.
     windowRequestOpened: (
       state,
@@ -81,9 +68,8 @@ const slice = createSlice({
         return state;
       }
 
-      // At the cap, refuse the write rather than evict — "open requests are
-      // never evicted" is the standing invariant, and a refused write must
-      // consume no ordinal (below `nextSeq` is never reached).
+      // At the cap, refuse rather than evict: open requests are never evicted,
+      // and a refused write must consume no ordinal.
       const openCount = Object.values(state.requests).filter(
         request => request?.status === 'open'
       ).length;
@@ -109,9 +95,8 @@ const slice = createSlice({
         }
       };
     },
-    // A Ledger confirmation started or finished for this request. Guarded like
-    // its siblings: only a live 'open' descriptor can carry the flag, so a
-    // message that arrives after the request was answered cannot resurrect one.
+    // A Ledger confirmation started or finished. Only a live 'open' descriptor
+    // can carry the flag, so a message arriving later cannot resurrect one.
     windowRequestDeviceConfirmationChanged: (
       state,
       action: PayloadAction<{ requestId: string; awaiting: boolean }>
@@ -137,9 +122,8 @@ const slice = createSlice({
         }
       };
     },
-    // A window began displaying this request. Dispatched by `openWindow` once
-    // `windows.create`/reuse resolves, and by `use-ledger` for the separate
-    // permission window.
+    // Dispatched by `openWindow` once `windows.create`/reuse resolves, and by
+    // `use-ledger` for the separate permission window.
     windowRequestWindowAttached: (
       state,
       action: PayloadAction<{ requestId: string; windowId: number }>
@@ -194,36 +178,20 @@ const slice = createSlice({
     },
     // The tombstone is deliberately kept: `selectRequestStatus` reading back
     // 'responded' is what makes the background dedup drop a duplicate response.
-    // On Chrome/Edge the session mirror now survives a service-worker restart
-    // (residual paths aside), so "in-memory" no longer bounds it there either.
-    // `manifest.v2.json` and `manifest.v2.safari.json` both declare
-    // `"persistent": true`, so on Firefox and Safari the background page is
-    // never torn down and nothing here deletes a key — the map grows by one
-    // permanent entry per request, keyed by a dapp-supplied string, for the
-    // whole browser session. Hence the FIFO cap below: the descriptor is
-    // dropped as before, and the oldest tombstones are evicted once there are
-    // more than a dedup could plausibly need. Open requests are never evicted.
     windowRequestResponded: (
       state,
       action: PayloadAction<{ requestId: string }>
     ) => {
-      // A transition, not an upsert — guarded the way its two siblings are.
-      // Only a request that is currently 'open' can become 'responded'; the
-      // union models ∅ → open → responded and this is what stops the reducer
-      // permitting ∅ → responded. Without it, a response the UI forwards for an
-      // id the store no longer holds (one of the residual descriptor-less
-      // paths) wrote an orphan tombstone that consumed a slot in the cap below
-      // and made the SDK entry guard reject that id as a duplicate.
+      // A transition, not an upsert: the union models ∅ → open → responded, so
+      // a response for an id the store no longer holds writes no orphan.
       const request = getRequest(state.requests, action.payload.requestId);
 
       if (request?.status !== 'open') {
         return state;
       }
 
-      // The tombstone is restamped with a fresh ordinal rather than keeping
-      // the registration `seq`: eviction below is oldest-ANSWERED-first, so
-      // reusing the registration ordinal could make answering the
-      // oldest-registered request write a tombstone this same dispatch evicts.
+      // Restamped rather than keeping the registration `seq`: eviction below is
+      // oldest-ANSWERED-first, so the reused ordinal could evict itself.
       const requests: WindowManagementState['requests'] = {
         ...state.requests,
         [action.payload.requestId]: {
@@ -232,9 +200,8 @@ const slice = createSlice({
         }
       };
 
-      // Oldest-ANSWERED first by stamped ordinal, not by key order: enumeration
-      // hoists an integer-like dapp-chosen key ahead of every string key, so
-      // `"42"` would be evicted first however recently it was answered.
+      // By stamped ordinal, not key order: enumeration hoists an integer-like
+      // dapp-chosen key, so `"42"` would go first however recently answered.
       const respondedIds = Object.entries(requests)
         .flatMap(([requestId, entry]) =>
           entry?.status === 'responded' ? [[requestId, entry.seq] as const] : []
@@ -251,12 +218,8 @@ const slice = createSlice({
 
       return { ...state, requests };
     },
-    // Dispatched only from `resetVaultSaga` (spec §8.3) — never forwarded from
-    // the UI, see the EXCLUSIONS entry in redux-actions.parity.test.ts. Returns
-    // the shared `initialState` reference like every other slice's reset case;
-    // the reset flow does not rely on the subscriber's write guard to clear
-    // the session mirror for this slice — it clears it directly instead (see
-    // session-store.ts).
+    // Dispatched only from `resetVaultSaga`, never forwarded from the UI; the
+    // reset flow clears the session mirror directly (session-store.ts).
     windowManagementReseted: () => initialState
   }
 });

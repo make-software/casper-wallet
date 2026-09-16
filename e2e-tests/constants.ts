@@ -132,19 +132,14 @@ export const NEW_VALIDATOR_FOR_STAKE = {
 
 export const URLS = {
   rpc: 'https://node.testnet.cspr.cloud/rpc',
-  // Every cspr.cloud RPC node the suite can end up pointed at. The buy-CSPR specs
-  // switch to Mainnet, which moves the background probe onto `node.cspr.cloud` —
-  // matching only `rpc` above would leave that one reaching the live network.
+  // Every cspr.cloud RPC node the suite can end up pointed at: the buy-CSPR specs
+  // switch to Mainnet, which moves the background probe onto `node.cspr.cloud`.
   anyRpcNode: /^https:\/\/node\.(\w+\.)?cspr\.cloud\/rpc$/
 };
 
 export const RPC_RESPONSE = {
-  // `checkCasper2NetworkSaga` probes the node for its api_version on every unlock
-  // and on every network switch, to learn whether it is talking to a Casper 2.x
-  // network. It runs in the background service worker, so `page.route` never sees
-  // it — see the context-level route in `fixtures.ts`. The api_version here has to
-  // stay in the 2.x line: it is what flips the send path onto `putTransaction`,
-  // which is the only shape `success` below answers with.
+  // api_version has to stay in the 2.x line: `checkCasper2NetworkSaga` reads it to
+  // flip the send path onto `putTransaction`, the only shape `success` answers with.
   getStatus: {
     status: 200,
     body: JSON.stringify({

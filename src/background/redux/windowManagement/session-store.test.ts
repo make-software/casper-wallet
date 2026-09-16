@@ -10,9 +10,8 @@ import {
 } from './session-store';
 import { Request } from './types';
 
-// `isEphemeralBackgroundBuild` is FALSE under jest: `npm test` sets no BROWSER
-// and DefinePlugin is webpack-only. Without this mock every case below would
-// exercise the disabled path and pass while asserting nothing.
+// `isEphemeralBackgroundBuild` is FALSE under jest, so without this mock every
+// case below would exercise the disabled path and pass while asserting nothing.
 let mockIsEphemeralBackgroundBuild = true;
 
 jest.mock('@src/utils', () => ({
@@ -26,8 +25,7 @@ const sessionSet = jest.fn<Promise<void>, [unknown]>();
 const sessionRemove = jest.fn<Promise<void>, [unknown]>();
 
 // The area itself is swappable: `@types/webextension-polyfill` declares
-// `session` non-optional, so "the browser has no session area" is a state only
-// the runtime can be in.
+// `session` non-optional, so an absent area is a runtime-only state.
 let mockSessionArea: unknown = {
   get: (...args: unknown[]) => sessionGet(...(args as [unknown])),
   set: (...args: unknown[]) => sessionSet(...(args as [unknown])),
@@ -158,13 +156,8 @@ describe('session-store — read path', () => {
     });
   });
 
-  // `typeof record !== 'object' || record == null` is deletable and the VALUE
-  // above still passes: destructuring `null` without the guard throws, which
-  // the outer `catch` swallows into the same `emptyRecord()`. The only
-  // observable difference is the catch's side effect — it LOGS. (A string
-  // like 'nope' would not distinguish this: object-destructuring a primitive
-  // string does not throw, so its result is identical with or without the
-  // guard.)
+  // The value above passes with or without the null guard; the only observable
+  // difference is that the catch path LOGS.
   it('returns the empty record for a null session record without logging', async () => {
     sessionGet.mockResolvedValue(storedRecord(null));
 
@@ -187,10 +180,8 @@ describe('session-store — read path', () => {
   });
 
   it('drops an array of otherwise-valid rows to {}, not index-keyed entries', async () => {
-    // Every element here individually passes `sanitizeRequest`, so this is
-    // blind to the `Array.isArray` guard specifically: without it,
-    // `Object.entries` on an array hydrates as `{'0': …, '1': …}` instead of
-    // `{}`.
+    // Every element individually passes `sanitizeRequest`: without the
+    // `Array.isArray` guard the array hydrates as `{'0': …, '1': …}`.
     sessionGet.mockResolvedValue(
       storedRecord({ requests: [openRow(), openRow()], windowId: null })
     );
@@ -320,8 +311,7 @@ describe('session-store — the sanitizer drops only the row it cannot vouch for
     ],
     ['a non-object row', 'nope' as unknown as Record<string, unknown>],
     // `typeof null === 'object'`, so this exercises the `raw == null` half of
-    // the guard specifically — the `typeof raw !== 'object'` half alone would
-    // let a null row through as "an object".
+    // the guard specifically.
     ['a null row', null as unknown as Record<string, unknown>],
     ['an undefined row', undefined as unknown as Record<string, unknown>]
   ];
@@ -357,9 +347,8 @@ describe('session-store — the sanitizer drops only the row it cannot vouch for
 
     expect(requests).toEqual({ good: survivingRow });
     expect(Object.keys(requests)).toEqual(['good']);
-    // `__proto__` must be dropped as a KEY, not assigned — assigning it inside
-    // the sanitizer's output builder would set the object's PROTOTYPE instead,
-    // silently making every later lookup on this map inherit `openRow()`.
+    // `__proto__` must be dropped as a KEY, not assigned — assigning it would
+    // set the map's PROTOTYPE, making every later lookup inherit `openRow()`.
     expect(Object.getPrototypeOf(requests)).toBe(Object.prototype);
   });
 
@@ -372,12 +361,6 @@ describe('session-store — the sanitizer drops only the row it cannot vouch for
     expect((await readRequestSession()).requests).toEqual({ 'req-1': row });
   });
 });
-
-// The completeness pin moved to session-store.ts, colocated with
-// `sanitizeRequest`'s open-row literal it actually guards — a copy here was
-// satisfiable inside the test file alone (add a field to BOTH the pin and a
-// hand-maintained runtime list, and the build stays green while the
-// sanitizer itself still silently drops it).
 
 describe('session-store — write path', () => {
   it('writes the record under the session key', async () => {
@@ -473,14 +456,8 @@ describe('session-store — write path', () => {
     await Promise.resolve();
 
     const writeB = writeRequestSession({ requests: {}, windowId: 2 });
-    // One more tick: if B's flush were merely CHAINED but not yet started
-    // (the real, serialised behaviour), this changes nothing — it is still
-    // waiting on A's unresolved `set`. If `writeChain` were rebuilt from a
-    // fresh `Promise.resolve()` instead of chained onto the existing one
-    // (serialisation lost), B's flush would be a microtask away from running
-    // regardless of A — this tick is what lets that difference surface as a
-    // second `sessionSet` call, which asserting synchronously right after the
-    // `writeB` call cannot see.
+    // One more tick: were `writeChain` rebuilt instead of chained onto the
+    // existing one, B's flush would run regardless of A and show up below.
     await Promise.resolve();
     // The reset queue only lets B's flush get CHAINED after A's — A's `set`
     // promise is still pending, so B's flush cannot have started yet.
@@ -495,12 +472,8 @@ describe('session-store — write path', () => {
   });
 
   it('drops nothing at exactly the combined cap: MAX_RESPONDED_TOMBSTONES tombstones plus MAX_OPEN_REQUESTS open rows', async () => {
-    // The identity `MAX_SESSION_ROWS === MAX_RESPONDED_TOMBSTONES +
-    // MAX_OPEN_REQUESTS` restates the definition character-for-character and
-    // proves nothing about the write-side cap itself. This instead builds
-    // the actual boundary case — a row is either a tombstone or an open
-    // request, no third state — and asserts the write path keeps every one
-    // of them, exactly at the cap.
+    // Asserting the `MAX_SESSION_ROWS` identity would only restate its
+    // definition; this builds the actual boundary case the write path faces.
     const requests: Record<string, Request> = {};
     for (let seq = 0; seq < MAX_RESPONDED_TOMBSTONES; seq += 1) {
       requests[`tombstone-${seq}`] = { status: 'responded', seq } as Request;
@@ -516,11 +489,7 @@ describe('session-store — write path', () => {
 
   it('keeps the open-request cap above the binding floor set by the payload caps (sign/signTypedData only)', () => {
     // Below `2 * MAX_STORED_PAYLOADS` the open-request cap would fire before
-    // either payload cap on the sign/signTypedData paths specifically,
-    // stranding an already-accepted payload with no window ever opened for
-    // it. The four capless methods share this same cap but have no payload
-    // map to strand, so this floor says nothing about them — kept as a
-    // tripwire for the two methods it actually bounds.
+    // either payload cap, stranding an accepted payload with no window opened.
     expect(MAX_OPEN_REQUESTS).toBeGreaterThanOrEqual(2 * MAX_STORED_PAYLOADS);
   });
 
@@ -569,7 +538,7 @@ describe('session-store — write path', () => {
   });
 });
 
-describe('session-store — clearRequestSession (spec §8.3)', () => {
+describe('session-store — clearRequestSession', () => {
   it('writes the empty record under the session key, joining the write chain', async () => {
     await clearRequestSession();
 

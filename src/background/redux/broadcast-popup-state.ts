@@ -7,20 +7,16 @@ import {
 import { selectPopupState } from '@background/redux/popup-state';
 import { RootState } from '@background/redux/store-types';
 
-// Only "no receiver" is expected: `runtime.sendMessage` delivers to every
-// extension context except the sender, so with no popup open Chrome rejects
-// with "Receiving end does not exist." Everything else — a structured-clone
-// failure, a throwing listener, a message-size limit — means an OPEN replica
-// just missed an update and is now silently stale, so it must be visible.
-// Same idiom as keep-alive.ts.
+// Only "no receiver" is expected — it means no popup is open. Everything else
+// means an open replica just missed an update and is now silently stale.
 function broadcastToReplicas(message: BackgroundEvent, source: string): void {
   runtime.sendMessage(message).catch((error: unknown) => {
     const text = error instanceof Error ? error.message : String(error);
     if (text.includes('Receiving end does not exist')) {
       return;
     }
-    // The broadcast payload is sanitized but still carries account and session
-    // data, so it is never logged — only a static source label and the error object.
+    // The payload still carries account and session data, so it is never
+    // logged — only a static source label and the error object.
     console.error(`${source} broadcast failed:`, error);
   });
 }

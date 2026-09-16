@@ -11,8 +11,7 @@ import {
   reportUiError
 } from './ui-error-channel';
 
-// jest runs in 'node' here — no jsdom. `renderToStaticMarkup` is how this repo
-// tests components (see remote-icon.test.tsx / svg-icon.test.tsx).
+// jest runs in 'node' here — no jsdom.
 jest.mock('react-inlinesvg', () => ({
   __esModule: true,
   default: () => null
@@ -24,17 +23,14 @@ jest.mock('react-i18next', () => ({
   Trans: ({ children }: { children: React.ReactNode }) => children
 }));
 
-// The banner's background half reads the replica store through `useSelector`.
-// Feeding the selector a fake state is lighter than standing up a Provider, and
-// it keeps this suite about the merge, not about redux.
+// Lighter than standing up a Provider, and keeps this suite about the merge.
 let fakeState: unknown;
 
 jest.mock('react-redux', () => ({
   useSelector: (selector: (state: unknown) => unknown) => selector(fakeState)
 }));
 
-// Importing the real module would pull in `webextension-polyfill`, which throws
-// outside an extension. Dismissing a background row is not what this suite tests.
+// The real module pulls in `webextension-polyfill`, which throws outside an extension.
 jest.mock('@background/redux/utils', () => ({
   dispatchToMainStore: jest.fn()
 }));
@@ -57,8 +53,8 @@ const withBackgroundError = () => {
   };
 };
 
-// `renderToStaticMarkup` escapes the apostrophe in the copy to `&#x27;`. Decode
-// it so the assertions read as the text a user actually sees.
+// `renderToStaticMarkup` escapes the apostrophe; decode it so the assertions read
+// as the text a user actually sees.
 const render = () =>
   renderToStaticMarkup(
     <ThemeProvider theme={lightTheme}>
@@ -87,8 +83,7 @@ describe('SagaErrorBanner', () => {
   });
 
   it('renders a dropped dispatch with translated copy and no action type', () => {
-    // The action type is a developer identifier: it names no dapp and suggests
-    // no next step, so it stays in the console.
+    // The action type is a developer identifier: it stays in the console.
     withNoBackgroundErrors();
     reportUiError('dispatch-failed', 'LOCK_VAULT_SAGA');
 

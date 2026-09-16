@@ -48,11 +48,8 @@ export interface DmkLedgerTransport extends ILedgerTransport {
 }
 
 /**
- * Makes a DMK session look like the `ILedgerTransport` core drives: a synthetic `'disconnect'`
- * event derived from the session-state observable (fired at most once, so core's 3600 ms
- * reconnection gate is never re-armed), a latched exchange timeout applied to every subsequent
- * `send` until overridden per call, and an `observeState()` channel whose subscription is what
- * lets the session refresher run, so device state keeps moving while core sends nothing.
+ * Makes a DMK session look like the `ILedgerTransport` core drives: a `'disconnect'` fired at
+ * most once, a latched exchange timeout, and an `observeState()` that gates the refresher.
  */
 export function createDmkLedgerTransport(
   dmk: DmkSessionHandle,
@@ -86,8 +83,7 @@ export function createDmkLedgerTransport(
 
   const gate = createRefresherGate(dmk, sessionId);
 
-  // Shared so a second reader costs no extra device traffic, and reset at zero subscribers so
-  // the refresher stops with the last one.
+  // Shared so a second reader costs no extra device traffic; reset at zero subscribers.
   const state$ = new Observable<LedgerDeviceState>(subscriber => {
     const releaseObservation = gate.beginObserving();
 

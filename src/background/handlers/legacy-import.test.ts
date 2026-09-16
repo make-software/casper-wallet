@@ -65,7 +65,6 @@ describe('handleLegacyImport routing gate', () => {
       store
     );
     expect(result).toEqual({ handled: false });
-    // no state was read
     expect(selectSecretKeysMock).not.toHaveBeenCalled();
   });
 
@@ -77,10 +76,8 @@ describe('handleLegacyImport routing gate', () => {
     'untrusted sender on %s → { handled: true } with NO response (membership oracle closed)',
     type => {
       const result = handleLegacyImport({ type }, UNTRUSTED_SENDER, store);
-      // handled:true drops the message with no data leaked back
       expect(result).toEqual({ handled: true });
       expect(result).not.toHaveProperty('response');
-      // and the vault was never queried for an untrusted caller
       expect(selectSecretKeysMock).not.toHaveBeenCalled();
       expect(selectNamesMock).not.toHaveBeenCalled();
       expect(selectWindowIdMock).not.toHaveBeenCalled();

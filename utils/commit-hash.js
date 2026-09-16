@@ -2,35 +2,21 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * The commit stamp that ships inside the source package.
- *
- * scripts/build_src.sh zips `src scripts utils *.* .env` — and no `.git`. On the
- * tree a Firefox/AMO reviewer unpacks, the `HASH=$(git rev-parse HEAD)` that
- * every build script passes therefore resolves to the empty string. Writing the
- * sha into the package is what lets that rebuild stamp the same
- * `manifest.version_name` as the artifact it is being compared against.
+ * The commit stamp that ships inside the source package: the tree an AMO reviewer
+ * unpacks has no `.git`, so `HASH=$(git rev-parse HEAD)` resolves empty there and only
+ * this file lets the rebuild stamp the same `manifest.version_name` as the upload.
  */
 const BUILD_HASH_FILE = 'build-hash.json';
 
 /**
- * What the config resolves to when it is evaluated outside a build — knip
- * harvesting entries, jest requiring the config. Deliberately constant: the
- * fallback this replaced was `Date.now()`, which made every build that reached
- * it unique and silently unreproducible.
+ * What the config resolves to outside a build — knip harvesting entries, jest
+ * requiring the config. Constant on purpose: a varying one is unreproducible.
  */
 const UNKNOWN_COMMIT_HASH = '0000000';
 
 /** Abbreviated or full; `version_name` only ever shows the first 7. */
 const COMMIT_HASH_PATTERN = /^[0-9a-f]{7,40}$/;
 
-/**
- * @param {string} root directory holding package.json.
- * @returns {string} the sha recorded in the source package, or `''` when the
- *   file is absent — the normal case for a build from a git checkout.
- * @throws when the file exists but carries no usable sha. A broken stamp is a
- *   build error; falling through to the placeholder would hand the reviewer a
- *   manifest that cannot match the upload, which is the failure being fixed.
- */
 function readBuildHashFile(root) {
   const file = path.join(root, BUILD_HASH_FILE);
   let raw;
@@ -74,9 +60,7 @@ function readBuildHashFile(root) {
  * @param {object} options
  * @param {string} options.root directory holding package.json.
  * @param {NodeJS.ProcessEnv} [options.env]
- * @param {boolean} [options.isDev] development builds are never compared
- *   against a published artifact, so they may carry a placeholder.
- * @returns {string}
+ * @param {boolean} [options.isDev] dev builds may carry a placeholder.
  */
 function resolveCommitHash({ root, env = process.env, isDev = false }) {
   const commitHash = env.HASH || env.GITHUB_SHA || readBuildHashFile(root);

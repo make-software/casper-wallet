@@ -38,7 +38,7 @@ export const PasswordInputs = ({
         <Typography type="body" color="contentSecondary">
           {needToAddMoreCharacters <= 0 ? (
             <Trans
-              // spase at the end required to prevent error on browser auto-translate
+              // space at the end required to prevent error on browser auto-translate
               defaults="Your password length is - <t><nt> {{passwordLength}} </nt> characters.</t> "
               values={{ passwordLength }}
               components={{

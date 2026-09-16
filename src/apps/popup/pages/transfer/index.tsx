@@ -221,8 +221,7 @@ export const TransferPage = () => {
     try {
       const secretKey = await fetchAccountSecretKey(activeAccount.name);
 
-      // Ledger accounts legitimately have no secret key: `onSubmitSending` doubles
-      // as this page's `ledgerAction`, and signTx takes the hardware branch for them.
+      // Ledger accounts legitimately have no secret key: signTx takes the hardware branch.
       if (!secretKey && activeAccount.hardware == null) {
         setIsSubmitButtonDisable(false);
         navigate(
@@ -437,7 +436,6 @@ export const TransferPage = () => {
     )
   };
 
-  // A CEP-18 transfer spends the selected token, so the header states that token's balance.
   const headerTokenBalance =
     isErc20Transfer && selectedToken
       ? { amount: selectedToken.amount, symbol: selectedToken.symbol }
@@ -583,16 +581,12 @@ export const TransferPage = () => {
             const shouldAskForReview =
               askForReviewAfter == null || currentDate > askForReviewAfter;
 
-            // Set once here, before the branch, rather than on the Home leg
-            // only: every exit from RateApp is a post-submission exit, and its
-            // four `navigate(RouterPath.Home)` calls would otherwise return the
-            // user to whatever tab they started the transfer from.
+            // Every exit from RateApp is a post-submission exit, so set it before the branch.
             setActiveHomeTab(HomePageTabName.Activity);
 
             if (ratedInStore || !shouldAskForReview) {
               navigate(RouterPath.Home);
             } else {
-              // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
               navigate(RouterPath.RateApp);
             }
           }}

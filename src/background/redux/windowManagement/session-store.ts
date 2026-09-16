@@ -8,10 +8,8 @@ import { MAX_OPEN_REQUESTS, MAX_RESPONDED_TOMBSTONES } from './reducer';
 import { isStorableRequestId } from './request-map';
 import { CancellableMethod, Request, WindowManagementState } from './types';
 
-// Follows the obfuscated `storage.local` convention for consistency only. This
-// one is NOT immutable the way those are: `storage.session` is cleared on
-// extension reload and update, so no data ever crosses a version boundary and a
-// later rename would strand nothing.
+// Follows the obfuscated `storage.local` convention for consistency only; a
+// later rename strands nothing, as `storage.session` is cleared on reload.
 export const REQUEST_SESSION_KEY = 'q7Rk2vHs4nTbX';
 
 // What the mirror carries. `exportKeysWindowId` is excluded — a local flow with
@@ -21,13 +19,8 @@ export type SessionRecord = {
   windowId: number | null;
 };
 
-// Write-side row cap: the reducer's tombstone bound plus its open-request bound
-// — the two are the only ways a row can exist, so their sum is the only correct
-// figure, not headroom picked separately. The read stays uncapped, so no drop
-// order has to be defined there and key hoisting can never decide which rows
-// survive. Exported so the startup sweep can bound its own per-wake work to the
-// same figure (see sweep-orphaned-requests.ts) — the hydrated snapshot it reads
-// can never hold more open rows than this in the first place.
+// Write-side row cap: the reducer's tombstone bound plus its open-request bound,
+// the only two ways a row can exist. The read stays uncapped.
 export const MAX_SESSION_ROWS = MAX_RESPONDED_TOMBSTONES + MAX_OPEN_REQUESTS;
 
 const MAX_ORIGIN_LENGTH = 256;
@@ -35,19 +28,8 @@ const MAX_WINDOW_IDS = 16;
 
 const emptyRecord = (): SessionRecord => ({ requests: {}, windowId: null });
 
-// The area must stay at Chrome's default `TRUSTED_CONTEXTS` — the map holds
-// every dapp origin with a pending or recently answered request, its tab ids
-// and live request ids. Nothing calls `setAccessLevel` and nothing should.
-//
-// Both halves of the gate are required. Firefox 115+ and Safari 16.4+ also have
-// the area, but their background pages are `"persistent": true` and lose
-// nothing, so a bare feature detect would enable an untested path there; and the
-// runtime half is still needed because `@types/webextension-polyfill` declares
-// `session` non-optional, so the type lies about availability.
-//
-// The polyfill exposes the area by pass-through, so this is the raw
-// `chrome.storage.session` and its rejections are not polyfill-normalised — a
-// catch here must not assume an `Error`.
+// The area must stay at Chrome's default `TRUSTED_CONTEXTS`: it holds every dapp
+// origin with a pending request. Its rejections are not normalised to `Error`.
 function sessionAreaOrNull(): Storage.StorageArea | null {
   if (!isEphemeralBackgroundBuild) {
     return null;
@@ -90,13 +72,8 @@ const isDeliverableOrigin = (raw: unknown): raw is string => {
   }
 };
 
-// Completeness pin for the open-row return literal below, same idiom as
-// `CANCELLABLE_METHODS` above: every key of the 'open' variant of `Request`,
-// so a field added there without a matching key here is a compile error IN
-// THIS FILE. TS does not otherwise require an OPTIONAL field to appear in an
-// object literal typed as a union member — `frameId` proved exactly that can
-// go unnoticed. `void`d rather than exported: its only job is the type
-// check, and an unused export would earn its own knip complaint instead.
+// Completeness pin for the open-row literal below: TS does not require an
+// optional field in a union-typed literal, so a new field must be listed here.
 type OpenRow = Extract<Request, { status: 'open' }>;
 const OPEN_ROW_KEYS: Record<keyof OpenRow, true> = {
   status: true,
@@ -148,10 +125,8 @@ function sanitizeRequest(raw: unknown): Request | undefined {
     return undefined;
   }
 
-  // `frameId` is kept only when `isNonNegativeInteger` — so `0` (top frame,
-  // falsy) survives verbatim — and otherwise omitted, never defaulted, so an
-  // absent or malformed (including negative) value degrades to today's
-  // unscoped send rather than dropping the row.
+  // `frameId` is omitted rather than defaulted when malformed, so the row
+  // degrades to an unscoped send instead of being dropped.
   return {
     status: 'open',
     tabId,
@@ -254,8 +229,7 @@ export async function readRequestSession(): Promise<SessionRecord> {
 }
 
 // Writes are serialised: two in-flight `set` calls have no documented landing
-// order, and an older one landing last leaves a STALE mirror — the unsafe
-// direction. The snapshot is taken at flush, so a superseded one is skipped.
+// order, and an older one landing last leaves a STALE mirror.
 let pendingRecord: SessionRecord | null = null;
 let flushQueued = false;
 let writeChain: Promise<void> = Promise.resolve();
@@ -309,12 +283,8 @@ export function writeRequestSession(record: SessionRecord): Promise<void> {
   return writeChain;
 }
 
-// A direct clear for callers that cannot rely on the subscriber's
-// identity-based write guard (get-main-store.ts) — e.g. a reducer's reset
-// case that returns the shared `initialState` reference, which the guard
-// sees as no change at all when the slice was already at rest. Goes through
-// the same `writeRequestSession`/`writeChain` plumbing, never touching
-// `chrome.storage.session` on its own.
+// A direct clear for callers that cannot rely on the subscriber's identity-based
+// write guard — e.g. a reducer reset returning the shared `initialState`.
 export function clearRequestSession(): Promise<void> {
   return writeRequestSession(emptyRecord());
 }

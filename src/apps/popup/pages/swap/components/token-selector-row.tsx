@@ -3,11 +3,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-// Deep paths, not the '@libs/layout' / '@libs/ui/components' barrels: both
-// re-export the header (via form-field.tsx), which pulls in
-// webextension-polyfill and throws outside a browser extension context —
-// including this repo's node-only jest. Every component below is barrel-free
-// for the same reason.
+// Deep paths: the barrels re-export the header, which throws in this repo's node-only jest.
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,

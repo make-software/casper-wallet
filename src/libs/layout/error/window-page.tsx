@@ -59,10 +59,8 @@ export function WindowErrorPage({
             color="primaryBlue"
             onClick={async () => {
               if (error instanceof PasswordDoesNotExistError) {
-                // Awaited: tearing this window down first would destroy the
-                // error banner with it and drop the user into onboarding
-                // believing the vault had been reset. The `try/catch` that used
-                // to wrap this caught nothing — all three calls were unawaited.
+                // Awaited: tearing this window down first would drop the user
+                // into onboarding believing the vault had been reset.
                 if (!(await dispatchToMainStore(resetVault()))) {
                   return;
                 }

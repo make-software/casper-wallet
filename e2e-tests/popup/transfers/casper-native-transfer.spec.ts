@@ -70,7 +70,6 @@ popup.describe('Popup UI: Casper Native Transfer', () => {
         popupPage.getByRole('button', { name: 'Confirm send' })
       ).toBeDisabled();
 
-      // Scroll to the bottom
       await popupPage.evaluate(() => {
         const container = document.querySelector('#ms-container');
 
@@ -90,9 +89,7 @@ popup.describe('Popup UI: Casper Native Transfer', () => {
       await popupPage.getByRole('button', { name: 'Done' }).click();
 
       // `askForReviewAfter` is null on fresh mock state, so Done routes to
-      // RateApp. Every exit from RateApp is a post-submission exit, so the
-      // Activity override has to survive it. `getByTitle` observes activeness:
-      // only `ActiveTabContainer` carries the attribute.
+      // RateApp; the Activity override has to survive that exit too.
       await popupPage.getByText('Close').click();
 
       await popupExpect(popupPage.getByTitle('Activity')).toBeVisible();
@@ -160,7 +157,6 @@ popup.describe('Popup UI: Casper Native Transfer', () => {
       popupPage.getByRole('button', { name: 'Confirm send' })
     ).toBeDisabled();
 
-    // Scroll to the bottom
     await popupPage.evaluate(() => {
       const container = document.querySelector('#ms-container');
 
@@ -200,10 +196,8 @@ popup.describe('Popup UI: Casper Native Transfer', () => {
         popupPage.getByRole('heading', { name: 'Specify recipient' })
       ).toBeVisible();
 
-      // The strip only renders while the input is empty — typing a valid key
-      // swaps it for `SearchItemByPublicKey`. This is the tree's only
-      // uncontrolled `<Tabs>`, so it is the only thing exercising the
-      // `activeTabName === undefined` branch of `handleTabClick`.
+      // The strip only renders while the input is empty, and it is the tree's only
+      // uncontrolled `<Tabs>` — the only exercise of `activeTabName === undefined`.
       await popupExpect(popupPage.getByTitle('Recent')).toBeVisible();
 
       await popupPage.getByText('My accounts').click();

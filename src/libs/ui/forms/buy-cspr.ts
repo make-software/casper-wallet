@@ -18,9 +18,8 @@ export const useBuyCSPR = (defaultAmount: string) => {
   const buyFromOptions: UseFormProps<BuyCSPRFormValues> = {
     reValidateMode: 'onChange',
     mode: 'onChange',
-    // casperAmount has no yup validation (it's a derived/display field), so yup infers
-    // it as an optional output key while keeping it a required-but-undefinable input key;
-    // that Input/Output asymmetry can't be expressed by a single FormValues type, hence the cast.
+    // casperAmount is a derived display field with no yup rule, so its inferred
+    // Input/Output types differ — one FormValues type can't span both, hence the cast.
     resolver: yupResolver(buyCSPRSchema) as Resolver<BuyCSPRFormValues>,
     defaultValues: {
       fiatAmount: defaultAmount

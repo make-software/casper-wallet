@@ -13,7 +13,6 @@ export const getTokenData = (
   if (tokenName === 'Casper') {
     return casperToken;
   } else {
-    // CEP-18 token case
     const formatedCep18Tokens = formatCep18Tokens(cep18Tokens);
 
     const token = formatedCep18Tokens?.find(token => token.id === tokenName);

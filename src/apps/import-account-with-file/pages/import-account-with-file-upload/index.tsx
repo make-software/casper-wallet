@@ -79,10 +79,8 @@ export function ImportAccountWithFileUploadPage() {
   const formOptions: UseFormProps<ImportAccountFormValues> = {
     mode: 'onChange',
     reValidateMode: 'onChange',
-    // secretKeyFile has no .required() (validity is enforced via .test() instead), so yup
-    // infers it as an optional output key while keeping it a required-but-undefinable input
-    // key; that Input/Output asymmetry can't be expressed by a single FormValues type, hence
-    // the cast (same pattern as buy-cspr.ts).
+    // secretKeyFile is optional in yup's output type but required in its input type, an
+    // asymmetry a single FormValues type cannot express — hence the cast.
     resolver: yupResolver(formSchema) as Resolver<ImportAccountFormValues>,
     defaultValues: {
       secretKeyFile: undefined,

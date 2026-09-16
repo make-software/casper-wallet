@@ -94,18 +94,8 @@ popup.describe('Popup UI: import account with file', () => {
         .getByPlaceholder('Account name', { exact: true })
         .fill(ACCOUNT_NAMES.importedPemAccountName);
 
-      // Only the guarded dispatch, which narrows what this case covers to the
-      // late-failure window: the transport drops after the name last validated,
-      // so Import is pressable and the guard is what stops the success screen.
-      //
-      // A whole-transport break is a different, still-silent story that no
-      // guard here can reach — `checkAccountNameIsTaken` is a bare
-      // `runtime.sendMessage` inside the yup resolver, so it rejects
-      // `handleSubmit` before `onSubmit` runs, and `checkSecretKeyExist`
-      // escapes the file reader as raw untranslated text. Both are legacy sends
-      // outside `dispatchToMainStore`; fixing them is its own change.
-      //
-      // The literal is pinned in `surfaced-dispatch-actions.test.ts`.
+      // Only the guarded dispatch: the transport drops after the name last
+      // validated, so the guard is what stops the success screen.
       await breakTransport(importAccountPage, ['vault/accountImported']);
 
       await importAccountPage.getByRole('button', { name: 'Import' }).click();

@@ -79,7 +79,6 @@ popup.describe('Popup UI: Redelegation', () => {
         popupPage.getByText(NEW_VALIDATOR_FOR_STAKE.publicKey)
       ).toBeVisible();
 
-      // Scroll to the bottom
       await popupPage.evaluate(() => {
         const container = document.querySelector('#ms-container');
 

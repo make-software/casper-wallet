@@ -67,10 +67,6 @@ describe('scrypt-off-thread — worker offload (the MV2 background page)', () =>
     jest.resetModules();
   });
 
-  // A worker that never answers must not hold the serialised derivation queue in
-  // `unlock-requests.ts` open: that queue chains on one promise, and a pending
-  // one can never be displaced, so every later unlock would wedge until the
-  // background restarts.
   it('rejects and terminates the worker when the derivation never settles', async () => {
     const { deriveScryptKey } = await loadWithWorker();
     jest.useFakeTimers();

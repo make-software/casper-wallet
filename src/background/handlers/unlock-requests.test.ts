@@ -63,9 +63,8 @@ function storeAt(
 
 beforeEach(() => jest.restoreAllMocks());
 
-// Each test gets its own attemptId by default so the module-scoped memo (which
-// deliberately outlives a single request — see MEMO_TTL_MS) never lets one
-// test's verdict answer another's call.
+// Each test gets its own attemptId so the module-scoped memo, which outlives a
+// single request, never lets one test's verdict answer another's call.
 let attemptCounter = 0;
 const verify = (
   password: string,
@@ -207,11 +206,8 @@ it('answers ok without touching the counter when the vault is already unlocked',
   expect(dispatch).not.toHaveBeenCalled();
 });
 
-// The page does nothing locally on `ok` — the broadcast is what unmounts it,
-// and `broadcastToReplicas` swallows delivery failures. Without a re-broadcast
-// here a lost one is unrecoverable: the retry lands on this path, which answers
-// `ok` without dispatching, so no new broadcast is ever produced and only
-// reopening the popup helps.
+// The broadcast is what unmounts the page; without a re-broadcast here a lost
+// one is unrecoverable, as the retry answers `ok` without dispatching.
 it('re-broadcasts state when the vault is already unlocked, so a lost broadcast heals', async () => {
   const { store } = storeAt(2, { session: { isLocked: false } });
 
@@ -492,9 +488,8 @@ it('evicts the oldest in-flight entry once the memo is full', async () => {
   expect(spy.mock.calls.length).toBe(afterFirstRound + 1);
 });
 
-// The mutation this pins: `.catch(() => false)` on the derivation. A transport
-// or worker failure would then be indistinguishable from a wrong password and
-// would eat one of the five attempts.
+// A `.catch(() => false)` on the derivation would make a transport or worker
+// failure indistinguishable from a wrong password, eating one of five attempts.
 it('does not count a failed derivation as a wrong password', async () => {
   jest
     .spyOn(scryptModule, 'verifyPasswordOffThread')
@@ -521,10 +516,8 @@ it('releases the service-worker anchor on the way out', async () => {
   expect(anchor.mock.results.at(-1)?.value).toHaveBeenCalled();
 });
 
-// Derivations are serialised, so a request can spend most of the TTL waiting for
-// the ones ahead of it. Stamping the entry at enqueue spends the replay window
-// on that wait: the caller's retry then misses the memo, re-derives, and counts
-// one user attempt twice — locking them out early.
+// Derivations are serialised, so stamping the entry at enqueue would spend the
+// replay window on the queue wait: the retry then re-derives and counts twice.
 it('measures the replay window from the verdict, not from enqueue', async () => {
   const T0 = 1_000_000;
   let now = T0;
@@ -581,10 +574,8 @@ describe('memo password digest', () => {
     expect(digestPassword('hunter2')).not.toContain('hunter2');
   });
 
-  // The digest must be keyed on a per-process secret. A bare hash of the
-  // password would be a brute-force oracle far cheaper than the scrypt-derived
-  // vault cipher it guards, so "same password, fresh process, same digest" is
-  // the failure this pins.
+  // The digest must be keyed on a per-process secret: a bare hash of the password
+  // would be a brute-force oracle cheaper than the vault cipher it guards.
   it('differs across processes for the same password', async () => {
     const { digestPassword: first } = await import('./unlock-requests');
     const before = first('same password');

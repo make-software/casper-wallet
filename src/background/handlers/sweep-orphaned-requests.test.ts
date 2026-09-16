@@ -38,9 +38,8 @@ const openRow = (
   seq
 });
 
-// A tiny real store: dispatch runs the REAL reducer, so the vehicle's own
-// live re-check (the property this whole suite is about) is exercised
-// against genuine transition guards, not a hand-rolled stand-in for them.
+// A tiny real store: dispatch runs the REAL reducer, so the live re-check is
+// exercised against genuine transition guards, not a hand-rolled stand-in.
 function makeStore(requests: WindowManagementState['requests']) {
   let windowManagement: WindowManagementState = {
     windowId: null,
@@ -235,13 +234,8 @@ it('bounds cancellation work per wake to the session write cap', async () => {
 });
 
 it('a per-row cancel failure is logged with identifiers only, never a raw URL or a raw Error', async () => {
-  // `JSON.stringify` on a whole log-call array is blind to a surgical revert
-  // of `error: redactUrlQuery(error)` back to `error: error`: `Error#message`
-  // is a non-enumerable own property, so a raw Error renders `{}` and the
-  // secret-text checks below would pass right past it — same trap as
-  // `fail-request-on-window-error.test.ts`'s equivalent test. Walk every
-  // logged argument's own values directly instead of trusting serialization
-  // to surface them.
+  // `Error#message` is non-enumerable, so a raw Error renders `{}` under
+  // `JSON.stringify` and the secret-text checks would pass right past it.
   (collectRequestIdsFromOpenWindows as jest.Mock).mockResolvedValue(new Set());
   const requests = { r1: openRow(3, 0) };
   const store = makeStore(requests);

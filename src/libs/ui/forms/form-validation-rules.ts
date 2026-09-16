@@ -64,9 +64,8 @@ export function useVerifyPasswordAgainstHashRule() {
           });
         }
 
-        // 'lockedOut' and 'error' both fall through to the generic message —
-        // neither is a wrong password, and the onboarding page has no lockout
-        // screen of its own to route to.
+        // 'lockedOut' and 'error' both fall through: neither is a wrong password,
+        // and onboarding has no lockout screen of its own to route to.
         return this.createError({ message: genericErrorMessage });
       } catch (error) {
         // The password is in scope and is deliberately not referenced.
@@ -133,7 +132,6 @@ export const useTransferIdMemoRule = () => {
 
   return Yup.string().test({
     name: 'validU64',
-    // this field is optional, so we set it to true if it's empty
     test: value => (value ? isValidU64(value) : true),
     message: t(`Transfer ID is invalid`)
   });

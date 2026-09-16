@@ -72,8 +72,6 @@ it('writes one pem per account and reports Success', async () => {
   expect(setStep).toHaveBeenCalledWith(DownloadAccountKeysSteps.Success);
 });
 
-// WALLET-1345: the user must never be told their keys were saved when the
-// archive never got built.
 it('routes a zip failure to Failure and never to Success', async () => {
   generateAsync.mockRejectedValue(new Error('boom'));
   const setStep = jest.fn();
@@ -85,8 +83,7 @@ it('routes a zip failure to Failure and never to Success', async () => {
   expect(mockDownloadFile).not.toHaveBeenCalled();
 });
 
-// A refused request answers `null`. Treating that as "no keys" would hand the
-// user an empty zip and a Success screen.
+// A refused request answers `null`, not an empty map.
 it('routes a refused secret-keys request to Failure, not an empty zip', async () => {
   mockFetchSecretKeys.mockResolvedValue(null);
   const setStep = jest.fn();
@@ -98,8 +95,6 @@ it('routes a refused secret-keys request to Failure, not an empty zip', async ()
   expect(mockDownloadFile).not.toHaveBeenCalled();
 });
 
-// The thrown value is built from key material, so only the error NAME may reach
-// the console.
 it('logs the error name only, never the error itself', async () => {
   class SecretBearingError extends Error {
     name = 'PemEncodeError';
@@ -115,8 +110,6 @@ it('logs the error name only, never the error itself', async () => {
   expect(JSON.stringify(logged)).not.toContain('0123456789abcdef');
 });
 
-// A partial archive presented as a complete one is the bug: the user walks away
-// believing every selected key is backed up.
 it('routes to Failure when a selected account produced no key file', async () => {
   mockCreateKeys
     .mockImplementationOnce(() => ({ secretKey: { toPem: () => 'PEM' } }))

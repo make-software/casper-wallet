@@ -122,10 +122,8 @@ export function* vaultSagas() {
     [loginRetryLockoutTimeSet.type, popupWindowInit.type, startBackground.type],
     setDelayForLockoutVaultSaga
   );
-  // Registered AFTER setDelayForLockoutVaultSaga on purpose. That saga is a
-  // takeLatest that also watches startBackground; arming first on a resume would
-  // start a run the still-queued startBackground delivery then cancels, possibly
-  // before the deadline write.
+  // Registered after setDelayForLockoutVaultSaga: that takeLatest also watches
+  // startBackground, so arming first would start a run it then cancels.
   yield takeEvery(
     [loginRetryCountIncremented.type, startBackground.type],
     armLockoutSaga
@@ -140,10 +138,8 @@ export function* vaultSagas() {
     ],
     timeoutCounterSaga
   );
-  // Account mutations persist immediately: an imported secret key exists
-  // nowhere else, so losing it to a crash inside the debounce window is
-  // unrecoverable. The remaining triggers are re-derivable or cosmetic and
-  // keep the coalescing below.
+  // Account mutations persist immediately: an imported secret key exists nowhere
+  // else, so losing it to a crash inside the debounce window is unrecoverable.
   yield takeEvery(
     [
       accountAdded.type,
@@ -153,12 +149,8 @@ export function* vaultSagas() {
     ],
     updateVaultCipher
   );
-  // Unlike takeLatest, debounce does not cancel an in-flight run when the next
-  // trigger arrives, so two updateVaultCipher runs could overlap and the staler
-  // cipher win. The takeEvery above makes overlap materially more likely — any
-  // account mutation now spawns a run immediately — so ordering rests on
-  // encryptVault having no `await`: overlapping runs resume strictly FIFO on the
-  // microtask queue. Breaks if encryption becomes async (WebCrypto, or a Worker).
+  // debounce does not cancel an in-flight run, so overlapping updateVaultCipher
+  // runs stay FIFO only while encryptVault has no `await`.
   yield debounce(
     VAULT_REENCRYPT_DEBOUNCE_MS,
     [
@@ -172,17 +164,8 @@ export function* vaultSagas() {
       activeTimeoutDurationSettingChanged.type,
       deployPayloadReceived.type,
       eip712PayloadReceived.type,
-      // The deletion belongs here for the same reason the two writes above do.
-      // The vault reducer drops an answered request's payload from
-      // `jsonById`/`eip712ById`, but that is an in-memory edit: without a
-      // re-encryption the cipher still holds the entry, and an MV3
-      // service-worker restart before the next vault write would resurrect it
-      // through `vaultLoaded` — for a requestId `windowRequestResponded` has
-      // already fired for — and nothing removes it: the map has a ceiling, but
-      // the ceiling refuses new writes rather than evicting stored ones.
-      // Most responses have no payload entry, so this usually re-encrypts an
-      // unchanged vault; at ~2ms behind a 500ms debounce that is cheaper than
-      // the alternative of persisting writes but not deletes.
+      // Dropping an answered request's payload is an in-memory edit; without a
+      // re-encryption a service-worker restart resurrects it through `vaultLoaded`.
       windowRequestResponded.type,
       hideAccountFromListChanged.type
     ],
@@ -192,19 +175,10 @@ export function* vaultSagas() {
   yield takeLatest(changePassword.type, changePasswordSaga);
 }
 
-/**
- * on lock destroy session, vault and deploys
- */
 export function* lockVaultSaga() {
   try {
-    // Flush any debounced-but-not-yet-persisted vault change before teardown.
-    // updateVaultCipher now runs on debounce(500ms); a vault edit in the last
-    // 500ms before lock would otherwise never be encrypted. Reusing
-    // updateVaultCipher keeps the ciphertext path (and blob format) identical.
-    // It reads the still-live encryptionKeyHash + vault; the resets below wipe
-    // both. A stale debounced straggler that fires ~500ms later runs against the
-    // reset session (encryptionKeyHash === null), where updateVaultCipher
-    // early-returns — so it can never overwrite this flushed cipher.
+    // Flush a debounced-but-unpersisted vault edit while the session key and
+    // vault are still live — the resets below wipe both.
     yield* updateVaultCipher();
 
     yield put(sessionReseted());
@@ -221,12 +195,8 @@ export function* lockVaultSaga() {
       });
     });
 
-    // The vault is locked, so the persisted auto-lock deadline is spent —
-    // remove it so a stale value can never fire against a future session.
-    // `timeoutCounterSaga` locks by dispatching this same `lockVault` action,
-    // so this single site covers both the timeout and manual-lock paths.
-    // Sequenced AFTER the emit: this is the only fallible step in the saga,
-    // and a storage rejection must not prevent dapps from seeing the lock.
+    // The persisted deadline is spent; clearing it after the emit keeps a storage
+    // rejection from stopping dapps seeing the lock.
     yield* sagaCall(clearAutoLockDeadline);
   } catch (err) {
     console.error(err);
@@ -241,9 +211,8 @@ function isChangePasswordPayload(
 ): payload is ReturnType<typeof changePassword>['payload'] {
   const p = payload as Partial<ReturnType<typeof changePassword>['payload']>;
 
-  // Non-empty, not just a string: this arrives over the sender- and page-gated
-  // privileged port, not the form, so its own length isn't enforced there —
-  // and an empty one would re-key the vault under scrypt('').
+  // Length is checked here because this arrives over the privileged port, not the
+  // form: an empty password would re-key the vault under scrypt('').
   return (
     typeof p?.currentPassword === 'string' &&
     typeof p?.password === 'string' &&
@@ -251,42 +220,26 @@ function isChangePasswordPayload(
   );
 }
 
-// Both halves of the re-key happen here, against the background's own state:
-// the current password is verified, and the new material is derived from a
-// plaintext password exactly as `initKeysSage` does it. Since WALLET-1424 this
-// action arrives over the privileged port (`privileged-port.ts`), gated on
-// both sender and page — but a caller that could hand in `newEncryptionKeyHash`
-// would still be choosing the key the vault is re-encrypted under, and the
-// persisted `vaultCipher` blob turns a chosen key into an offline decrypt if it
-// were ever exfiltrated. Verifying page-side only is not enough either: the
-// page-side check reads `passwordHash` from that same handler, so it is
-// replayable, while the plaintext password demanded here is not derivable from
-// anything an extension page can read.
+// The re-key happens here, against the background's own state: a caller allowed to
+// hand in `newEncryptionKeyHash` would choose the key `vaultCipher` is encrypted under.
 export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
-  // Errors are append-only and SagaErrorBanner is mounted route-independently,
-  // so without this a previous attempt's "the wallet locked" banner outlives
-  // the retry that succeeded.
+  // Errors are append-only and the banner is route-independent, so a previous
+  // attempt's banner would otherwise outlive the retry that succeeded.
   yield put(dismissSagaErrorsBySource('changePasswordSaga'));
 
-  // Keep the MV3 service worker alive while the vault is re-encrypted —
-  // Chrome may otherwise kill it mid-saga during the heavy crypto work.
   const releaseAnchor = anchorServiceWorker('encrypt');
 
   try {
-    // Validated inside the `try`, and destructured only after: the privileged
-    // port already validates payload shape before dispatching, but this saga
-    // has no static guarantee of that — a destructure above would throw past
-    // every catch here into `rootSaga`'s boundary-less `all([...])`, cancelling
-    // every watcher in the tree — auto-lock included.
+    // Validated inside the `try`: a throw above it escapes into `rootSaga`'s
+    // boundary-less `all([...])` and cancels every watcher, auto-lock included.
     if (!isChangePasswordPayload(action.payload)) {
       throw Error('Malformed changePassword payload');
     }
 
     const { currentPassword, password } = action.payload;
 
-    // Fail fast before burning three scrypt derivations on a vault that is
-    // already locked. The window either side of them is covered by the
-    // re-check after the encrypt below.
+    // Fail fast before burning three scrypt derivations on an already-locked
+    // vault; the re-check after the encrypt covers the window either side.
     if (yield* sagaSelect(selectVaultIsLocked)) {
       yield put(
         sagaError({
@@ -331,11 +284,8 @@ export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
       yield* sagaCall(() => deriveScryptKey(password, keyDerivationSaltHash))
     );
 
-    // Encrypt BEFORE putting anything: if this throws, nothing has been
-    // persisted yet and the old password stays fully intact. The alternative
-    // order — store the new keys, then encrypt — leaves new keys over an
-    // old-key cipher on failure, which the next unlock rejects under BOTH the
-    // old and the new password.
+    // Encrypt BEFORE putting anything: new keys stored over an old-key cipher
+    // leave a vault the next unlock rejects under both passwords.
     const vault = yield* sagaSelect(selectVault);
     const vaultCipher = yield* sagaCall(
       encryptVault,
@@ -343,12 +293,8 @@ export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
       vault
     );
 
-    // The derivation and encrypt above take seconds — long enough for a manual
-    // lock, an idle timeout or a service-worker restart to land mid-flight. By
-    // then `lockVaultSaga` has emptied the vault, and `encryptionKeyHashCreated`
-    // does not clear `isLocked`. Re-check rather than trust the pre-check: without this,
-    // a locked wallet would get a new session key planted on it, re-arming the
-    // exact empty-vault-overwrite hazard the pre-check exists to prevent.
+    // The crypto above takes seconds, long enough for a lock to land mid-flight:
+    // a session key planted on a locked wallet re-arms the empty-vault overwrite.
     if (yield* sagaSelect(selectVaultIsLocked)) {
       yield put(
         sagaError({
@@ -359,8 +305,6 @@ export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
       return;
     }
 
-    // The remaining window is storage-write ordering between these three puts,
-    // not the crypto — the cipher already exists under the new key by now.
     yield put(
       keysUpdated({ passwordHash, passwordSaltHash, keyDerivationSaltHash })
     );
@@ -380,13 +324,12 @@ export function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
 
 /**
  * Promise-based delay used as a saga `call` effect. Exported so tests can match
- * `call(delay, ms)` and assert the exact residual without a real timer.
+ * `call(delay, ms)` and assert the residual without a real timer.
  */
 export const delay = (ms: number) =>
   new Promise(resolve => setTimeout(resolve, ms));
 
-// Absolute login-retry lockout deadline persisted to `storage.local` so the
-// reset timer can be re-armed with the residual after a service-worker restart.
+// Persisted so the reset timer can be re-armed with the residual after a restart.
 const readLockoutDeadline = () =>
   storage.local.get(LOGIN_RETRY_LOCKOUT_DEADLINE_KEY);
 const writeLockoutDeadline = (deadline: number) =>
@@ -395,15 +338,9 @@ const clearLockoutDeadline = () =>
   storage.local.remove(LOGIN_RETRY_LOCKOUT_DEADLINE_KEY);
 
 /**
- * Re-arms the login-retry lockout reset timer.
- *
- * Triggered when a lockout is set (`loginRetryLockoutTimeSet`) and on resume
- * points (`startBackground` after an MV3 service-worker restart, `popupWindowInit`).
- *
- * On arming we persist an absolute `start + LOCK_VAULT_TIMEOUT` deadline to
- * `storage.local`; on resume we read that deadline back and wait only the
- * residual (`deadline - now`), or reset immediately if it already elapsed. This
- * survives the service worker being killed mid-lockout.
+ * Re-arms the login-retry lockout reset timer. Arming persists an absolute
+ * `start + LOCK_VAULT_TIMEOUT` deadline; a resume reads it back and waits only the
+ * residual, so the lockout survives the service worker being killed mid-lockout.
  */
 export function* setDelayForLockoutVaultSaga(
   action: ReturnType<
@@ -417,7 +354,6 @@ export function* setDelayForLockoutVaultSaga(
   );
 
   if (loginRetryLockoutTime == null) {
-    // No active lockout — drop any stale persisted deadline and stop.
     yield* sagaCall(clearLockoutDeadline);
     return;
   }
@@ -425,13 +361,11 @@ export function* setDelayForLockoutVaultSaga(
   let deadline: number;
 
   if (action.type === loginRetryLockoutTimeSet.type) {
-    // Arming: compute and persist the absolute deadline.
     deadline = loginRetryLockoutTime + LOCK_VAULT_TIMEOUT;
     yield* sagaCall(writeLockoutDeadline, deadline);
   } else {
-    // Resume: read the persisted deadline. Anything but a finite number
-    // (missing key, corrupted storage) falls back to recomputing from the
-    // lockout start time — never fail open into an immediate lockout reset.
+    // Anything but a finite number (missing key, corrupted storage) recomputes
+    // from the lockout start — never fail open into an immediate reset.
     const stored = yield* sagaCall(readLockoutDeadline);
     const raw = stored[LOGIN_RETRY_LOCKOUT_DEADLINE_KEY];
     deadline =
@@ -442,8 +376,6 @@ export function* setDelayForLockoutVaultSaga(
 
   const timeLeft = deadline - Date.now();
 
-  // Wait out only the residual; if it already elapsed we fall straight through
-  // to the reset below.
   if (timeLeft > 0) {
     yield* sagaCall(delay, timeLeft);
   }
@@ -478,21 +410,15 @@ export function* armLockoutSaga() {
 }
 
 /**
- * Reclaim the capped payload slots (`MAX_STORED_PAYLOADS`) that no live request
- * can answer for. A plain auto-lock is enough to strand one: `lockVaultSaga`
- * flushes `updateVaultCipher` BEFORE the resets, so an unanswered payload is
- * persisted, the later `windowRequestResponded` finds an emptied in-memory map,
- * and `vaultLoaded` restores the entry on the next unlock.
- *
- * `windowRequestResponded` is reused rather than a new action added because it
- * is already in the re-encrypt debounce list above, which is how the deletion
- * reaches the cipher rather than living in memory until the next restart.
+ * Reclaim the capped payload slots (`MAX_STORED_PAYLOADS`) that no live request can
+ * answer for: an auto-lock persists an unanswered payload and `vaultLoaded` restores
+ * it on the next unlock. Reuses `windowRequestResponded` because it is already in
+ * the re-encrypt debounce list, which is how the deletion reaches the cipher.
  */
 export function* reconcileStalePayloadsSaga() {
   try {
-    // Nothing stored, nothing to reclaim: skip the round trip over every tab
-    // URL. Sound as a pre-await read because it only decides whether to do
-    // nothing at all — never reuse it for the purge decision.
+    // Sound as a pre-await read because it only decides whether to do nothing at
+    // all — never reuse it for the purge decision.
     const payloadsAtEntry = yield* sagaSelect(selectVault);
 
     if (
@@ -516,10 +442,8 @@ export function* reconcileStalePayloadsSaga() {
     const openRequests = yield* sagaSelect(selectOpenRequests);
     const vault = yield* sagaSelect(selectVault);
 
-    // Both halves are needed. On a residual descriptor-less path the
-    // descriptors are gone while the window still shows its `?requestId=`;
-    // on window reuse a live window still reports the previous request's
-    // URL mid-navigation.
+    // Both halves are needed: descriptors can be gone while the window still shows
+    // its `?requestId=`, and a reused window reports the previous request's URL.
     const keep = new Set(liveIdsFromWindows);
 
     for (const { requestId } of openRequests) {
@@ -552,9 +476,8 @@ export function* reconcileStalePayloadsSaga() {
       yield put(windowRequestResponded({ requestId }));
     }
   } catch (err) {
-    // `root-saga.ts` is a bare `all([...])` with no `onError`, so an escaping
-    // throw aborts every saga — auto-lock and cipher persistence included. The
-    // reported message is fixed: nothing from a window URL may reach the banner.
+    // An escaping throw aborts every saga in `root-saga.ts`'s bare `all([...])`.
+    // The message is fixed: nothing from a window URL may reach the banner.
     console.error('reconcileStalePayloadsSaga: failed', errorToMessage(err));
     yield put(
       sagaError({
@@ -565,14 +488,7 @@ export function* reconcileStalePayloadsSaga() {
   }
 }
 
-/**
- * on unlock decrypt stored vault from cipher
- * generate a new encryption key each login and update existing cipher (collisions0
- * put new encryption key in session
- */
 export function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
-  // Keep the MV3 service worker alive for the whole unlock flow — Chrome may
-  // otherwise kill it mid-saga during the heavy crypto work.
   const releaseAnchor = anchorServiceWorker('unlock');
 
   try {
@@ -580,10 +496,8 @@ export function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
     // banner would otherwise outlive the retry that succeeds.
     yield put(dismissSagaErrorsBySource('unlockVaultSaga'));
 
-    // Defence in depth, not the fix for WALLET-1424: a DROPPED
-    // `loginRetryLockoutTimeSet` leaves this selector null, so this cannot
-    // catch that. It closes the forged-`unlockVault` path, and once the
-    // background owns the unlock it is a belt-and-braces assertion.
+    // Defence in depth: a dropped `loginRetryLockoutTimeSet` leaves this selector
+    // null, so this catches only the forged-`unlockVault` path.
     if (yield* sagaSelect(selectHasLoginRetryLockoutTime)) {
       yield put(
         sagaError({
@@ -664,8 +578,7 @@ export function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
   }
 }
 
-// Absolute auto-lock deadline persisted to `storage.local` so the inactivity
-// timer can be re-armed with the residual after a service-worker restart.
+// Persisted so the inactivity timer can be re-armed with the residual after a restart.
 const readAutoLockDeadline = () => storage.local.get(AUTO_LOCK_DEADLINE_KEY);
 const writeAutoLockDeadline = (deadline: number) =>
   storage.local.set({ [AUTO_LOCK_DEADLINE_KEY]: deadline });
@@ -673,16 +586,9 @@ const clearAutoLockDeadline = () =>
   storage.local.remove(AUTO_LOCK_DEADLINE_KEY);
 
 /**
- * Saga to handle the timeout and locking mechanism of a vault based on its last
- * activity time and a specified timeout duration setting.
- *
- * On arming (`lastActivityTimeRefreshed` / `activeTimeoutDurationSettingChanged`)
- * it computes an absolute `lastActivity + timeout` deadline and persists it to
- * `storage.local`. On resume (`startBackground` after an MV3 service-worker
- * restart) it reads that deadline back instead of recomputing. Either way it
- * locks immediately if the deadline already elapsed, otherwise it waits only the
- * residual (`deadline - now`) before locking. Persisting the absolute deadline is
- * what lets the timer survive the service worker being killed.
+ * Locks the vault once the inactivity timeout elapses. Arming persists an absolute
+ * `lastActivity + timeout` deadline; a resume reads it back and waits only the
+ * residual, so the timer survives the service worker being killed.
  */
 export function* timeoutCounterSaga(
   action: ReturnType<
@@ -707,9 +613,8 @@ export function* timeoutCounterSaga(
       let deadline: number;
 
       if (action.type === startBackground.type) {
-        // Resume: read the persisted deadline. Anything but a finite number
-        // (missing key, corrupted storage) falls back to recomputing from the
-        // last activity time — same validation as the lockout saga.
+        // Anything but a finite number (missing key, corrupted storage) recomputes
+        // from the last activity time.
         const stored = yield* sagaCall(readAutoLockDeadline);
         const raw = stored[AUTO_LOCK_DEADLINE_KEY];
         deadline =
@@ -717,7 +622,6 @@ export function* timeoutCounterSaga(
             ? raw
             : vaultLastActivityTime + timeoutDurationValue;
       } else {
-        // Arming: compute and persist the absolute deadline.
         deadline = vaultLastActivityTime + timeoutDurationValue;
         yield* sagaCall(writeAutoLockDeadline, deadline);
       }
@@ -730,10 +634,8 @@ export function* timeoutCounterSaga(
 
       yield put(lockVault());
     } else {
-      // Locked (or no session) — e.g. a cold start where the session slice was
-      // lost. The `lockVault` path that normally clears the persisted deadline
-      // never ran in this worker, so drop any stale value here to keep it from
-      // ever firing against a future session.
+      // The `lockVault` path that clears the persisted deadline never ran in this
+      // worker, so drop a stale value here rather than let it fire later.
       yield* sagaCall(clearAutoLockDeadline);
     }
   } catch (err) {
@@ -744,31 +646,18 @@ export function* timeoutCounterSaga(
   }
 }
 
-/**
- * update vault cipher on each vault update
- */
 function* updateVaultCipher() {
-  // Keep the MV3 service worker alive while the vault is re-encrypted —
-  // Chrome may otherwise kill it mid-saga during the heavy crypto work.
   const releaseAnchor = anchorServiceWorker('encrypt');
 
   try {
-    // get current encryption key
     const encryptionKeyHash = yield* sagaSelect(selectEncryptionKeyHash);
 
-    // A locked / session-less state is not an error — there is simply nothing to
-    // persist. This is the debounced-straggler case: a trigger fired within
-    // 500ms before a lock re-arms the debounce, then `lockVaultSaga` wipes the
-    // session key, and the trailing run lands here with a null key. Returning
-    // early keeps it out of the `sagaError` → UI-banner channel, so a routine
-    // "edit then lock" never surfaces a spurious "Encryption key doesn't exist"
-    // toast. It also means the straggler can never overwrite the cipher the
-    // lock flush already persisted.
+    // A debounced straggler lands here after a lock with a null key: returning
+    // early keeps it off the error banner and off the cipher the flush persisted.
     if (encryptionKeyHash == null) {
       return;
     }
 
-    // encrypt cipher with the new key
     const vault = yield* sagaSelect(selectVault);
 
     const vaultCipher = yield* sagaCall(encryptVault, encryptionKeyHash, vault);
@@ -788,12 +677,7 @@ function* updateVaultCipher() {
   }
 }
 
-/**
- *
- */
 function* createAccountSaga(action: ReturnType<typeof createAccount>) {
-  // Keep the MV3 service worker alive during key derivation — Chrome may
-  // otherwise kill it mid-saga during the heavy crypto work.
   const releaseAnchor = anchorServiceWorker('create-account');
 
   try {

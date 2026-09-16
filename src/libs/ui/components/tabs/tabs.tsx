@@ -45,10 +45,7 @@ interface TabProps {
 
 interface TabsProps {
   children: React.ReactElement<TabProps>[];
-  /**
-   * When provided, the parent owns the active tab. Without it the component
-   * keeps its own state and starts on the first tab.
-   */
+  /** When provided, the parent owns the active tab; otherwise state is local. */
   activeTabName?: string;
   onTabChange?: (tabName: string) => void;
   onClick?: () => void;
@@ -65,8 +62,7 @@ export function Tabs({
   const [uncontrolledTabName, setUncontrolledTabName] = useState(firstTabName);
 
   const requestedTabName = activeTabName ?? uncontrolledTabName;
-  // Fall back to the first tab rather than rendering nothing if the requested
-  // name matches no child.
+  // Falls back to the first tab rather than rendering nothing.
   const currentTabName = children.some(
     tab => tab.props.tabName === requestedTabName
   )

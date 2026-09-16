@@ -15,10 +15,8 @@ describe('nextHasError', () => {
     const afterError = nextHasError(false, { type: 'loadError' });
     expect(afterError).toBe(true);
 
-    // The same component instance is recycled to show a different token —
-    // the effect behind this event only ever fires when src genuinely
-    // changed (React's own dependency-array guarantee), so a srcChanged
-    // event here always means a new, unrelated icon.
+    // The effect behind this event only fires when src genuinely changed, so it
+    // always means a new, unrelated icon on a recycled row.
     const afterRecycle = nextHasError(afterError, { type: 'srcChanged' });
     expect(afterRecycle).toBe(false);
   });

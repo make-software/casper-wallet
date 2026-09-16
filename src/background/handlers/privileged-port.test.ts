@@ -53,8 +53,7 @@ const WEB_PAGE_SENDER = {
   url: 'https://evil.example/index.html'
 } as Runtime.MessageSender;
 
-// Same id and an allow-listed pathname, foreign origin. Every other fixture is
-// already rejected by `isAllowedPage` on pathname alone, so without this one the
+// Same id and an allow-listed pathname, foreign origin: without this fixture the
 // `isTrustedUiSender` leg of the guard can be deleted with the suite still green.
 const SPOOFED_ORIGIN_SENDER = {
   id: 'ext-id',
@@ -327,11 +326,8 @@ describe('handlePrivilegedRequest — unlock routing', () => {
 });
 
 describe('ALLOWED_PAGES', () => {
-  // Of the eight entries only one was positively asserted, so removing any of
-  // the others left the suite green. Dropping SIGNATURE_REQUEST_PAGE from UNLOCK
-  // is the expensive one: a locked user who clicks Sign in a dapp could then
-  // never unlock — the refusal disconnects, both retries reject, and the generic
-  // error is all they see.
+  // Every entry needs its own pin: drop SIGNATURE_REQUEST_PAGE from UNLOCK and a
+  // locked user who clicks Sign in a dapp can never unlock.
   it('pins which page may send which request', () => {
     expect(ALLOWED_PAGES).toEqual({
       [CHANGE_PASSWORD_REQUEST_TYPE]: ['/popup.html'],

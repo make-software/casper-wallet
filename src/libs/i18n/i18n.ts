@@ -10,13 +10,9 @@ languageDetector.addDetector(detector);
 
 // eslint-disable-next-line import/no-named-as-default-member
 i18n
-  // loads translations from your server
   .use(Backend)
-  // detect user language
   .use(languageDetector)
-  // adds react support
   .use(initReactI18next)
-  // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
     detection: {
       order: ['customLanguageDetector'],

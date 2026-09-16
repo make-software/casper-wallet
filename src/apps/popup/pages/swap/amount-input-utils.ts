@@ -22,9 +22,7 @@ export function sanitizeAmountInput(
 
 /**
  * Thousand separators for the integer part, preserving an in-progress decimal tail.
- * `maxFractionDigits` truncates rather than rounds, so a displayed amount never reads as more
- * than the value actually is. Callers must leave it unset while the field has focus, or a
- * keystroke past the cap would be silently swallowed from the value being typed.
+ * `maxFractionDigits` truncates rather than rounds; leave it unset while the field has focus.
  */
 export function formatAmountForDisplay(
   value: string,

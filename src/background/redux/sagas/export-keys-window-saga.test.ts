@@ -36,10 +36,8 @@ interface RecordedEffect {
   payload?: { action?: { type?: string } };
 }
 
-// `.put(...)` is a containment check — it removes one matching effect from the
-// recorded set and passes, so a second, identical dispatch goes unnoticed.
-// Counting is what pins "exactly one", and it reads `allEffects` rather than
-// `effects` precisely because the former is not consumed by the assertions.
+// `.put(...)` is a containment check, so a second identical dispatch goes
+// unnoticed. `allEffects` is used because the assertions do not consume it.
 const countPutsOfType = (allEffects: unknown, type: string) =>
   (allEffects as RecordedEffect[]).filter(
     effect => effect.type === 'PUT' && effect.payload?.action?.type === type
@@ -80,16 +78,12 @@ describe('openExportKeysWindowSaga', () => {
           [matchers.call.fn(windows.update), undefined]
         ])
         .call.fn(windows.update)
-        // Guards the early `return` after the reuse hit: without it, execution
-        // falls through into windows.getCurrent()/windows.create() and the
-        // failure is swallowed by the catch block, so this test would still
-        // pass on the assertions above alone.
+        // Guards the early `return` after the reuse hit: without it execution falls
+        // through to getCurrent()/create() and the catch swallows the failure.
         .not.call.fn(windows.getCurrent)
         .not.call.fn(windows.create)
-        // Asserted on the action type, not on a built action: expectSaga
-        // compares effects with lodash.isEqual, which never matches jest's
-        // asymmetric matchers — `.not.put(action(expect.any(Number)))` would be
-        // satisfied unconditionally and guarantee nothing.
+        // Asserted on the action type: expectSaga compares with lodash.isEqual,
+        // which never matches asymmetric matchers, so `expect.any` would be vacuous.
         .not.put.actionType(exportKeysWindowIdChanged.type)
         .not.put.actionType(sagaError.type)
         .run()
@@ -180,11 +174,8 @@ describe('openExportKeysWindowSaga', () => {
         .not.put.actionType(exportKeysWindowIdCleared.type)
         .run();
 
-      // Exactly one argument. The saga deliberately does not log `created`:
-      // a Windows.Window can carry tabs[].url, which here is the
-      // download-account-keys route. Nothing else in the tree pins that
-      // redaction, so a later "improvement" to console.error(msg, created)
-      // would otherwise ship green.
+      // Exactly one argument: `created` is deliberately not logged, since a
+      // Windows.Window can carry tabs[].url and nothing else pins that redaction.
       expect(consoleError).toHaveBeenCalledWith(
         'openExportKeysWindowSaga: the export window resolved without an id'
       );
@@ -204,11 +195,8 @@ describe('openExportKeysWindowSaga', () => {
         .withState({ windowManagement: { exportKeysWindowId: null } })
         .provide([
           [matchers.call.fn(windows.getCurrent), currentWindow],
-          // throwError throws at the effect site. A literal
-          // Promise.reject(...) here is built when the provider array is
-          // evaluated, before .run(), and nothing attaches a handler until the
-          // windows.create yield is reached — safe only while no macrotask
-          // boundary precedes it, and an unhandledRejection the moment one does.
+          // throwError throws at the effect site; a literal Promise.reject() is
+          // built up front and goes unhandled until the create yield is reached.
           [matchers.call.fn(windows.create), throwError(new Error('denied'))]
         ])
         .put(
@@ -232,10 +220,8 @@ describe('openExportKeysWindowSaga', () => {
       .mockImplementation(() => {});
 
     try {
-      // Three selects run in this flow: the reuse guard, the pre-create
-      // snapshot, and the post-create re-read. Only the last one sees a
-      // tracked id — i.e. the retry the timeout banner invited won the race
-      // while this create was still in flight.
+      // Three selects run: the reuse guard, the pre-create snapshot, the post-create
+      // re-read. Only the last sees a tracked id — the retry won the race.
       let selects = 0;
       const trackedByTheRetry = 55;
 
@@ -251,7 +237,7 @@ describe('openExportKeysWindowSaga', () => {
           [matchers.call.fn(windows.remove), undefined]
         ])
         // Overwriting the tracked id would strand the retry's window instead —
-        // two windows rendering key material is exactly what 1391 is about.
+        // two windows rendering key material is the harm.
         .not.put.actionType(exportKeysWindowIdChanged.type)
         .call([windows, windows.remove], 99)
         .run();
@@ -268,13 +254,8 @@ describe('openExportKeysWindowSaga', () => {
       .mockImplementation(() => {});
 
     try {
-      // The sibling test above hangs in `create`, so the retry lands BETWEEN the
-      // pre-create snapshot and the post-create re-read. Here the hang is one
-      // call earlier — in `getCurrent` — so the retry lands BEFORE the snapshot
-      // too. That ordering is what makes the position of the snapshot, rather
-      // than the comparison itself, the thing under test: read it downstream of
-      // the hang and it already holds the retry's id, so `trackedNow !==
-      // trackedBeforeCreate` is false exactly when a straggler must be caught.
+      // The hang is one call earlier than in the sibling test, so the retry lands
+      // BEFORE the snapshot too — the snapshot's position is what is under test.
       let trackedId: number | null = null;
       const trackedByTheRetry = 99;
       const arrivedLate = 100;
@@ -289,8 +270,7 @@ describe('openExportKeysWindowSaga', () => {
           [
             matchers.call.fn(windows.getCurrent),
             dynamic(() => {
-              // While this worker was parked here, the entry saga's bound fired,
-              // the banner invited a retry, and that retry ran to completion.
+              // The retry the timeout invited ran while this worker was parked.
               trackedId = trackedByTheRetry;
 
               return currentWindow;
@@ -321,10 +301,8 @@ describe('openExportKeysWindowSaga', () => {
       // The hang the bound exists for: windows.getCurrent never settles.
       (windows.getCurrent as jest.Mock).mockReturnValue(new Promise(() => {}));
 
-      // Only redux-saga's own delay is short-circuited, so the real race runs
-      // against the real WINDOWS_API_TIMEOUT_MS. A static `race` provider would
-      // be shape-blind — it replaces the whole effect, the worker is never
-      // entered, and the bound under test is never exercised.
+      // Only redux-saga's own delay is short-circuited, so the race runs against the
+      // real bound; a static `race` provider would never enter the worker at all.
       const saga = expectSaga(exportKeysWindowSaga)
         .withState({ windowManagement: { exportKeysWindowId: null } })
         .provide({
@@ -347,17 +325,15 @@ describe('openExportKeysWindowSaga', () => {
       await Promise.resolve();
       await Promise.resolve();
 
-      // The wedged first attempt must not swallow this one — that inert menu
-      // item is the whole point of the ticket's timeout item.
+      // The wedged first attempt must not swallow this one — an inert menu item
+      // is what the bound exists to prevent.
       saga.dispatch(openExportKeysWindow());
 
       const { allEffects } = await runPromise;
 
       expect(windows.getCurrent).toHaveBeenCalledTimes(2);
-      // Literal on purpose. Asserting against the imported constant is a
-      // tautology — both sides move together, and dropping the bound to 50ms
-      // sails straight through. 5000 is a product-visible wait; changing it
-      // should have to change this line too.
+      // Literal on purpose: asserting against the imported constant is a tautology,
+      // and dropping the bound to 50ms would sail straight through.
       expect(delaysRequested).toEqual([5000, 5000]);
       expect(WINDOWS_API_TIMEOUT_MS).toBe(5000);
       expect(countPutsOfType(allEffects, sagaError.type)).toBe(2);
@@ -375,11 +351,8 @@ describe('openExportKeysWindowSaga', () => {
     });
 
     it('takeLeading runs the open worker only once for two overlapping dispatches', async () => {
-      // No .provide() here: the mocked windows.* fns must actually be invoked
-      // (not short-circuited by a provider) so call counts are meaningful, and
-      // windows.getCurrent stays pending so the second dispatch genuinely
-      // overlaps the first worker's in-flight run instead of arriving after
-      // it settles.
+      // No .provide(): the mocked windows.* fns must actually be invoked for the
+      // call counts to mean anything, and getCurrent stays pending so they overlap.
       let resolveGetCurrent: (value: typeof currentWindow) => void = () => {};
       (windows.getCurrent as jest.Mock).mockReturnValue(
         new Promise(resolve => {
@@ -395,9 +368,8 @@ describe('openExportKeysWindowSaga', () => {
       saga.dispatch(openExportKeysWindow());
       const runPromise = saga.run(200);
 
-      // Flush microtasks so the first dispatch is delivered and the worker
-      // parks on the pending windows.getCurrent() call before the second,
-      // overlapping dispatch fires.
+      // Flush microtasks so the worker parks on the pending getCurrent() before
+      // the second, overlapping dispatch fires.
       await Promise.resolve();
       await Promise.resolve();
       await Promise.resolve();

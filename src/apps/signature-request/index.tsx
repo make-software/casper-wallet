@@ -1,7 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import React, { Suspense, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-// skeleton styles
 import 'react-loading-skeleton/dist/skeleton.css';
 import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
@@ -52,7 +51,6 @@ const Tree = () => {
 
   const themeMode = selectThemeModeSetting(store.getState());
 
-  // Set theme mode to system if it is no present in the store
   if (themeMode === undefined && !isSafariBuild) {
     dispatchToMainStore(themeModeSettingChanged(ThemeMode.SYSTEM));
   } else if (themeMode === undefined && isSafariBuild) {

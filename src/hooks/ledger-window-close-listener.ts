@@ -6,10 +6,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 export interface LedgerWindowCloseTracker {
   /**
    * Watch `permissionWindowId`, replacing whatever was watched before.
-   *
-   * `onClosed` runs only for that window actually being removed — never on
-   * `detach`, which means the flow was taken over or the document is going
-   * away, not that the window the owner is rendering for has gone.
+   * `onClosed` runs only for that window actually being removed — never on `detach`.
    */
   arm(permissionWindowId: number, onClosed?: () => void): void;
   /** Stop watching. Safe to call when nothing is armed. */
@@ -19,21 +16,9 @@ export interface LedgerWindowCloseTracker {
 /**
  * Owns the `windows.onRemoved` registration for a Ledger permission window.
  *
- * Two failures live here, which is why the lifecycle is a unit rather than two
- * lines inside the effect that opens the window:
- *
- * 1. `windows.onRemoved` passes the removed window's id, and a zero-arg
- *    listener is arity-assignable to it — so an unguarded handler fires for the
- *    FIRST window closed anywhere in the browser, clears the whole ledger slice
- *    mid-flow, and then removes itself so the real close clears nothing.
- * 2. The id guard makes self-removal correct, not guaranteed. A window that is
- *    never closed leaves the listener armed for the life of the document, and
- *    `ledgerStateCleared()` reaches the store from paths that do not close it
- *    (the Connect CTA in `LedgerDisconnectedFooter`, which `renderLedgerFooter`
- *    shows for `LedgerAskPermission` too). Another `useLedger` instance then
- *    opens its own permission window and takes over the slice — and closing the
- *    stale window afterwards wipes THAT flow's deploy/transaction, silently.
- *    `detach` is what the owner calls on unmount and when the slice is cleared.
+ * The listener must be id-guarded and single: an unguarded one fires for the first
+ * window closed anywhere in the browser, and one left armed on a window nobody
+ * closes wipes whatever flow has since taken over the ledger slice.
  */
 export function createLedgerWindowCloseTracker(): LedgerWindowCloseTracker {
   let armed: ((removedWindowId: number) => void) | null = null;

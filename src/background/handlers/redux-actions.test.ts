@@ -29,21 +29,19 @@ jest.mock('webextension-polyfill', () => ({
   runtime: { id: 'ext-id', getURL: () => 'chrome-extension://ext-id/' }
 }));
 
-// An extension UI page: same extension id, URL under the extension origin.
 const trustedSender = {
   id: 'ext-id',
   url: 'chrome-extension://ext-id/popup.html'
 } as Runtime.MessageSender;
 
-// A content script of this extension: our id, but a page URL — it fails the URL
-// half of the gate, which is the half that makes the gate meaningful.
+// Our extension id, but a page URL: it fails the URL half of the gate.
 const untrustedSender = {
   id: 'ext-id',
   url: 'https://dapp.example/page'
 } as Runtime.MessageSender;
 
-// The same, displaying request `r1` — every window a dapp flow opens carries the
-// id in its query string, the approval window and the permission window alike.
+// Displaying request `r1`: every window a dapp flow opens carries the id in its
+// query string.
 const trustedSenderForR1 = {
   id: 'ext-id',
   url: 'chrome-extension://ext-id/signature-request.html?requestId=r1&origin=https%3A%2F%2Fdapp.example#/sign-deploy'
@@ -66,18 +64,14 @@ function makeStore() {
 
 beforeEach(() => {
   enableOnboardingFlowMock.mockClear();
-  // `windows.get` is asserted on per test (the attach branch probes it), so its
-  // call history must not leak between them.
   (windows.get as jest.Mock).mockClear();
   closeLedgerFlowWindowsMock.mockClear();
 });
 
 describe('handleReduxAction forwarding gate (fail-closed)', () => {
   it('resetVault → dispatches and re-enables the onboarding flow', async () => {
-    // A fresh `resetVault(...)` is built here, not the wire action re-cast —
-    // the sender's own window id (absent for this tab-less sender) is
-    // attached from `MessageSender`, which the UI has no access to and could
-    // not be trusted to self-report even if it did.
+    // A fresh `resetVault(...)`, not the wire action re-cast: the window id is
+    // attached from `MessageSender`, which the UI cannot self-report.
     const { store, dispatch } = makeStore();
     const action = { type: resetVault.type };
 
@@ -102,10 +96,8 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
   });
 
   it('windowRequestWindowAttached → handled by its own branch, which verifies the window', async () => {
-    // It must reach the store (the Ledger hook dispatches it from a UI page),
-    // but through the branch that probes the window rather than through the
-    // blind forwarding set — a dead or invented windowId would otherwise make
-    // the request permanently uncancellable.
+    // It must reach the store, but through the branch that probes the window: a
+    // dead or invented windowId leaves the request permanently uncancellable.
     const { store, dispatch } = makeStore();
     const action = windowRequestWindowAttached({
       requestId: 'r1',
@@ -120,14 +112,8 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
   });
 
   it('an attach from an untrusted sender is dropped before it reaches the store', async () => {
-    // Attaching a window is what decides whether a request can ever be
-    // cancelled: a live-but-unrelated windowId gives a set that never shrinks
-    // to empty (permanently uncancellable), a dead one gives a set of exactly
-    // [dead] that the cancel path then selects on status alone. That is a
-    // lifecycle-authority decision, and it was the one handler path with no
-    // sender gate — unlike its siblings handleSdkResponseToTab and
-    // handleLegacyImport, which are pulled out of the generic loop precisely
-    // to gate on it.
+    // Attaching a window decides whether a request can ever be cancelled: a
+    // live-but-unrelated windowId gives a set that never shrinks to empty.
     const { store, dispatch } = makeStore();
     const action = windowRequestWindowAttached({
       requestId: 'r1',
@@ -149,11 +135,8 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
   });
 
   it('a payload-less attach message is refused by the guard, not thrown out of the handler', async () => {
-    // `.match` is `isAction(action) && action.type === type` — it does not
-    // validate the payload. Reading `action.payload.requestId` before
-    // `attachWindowToRequest`'s own shape guard runs turns the most obvious
-    // malformed shape into a TypeError that the router reports as a generic
-    // sendError, instead of the intended "ignoring malformed attach".
+    // `.match` does not validate the payload; reading it before the shape guard
+    // runs turns a malformed shape into a generic sendError.
     const consoleError = jest
       .spyOn(console, 'error')
       .mockImplementation(() => {});
@@ -176,7 +159,7 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
 
   it('a FORWARDED action type → dispatched to the real store', async () => {
     const { store, dispatch } = makeStore();
-    const action = lockVault(); // type is in FORWARDED_ACTION_TYPES
+    const action = lockVault();
 
     const result = await handleReduxAction(action, trustedSender, store);
 
@@ -213,7 +196,6 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
     const result = await handleReduxAction(action, trustedSender, store);
 
     expect(dispatch).not.toHaveBeenCalled();
-    // handled:true with no response — promise stays pending on purpose
     expect(result).toEqual({ handled: true });
     expect(result).not.toHaveProperty('response');
   });
@@ -233,8 +215,6 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
   });
 
   it('closeLedgerFlowWindows → routed to its handler, never dispatched into the store', async () => {
-    // It must NOT reach the forwarding set: there is no reducer case for it, and
-    // closing windows is a lifecycle decision that needs the requests map.
     const { store, dispatch } = makeStore();
     const action = closeLedgerFlowWindows({
       requestId: 'r1',
@@ -252,9 +232,8 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
   });
 
   it('closeLedgerFlowWindows without a requestId is routed with undefined', async () => {
-    // The internal flows (import-account-from-ledger, sign-with-ledger-in-new-window)
-    // have no dapp request behind them and legitimately send no requestId — and
-    // their page URL carries none either, so the two still agree.
+    // The internal flows have no dapp request behind them and legitimately send
+    // no requestId — their page URL carries none either, so the two still agree.
     const { store } = makeStore();
 
     await handleReduxAction(
@@ -270,8 +249,6 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
   });
 
   it('closeLedgerFlowWindows from an untrusted sender is dropped', async () => {
-    // Closing an approval window reaches cancel-on-close and cancels the request
-    // it displayed — a lifecycle-authority decision, gated like its siblings.
     const { store } = makeStore();
     const action = closeLedgerFlowWindows({
       requestId: 'r1',
@@ -289,10 +266,8 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
   });
 
   it('a trusted page naming a request it does not display is dropped', async () => {
-    // The sender gate admits every wallet page and stops there, so on its own it
-    // lets the export-keys window close a live dapp approval. The handler does
-    // not consult `method` either: connect / switchAccount / decryptMessage would
-    // be torn down exactly like a Ledger sign.
+    // The sender gate admits every wallet page, so on its own it lets the
+    // export-keys window close a live dapp approval of any method.
     const { store } = makeStore();
 
     const result = await handleReduxAction(
@@ -330,9 +305,8 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
   });
 
   it('a payload-less closeLedgerFlowWindows message is dropped, not thrown on', async () => {
-    // `.match` checks the type, not the payload; the message crosses
-    // runtime.sendMessage. Without a permissionWindowId there is no ownership
-    // proof, so nothing may be closed.
+    // Without a permissionWindowId there is no ownership proof, so nothing may
+    // be closed.
     const consoleWarn = jest
       .spyOn(console, 'warn')
       .mockImplementation(() => {});
@@ -369,9 +343,8 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
   });
 
   it('a synchronous throw from the handler is caught and logged, not left unhandled', async () => {
-    // `handleCloseLedgerFlowWindows` never rejects per its own contract, but the
-    // branch is fire-and-forget from a service worker, where an unhandled
-    // rejection is invisible — the `.catch` is the belt or a broken contract.
+    // The branch is fire-and-forget from a service worker, where an unhandled
+    // rejection is invisible — the `.catch` is the belt for a broken contract.
     const consoleError = jest
       .spyOn(console, 'error')
       .mockImplementation(() => {});
@@ -384,8 +357,8 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
       trustedSenderForR1,
       store
     );
-    // The rejection is caught off the fire-and-forget promise, not awaited by
-    // the handler itself — let the microtask queue drain before asserting.
+    // The rejection is caught off the fire-and-forget promise — let the
+    // microtask queue drain before asserting.
     await new Promise(resolve => setImmediate(resolve));
 
     expect(result).toEqual({ handled: true, response: undefined });
@@ -397,9 +370,6 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
   });
 
   describe('windowRequestDeviceConfirmationChanged', () => {
-    // It decides whether the shared approval window may be reused, so it is
-    // gated like its two siblings rather than left in the forwarding set, which
-    // checks no sender at all.
     it('reaches the store when the page names the request it displays', async () => {
       const { store, dispatch } = makeStore();
       const action = windowRequestDeviceConfirmationChanged({
@@ -432,8 +402,6 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
       expect(result).toEqual({ handled: true });
     });
 
-    // Holding the flag on someone else's request withholds THAT request's
-    // window from reuse for as long as it stays open.
     it('is dropped when the page names a request it does not display', async () => {
       const { store, dispatch } = makeStore();
 
@@ -499,14 +467,14 @@ describe('handleReduxAction sender-trust gate', () => {
 
     expect(dispatch).not.toHaveBeenCalled();
     expect(result).toEqual({ handled: true });
-    // `toEqual` ignores undefined-valued keys, so the contract `respond()` reads
-    // (`index.ts:215` branches on `'response' in result`) needs its own assertion.
+    // `toEqual` ignores undefined-valued keys, so the `'response' in result`
+    // contract `respond()` reads needs its own assertion.
     expect(result).not.toHaveProperty('response');
   });
 
   it('EVERY member of FORWARDED_ACTION_TYPES is gated, so a future addition is covered too', async () => {
-    // The point of iterating the live set rather than sampling it: there is no
-    // second list to keep in sync when a type is appended.
+    // Iterating the live set rather than sampling it: no second list to keep in
+    // sync when a type is appended.
     for (const type of FORWARDED_ACTION_TYPES) {
       const { store, dispatch } = makeStore();
 
@@ -548,9 +516,8 @@ describe('handleReduxAction sender-trust gate', () => {
   });
 
   it('an unlisted type from an untrusted sender still falls through — handleBringWeb3 depends on it', async () => {
-    // GET_ACTIVE_PUBLIC_KEY arrives from bring.ts, i.e. from a content script.
-    // If the gate were ever widened past the two re-dispatch types this would
-    // come back { handled: true } and the Bring integration would go dark.
+    // GET_ACTIVE_PUBLIC_KEY arrives from a content script; widen the gate past
+    // the two re-dispatch types and the Bring integration goes dark.
     const { store, dispatch } = makeStore();
 
     const result = await handleReduxAction(

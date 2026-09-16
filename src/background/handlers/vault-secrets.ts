@@ -30,16 +30,11 @@ interface AccountSecretKeysRequest {
 const POPUP_PAGE = '/popup.html';
 const SIGNATURE_REQUEST_PAGE = '/signature-request.html';
 
-// isTrustedUiSender proves "an extension page"; it does not prove "a page that
-// needs this". Without the per-page allowlist an XSS in connect-to-app — which
-// renders dapp-controlled origin, favicon and site name — could simply ask for the
-// phrase. Same shape as the request-window allowlist in open-request-windows.ts.
-// The export-keys window is popup.html too (sagas/export-keys-window-saga.ts:28).
-//
-// A rejection here always answers `{ handled: true, response: null }` rather
-// than leaving the caller's promise pending — every caller of the fetch*
-// functions below already treats a null/empty response as "cannot do this
-// here" and surfaces that.
+/**
+ * isTrustedUiSender proves "an extension page", not "a page that needs this": without this
+ * allowlist an XSS in a dapp-facing page could ask for the phrase. `/popup.html` covers the
+ * export-keys window too — it is the same document, opened in a window of its own.
+ */
 const ALLOWED_PAGES: Record<string, readonly string[]> = {
   [SECRET_PHRASE_REQUEST_TYPE]: [POPUP_PAGE],
   [SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE]: [POPUP_PAGE],
@@ -67,7 +62,6 @@ export function handleVaultSecrets(
 
   if (!isTrustedUiSender(sender) || !isAllowedPage(action.type, sender)) {
     if (sender.id === runtime.id) {
-      // Origin only — see the same check in background/index.ts.
       const senderOrigin =
         sender.url != null ? new URL(sender.url).origin : undefined;
       // nosemgrep: cw-logging-secrets — logs the sender origin only, never vault contents
@@ -81,9 +75,8 @@ export function handleVaultSecrets(
 
   const state = store.getState();
 
-  // Today lockVaultSaga empties the vault, so this is belt-and-braces — and it is
-  // the only thing keeping this handler from becoming a lock bypass if the
-  // decrypted vault ever survives a soft lock.
+  // Belt-and-braces while lockVaultSaga empties the vault, but the only thing
+  // keeping this handler from becoming a lock bypass if that ever changes.
   if (selectVaultIsLocked(state)) {
     return { handled: true, response: null };
   }
@@ -116,8 +109,7 @@ export function handleVaultSecrets(
       const { accountNames } = (action as AccountSecretKeysRequest).payload;
       const accounts = selectVaultAccounts(state);
 
-      // Null prototype: the keys are user-chosen account names, and the repo already
-      // refuses `__proto__` where external strings key an assignment-built map.
+      // Null prototype: the keys are user-chosen account names.
       const response: Record<string, string> = Object.create(null);
 
       for (const name of accountNames) {
@@ -137,17 +129,14 @@ export function handleVaultSecrets(
   }
 }
 
-/** UI side. Only pages listed in ALLOWED_PAGES get an answer. */
 export function fetchSecretPhrase(): Promise<SecretPhrase | null> {
   return runtime.sendMessage({ type: SECRET_PHRASE_REQUEST_TYPE });
 }
 
-/** UI side. Only pages listed in ALLOWED_PAGES get an answer. */
 export function fetchSuggestedAccountName(): Promise<string | null> {
   return runtime.sendMessage({ type: SUGGESTED_ACCOUNT_NAME_REQUEST_TYPE });
 }
 
-/** UI side. Only pages listed in ALLOWED_PAGES get an answer. */
 export function fetchAccountSecretKeys(
   accountNames: string[]
 ): Promise<Record<string, string> | null> {
@@ -159,10 +148,8 @@ export function fetchAccountSecretKeys(
 
 /**
  * Single-account convenience wrapper; empty string if the account holds no key
- * OR the request failed. Never throws: every caller already treats an empty
- * key as "cannot sign/decrypt here" and surfaces that — letting a rejection
- * through instead would strand the caller (unhandled rejection, no SDK
- * response, window/button stuck).
+ * or the request failed. Never throws: callers already treat an empty key as
+ * "cannot sign/decrypt here" and surface that.
  */
 export async function fetchAccountSecretKey(
   accountName: string

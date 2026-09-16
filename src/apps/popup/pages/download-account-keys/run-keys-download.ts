@@ -20,9 +20,8 @@ export async function runKeysDownload(
       fetchAccountSecretKeys(accounts.map(account => account.name))
     );
 
-    // A refused/null response must not fall back to an empty map: every account
-    // would then be silently skipped below, producing an empty zip with a
-    // Success screen. Throwing routes it into the catch's Failure step.
+    // Null is a refusal, not "no keys": falling back to an empty map would skip
+    // every account and ship an empty zip behind a Success screen.
     if (secretKeys == null) {
       throw new Error('fetchAccountSecretKeys returned null');
     }

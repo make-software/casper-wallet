@@ -3,11 +3,8 @@ import os from 'os';
 import path from 'path';
 
 import pkg from '../package.json';
-// The alias table the sideEffects check resolves specifiers through, read from
-// the same file the compiler uses so the two cannot drift.
+// Read from the file the compiler uses, so the alias table cannot drift from it.
 import tsconfig from '../tsconfig.json';
-// The module webpack.config.js resolves the version stamp through. Imported by
-// path because utils/ is plain CommonJS, outside tsconfig's `include`.
 import {
   BUILD_HASH_FILE,
   UNKNOWN_COMMIT_HASH,
@@ -15,21 +12,10 @@ import {
 } from '../utils/commit-hash';
 
 /**
- * The Chrome-production CSP nonce is wired through two independent channels: the
- * `content_security_policy` baked into the manifest, and the `__CSP_NONCE__` literal
- * substituted into every bundle. They are generated from a single predicate in
- * webpack.config.js, and nothing else in CI evaluates that file — `knip` executes it
- * only to harvest entries and aliases, and format/lint/tsc/jest never load it.
- *
- * If the two ever disagree, the failure is silent and total: the manifest pins
- * `style-src` to a nonce no bundle sets (or to the literal `nonce-null`), every
- * styled-components sheet and style-loader <style> is blocked, and all five apps
- * render unstyled while the DOM stays fully present — which e2e's `toBeVisible()`
- * assertions happily accept.
- *
- * So this file asserts the invariant rather than the value: the manifest CSP carries
- * a nonce if and only if the bundle literal is a non-empty string, and it is the same
- * string.
+ * Nothing else in CI evaluates webpack.config.js, and a manifest that pins `style-src`
+ * to a nonce no bundle sets fails silently: every app renders unstyled with the DOM
+ * fully present, which e2e's `toBeVisible()` accepts. So assert the invariant rather
+ * than the value — the manifest carries a nonce iff the bundle literal does, the same one.
  */
 
 const ROOT = path.join(__dirname, '..');
@@ -53,7 +39,6 @@ interface PluginLike {
 
 type EntryLike = Record<string, string | string[]>;
 
-/** The shape of a chunk as far as the splitChunks predicate is concerned. */
 interface ChunkLike {
   name?: string;
   canBeInitial: () => boolean;
@@ -70,7 +55,6 @@ interface Manifest {
   version_name?: string;
 }
 
-/** The slice of webpack's compilation/compiler API the emit-time assertion touches. */
 interface FakeAsset {
   source: { source: () => string };
 }
@@ -94,13 +78,9 @@ interface LoadedConfig {
   /** Raw DefinePlugin substitution — a JSON literal: `"<base64>"` or `null`. */
   nonceLiteral: string;
   manifest: Manifest;
-  /** The AssertCspNonceIntegrity instance registered by this config. */
   assertPlugin: PluginLike;
-  /** The AssertSingleFileEntries instance registered by this config. */
   singleFilePlugin: PluginLike;
-  /** The AssertSdkFreePageEntries instance registered by this config. */
   sdkFreePlugin: PluginLike;
-  /** optimization.splitChunks.chunks — the predicate deciding what may split. */
   splitChunksPredicate: (chunk: ChunkLike) => boolean;
   entry: EntryLike;
 }
@@ -116,8 +96,6 @@ const loadConfig = (browser: string, nodeEnv: string): LoadedConfig => {
   // at require time, so the whole chain has to be re-evaluated per combination.
   jest.resetModules();
 
-  // A static import would be hoisted and evaluated once, before any of the env
-  // juggling above; the whole point here is to re-evaluate per combination.
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const config: ConfigLike = require(CONFIG_PATH);
 
@@ -238,17 +216,14 @@ describe('webpack.config.js CSP nonce', () => {
         const { nonceLiteral, manifest } = loadConfig(browser, nodeEnv);
         const csp = flattenCSP(manifest) ?? '';
 
-        // The one property worth protecting: neither side may carry a nonce alone.
         expect(csp.includes('nonce-')).toBe(nonceLiteral !== 'null');
         expect(csp).not.toContain('nonce-null');
       });
     }
   );
 
-  // Pre-existing behaviour, asserted so a change to it is a deliberate one rather
-  // than a surprise: getCSP() returns undefined for Safari (it branches on isFirefox
-  // and isChrome only), and none of the three source manifests declares a CSP of its
-  // own, so the built Safari manifest ships without a content_security_policy key.
+  // Asserted so a change is deliberate: getCSP() branches on isFirefox and isChrome
+  // only, and no source manifest declares a CSP, so Safari ships without one.
   it.each(['production', 'development'])(
     'leaves the Safari manifest (NODE_ENV=%s) without a CSP',
     nodeEnv => {
@@ -260,14 +235,9 @@ describe('webpack.config.js CSP nonce', () => {
 });
 
 /**
- * The casper-assets host was removed from host_permissions/permissions (and the CSP
- * arms) in five places; only the CSP side had a guard (see the nonce block above,
- * which itself doesn't check for this string). This asserts against the manifest as
- * CopyWebpackPlugin actually emits it — not src/manifest.*.json directly — because a
- * transform that reintroduced the host would still leave the source files clean.
- * Stringifying the whole manifest, rather than reading a specific key, catches the
- * host resurfacing in `permissions` (where MV2/Safari embed their host allowlist),
- * `host_permissions` (MV3's separate array), or `content_security_policy` alike.
+ * Asserted against the manifest as CopyWebpackPlugin emits it, since a transform that
+ * reintroduced the host would leave src/manifest.*.json clean. Stringifying the whole
+ * manifest catches it in `permissions`, `host_permissions` or the CSP alike.
  */
 describe('manifest host allowlist', () => {
   const originalEnv = { ...process.env };
@@ -286,20 +256,7 @@ describe('manifest host allowlist', () => {
   );
 });
 
-/**
- * WALLET-1392: `manifest.version_name` used to fall back to `Date.now()` when no
- * commit hash was in the environment. scripts/build_src.sh zips `src scripts utils
- * *.* .env` and no `.git`, so on the tree an AMO reviewer unpacks, the build
- * scripts' `HASH=$(git rev-parse HEAD)` resolves to the empty string and the
- * fallback fired — the rebuilt manifest read `2.7.0 (1785914)` against the
- * uploaded artifact's `2.7.0 (905e0c8)`, and source-review comparison failed on
- * manifest.json alone.
- *
- * The stamp now comes from the source package itself (build-hash.json), and there
- * is no per-build-varying fallback left to reach.
- */
 describe('commit hash resolution', () => {
-  /** A root holding whatever build-hash.json the case is about (or none). */
   const rootWith = (buildHashFile?: string): string => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'commit-hash-'));
 
@@ -348,7 +305,6 @@ describe('commit hash resolution', () => {
     const first = resolveCommitHash({ root, env: {}, isDev: true });
 
     expect(first).toBe(UNKNOWN_COMMIT_HASH);
-    // The defect in one line: a fallback that differs per build.
     expect(resolveCommitHash({ root, env: {}, isDev: true })).toBe(first);
     expect(first).not.toMatch(/^\d{13}$/);
   });
@@ -359,8 +315,7 @@ describe('commit hash resolution', () => {
     ['a non-sha commitHash', JSON.stringify({ commitHash: 'v2.7.0-rc1' })],
     ['a non-string commitHash', JSON.stringify({ commitHash: 1785914829890 })]
   ])('rejects a shipped stamp with %s', (_case, buildHashFile) => {
-    // A broken stamp must not degrade into the unknown/placeholder path — that
-    // would put the reviewer back on a manifest that cannot match the upload.
+    // A broken stamp must not degrade into the placeholder path.
     expect(() =>
       resolveCommitHash({ root: rootWith(buildHashFile), env: {}, isDev: true })
     ).toThrow(new RegExp(BUILD_HASH_FILE));
@@ -394,14 +349,9 @@ describe('commit hash resolution', () => {
 });
 
 /**
- * The assertions above compare the two nonce channels as the config *describes* them.
- * AssertCspNonceIntegrity (webpack.config.js) compares them as the build *emits* them,
- * which is where WALLET-1388 went wrong: an ambient CSP_NONCE was substituted into the
- * bundles through dotenv-webpack's `systemvars` while the manifest kept the generated
- * value, and the build reported success.
- *
- * Driving it needs only four things off the compiler/compilation, faked here: the two
- * hooks it taps, the normalized entry, the entrypoint file lists, and getAsset.
+ * The assertions above compare the two nonce channels as the config *describes* them;
+ * AssertCspNonceIntegrity compares them as the build *emits* them. Driving it needs only
+ * the two hooks it taps, the normalized entry, the entrypoint file lists, and getAsset.
  */
 const asset = (content: string): FakeAsset => ({
   source: { source: () => content }
@@ -527,7 +477,6 @@ describe('AssertCspNonceIntegrity', () => {
           assertPlugin,
           entry,
           manifestJson: manifestWith(`style-src 'self' 'nonce-${nonce}'`),
-          // What an ambient CSP_NONCE used to produce.
           bundles: { ...bundles, 'popup.bundle.js': '"SHADOWVALUE123";' }
         })
       ).toThrow(/no bundle of entry "popup" contains it/);
@@ -543,9 +492,8 @@ describe('AssertCspNonceIntegrity', () => {
           manifestJson: manifestWith("style-src 'self' 'nonce-SOMETHINGELSE'"),
           bundles
         })
-        // Anchored on the second clause: the per-entry check below reports the same
-        // "the manifest pins …" prefix, and this case has to fail on the manifest
-        // comparison specifically.
+        // Anchored on the second clause: the per-entry check reports the same "the
+        // manifest pins …" prefix, and this case must fail on the manifest comparison.
       ).toThrow(/pins "SOMETHINGELSE", but this build generated/);
     });
 
@@ -606,10 +554,8 @@ describe('AssertCspNonceIntegrity', () => {
 });
 
 /**
- * The guards that keep the MV3 service worker and the two content scripts
- * single-file now that splitChunks is on. They had no test of their own, in the
- * one file that exists because nothing else in CI evaluates webpack.config.js —
- * relaxing `files.length !== 1` to `< 1` left ci-check green.
+ * The guards that keep the MV3 service worker and the two content scripts single-file
+ * now that splitChunks is on. Nothing else in CI evaluates webpack.config.js.
  */
 interface FakeEntrypoint {
   getFiles: () => string[];
@@ -660,7 +606,6 @@ const runSingleFileAssertion = (
   return tapped;
 };
 
-/** Every single-file entry, each emitting exactly one JS file and no chunks. */
 const healthyEntrypoints = (): Record<string, FakeEntrypoint> => ({
   background: fakeEntrypoint(['background.bundle.js']),
   contentScript: fakeEntrypoint(['contentScript.bundle.js']),
@@ -714,8 +659,6 @@ describe('AssertSingleFileEntries', () => {
     );
   });
 
-  // None of the three can load one: a content script would fetch it from the
-  // visited site's origin, and the service worker has no document.
   it.each(['contentScript', 'sdk', 'background'])(
     'rejects an async chunk owned by %s',
     name => {
@@ -753,16 +696,10 @@ describe('AssertSingleFileEntries', () => {
 });
 
 /**
- * AssertSdkFreePageEntries is the only thing keeping the ~900 KB UMD SDK off the
- * pages this branch cleared, and its inputs are undocumented webpack internals:
- * chunkGraph/moduleGraph, and a ConcatenatedModule's members hanging off
- * `.modules` rather than a `resource` of its own. A build only proves the guard
- * silent, never that it can still speak — so the cases below drive it against a
- * compilation that does contain the SDK.
- *
- * The entry list is asserted through behaviour rather than read out of the
- * config: dropping a name from SDK_FREE_PAGE_ENTRY_NAMES is exactly the silent
- * revert this file exists to catch.
+ * A build only proves this guard silent, never that it can still speak, so the cases
+ * below drive it against a compilation that does contain the SDK. The entry list is
+ * asserted through behaviour rather than read out of the config, since dropping a name
+ * from SDK_FREE_PAGE_ENTRY_NAMES is the silent revert these cases exist to catch.
  */
 interface FakeModule {
   resource?: string;
@@ -836,7 +773,6 @@ const PAGE_ENTRY_NAMES = [
   'onboarding'
 ];
 
-/** Every page entry, each with one initial chunk of ordinary app modules. */
 const healthyPageEntrypoints = (): Record<string, FakeChunk[]> =>
   Object.fromEntries(
     PAGE_ENTRY_NAMES.map(name => [
@@ -868,8 +804,6 @@ describe('AssertSdkFreePageEntries', () => {
     }
   );
 
-  // The two pages the SDK is still allowed on. A guard that rejected these would
-  // be unfixable without reverting the branch, so the exemption is asserted too.
   it.each(['importAccountWithFile', 'signatureRequest'])(
     'leaves %s free to link it eagerly',
     name => {
@@ -913,8 +847,7 @@ describe('AssertSdkFreePageEntries', () => {
   });
 
   it('finds it inside a ConcatenatedModule', () => {
-    // Concatenation runs in production builds only, which is where the guard has
-    // to work; a walk that stopped at the wrapper would see nothing there.
+    // Concatenation runs in production builds only, which is where the guard has to work.
     const { sdkFreePlugin } = loadConfig('chrome', 'production');
 
     expect(
@@ -992,11 +925,9 @@ describe('optimization.splitChunks predicate', () => {
 });
 
 /**
- * `sideEffects` declares every module under src/ side-effect-free unless listed,
- * letting webpack drop a bare `import './x'` whose exports are unused. Nothing
- * else ties the list to the imports it governs — an omission is invisible to
- * format, lint, tsc, knip and the suite, and surfaces only in a production
- * bundle, as a popup rendering raw translation keys because i18next never
+ * `sideEffects` declares every module under src/ side-effect-free unless listed, letting
+ * webpack drop a bare `import './x'` whose exports are unused. An omission surfaces only
+ * in a production bundle, as a popup rendering raw translation keys because i18next never
  * initialised. Enumerated from disk so the next bare import is covered too.
  */
 describe('package.json sideEffects', () => {
@@ -1022,7 +953,6 @@ describe('package.json sideEffects', () => {
       return /\.tsx?$/.test(entry.name) ? [full] : [];
     });
 
-  /** Resolves an import specifier to a file inside src/, or null. */
   const resolveSpecifier = (specifier: string, importer: string) => {
     let base: string | null = null;
 

@@ -29,7 +29,6 @@ describe('watchCasper2NetworkSaga', () => {
     jest.restoreAllMocks();
   });
 
-  // Matrix row: Unlock.
   it('dispatches the resolved api version on unlockVault', async () => {
     jest
       .spyOn(casperTransactionsRepository, 'getNetworkApiVersion')
@@ -58,7 +57,6 @@ describe('watchCasper2NetworkSaga', () => {
       .silentRun(50);
   });
 
-  // Matrix row: Network switch.
   it('dispatches the resolved api version for the new network on activeNetworkSettingChanged', async () => {
     jest
       .spyOn(casperTransactionsRepository, 'getNetworkApiVersion')
@@ -80,7 +78,6 @@ describe('watchCasper2NetworkSaga', () => {
       .silentRun(50);
   });
 
-  // Matrix row: Node unreachable — error dispatched, not thrown; no version put.
   it('dispatches sagaError and leaves the stored version alone when the RPC call throws', async () => {
     const { storeState, effects } = await expectSaga(watchCasper2NetworkSaga)
       .withReducer(combinedReducer())
@@ -103,7 +100,6 @@ describe('watchCasper2NetworkSaga', () => {
       .dispatch(activeNetworkSettingChanged(NetworkSetting.Mainnet))
       .silentRun(50);
 
-    // Untouched pre-2.0 default: the failure path leaves it in place.
     expect(selectCasperNetworkApiVersion(storeState)).toBe('1.5.8');
     const putTypes = (effects.put ?? []).map(
       (e: { payload: { action: { type: string } } }) => e.payload.action.type
@@ -111,7 +107,6 @@ describe('watchCasper2NetworkSaga', () => {
     expect(putTypes).not.toContain(casperNetworkApiVersionChanged.type);
   });
 
-  // Matrix row: Derived flag — a '2.0.0' response flips selectIsCasper2Network.
   it('flips selectIsCasper2Network to true once a 2.x api version is stored', async () => {
     jest
       .spyOn(casperTransactionsRepository, 'getNetworkApiVersion')

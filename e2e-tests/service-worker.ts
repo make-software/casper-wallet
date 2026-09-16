@@ -5,8 +5,7 @@ const GENERATION_KEY = '__casperWorkerGeneration';
 const STOP_TIMEOUT_MS = 15000;
 
 function currentWorker(context: BrowserContext) {
-  // Index 0 is not necessarily the extension: other registered workers (a
-  // Playwright-loaded page's own service worker, another extension) can share
+  // Index 0 is not necessarily the extension: other registered workers can share
   // the context, and their position in the list is not guaranteed.
   const worker = context
     .serviceWorkers()
@@ -20,11 +19,9 @@ function currentWorker(context: BrowserContext) {
 }
 
 /**
- * Stamps a token on the running worker's global scope. It dies with the worker,
- * so a later read that no longer returns it is proof the worker really restarted
- * — which `context.serviceWorkers()` cannot give: the list keeps its entry
- * across a stop, and `Worker.evaluate` keeps answering because the evaluate
- * itself starts a fresh worker.
+ * Stamps a token on the running worker's global scope. It dies with the worker, so
+ * a later read that no longer returns it is proof the worker really restarted —
+ * which `context.serviceWorkers()` cannot give: its entry survives a stop.
  */
 export async function markServiceWorker(
   context: BrowserContext
@@ -56,15 +53,10 @@ export async function readServiceWorkerMark(
 }
 
 /**
- * Terminates the extension's MV3 service worker. There is no Playwright API for
- * it — `Worker` has no `close()` — so it goes over CDP; `stopAllWorkers` is
- * global despite being sent on a page session, so the page it is sent from does
- * not matter.
- *
- * Resolution waits for the worker's own `stopped` transition rather than
- * polling it. Polling would be self-defeating: every probe that touches the
- * worker starts it again, and a caller that needs it to STAY dead would be the
- * one waking it.
+ * Terminates the extension's MV3 service worker over CDP — `Worker` has no
+ * `close()`, and `stopAllWorkers` is global, so the page it is sent from does not
+ * matter. Resolution waits for the worker's own `stopped` transition: every probe
+ * that polls the worker would start it again.
  */
 export async function stopServiceWorker(
   context: BrowserContext,

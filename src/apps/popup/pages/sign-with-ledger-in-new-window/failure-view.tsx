@@ -20,9 +20,8 @@ interface IFailureViewProps {
 }
 
 /**
- * What this window shows when a flow fails after the device has signed — an RPC rejection, a node
- * timeout, an allowance or balance problem found on submission. Device-side failures are rendered
- * by `LedgerConnectionView` from the status channel instead.
+ * Shown when a flow fails after the device has signed — an RPC rejection, a node timeout, a
+ * balance problem found on submission. Device-side failures go to `LedgerConnectionView`.
  */
 export const FailureView: React.FC<IFailureViewProps> = ({
   header,

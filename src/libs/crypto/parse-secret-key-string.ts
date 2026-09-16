@@ -1,7 +1,7 @@
+// @lapo/asn1js is here for backward compatibility with Legacy Signer key files.
 import { ASN1 } from '@lapo/asn1js';
 import { Base64 } from '@lapo/asn1js/base64.js';
 import { Conversions, KeyAlgorithm, PrivateKey } from 'casper-js-sdk';
-// These libraries are required for backward compatibility with Legacy Signer
 import { t } from 'i18next';
 
 import { ErrorMessages } from '@src/constants';

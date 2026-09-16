@@ -44,9 +44,8 @@ export type UnlockResult =
 
 /**
  * Keyed on a secret generated for this process, so the stored digest is not a
- * brute-force oracle for anyone who reads it without also reading this key. A
- * bare hash of the password would be exactly that — and a far cheaper one than
- * the scrypt-derived cipher it guards. Never persist this.
+ * brute-force oracle for anyone who reads it without also reading this key.
+ * Never persist this.
  */
 const memoDigestKey = randomBytes(32);
 
@@ -56,11 +55,8 @@ export function digestPassword(password: string): string {
 
 const MEMO_LIMIT = 8;
 
-// Bounds how long a verdict can be replayed. An entry itself is removed only by
-// FIFO eviction or a lookup on that exact key, so residency is longer than this
-// — which is why the entry holds a digest and never the password. Must outlive
-// the page's own retry window for a dropped response (background-port.ts retries
-// at +250ms, then +500ms).
+// Bounds how long a verdict can be replayed; must outlive the page's retry
+// window for a dropped response (background-port.ts: +250, +500ms).
 const MEMO_TTL_MS = 10_000;
 
 interface MemoEntry {
@@ -71,23 +67,16 @@ interface MemoEntry {
 
 /**
  * Keyed on `${type}:${attemptId}` AND a digest of the password: the id is
- * caller-chosen, so replaying a verdict for a different password could answer a
- * correct password `wrong`, and replaying a VERIFY verdict for an UNLOCK with the same id would
- * report `ok` without ever dispatching `unlockVault`. Holds the in-flight
- * promise, not just the settled value, so a reconnect awaits the first
- * derivation instead of starting a second one that counts again — and a retry
- * that lands AFTER settlement (the actual `background-port.ts` retry case, once
- * the response itself was dropped) replays the same verdict instead of
- * deriving — and counting — a second time. Entries expire lazily on lookup
- * (see `MEMO_TTL_MS`) rather than being deleted on settlement.
+ * caller-chosen, so replaying a verdict for another password, or a VERIFY verdict
+ * for an UNLOCK, would answer without deriving or dispatching `unlockVault`.
+ * Holds the in-flight promise so a retry replays rather than counting an attempt.
  */
 const memo = new Map<string, MemoEntry>();
 
 /**
- * One derivation at a time, process-wide. Without this a single compromised
- * allowed page can start many concurrent scrypt runs (~256MB each) and OOM the
- * service worker; serialised, the same burst is just attempts that hit the
- * lockout.
+ * One derivation at a time, process-wide: concurrent scrypt runs (~256MB each)
+ * would OOM the service worker, and serialised the same burst is just attempts
+ * that hit the lockout.
  */
 let derivationQueue: Promise<unknown> = Promise.resolve();
 
@@ -124,9 +113,8 @@ function remember(
   const entry: MemoEntry = { passwordDigest, result, createdAt: Date.now() };
   memo.set(memoKey, entry);
 
-  // Re-stamp once the verdict exists. Derivations are serialised, so a request
-  // can spend most of the window queued behind others; measured from enqueue,
-  // the caller's retry would miss, re-derive, and count one attempt twice.
+  // Re-stamp once the verdict exists: measured from enqueue, a request that sat
+  // queued would miss the caller's retry, re-derive, and count one attempt twice.
   const stamp = () => {
     entry.createdAt = Date.now();
   };
@@ -143,9 +131,8 @@ async function runUnlock(
   try {
     const state = store.getState();
 
-    // Derivations are serialised, so a request may have sat queued behind
-    // another window's failed attempts arming the lockout in the meantime —
-    // check before starting the (expensive) derivation, not just after it.
+    // Derivations are serialised, so the lockout can have been armed while this
+    // request sat queued — check before starting the expensive derivation.
     if (selectHasLoginRetryLockoutTime(state)) {
       return { status: 'lockedOut' };
     }
@@ -166,8 +153,7 @@ async function runUnlock(
     if (!isCorrect) {
       store.dispatch(loginRetryCountIncremented());
       // Re-read the COUNT, not the lockout flag: the answer must not depend on
-      // when the saga that arms the lockout in response to the increment has
-      // put its result relative to this handler.
+      // when the saga arming the lockout lands relative to this handler.
       const count = selectLoginRetryCount(store.getState());
 
       return count >= LOGIN_RETRY_ATTEMPTS_LIMIT
@@ -175,9 +161,8 @@ async function runUnlock(
         : { status: 'wrong', attemptsLeft: LOGIN_RETRY_ATTEMPTS_LIMIT - count };
     }
 
-    // Derivations are serialised, so this request may have sat queued behind
-    // another window's failed attempts arming the lockout in the meantime.
-    // Re-check before acting on a now-stale `isCorrect`, on both paths.
+    // The lockout can have been armed while this request sat queued; re-check
+    // before acting on a now-stale `isCorrect`.
     if (selectHasLoginRetryLockoutTime(store.getState())) {
       return { status: 'lockedOut' };
     }
@@ -240,10 +225,8 @@ export async function handleUnlockRequest(
 
   // Nothing to unlock, and no password was verified — do NOT touch the counter.
   if (request.type === UNLOCK_REQUEST_TYPE && !selectVaultIsLocked(state)) {
-    // The page renders nothing locally on `ok`; the broadcast is what unmounts
-    // it, and delivery failures are swallowed. Without this a dropped broadcast
-    // is unrecoverable — the retry lands here, which dispatches nothing, so no
-    // further broadcast would ever be produced.
+    // The broadcast is what unmounts the page; without one here a dropped
+    // broadcast is unrecoverable, as the retry lands here and dispatches nothing.
     broadcastPopupState(state);
     return { status: 'ok' };
   }
@@ -253,10 +236,6 @@ export async function handleUnlockRequest(
     return { status: 'lockedOut' };
   }
 
-  // Keyed by type as well as attemptId: a VERIFY_PASSWORD_REQUEST verdict must
-  // never be replayed to answer an UNLOCK_REQUEST (or vice versa) sharing the
-  // same caller-chosen id — an UNLOCK replayed from a VERIFY's `ok` would report
-  // success without ever dispatching `unlockVault`.
   const memoKey = `${request.type}:${attemptId}`;
   const passwordDigest = digestPassword(password);
   const cached = memo.get(memoKey);

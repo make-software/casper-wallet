@@ -13,9 +13,6 @@ export interface LocationState extends ErrorLocationState {
   recipientPublicKey?: string;
   deploy?: IDeploy;
   appEvent?: IAppMarketingEvent;
-  /**
-   * Token to preselect as the "from" leg on the swap page, in `IDexToken.id` terms:
-   * the literal `'cspr'` for native CSPR, otherwise the contract package hash.
-   */
+  /** In `IDexToken.id` terms: `'cspr'` for native CSPR, otherwise the contract package hash. */
   swapFromTokenId?: string;
 }

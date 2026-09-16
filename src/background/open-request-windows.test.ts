@@ -98,12 +98,8 @@ describe('collectRequestIdsFromOpenWindows', () => {
     );
   });
 
-  // A silently skipped tab purges a live request with nothing pointing at the
-  // cause, so the skip is logged — redacted, never the raw url.
-  //
-  // Asserted positively as well as negatively: `new URL`'s TypeError says only
-  // `Invalid URL`, so absence assertions alone would still pass on a line that
-  // names no tab at all and leaves the operator where they were.
+  // Asserted positively as well as negatively: `Invalid URL` names no tab, so
+  // absence assertions alone would pass on a log line that identifies nothing.
   it('logs the skipped url without its query string', async () => {
     const consoleError = jest.spyOn(console, 'error');
     mockWindowsGetAll.mockResolvedValue([
@@ -162,9 +158,8 @@ describe('collectRequestIdsFromOpenWindows', () => {
     );
   });
 
-  // `sdk.bundle.js` is web-accessible on all three targets, and the extension
-  // id is public (`content/index.ts` puts it in the page DOM), so the origin
-  // alone does not make a URL ours to trust.
+  // `sdk.bundle.js` is web-accessible and the extension id is public, so the
+  // origin alone does not make a URL ours to trust.
   it('ignores a requestId on a web-accessible resource of our own extension', async () => {
     mockWindowsGetAll.mockResolvedValue([
       {
@@ -180,9 +175,8 @@ describe('collectRequestIdsFromOpenWindows', () => {
     expect(await collectRequestIdsFromOpenWindows()).toEqual(new Set());
   });
 
-  // The closed set. `popup.html` carries no `requestId` today, but it is
-  // `use-ledger.ts`'s default `domain`, and a missed Ledger window purges a
-  // payload mid-signature.
+  // `popup.html` carries no `requestId` today, but it is `use-ledger.ts`'s
+  // default `domain`, and a missed Ledger window purges a payload mid-signature.
   it.each(['signature-request.html', 'connect-to-app.html', 'popup.html'])(
     'reads a requestId carried by %s',
     async page => {
@@ -247,11 +241,8 @@ describe('collectRequestIdsFromOpenWindows', () => {
     expect(await collectRequestIdsFromOpenWindows()).toBeNull();
   });
 
-  // The argument's TYPE is asserted, not only its content. A plain `Error` has
-  // no enumerable own properties, so `JSON.stringify` renders it `{}` and the
-  // two absence assertions below hold whatever the code does — dropping
-  // `redactUrlQuery` and logging the error object would keep them green while
-  // the console started printing the untruncated message.
+  // The argument's TYPE is asserted too: `JSON.stringify` renders a plain
+  // `Error` as `{}`, so the absence assertions alone hold whatever the code does.
   it('never puts a window URL into the log when the enumeration rejects', async () => {
     const consoleError = jest.spyOn(console, 'error');
     mockWindowsGetAll.mockRejectedValue(
@@ -272,10 +263,8 @@ describe('collectRequestIdsFromOpenWindows', () => {
   });
 });
 
-// Oracle: nothing else ties `REQUEST_BEARING_PATHNAMES` to the URLs approval
-// windows actually open at — the two lists could drift silently. Derived from
-// `getUrlByWindowApp`, not restated as literals, so a pathname change on
-// either side fails here instead of only in production.
+// Nothing else ties `REQUEST_BEARING_PATHNAMES` to the URLs approval windows
+// open at, so the pathnames are derived here rather than restated as literals.
 describe('REQUEST_BEARING_PATHNAMES tracks every approval WindowApp', () => {
   const APPROVAL_WINDOW_APPS = [
     WindowApp.ConnectToApp,

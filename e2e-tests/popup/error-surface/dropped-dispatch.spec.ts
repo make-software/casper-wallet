@@ -13,10 +13,8 @@ async function clickMenuItem(page: Page, name: string) {
   await page.getByText(name, { exact: true }).click();
 }
 
-// `unlockVault` returns before the unlock has actually completed — it only waits
-// for network idle, and the flow finishes through further dispatches from this
-// page. Breaking the transport before then breaks the unlock itself and the page
-// sits on the lock screen forever, so wait for the unlocked UI first.
+// `unlockVault` returns before the unlock has completed, so breaking the
+// transport before the unlocked UI is up breaks the unlock itself.
 async function waitForUnlockedHome(page: Page) {
   await popupExpect(page.getByTestId('menu-open-icon')).toBeVisible();
 }
@@ -39,11 +37,8 @@ popup.describe('Popup UI: dropped dispatch error surface', () => {
     }
   );
 
-  // Dedupe of repeated failures is covered by `ui-error-channel.test.ts` and not
-  // here: the banner is `position: fixed; top: 0` with a tooltip z-index, so once
-  // a row is up it covers the header — measured at 1280x77 over a menu icon at
-  // y=24..48, with `elementFromPoint` returning the banner. A second click on the
-  // menu cannot land until the row is dismissed.
+  // Dedupe of repeated failures is covered by `ui-error-channel.test.ts`, not
+  // here: a raised row covers the header, so a second menu click cannot land.
   popup(
     'shows no banner for an action that is not on the surfaced list',
     async ({ popupPage, unlockVault }) => {

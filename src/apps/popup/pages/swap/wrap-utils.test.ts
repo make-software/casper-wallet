@@ -166,8 +166,7 @@ describe('calculateWrapNetworkCost', () => {
     expect(calculateWrapNetworkCost('wrap', null, 'USD')).toBe('5 CSPR');
   });
 
-  // A rate of 0 is real market data, not a missing one, but it prices gas at nothing — the CSPR
-  // figure is the honest thing to show rather than a confident "$0.00".
+  // A rate of 0 is real market data, but pricing gas at nothing would show a confident "$0.00".
   it('falls back to the CSPR figure on a zero rate', () => {
     expect(calculateWrapNetworkCost('wrap', 0, 'USD')).toBe('5 CSPR');
   });

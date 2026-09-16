@@ -17,9 +17,8 @@ import {
 /**
  * The repositories that parse and sign transactions.
  *
- * Importing this module links `casper-js-sdk` (~900 KB, one prebuilt UMD bundle with nothing to
- * shake out), so it is kept out of `./wallet-repositories`: every page entry reads balances and
- * accounts, but only the signing surfaces and the background need these.
+ * Kept out of `./wallet-repositories` because importing this module links
+ * `casper-js-sdk` (~900 KB, nothing to shake out); only signing surfaces need it.
  */
 const {
   txSignatureRequestRepository,

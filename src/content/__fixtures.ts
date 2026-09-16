@@ -1,8 +1,7 @@
 export type Handler = (e: { data: unknown }) => void;
 
-// A synchronous stand-in for MessagePort: `postMessage` delivers straight into
-// the peer's `onmessage` and its 'message' listeners. Closing either end of the
-// pair stops delivery in both directions.
+// A synchronous stand-in for MessagePort: `postMessage` delivers straight into the
+// peer's `onmessage` and its 'message' listeners; closing either end stops both.
 export class FakePort {
   peer!: FakePort;
   onmessage: Handler | null = null;
@@ -36,14 +35,8 @@ type FakeWindow = {
   postMessage: (data: unknown, origin: string, transfer: FakePort[]) => void;
 };
 
-// Installs the `MessageChannel` / `window` / `document` / `CustomEvent` globals
-// a content-script module touches at require time under `testEnvironment: 'node'`
-// (see index.test.ts and sdk-error-envelope.test.ts for why). Callers differ in
-// what `window.postMessage` should do, so `win.postMessage` is left as a no-op
-// here — set it on the returned `win` before `require`-ing the module under test.
-// `channelRef` is a mutable box (not the channel itself): the `MessageChannel`
-// constructor below only runs once the required module calls `new MessageChannel()`,
-// which happens after this function has already returned.
+// Installs the `MessageChannel` / `window` / `document` / `CustomEvent` globals a
+// content-script module touches at require time under `testEnvironment: 'node'`.
 export function installFakeDom(origin: string) {
   const messageListeners: Handler[] = [];
   const cleanupListeners: (() => void)[] = [];

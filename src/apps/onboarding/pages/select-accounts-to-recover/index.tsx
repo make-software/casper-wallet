@@ -113,11 +113,8 @@ export const SelectAccountsToRecoverPage = () => {
       derivationIndex: account.derivationIndex
     }));
 
-    // `.finally` closed the onboarding tab on a dropped send too, presenting an
-    // empty vault as recovered and taking the banner down with the tab it is
-    // mounted in. `isSubmitting` covers the round trip the verdict adds:
-    // `accountsAdded` appends without a dedupe, so a second click would double
-    // every recovered account.
+    // `isSubmitting` covers the round trip the verdict adds: `accountsAdded` appends
+    // without a dedupe, so a second click would double every recovered account.
     setIsSubmitting(true);
     dispatchToMainStore(
       recoverVault({

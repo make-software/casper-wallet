@@ -6,13 +6,8 @@ import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
 import { HomeTabProvider } from '@popup/hooks/use-home-tab';
 import { LazyPageFallback } from '@popup/lazy-page-fallback';
-// Everything not listed here is a separate chunk, parsed the first time its
-// route is reached rather than on every popup open (WALLET-1381). The eager
-// four each have a reason: home is what the popup renders on open, the
-// navigation menu is one click away everywhere and is cheap, BringWeb3Unlock is
-// a ten-line stub whose window only opens against a locked vault (lazy would
-// put a loading state on the unlock path), and WindowErrorPage must not itself
-// be able to fail to load.
+// Everything not listed here is a separate chunk, parsed the first time its route is
+// reached; the eager four are on the popup's open path or must not fail to load.
 import { BringWeb3Unlock } from '@popup/pages/bring-web3-unlock';
 import { HomePageContent } from '@popup/pages/home';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
@@ -177,9 +172,8 @@ export function AppRouter() {
   const keysDoesExist = useSelector(selectKeysDoesExist);
   useUserActivityTracker();
 
-  // The icon opens this popup straight from the manifest, before the background has read the
-  // vault and detached it for an unfinished onboarding. Reaching it with no keys would
-  // otherwise draw an unlock prompt for a wallet that does not exist.
+  // The icon opens this popup straight from the manifest, before the background has
+  // detached an unfinished onboarding; with no keys it would prompt to unlock nothing.
   useEffect(() => {
     if (!keysDoesExist) {
       openOnboardingUi();
@@ -215,11 +209,8 @@ function AppRoutes() {
     return null;
   }
 
-  // Both branches return a <Suspense> at the same position so the boundary
-  // survives the menu toggle. startTransition only protects content an
-  // *existing* boundary has already revealed; a freshly mounted one paints its
-  // fallback instead. Since menu items navigate to lazy routes in the same
-  // click handler, dropping this wrapper puts the fallback on every one.
+  // Both branches return a <Suspense> at the same position so the boundary survives the
+  // menu toggle; a freshly mounted one would paint its fallback on every menu click.
   if (state?.showNavigationMenu) {
     return (
       <Suspense fallback={<LazyPageFallback />}>

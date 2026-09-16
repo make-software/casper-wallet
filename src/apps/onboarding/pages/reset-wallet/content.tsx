@@ -4,8 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { TabPageContainer, TabTextContainer } from '@libs/layout';
 import { Typography } from '@libs/ui/components';
 
-// Design of this page is temporary. Should be changed after it will be done in Figma
-
 export function ResetWalletPageContent() {
   const { t } = useTranslation();
 

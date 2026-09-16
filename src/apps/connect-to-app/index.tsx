@@ -50,7 +50,6 @@ const Tree = () => {
 
   const themeMode = selectThemeModeSetting(store.getState());
 
-  // Set theme mode to system if it is no present in the store
   if (themeMode === undefined && !isSafariBuild) {
     dispatchToMainStore(themeModeSettingChanged(ThemeMode.SYSTEM));
   } else if (themeMode === undefined && isSafariBuild) {

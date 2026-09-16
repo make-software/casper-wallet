@@ -72,8 +72,7 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   }, [hasLoginRetryLockoutTime, resetField]);
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
-    // The background refuses while a lockout is armed, so there is no request
-    // here worth starting — the submit button is inert for the duration anyway.
+    // The background refuses while a lockout is armed, so there is nothing to send.
     if (isLoading || hasLoginRetryLockoutTime) return;
 
     setIsLoading(true);
@@ -93,9 +92,8 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
           message: t('Something went wrong. Please try again.')
         });
       } else if (result.status === 'lockedOut') {
-        // Normally the broadcast swaps the content to the lockout screen before
-        // this is seen. `broadcastToReplicas` swallows delivery failures though,
-        // so this is the only feedback if that broadcast is dropped.
+        // The broadcast normally swaps in the lockout screen first; this is the
+        // only feedback if `broadcastToReplicas` drops it.
         setError('password', {
           message: t(
             'Too many failed attempts. Please wait before trying again.'

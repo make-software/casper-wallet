@@ -112,11 +112,8 @@ const selectEip712JsonByIdMock = selectEip712JsonById as jest.MockedFunction<
 const ORIGIN = 'https://dapp.example';
 const META = { requestId: 'req-1' };
 
-// `dispatch` records a `windowRequestOpened` into a mutable backing map, mimicking
-// the real reducer's accept path closely enough that the handler's post-dispatch
-// re-read (`selectRequestStatus`) sees the row. A test asserting the open-request
-// cap overrides `dispatch` to a no-op instead, standing in for the reducer's
-// refusal — the row then never appears, exactly like the real cap.
+// `dispatch` records a `windowRequestOpened` into a mutable map so the handler's
+// post-dispatch re-read sees the row; a no-op `dispatch` stands in for the cap.
 function makeStore(requests: Record<string, unknown> = {}) {
   const state = { ...requests };
   const dispatch = jest.fn((action: { type: string; payload?: unknown }) => {
@@ -144,20 +141,16 @@ const SENDER = {
   frameId: 3
 } as Runtime.MessageSender;
 
-// Top-frame sender — the common case, and the one `sender.frameId || undefined`
-// would silently erase (0 is falsy). SENDER above pins only frameId 3 in every
-// assertion, so that slip would keep the suite green without this variant.
+// Top-frame sender — the case `sender.frameId || undefined` would silently
+// erase (0 is falsy), and SENDER above pins only frameId 3.
 const SENDER_TOP_FRAME = {
   url: 'https://dapp.example/page',
   tab: { id: 9 },
   frameId: 0
 } as Runtime.MessageSender;
 
-// `reconcileStalePayloadsSaga` may resume at any `await`, and a payload that no
-// descriptor and no window claims is exactly what it purges — so the payload
-// write and `windowRequestOpened` have to land in one synchronous block. The
-// probe is a microtask queued at the write: an `await` in between would let it
-// run before the descriptor.
+// `reconcileStalePayloadsSaga` purges a payload no descriptor claims, so the
+// write and `windowRequestOpened` have to land in one synchronous block.
 function watchGapBeforeDescriptor(dispatch: jest.Mock, payloadType: string) {
   const seen: { microtaskRanBeforeDescriptor: boolean | null } = {
     microtaskRanBeforeDescriptor: null
@@ -200,12 +193,6 @@ afterEach(() => {
 });
 
 describe('a requestId the wallet already registered', () => {
-  // `requestId` is page-generated, i.e. dapp-controlled. The reducer already
-  // refuses to overwrite a live request or resurrect a tombstone — but the six
-  // method branches called `openWindow` regardless, so the wallet still opened
-  // a fully functional approval screen for a request it could never answer:
-  // the user's approval was then dropped by the dedup, silently. Answer the
-  // dapp now instead.
   it('a replayed finished requestId is refused before anything is dispatched', async () => {
     const { store, dispatch } = makeStore({ 'req-1': { status: 'responded' } });
 
@@ -245,8 +232,8 @@ describe('a requestId the wallet already registered', () => {
       )
     ).rejects.toThrow('Duplicate requestId');
 
-    // Nothing was dispatched — in particular not `deployPayloadReceived`, which
-    // is what made the replayed screen render normally.
+    // In particular not `deployPayloadReceived`, which is what would make the
+    // replayed screen render normally.
     expect(dispatch).not.toHaveBeenCalled();
     expect(openWindowMock).not.toHaveBeenCalled();
   });
@@ -255,9 +242,7 @@ describe('a requestId the wallet already registered', () => {
 describe('a requestId that is not storable', () => {
   it('is refused before a window opens, instead of stranding one', async () => {
     // `__proto__` cannot be a key in the requests map, so the reducer refuses
-    // it. Without this the caller was told the id was fresh, the window opened,
-    // and the approval sat outside the lifecycle model entirely — not
-    // cancellable on close or supersede, not deduped, not recoverable.
+    // it and a window opened anyway sits outside the lifecycle model entirely.
     const { store, dispatch } = makeStore();
 
     await expect(
@@ -637,8 +622,7 @@ describe('signRequest', () => {
 
   it('a top-frame sender (frameId 0) reaches the dispatch as frameId 0', async () => {
     // jest's argument equality ignores an `undefined` value but not a `0`, so
-    // `frameId: 0` here is what discriminates against `sender.frameId ||
-    // undefined`.
+    // `frameId: 0` is what discriminates against `sender.frameId || undefined`.
     isEqualCIMock.mockReturnValue(false);
     const { store, dispatch } = makeStore();
 
@@ -678,8 +662,7 @@ describe('signRequest', () => {
 
   it('payload write refused at capacity → cancelled response, no window', async () => {
     // The map stays empty after the dispatch, so the signature page would have
-    // had nothing to render and the dapp promise would have hung to its own
-    // 30-minute timeout.
+    // nothing to render and the dapp promise would hang to its own timeout.
     isEqualCIMock.mockReturnValue(false);
     selectDeploysJsonByIdMock.mockReturnValue({});
     const { store, dispatch } = makeStore();
@@ -798,10 +781,8 @@ describe('signRequest', () => {
   });
 
   it('refused at the open-request cap → the payload-cap-style cancelled response, no window', async () => {
-    // Payload cap has room (default mock), only the open-request cap refuses —
-    // so, unlike the payload-cap refusal above, the payload dispatch DOES land
-    // and only the descriptor dispatch is refused: the accepted deploy payload
-    // is left stranded for `reconcileStalePayloadsSaga` to reclaim.
+    // Payload cap has room, only the open-request cap refuses — so the payload
+    // dispatch DOES land and only the descriptor is refused.
     isEqualCIMock.mockReturnValue(false);
     const { store, dispatch } = makeStore();
     dispatch.mockImplementation(() => {});
@@ -827,8 +808,7 @@ describe('signRequest', () => {
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({ type: windowRequestOpened.type })
     );
-    // Reclaims the stranded payload immediately, rather than waiting on
-    // `reconcileStalePayloadsSaga`: the vault reducer deletes the payload
+    // Reclaims the stranded payload immediately: the vault reducer deletes it
     // keyed off exactly this action.
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1188,10 +1168,8 @@ describe('signTypedDataRequest', () => {
   });
 
   it('refused at the open-request cap → the payload-cap-style cancelled response, no window', async () => {
-    // Payload cap has room (default mock), only the open-request cap refuses —
-    // so, unlike the payload-cap refusal above, the payload dispatch DOES land
-    // and only the descriptor dispatch is refused: the accepted eip712 payload
-    // is left stranded for `reconcileStalePayloadsSaga` to reclaim.
+    // Payload cap has room, only the open-request cap refuses — so the eip712
+    // payload dispatch DOES land and only the descriptor is refused.
     const { store, dispatch } = makeStore();
     dispatch.mockImplementation(() => {});
 

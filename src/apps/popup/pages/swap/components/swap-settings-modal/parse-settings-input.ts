@@ -11,13 +11,11 @@ export const sanitizeDecimalInput = (value: string): string => {
 export const sanitizeIntegerInput = (value: string): string =>
   value.replace(/\D/g, '');
 
-/** Percent, truncated to 2 decimals. Anything unparseable — including an empty field — is 0;
- *  the settings reducer clamps 0 up to MIN_SLIPPAGE. */
+/** Percent, truncated to 2 decimals; anything unparseable is 0 and the reducer clamps it up. */
 export const parseSlippageInput = (value: string): number => {
   try {
     const normalized = (value ?? '').toString().trim().replace(/,/g, '.');
 
-    // Allow: "", "123", "123.", ".5", "123.45"
     if (!/^\d*(\.\d*)?$/.test(normalized)) {
       return 0;
     }
@@ -29,7 +27,7 @@ export const parseSlippageInput = (value: string): number => {
   }
 };
 
-/** Whole minutes. An empty field is 0; the reducer clamps 0 up to MIN_DEADLINE. */
+/** Whole minutes; an empty field is 0 and the reducer clamps it up. */
 export const parseDeadlineInput = (value: string): number =>
   parseInt(sanitizeIntegerInput(value), 10) || 0;
 

@@ -30,9 +30,6 @@ it('proceeds only once the background has accepted the change', async () => {
   expect(reportUiError).not.toHaveBeenCalled();
 });
 
-// Navigating regardless left the user on Home believing the password had
-// changed. The old one is still live, and each later unlock attempt counts
-// toward the lockout.
 it('keeps the caller on the page and surfaces the failure when the request fails', async () => {
   const onAccepted = jest.fn();
 

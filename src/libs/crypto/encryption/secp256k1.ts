@@ -10,11 +10,8 @@ function getCrypto(): Crypto {
   return c;
 }
 
-// TS 5.7+ types `Uint8Array` as `Uint8Array<ArrayBufferLike>`, where
-// `ArrayBufferLike` includes `SharedArrayBuffer`; WebCrypto's `BufferSource`
-// only accepts `ArrayBuffer`-backed views. Every buffer here is a plain
-// `ArrayBuffer`-backed `Uint8Array` at runtime (from `new Uint8Array`, noble,
-// `TextEncoder`, or `.slice()`), so this reinterpretation is byte-identical.
+// WebCrypto's `BufferSource` rejects the `SharedArrayBuffer` arm of TS's
+// `Uint8Array<ArrayBufferLike>`; every buffer here is `ArrayBuffer`-backed at runtime.
 function asBufferSource(bytes: Uint8Array): BufferSource {
   return bytes as BufferSource;
 }
@@ -29,7 +26,6 @@ function leftPad32(x: Uint8Array): Uint8Array {
     out.set(x, 32 - x.length);
     return out;
   }
-  // length > 32: allow only leading zero padding
   const extra = x.length - 32;
   for (let i = 0; i < extra; i++) {
     if (x[i] !== 0) {
@@ -41,7 +37,6 @@ function leftPad32(x: Uint8Array): Uint8Array {
   return x.slice(x.length - 32);
 }
 
-// ECIES
 const ALG = { SECP256K1: 0x01 };
 
 function concat(...parts: Uint8Array[]): Uint8Array {
@@ -82,7 +77,6 @@ function unpackECIES(buf: Uint8Array) {
   };
 }
 
-// HKDF
 const HKDF_INFO = enc.encode('ecies-secp256k1-v1');
 
 async function hkdfAesKey(
@@ -115,7 +109,6 @@ async function hkdfAesKey(
   ]);
 }
 
-// Encryption
 function randomBytes(len: number): Uint8Array {
   const crypto = getCrypto();
   const out = new Uint8Array(len);

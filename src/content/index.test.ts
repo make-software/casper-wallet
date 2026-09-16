@@ -36,8 +36,7 @@ const loadContentScript = () => {
   jest.resetModules();
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   require('./index');
-  // Re-require *after* resetting, in the same (post-reset) module registry
-  // `./index` just populated, so this is the exact `runtime` instance bound
+  // Re-require *after* resetting, so this is the exact `runtime` instance bound
   // inside the freshly loaded content script.
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const runtime = require('webextension-polyfill').runtime as MockedRuntime;
@@ -100,10 +99,8 @@ describe('establishSdkPort request gate', () => {
     });
   });
 
-  // Pinning the exact request-direction strings is what stops a forged
-  // response envelope or a redux action from reaching the background
-  // (defence-in-depth for P0.2). Relaxing the gate to `isSDKMethod` alone
-  // must fail here.
+  // Relaxing the gate to `isSDKMethod` alone must fail here: the exact
+  // request-direction strings are what stop a forged response envelope.
   it.each([
     ['a response envelope', sdkMethod.signResponse.type],
     ['an error envelope', sdkMethod.signError.type],
@@ -151,9 +148,8 @@ describe('establishSdkPort request gate', () => {
   });
 });
 
-// Reaching the `activePort == null` branch means running cleanup() first —
-// the module wires it to a window event listener, which the harness captured
-// in `cleanupListeners`.
+// Reaching the `activePort == null` branch means running cleanup() first, which
+// the module wires to a window event listener captured in `cleanupListeners`.
 describe('delayed response with no active port', () => {
   it('logs the type and requestId, never the payload', () => {
     const { cleanupListeners, channel, runtime } = loadContentScript();
@@ -168,8 +164,7 @@ describe('delayed response with no active port', () => {
       meta: { requestId: 'req-9' }
     });
 
-    // SECURITY: the payload of a delayed response carries signatureHex /
-    // encryptedMessage — type + requestId only.
+    // SECURITY: a delayed response payload carries signatureHex / encryptedMessage.
     expect(console.error).toHaveBeenCalledWith(
       'Content: dropped a delayed SDK response, no active port:',
       sdkMethod.signResponse.type,

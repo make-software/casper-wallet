@@ -9,18 +9,9 @@ export interface LedgerPermissionWindowInputs {
 
 /**
  * Whether the device chooser needs a browser window of its own before this
- * transport can be opened.
- *
- * The extension popup cannot host a WebHID, WebUSB or Web Bluetooth chooser,
- * which is what the permission window is for. This used to be discovered by
- * attempting the connection and reading `ledger-permission-required` off the
- * event stream — a status the shared core service no longer emits, because it
- * reports every transport-open failure as `ledger-error-opening-device`. Asking
- * up front also drops a doomed connect attempt from the happy path.
- *
- * Bluetooth always needs the window outside it: paired BLE devices cannot be
- * enumerated the way `navigator.hid.getDevices()` enumerates permitted ones, so
- * there is no witness that would let us skip it.
+ * transport can be opened: the extension popup cannot host a WebHID, WebUSB or
+ * Web Bluetooth chooser. Bluetooth always needs one, since paired BLE devices
+ * cannot be enumerated the way `navigator.hid.getDevices()` enumerates permitted ones.
  */
 export function needsLedgerPermissionWindow({
   transport,

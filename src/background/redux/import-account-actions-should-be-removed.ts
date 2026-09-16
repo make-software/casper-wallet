@@ -1,7 +1,5 @@
 import { runtime } from 'webextension-polyfill';
 
-// WARNING: legacy to be refactored, don't reuse!
-
 export type CheckAccountNameIsTakenAction = {
   type: 'check-account-name-is-taken';
   payload: { accountName: string };

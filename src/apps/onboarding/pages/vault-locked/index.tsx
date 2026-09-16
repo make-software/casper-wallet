@@ -9,10 +9,8 @@ import { Button } from '@libs/ui/components';
 import { VaultLockedPageContent } from './content';
 
 /**
- * Shown when keys exist but the session does not — a locked vault, or an
- * onboarding that was abandoned after the password step. Onboarding is not on
- * the unlock allowlist, so the only action offered here is the confirmed reset;
- * unlocking happens in the extension popup.
+ * Shown when keys exist but the session does not. Onboarding is not on the unlock
+ * allowlist, so the only action offered here is the confirmed reset.
  */
 export function VaultLockedPage() {
   const navigate = useTypedNavigate();

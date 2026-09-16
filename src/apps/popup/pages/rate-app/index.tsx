@@ -22,19 +22,12 @@ import { Button } from '@libs/ui/components';
 import { Content } from './content';
 import { RateAppLinks, RateAppSteps, getBrowserFromUserAgent } from './utils';
 
-/**
- * The main RateApp page component.
- *
- * @component
- * @name RateAppPage
- */
 export const RateAppPage = () => {
   const [reviewStep, setReviewStep] = useState<RateAppSteps>(
     RateAppSteps.Navigation
   );
   const [browser, setBrowser] = useState<Browser | 'Unknown'>(Browser.Chrome);
 
-  // Runs once on component mount to determine the user's browser.
   useEffect(() => {
     setBrowser(getBrowserFromUserAgent());
   }, []);
@@ -42,9 +35,6 @@ export const RateAppPage = () => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
-  /**
-   * Defines the content to be displayed based on the current rate app step.
-   */
   const content = {
     [RateAppSteps.Navigation]: (
       <Content
@@ -71,10 +61,6 @@ export const RateAppPage = () => {
     )
   };
 
-  /**
-   * Defines footer buttons to be shown based on the current rate app step.
-   * The button actions dispatch relevant actions to the Redux store and set the rate app step or navigation path accordingly.
-   */
   const footerButtons = {
     [RateAppSteps.Navigation]: (
       <>
@@ -105,8 +91,8 @@ export const RateAppPage = () => {
       <>
         <Button
           onClick={() => {
-            const date = new Date(); // This will get current date
-            const datePlusFourMonth = date.setMonth(date.getMonth() + 4); //This will set date 4 month ahead.
+            const date = new Date();
+            const datePlusFourMonth = date.setMonth(date.getMonth() + 4);
 
             dispatchToMainStore(ratedInStoreChanged(false));
             dispatchToMainStore(askForReviewAfterChanged(datePlusFourMonth));
@@ -120,8 +106,8 @@ export const RateAppPage = () => {
         <Button
           color="secondaryBlue"
           onClick={() => {
-            const date = new Date(); // This will get current date
-            const datePlusFourMonth = date.setMonth(date.getMonth() + 1); //This will set a date 1 month ahead.
+            const date = new Date();
+            const datePlusFourMonth = date.setMonth(date.getMonth() + 1);
 
             dispatchToMainStore(ratedInStoreChanged(false));
             dispatchToMainStore(askForReviewAfterChanged(datePlusFourMonth));
@@ -135,17 +121,13 @@ export const RateAppPage = () => {
     )
   };
 
-  /**
-   * Defines header buttons to be shown based on the current rate app step.
-   * The actions dispatch relevant actions to the Redux store and set the rate app step or navigation path accordingly.
-   */
   const headerButtons = {
     [RateAppSteps.Navigation]: (
       <HeaderSubmenuBarNavLink
         linkType="close"
         onClick={() => {
-          const date = new Date(); // This will get current date
-          const datePlusOneMonth = date.setMonth(date.getMonth() + 1); //This will set a date 1 month ahead.
+          const date = new Date();
+          const datePlusOneMonth = date.setMonth(date.getMonth() + 1);
 
           dispatchToMainStore(ratedInStoreChanged(false));
           dispatchToMainStore(askForReviewAfterChanged(datePlusOneMonth));
@@ -168,9 +150,6 @@ export const RateAppPage = () => {
     )
   };
 
-  /**
-   * Generates the page layout, including the header, main content and footer.
-   */
   return (
     <PopupLayout
       renderHeader={() => (

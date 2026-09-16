@@ -25,9 +25,7 @@ describe('DexTokenIcon', () => {
     expect(html).toContain('alt="CD_LONG"');
   });
 
-  // Without a fallback this rendered nothing at all and the row's text slid
-  // into the icon's slot. react-inlinesvg fetches the bundled asset in the
-  // browser, so only the sized box it renders into is visible from here.
+  // react-inlinesvg fetches the bundled asset in the browser, so only its sized box is visible.
   it('still occupies the icon slot when the token has no icon url', () => {
     const html = render({ icon: null, symbol: 'CD_LONG' });
 

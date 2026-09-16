@@ -66,9 +66,8 @@ it("closes the caller's permission window and every window still displaying the 
 });
 
 it('closes each window exactly once when the sets overlap', async () => {
-  // `windowIds` contains the permission window too (use-ledger attaches it via
-  // windowRequestWindowAttached), so a naive concat would call remove twice and
-  // the second call would reject with "No window with id".
+  // `windowIds` contains the permission window too, so a naive concat would call
+  // remove twice and the second call would reject with "No window with id".
   const { store } = makeStore(20, { r1: openRequest([10, 20]) });
 
   await handleCloseLedgerFlowWindows(store, {
@@ -80,8 +79,6 @@ it('closes each window exactly once when the sets overlap', async () => {
 });
 
 it('closes nothing outside the flow — an unrelated request keeps its window', async () => {
-  // This is the whole ticket: the predecessor closed every popup in the profile,
-  // which cancelled other dapps' approvals and the secret-key export window.
   const { store } = makeStore(20, {
     r1: openRequest([10, 20]),
     other: openRequest([99])
@@ -96,9 +93,8 @@ it('closes nothing outside the flow — an unrelated request keeps its window', 
 });
 
 it('leaves a window a second open request still claims, even when this flow lists it', async () => {
-  // The shared approval window: a second dapp request reuses it, so it is that
-  // request's only display and removing it here answers a dapp we were not asked
-  // about. Same subtraction the response path does.
+  // The shared approval window: a second dapp request reuses it, so removing it
+  // here answers a dapp we were not asked about.
   const { store } = makeStore(20, {
     r1: openRequest([10, 20]),
     other: openRequest([10])
@@ -138,9 +134,8 @@ it('closes only the permission window when the response path already collapsed t
 });
 
 it('reads the requests map by own properties only', async () => {
-  // requestId is dapp-controlled (generateRequestId, src/content/sdk.ts). The
-  // console.warn assertion is what proves the safe read fell into the
-  // no-descriptor branch rather than reaching the inherited one.
+  // requestId is dapp-controlled; the console.warn assertion is what proves the
+  // read fell into the no-descriptor branch rather than the inherited one.
   const { store } = makeStore(
     20,
     Object.create({ polluted: openRequest([10, 20]) })
@@ -201,9 +196,7 @@ it("closes the caller's window but leaves the slice when the slot already moved 
 
 describe('a second flow holding the global slot', () => {
   // `state.ledger.windowId` is one scalar with no per-request keying, and it can
-  // be released while its window is still open (LedgerDisconnectedFooter's
-  // Connect CTA dispatches ledgerStateCleared). Reading it here removed the
-  // taking-over flow's window mid device-confirmation.
+  // be released while its window is still open.
   it("never removes the slot's window on the caller's behalf", async () => {
     const { store } = makeStore(77, { r1: openRequest([10]) });
 

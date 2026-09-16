@@ -75,7 +75,7 @@ describe('settings reducer', () => {
         ...jest.requireActual('@src/utils'),
         isSafariBuild: true
       }));
-      // eslint-disable-next-line @typescript-eslint/no-require-imports -- require is required to re-import the module under the mocked build flag
+      // eslint-disable-next-line @typescript-eslint/no-require-imports -- re-imports the module under the mocked build flag
       const { reducer: safariReducer } = require('./reducer');
       const safariInitial = safariReducer(undefined, { type: '@@INIT' } as any);
       expect(safariInitial.themeMode).toBe(ThemeMode.LIGHT);

@@ -31,7 +31,6 @@ onboarding.describe('Onboarding UI: confirm secret phrase flow', () => {
         page.getByText(DEFAULT_FIRST_ACCOUNT.accountName)
       ).toBeVisible();
 
-      //Fresh account should have empty balances, no nft or deploy history
       await onboardingExpect(page.getByText('NFTs')).toBeVisible();
 
       await page.getByText('NFTs').click();

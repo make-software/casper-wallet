@@ -17,11 +17,7 @@ interface BuildSwapDependenciesParams {
   activePublicKey: string | null;
 }
 
-/**
- * Assembles the dependency object core's swap hooks take as their single parameter. Split out
- * of `useSwapDependencies` so it can be tested directly: this repo's jest has no DOM environment
- * to render a hook against.
- */
+/** Split out of `useSwapDependencies` so it can be tested: this repo's jest has no DOM. */
 export const buildSwapDependencies = ({
   network,
   activePublicKey
@@ -30,8 +26,8 @@ export const buildSwapDependencies = ({
   dexContractRepository,
   tokensRepository,
   network,
-  // Read only by core hooks this app never mounts: `useSwapSubmit` builds a runner per
-  // submission instead, so the secret key's lifetime matches the flow's.
+  // Read only by core hooks this app never mounts; `useSwapSubmit` builds a runner per submission,
+  // so the secret key's lifetime matches the flow's.
   swapFlowRunner: null,
   wrapFlowRunner: null,
   activePublicKey

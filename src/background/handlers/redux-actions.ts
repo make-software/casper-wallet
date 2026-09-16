@@ -114,9 +114,6 @@ import {
 } from './trusted-sender';
 import { HandlerResult } from './types';
 
-// The request a sender page is displaying, read off its own URL — the same
-// recovery `handleSdkResponseToTab` does for the dapp origin. Null when the page
-// carries no id (the internal Ledger flows) or the URL will not parse.
 function recoverRequestId(url: string | undefined): string | null {
   if (!url) {
     return null;
@@ -209,29 +206,17 @@ export async function handleReduxAction(
   sender: Runtime.MessageSender,
   store: MainStore
 ): Promise<HandlerResult> {
-  // Intercepted rather than forwarded blindly: attaching a window is what makes
-  // a request cancellable, so a dead or bogus `windowId` would leave it open
-  // forever. `attachWindowToRequest` dispatches AND verifies the window is
-  // alive, which the generic forwarding path cannot do. The UI dispatcher here
-  // is `use-ledger` registering the Ledger permission window.
+  // Intercepted rather than forwarded blindly: `attachWindowToRequest` also
+  // verifies the window is alive, which the forwarding path cannot do.
   if (windowRequestWindowAttached.match(action)) {
-    // Defense-in-depth, same gate and same reasoning as `handleSdkResponseToTab`
-    // and `handleLegacyImport`: this branch decides a request's lifecycle, so
-    // only the extension's own UI pages may originate it. A live-but-unrelated
-    // windowId makes the request permanently uncancellable; a dead one attached
-    // in the gap before the real window makes `windowIds` exactly `[dead]`,
-    // which the cancel path then selects. Already unreachable from a page via
-    // the content script's SDK_REQUEST_TYPES allowlist — this is the layer that
-    // does not depend on that allowlist staying right.
-    // Silently drop (no response), matching the sibling gates.
+    // Only the extension's own UI may decide a request's lifecycle: a foreign
+    // windowId leaves the request permanently uncancellable. Dropped silently.
     if (!isTrustedUiSender(sender)) {
       return { handled: true };
     }
 
-    // `.match` is `isAction(action) && action.type === type` — it says nothing
-    // about the payload. Read it defensively so a payload-less message reaches
-    // `attachWindowToRequest`'s shape guard (which logs and drops it) instead
-    // of throwing a TypeError the router reports as a generic sendError.
+    // `.match` says nothing about the payload; read it defensively so a
+    // payload-less message reaches `attachWindowToRequest`'s shape guard.
     const payload: Partial<{ requestId: string; windowId: number }> =
       action.payload ?? {};
 
@@ -243,26 +228,18 @@ export async function handleReduxAction(
     return { handled: true, response: undefined };
   }
 
-  // Intercepted rather than forwarded even though it HAS a reducer case: it
-  // decides whether the shared approval window may be reused while a Ledger
-  // call runs in it, and `FORWARDED_ACTION_TYPES` checks no sender at all. Held
-  // on a foreign request the flag withholds that request's window from reuse for
-  // as long as it stays open, so the same two gates as the branches around it.
+  // Intercepted though it has a reducer case: held on a foreign request the flag
+  // withholds that request's window from reuse for as long as it stays open.
   if (windowRequestDeviceConfirmationChanged.match(action)) {
     if (!isTrustedUiSender(sender)) {
       return { handled: true };
     }
 
-    // `.match` says nothing about the payload, and this crosses
-    // `runtime.sendMessage`.
     const payload: Partial<{ requestId: string; awaiting: boolean }> =
       action.payload ?? {};
 
-    // Bound to the sender's own URL exactly as `closeLedgerFlowWindows` is: the
-    // page that runs the device call is the page the request opened, so it
-    // carries the id in its query string. Unlike that one there is no
-    // internal-flow case to admit — `runWithDeviceConfirmationReported` sends
-    // nothing without a requestId.
+    // Bound to the sender's own URL: the page that runs the device call is the
+    // page the request opened, so it carries the id in its query string.
     if (
       typeof payload.awaiting !== 'boolean' ||
       typeof payload.requestId !== 'string' ||
@@ -275,28 +252,20 @@ export async function handleReduxAction(
     return { handled: true, response: undefined };
   }
 
-  // Intercepted rather than forwarded: there is no reducer case for it, and the
-  // window set it closes is derived from `windowManagement.requests`, which no
-  // replica can see. Gated on `sender` for the same reason as the branch above —
-  // closing an approval window reaches `cancelOpenRequestsForClosedWindow`, so
-  // this decides a request's lifecycle.
+  // Intercepted rather than forwarded: no reducer case, and the window set it
+  // closes derives from `windowManagement.requests`, which no replica can see.
   if (closeLedgerFlowWindows.match(action)) {
     if (!isTrustedUiSender(sender)) {
       return { handled: true };
     }
 
-    // `.match` says nothing about the payload, and this crosses
-    // `runtime.sendMessage`. Read it defensively so a payload-less message
-    // becomes the no-requestId (internal-flow) case instead of a TypeError the
-    // router reports as a generic sendError.
+    // Read defensively so a payload-less message becomes the no-requestId
+    // (internal-flow) case instead of a TypeError.
     const payload: Partial<{ requestId: string; permissionWindowId: number }> =
       action.payload ?? {};
 
-    // The sender gate admits every wallet page, so on its own it lets any of
-    // them name any request — and this branch decides that request's lifecycle.
-    // Every legitimate dispatcher runs in a window whose URL carries the id
-    // (`use-ledger` builds the permission window's URL from the same params),
-    // so binding the two costs nothing and drops the mismatch.
+    // The sender gate admits every wallet page, so bind the named request to the
+    // id in the sender's own URL — every legitimate dispatcher carries it.
     if ((payload.requestId ?? null) !== recoverRequestId(sender.url)) {
       return { handled: true };
     }
@@ -311,8 +280,7 @@ export async function handleReduxAction(
     }
 
     // Fire-and-forget: the dispatcher's document is one of the windows being
-    // closed. `handleCloseLedgerFlowWindows` never rejects; the `.catch` is the
-    // belt for a synchronous throw before its first await.
+    // closed. The `.catch` covers a synchronous throw before the first await.
     void Promise.resolve(
       handleCloseLedgerFlowWindows(store, {
         requestId: payload.requestId,
@@ -325,21 +293,14 @@ export async function handleReduxAction(
     return { handled: true, response: undefined };
   }
 
-  // Both branches below re-dispatch into the real store: the set carries
-  // `initVault` and `keysReseted`, and `resetVault` reaches `storage.local.clear()`.
-  // Gated like the two branches above, and for the same reason — so this does
-  // not rest on the content script's request allowlist staying right. Scoped to
-  // those two branches on purpose: an unlisted type must keep falling through
-  // as `{ handled: false }`, which is how `handleBringWeb3` sees its
-  // content-script messages at all.
+  // Gated because both branches below re-dispatch into the real store; scoped to
+  // them so an unlisted type still falls through for `handleBringWeb3`.
   if (
     action.type === resetVault.type ||
     FORWARDED_ACTION_TYPES.has(action.type)
   ) {
-    // Silently drop (no response), matching the sibling gates. Interpolating
-    // `action.type` into the warning is safe only because this branch is
-    // reached for a fixed vocabulary (resetVault plus FORWARDED_ACTION_TYPES) —
-    // widen the branch and it becomes attacker-chosen console text.
+    // Interpolating `action.type` is safe only because this branch is reached
+    // for a fixed vocabulary — widen it and it becomes attacker-chosen text.
     if (!isTrustedUiSender(sender)) {
       warnUntrustedSameExtensionSender(sender, `redux action ${action.type}`);
       return { handled: true };
@@ -347,13 +308,8 @@ export async function handleReduxAction(
   }
 
   if (action.type === resetVault.type) {
-    // The sender's OWN window, from `MessageSender` rather than the wire
-    // payload — `ResetVaultPage` renders inside the signature-request and
-    // connect-to-app approval windows (`LockedRouter`), so `resetVaultSaga`'s
-    // window-removal set must exclude it: closing the window the reset was
-    // issued FROM would kill the page's own continuation
-    // (`closeWindowByReloadExtension`), and on Firefox/Safari that also skips
-    // `runtime.reload()`. Absent for a non-tab sender, hence optional.
+    // The sender's OWN window, so `resetVaultSaga` excludes it from removal:
+    // closing it would kill the page's own continuation.
     store.dispatch(resetVault(sender.tab?.windowId));
     await enableOnboardingFlow();
     return { handled: true, response: undefined };

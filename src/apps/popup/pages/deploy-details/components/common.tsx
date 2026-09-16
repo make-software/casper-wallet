@@ -293,7 +293,7 @@ export const ContractInfoRow = ({
 }: ContractInfoRowProps) => {
   const { t } = useTranslation();
 
-  const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork); // Fetch the live Casper network URL from Redux store.  // Assuming 'publicKey' is the public key of the contract.  // Replace 'casperLiveUrl' with the actual live Casper network URL.  // Fetch the contract details using the public key.  // Display the contract name, icon, and additional information.  // If the contract details are not found, display a
+  const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
   const link = getBlockExplorerContractPackageUrl(
     casperLiveUrl,

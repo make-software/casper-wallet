@@ -28,8 +28,7 @@ export const ResetVaultPage = ({ popupLayout }: ResetVaultPageProps) => {
 
   function handleResetVault() {
     dispatchToMainStore(resetVault()).then(dispatched => {
-      // Reloading on a dropped dispatch would present an unperformed reset as
-      // done, and take the error banner down with the page.
+      // Reloading on a dropped dispatch would present an unperformed reset as done.
       if (dispatched) {
         closeWindowByReloadExtension();
       }

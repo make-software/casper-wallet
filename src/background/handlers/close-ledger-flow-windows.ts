@@ -8,16 +8,14 @@ import { selectOpenRequests } from '@background/redux/windowManagement/selectors
 export interface CloseLedgerFlowWindowsTarget {
   /** Absent for the internal flows, which have no dapp request behind them. */
   requestId?: string;
-  /** The dispatcher's own Ledger window — see the action's docblock. */
+  /** The dispatcher's own Ledger window, never the global slot. */
   permissionWindowId: number;
 }
 
 /**
  * Closes the caller's permission window plus every window still displaying
- * `requestId`, minus whatever another open request still claims.
- *
- * Never rejects: every caller is a fire-and-forget UI dispatch, and an
- * unhandled rejection in a service worker is invisible.
+ * `requestId`, minus whatever another open request still claims. Never rejects:
+ * every caller is a fire-and-forget UI dispatch.
  */
 export async function handleCloseLedgerFlowWindows(
   store: MainStore,
@@ -26,9 +24,8 @@ export async function handleCloseLedgerFlowWindows(
   const state = store.getState();
   const targets = new Set<number>();
 
-  // Never `state.ledger.windowId`: one global slot that a second flow can take
-  // over, so reading it here removed that flow's window mid-confirmation and
-  // wiped the deploy it was signing. The caller proves ownership instead.
+  // Never `state.ledger.windowId`: one global slot a second flow can take over,
+  // so the caller proves ownership instead.
   targets.add(permissionWindowId);
 
   const hasRequestId = typeof requestId === 'string' && requestId !== '';
@@ -52,9 +49,8 @@ export async function handleCloseLedgerFlowWindows(
     }
   }
 
-  // Same subtraction as the response path, and for the same reason: a window
-  // shared with another open request is that request's only display, so
-  // removing it here answers a dapp we were never asked about.
+  // A window shared with another open request is that request's only display,
+  // so removing it here answers a dapp we were never asked about.
   const claimedByOthers = new Set<number>();
   for (const openRequest of selectOpenRequests(state)) {
     if (hasRequestId && openRequest.requestId === requestId) continue;
@@ -66,9 +62,8 @@ export async function handleCloseLedgerFlowWindows(
 
   const removals = [...targets].filter(id => !claimedByOthers.has(id));
 
-  // Before the removals so the slice cannot outlive them, and only when it still
-  // names a window we are about to take down — clearing it otherwise wipes the
-  // `deploy`/`transaction` a flow that took the slot over is signing.
+  // Before the removals so the slice cannot outlive them; only while it still
+  // names a window we are taking down, or this wipes what another flow is signing.
   if (
     state.ledger.windowId === permissionWindowId &&
     removals.includes(permissionWindowId)

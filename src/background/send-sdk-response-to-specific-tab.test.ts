@@ -41,8 +41,6 @@ describe('sendSdkResponseToSpecificTab (UI→background forwarder)', () => {
   });
 
   it('always resolves even when runtime.sendMessage REJECTS (SW torn down mid-flight)', async () => {
-    // Regression: callers `await` this then closeCurrentWindow() with no
-    // try/catch, so a rejection must never propagate — else the window hangs.
     sendMessageMock.mockRejectedValue(
       new Error('Extension context invalidated')
     );

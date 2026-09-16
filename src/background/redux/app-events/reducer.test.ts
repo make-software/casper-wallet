@@ -114,7 +114,6 @@ describe('app-events reducer', () => {
         errors: [],
         nextErrorId: 0
       };
-      // add 2 errors -> ids 0, 1
       state = reducer(
         state,
         sagaError({ source: 'lockVaultSaga', message: 'a' })
@@ -130,7 +129,6 @@ describe('app-events reducer', () => {
       state = reducer(state, dismissSagaError(1));
       expect(state.errors.map(e => e.id)).toEqual([0]);
 
-      // a new error must get id 2, NOT the freed-up id 1
       state = reducer(
         state,
         sagaError({ source: 'createAccountSaga', message: 'c' })
@@ -197,9 +195,6 @@ describe('app-events reducer', () => {
       ]);
     });
 
-    // "Unknown source" is no longer expressible — the payload is the same closed
-    // union as SagaError.source — so what is left to assert is the reachable case:
-    // a real producer that happens to have nothing on screen.
     it('is a no-op for a source with no errors of its own', () => {
       expect(
         reducer(seeded, dismissSagaErrorsBySource('initVaultSaga')).errors

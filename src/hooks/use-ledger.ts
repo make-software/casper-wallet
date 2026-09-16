@@ -44,11 +44,8 @@ import {
 } from '@libs/services/ledger';
 
 /**
- * Search params carried into the permission window's URL. Spelled out rather
- * than `Record<string, string>` so renaming `requestId` at a call site is a
- * compile error: the lookup below is what registers the window against its
- * request, and against a string record a renamed key silently yields
- * `undefined` and takes the whole approval back to the P0 this model fixes.
+ * Search params carried into the permission window's URL. Spelled out rather than
+ * `Record<string, string>` so a renamed key is a compile error, not a silent `undefined`.
  */
 interface LedgerPermissionParams {
   requestId?: string;
@@ -62,14 +59,12 @@ interface IUseLedgerParams {
   ledgerAction: () => Promise<void>;
   /**
    * Must have parked whatever the permission window will sign by the time it
-   * resolves — a popup opener closes itself once that window exists, taking any
-   * undelivered park with it.
+   * resolves: a popup opener closes itself once that window exists.
    */
   beforeLedgerActionCb: () => Promise<void>;
   initialEventToRender?: ILedgerEvent;
   shouldLoadAccountList?: boolean;
   withWaitingEventOnDisconnect?: boolean;
-  /** We have to open new browser window to handle device permission */
   askPermissionUrlData?: {
     domain: string;
     params?: LedgerPermissionParams;
@@ -104,10 +99,6 @@ export const useLedger = ({
   const triggeredRef = useRef(false);
   const submitResume = useMemo(() => createLedgerSubmitResume(), []);
 
-  // Built key by key (rather than spread into the constructor) because
-  // `LedgerPermissionParams` has optional members: an absent one must be left
-  // out, not stringified as "undefined". Insertion order matches the previous
-  // spread, so the URL is unchanged for every existing flow.
   const searchParams = new URLSearchParams();
   Object.entries(askPermissionUrlData.params ?? {}).forEach(([key, value]) => {
     if (value != null) {
@@ -146,7 +137,6 @@ export const useLedger = ({
 
     if (isLedgerConnected) {
       // Fire-and-forget: the status below must render while the device is read.
-      // Bracketed so the background leaves the window this request runs in alone.
       const settleSubmit = submitResume.issued();
       void runWithDeviceConfirmationReported(
         askPermissionUrlData.params?.requestId,
@@ -163,10 +153,7 @@ export const useLedger = ({
 
       const transportToOpen = selectedTransportRef.current;
 
-      // The popup cannot host the device chooser; the window opened by the
-      // effect below can. Checked before connecting because the shared core
-      // service reports a failed open as a device error, not as a permission
-      // one.
+      // Checked before connecting: core reports a failed chooser open as a device error.
       if (
         transportToOpen &&
         needsLedgerPermissionWindow({
@@ -221,8 +208,8 @@ export const useLedger = ({
     const sub = ledger.connected$.subscribe(connected => {
       setIsLedgerConnected(connected);
 
-      // A device that leaves mid-action takes the submit with it; the connect branch only
-      // covers one that was already away when the user pressed submit.
+      // A device that leaves mid-action takes the submit with it; the connect branch
+      // only covers one that was already away.
       if (!connected) {
         submitResume.deviceLeft();
       }
@@ -273,22 +260,17 @@ export const useLedger = ({
   }, [isLedgerConnected, makeSubmitLedgerAction, submitResume]);
 
   /**
-   * Drops a submit still waiting for the device. `DeviceLocked` keeps polling
-   * behind the error screen, so a dismissed flow would otherwise sign the moment
-   * the device is unlocked, from a page the user already left. WALLET-1452.
+   * Drops a submit still waiting for the device: `DeviceLocked` keeps polling behind
+   * the error screen, so a dismissed flow would otherwise sign once it is unlocked.
    */
   const cancelPendingLedgerAction = useCallback(() => {
     submitResume.dropped();
   }, [submitResume]);
 
-  // One per hook instance, stable across renders: the effect below arms it and
-  // the two effects after it are the only things that take it back down.
   const closeTracker = useMemo(() => createLedgerWindowCloseTracker(), []);
 
-  // The witnesses `resolveOwnPermissionWindowId` weighs: the window this
-  // instance opened, and the window it renders in. Both are per-document; the
-  // third (`openerWindowId` qualified by `openerRequestId`) rides in the slice
-  // so a remounted popup still owns the window its predecessor opened.
+  // `openerWindowId` rides in the slice so a remounted popup still owns the window
+  // its predecessor opened; the other two witnesses are per-document.
   const openedPermissionWindowIdRef = useRef<number | null>(null);
   const [hostWindowId, setHostWindowId] = useState<number | null>(null);
   // Mirror for the open effect below, which must not re-run when the state lands.
@@ -316,10 +298,8 @@ export const useLedger = ({
     };
   }, []);
 
-  // Null until the slot names a window this instance owns, so a takeover between
-  // the two flows reads as "no permission window of mine" rather than as someone
-  // else's. Still derived from the slot, so a window this instance opened and
-  // then lost stops counting once the background clears the stale id.
+  // Null until the slot names a window this instance owns, so a takeover reads as
+  // "no permission window of mine" rather than as someone else's.
   const ownPermissionWindowId = resolveOwnPermissionWindowId({
     slotWindowId: windowId,
     openerWindowId,
@@ -329,7 +309,6 @@ export const useLedger = ({
     ownRequestId: askPermissionUrlData.params?.requestId ?? null
   });
 
-  /** We have to open new browser window to handle device permission */
   useEffect(() => {
     (async () => {
       if (
@@ -341,9 +320,7 @@ export const useLedger = ({
         const w = await openNewSeparateWindow({ url });
 
         if (w.id == null) {
-          // Nothing below can run, and no `windows.onRemoved` will ever fire
-          // for a window without an id — so the request keeps claiming a
-          // display it does not have.
+          // No `windows.onRemoved` ever fires for a window without an id.
           console.error(
             'useLedger: the permission window resolved without an id'
           );
@@ -355,8 +332,7 @@ export const useLedger = ({
 
         openedPermissionWindowIdRef.current = w.id;
 
-        // Awaited so the close below cannot drop it: this id is what lets
-        // `handleWindowRemoved` clear the slice when the window goes.
+        // Awaited so the close below cannot drop it: this id is what clears the slice.
         await dispatchToMainStore(
           ledgerNewWindowIdChanged({
             windowId: w.id,
@@ -399,8 +375,7 @@ export const useLedger = ({
           }
         }
 
-        // Reached only by an opener that stays — the flow runs in the window's
-        // own document, so nothing else here ever lowers the permission screen.
+        // Reached only by an opener that stays; nothing else here lowers the screen.
         closeTracker.arm(w.id, () => {
           setLedgerEventStatusToRender({
             status: LedgerEventStatus.Disconnected
@@ -408,19 +383,13 @@ export const useLedger = ({
         });
       }
     })().catch(error => {
-      // `openNewSeparateWindow` is an awaited call that can reject, and without
-      // this the whole body — including the attach that keeps the request alive
-      // — is skipped with nothing anywhere. Log the error's NAME only: `url`
-      // embeds the plaintext `signMessage` message as a query param, and a
-      // rejection's text can echo the URL it failed on.
+      // Log the error's NAME only: `url` embeds the plaintext `signMessage`
+      // message as a query param, and a rejection's text can echo the URL.
       console.error('useLedger: opening the permission window failed', {
         errorName: (error as Error)?.name
       });
-      // Without this the screen keeps rendering LedgerPermissionRequired: it
-      // tells the user to grant permission in a window that was never opened
-      // and never will be, with no retry path — nothing in this effect's
-      // dependency array has changed, so it will not run again. The only exit
-      // was the CTA that abandons the approval.
+      // Nothing in this effect's dependencies changes on failure, so the screen would
+      // otherwise stay on LedgerPermissionRequired with no retry path.
       setLedgerEventStatusToRender({
         status: LedgerEventStatus.PermissionWindowFailed
       });
@@ -434,50 +403,22 @@ export const useLedger = ({
     windowId
   ]);
 
-  // Unmount only — deliberately NOT the cleanup of the effect above. `windowId`
-  // is one of that effect's dependencies and the arm path dispatches
-  // ledgerNewWindowIdChanged, so its cleanup would run a broadcast round-trip
-  // after arming and remove the listener that was just registered.
+  // Unmount only, not the cleanup of the effect above: `windowId` is one of its
+  // dependencies, so that cleanup would remove the listener the arm path just registered.
   useEffect(() => () => closeTracker.detach(), [closeTracker]);
 
-  // The slice can be cleared without this window ever closing —
-  // LedgerDisconnectedFooter's Connect CTA does it, and renderLedgerFooter
-  // shows that footer for LedgerAskPermission as well as Disconnected. Once
-  // that happens another useLedger instance can open its own permission window
-  // and take over the slice; a listener still watching ours would wipe that
-  // flow's deploy/transaction the moment our stale window is closed.
+  // The slice can be cleared while this window stays open, letting another useLedger
+  // instance take it over; a listener still watching ours would wipe that flow's deploy.
   useEffect(() => {
     if (windowId != null) return;
 
     closeTracker.detach();
   }, [closeTracker, windowId]);
 
-  // Asks the background to close the windows THIS flow owns — the tracked
-  // permission window plus every window still displaying this flow's request —
-  // and to clear the ledger slice.
-  //
-  // The decision cannot be made here. The owning window ids live in
-  // `windowManagement.requests`, which `selectPopupState` strips from every
-  // replica on purpose (it maps requestIds to dapp origins and tab ids). What
-  // this replaced asked `windows.getAll({ windowTypes: ['popup'] })` instead
-  // and removed every popup window in the profile: other dapps' approval
-  // windows, the secret-key export window, and popup windows belonging to
-  // ordinary web pages. It never closed its own permission window either —
-  // `openNewSeparateWindow` creates that one `type: 'normal'`. WALLET-1416.
-  //
-  // Synchronous by design: `dispatchToMainStore` is fire-and-forget, and every
-  // call site is unawaited — the previous `async` body handed each of them a
-  // promise that rejected on a stale windowId with nothing to catch it.
-  //
-  // `permissionWindowId` is the proof of ownership the background cannot derive:
-  // the slot is global, so without it the handler can only guess whether the
-  // window it is about to remove belongs to the caller's flow.
+  // The background decides which windows to close — the owning ids live in
+  // `windowManagement.requests`, which `selectPopupState` strips from every replica.
   const closeNewLedgerWindowsAndClearState = useCallback(() => {
     if (ownPermissionWindowId == null) {
-      // A control the user pressed did nothing. Reachable two ways: the slot was
-      // released or taken over, and — briefly, on mount — before
-      // `windows.getCurrent` resolves for a page that IS (or shares a browser
-      // window with the opener of) the permission window.
       console.warn('useLedger: no permission window of this flow to close');
       return;
     }
@@ -515,8 +456,7 @@ export const useLedger = ({
     makeSubmitLedgerAction,
     cancelPendingLedgerAction,
     closeNewLedgerWindowsAndClearState,
-    // Deliberately not the raw slot: a page that branches on "is there a
-    // permission window" must not see a foreign flow's.
+    // Deliberately not the raw slot: a page must not see a foreign flow's window.
     ownPermissionWindowId
   };
 };

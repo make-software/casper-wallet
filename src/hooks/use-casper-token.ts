@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 
 import { useFetchWalletBalance } from '@libs/services/balance-service';
 
-// TODO: review this in future and maybe remove and use type from casper wallet core
 export type TokenType = {
   id: string;
   contractPackageHash?: string;

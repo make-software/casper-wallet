@@ -36,16 +36,16 @@ const theme = await getTheme();
 export const initBringScript = () => {
   if (isChromeBuild) {
     bringInitContentScript({
-      getWalletAddress: getActivePublicKye, // Async function that returns the current user's wallet address
+      getWalletAddress: getActivePublicKye,
       promptLogin: () =>
         runtime.sendMessage({
           type: 'PROMPT_LOGIN_REQUEST'
-        }), // Function that prompts a UI element asking the user to login
+        }),
       walletAddressListeners: [
         'casper-wallet:activeKeyChanged',
         'casper-wallet:unlocked',
         'casper-wallet:locked'
-      ], // A list of custom events that dispatched when the user's wallet address had changed
+      ],
       theme: theme,
       text: 'lower',
       switchWallet: false

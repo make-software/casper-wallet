@@ -115,7 +115,6 @@ export const Modal = ({
         setIsOpen(false);
         setIsExiting(false);
       } else {
-        // After animation completes, set isOpen to false
         setTimeout(() => {
           setIsOpen(false);
           setIsExiting(false);
@@ -132,7 +131,6 @@ export const Modal = ({
       setIsOpen(false);
       setIsExiting(false);
     } else {
-      // After animation completes, set isOpen to false
       setTimeout(() => {
         setIsOpen(false);
         setIsExiting(false);

@@ -1,15 +1,9 @@
 import { getAccountHashFromPublicKey } from './Account';
 
 /**
- * WALLET-1381 moved this derivation onto `casper-wallet-core`, which
- * reimplements `PublicKey.fromHex(pk).accountHash()` without linking the SDK.
- * Core's own parity test lives in `node_modules`, jest never collects it, and
- * the dependency is pinned by a mutable git SHA — so a core-side change to the
- * preimage would land on a bump with ci-check green, and every account hash the
- * wallet shows and queries would move.
- *
- * The vectors are literals, generated once from `casper-js-sdk@5.1.0`.
- * Re-deriving them with the SDK at test time would only prove the two agree.
+ * The derivation lives in `casper-wallet-core`, pinned by a mutable git SHA, and core's own parity
+ * test is never collected here — so a core-side change to the preimage would land on a bump with
+ * ci-check green, moving every account hash. Vectors are literals from `casper-js-sdk@5.1.0`.
  */
 const VECTORS = [
   {
@@ -58,8 +52,7 @@ describe('getAccountHashFromPublicKey', () => {
     );
   });
 
-  // Four call sites read the key off an account that may not be loaded yet and
-  // rely on a throw rather than a hash of the string "undefined".
+  // Call sites read the key off an account that may not be loaded yet and rely on the throw.
   it.each([undefined, ''])('throws for %p rather than hashing it', value => {
     expect(() => getAccountHashFromPublicKey(value)).toThrow(
       'Missing public key'

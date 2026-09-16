@@ -103,7 +103,6 @@ export function SignMessagePage() {
 
   const signingAccount = getSigningAccount(accounts, signingPublicKeyHex);
 
-  // signing account should exist in wallet
   if (signingAccount == null) {
     const error = Error(
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
@@ -248,9 +247,7 @@ export function SignMessagePage() {
       ownPermissionWindowId
     );
 
-    // Unconditional, as it was before the window-ownership work: `closeCurrentWindow`
-    // both rejects and — on a window that is not a popup — resolves having done
-    // nothing, and either one used to leave the user on a dead error screen.
+    // Unconditional: `closeCurrentWindow` can resolve having done nothing on a non-popup window.
     cancelPendingLedgerAction();
     setShowLedgerConfirm(false);
 

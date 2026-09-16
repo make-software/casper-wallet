@@ -10,22 +10,8 @@ const SETTLEMENT_KEY = '__casperConnectSettlement';
 
 type Settlement = { accepted: boolean } | { error: string };
 
-// The one ordering that matters, and the only one an in-memory `requests` map
-// cannot survive: the worker is already dead and the event that WAKES it is the
-// approval window closing. A saga cannot rebuild the descriptor from the open
-// windows here — the window is gone from `windows.getAll` by the time anything
-// runs — so the mirror in `storage.session`, hydrated in the store preload, is
-// the only thing that can still tell the dapp its request was cancelled.
-//
-// Two things make this test real, and both are easy to void:
-//   - It must NOT run against a MOCK_STATE build. `get-main-store.ts`
-//     short-circuits the session READ under that flag, so the mirror never
-//     hydrates and the result says nothing about the fix. Hence the wallet is
-//     set up through onboarding, and this directory has its own npm script.
-//   - Nothing may touch the approval page. `useUserActivityTracker` is still
-//     mounted with its pre-kill listeners, and one mouse move over that page
-//     wakes the worker before the close — which is why the window is closed
-//     programmatically rather than through its title-bar X.
+// Only the `storage.session` mirror can cancel here: the event that wakes the
+// dead worker is the window closing. MOCK_STATE or a pointer event voids it.
 onboarding.describe('Request lifecycle: service worker restart', () => {
   onboarding(
     'should cancel a connect request when its window closes while the worker is dead',
@@ -68,9 +54,8 @@ onboarding.describe('Request lifecycle: service worker restart', () => {
         { timeout: 10000 }
       );
 
-      // Driven from the page rather than from a playground button so the test
-      // holds the promise itself: the assertion is about it SETTLING, and a
-      // button click leaves it somewhere unreachable.
+      // Driven from the page so the test holds the promise itself: the assertion
+      // is about it SETTLING, and a button click leaves it unreachable.
       const [approvalPage] = await Promise.all([
         context.waitForEvent('page', { timeout: 15000 }),
         page.evaluate(key => {

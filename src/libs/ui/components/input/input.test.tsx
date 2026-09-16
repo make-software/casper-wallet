@@ -6,28 +6,17 @@ import { lightTheme } from '@libs/ui/theme-config';
 
 import { Input, InputProps } from './input';
 
-// Input pulls in the `@libs/ui/components` barrel, which reaches `FormField`,
-// which imports `FlexColumn` from the `@libs/layout` barrel rather than the
-// deep `@libs/layout/containers` path. The barrel also re-exports
-// popup-layout.tsx, which requires 'mac-scrollbar' — an ESM-only package
-// jest's CJS resolver cannot load. Routing the barrel to the deep module
-// (real `FlexColumn`, no popup-layout) sidesteps that without touching
-// production code.
+// This barrel reaches 'mac-scrollbar', an ESM-only package jest cannot load.
 jest.mock('@libs/layout', () => jest.requireActual('@libs/layout/containers'));
 
-// `@libs/ui/components`'s barrel also directly re-exports list.tsx, which
-// imports 'mac-scrollbar' the same way. Routing to the three real deep
-// modules Input/FormField actually need avoids loading the barrel's list.tsx.
+// list.tsx, re-exported here, imports 'mac-scrollbar' the same way.
 jest.mock('@libs/ui/components', () => ({
   ...jest.requireActual('@libs/ui/components/typography/typography'),
   ...jest.requireActual('@libs/ui/components/form-field/form-field'),
   ...jest.requireActual('@libs/ui/components/svg-icon/svg-icon')
 }));
 
-// Input pulls in the `@libs/ui/components` barrel, which transitively reaches
-// `@libs/layout`'s header and its background/close-current-window import —
-// webextension-polyfill throws outside a real extension context. See
-// background/utils.test.ts for the same pattern.
+// webextension-polyfill throws outside a real extension context.
 jest.mock('webextension-polyfill', () => ({
   windows: {
     getCurrent: jest.fn(),
@@ -35,10 +24,8 @@ jest.mock('webextension-polyfill', () => ({
   }
 }));
 
-// react-inlinesvg only reaches its DOM-dependent branches behind canUseDOM(),
-// and this repo's jest environment is 'node' — the real component would
-// short-circuit to `null` before rendering anything. The stub renders the
-// `src` it was given so the error-icon row can assert on the icon path.
+// The real component short-circuits to `null` without a DOM; the stub renders
+// `src` so the error-icon row is assertable.
 jest.mock('react-inlinesvg', () => ({
   __esModule: true,
   default: (props: { src: string }) => (

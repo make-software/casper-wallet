@@ -47,10 +47,8 @@ const slice = createSlice({
     }),
     /**
      * Retracts every error a single producer has on screen. `errors` is
-     * otherwise append-only, so a producer that can be retriggered by the user
-     * leaves its previous failures pinned — including on top of the very screen
-     * a successful retry opens. A producer dispatches this before re-attempting
-     * so what the banner shows is always the current attempt.
+     * otherwise append-only, so a producer dispatches this before re-attempting
+     * and the banner always shows the current attempt.
      */
     dismissSagaErrorsBySource: (
       state,

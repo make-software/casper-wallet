@@ -92,9 +92,8 @@ export function HomePageContent() {
 
   const { showExpirationBanner, dismissExpiringNames } = useExpiringCsprNames();
 
-  // Latch for the whole popup session: dismissing the expiration banner must
-  // not reveal the marketing banner until the popup is reopened (refs reset
-  // on the next mount).
+  // Latch for the popup session: dismissing the expiration banner must not
+  // reveal the marketing banner until the popup is reopened.
   const wasExpirationBannerShown = useRef(false);
 
   if (showExpirationBanner) {
@@ -104,7 +103,6 @@ export function HomePageContent() {
   const { activeMarketingEvent } =
     useGetActiveAppMarketingEvent(dismissedAppEventIds);
 
-  // At most one banner; the expiration banner wins over the marketing banner.
   const showMarketingBanner =
     Boolean(activeMarketingEvent) &&
     !showExpirationBanner &&

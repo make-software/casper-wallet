@@ -192,9 +192,8 @@ describe('handleVaultSecrets — SUGGESTED_ACCOUNT_NAME_REQUEST', () => {
   });
 
   it('ignores an imported account even when its public key matches a derived index', () => {
-    // The account IS index 0's key pair, but imported: true — only a handler
-    // wired to selectVaultDerivedAccounts (not selectVaultAccounts) sees index
-    // 0 as free and answers 'Account 1'; a wrong selector would answer 'Account 2'.
+    // The account IS index 0's key pair but imported: true, so only a handler
+    // wired to selectVaultDerivedAccounts sees index 0 as free and says 'Account 1'.
     const derivedAccount0 = deriveKeyPair(FIXED_SECRET_PHRASE, 0);
 
     expect(

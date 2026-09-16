@@ -27,9 +27,8 @@ import { submitPasswordChange } from './submit-password-change';
 export const ChangePasswordPage = () => {
   const [isPasswordConfirmed, setIsPasswordConfirmed] =
     useState<boolean>(false);
-  // The saga re-verifies it before re-keying, so the plaintext has to survive
-  // the confirmation screen — the stored hash it is checked against is
-  // readable by any extension page, and so replayable, while this is not.
+  // The saga re-verifies it before re-keying, so the plaintext has to survive the
+  // confirmation screen; the stored hash it is checked against is replayable.
   const [currentPassword, setCurrentPassword] = useState<string | null>(null);
 
   const { t } = useTranslation();

@@ -141,7 +141,6 @@ export const useStakeType = () => {
 
   useEffect(() => {
     const name = pathname.split('/')[1];
-    // checking pathname to know what type of stake it is
     if (
       name === AuctionManagerEntryPoint.delegate ||
       name === AuctionManagerEntryPoint.redelegate

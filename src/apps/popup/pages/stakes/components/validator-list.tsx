@@ -89,7 +89,6 @@ export const ValidatorList = ({
                     fee={validator.fee}
                     name={validator?.name}
                     logo={logo}
-                    // TODO: remove user_stake after we merge recipient and amount steps for undelegation
                     formattedTotalStake={validator[totalStake]}
                     delegatorsNumber={validator?.delegatorsNumber}
                     handleClick={() => {

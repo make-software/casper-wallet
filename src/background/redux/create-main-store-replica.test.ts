@@ -13,8 +13,6 @@ const CONTACT = {
 
 describe('createMainStoreReplica', () => {
   it('ignores slices outside POPUP_SLICES even when the payload carries them', () => {
-    // Exactly what the old `...state` spread would have copied into a page with
-    // no diagnostic at all: a full RootState satisfied the old generic's bound.
     const overWide = {
       ...selectPopupState(fullState),
       vaultCipher: 'SECRET-CIPHER'
@@ -27,9 +25,8 @@ describe('createMainStoreReplica', () => {
   });
 
   it('copies the listed slices through to the replica', () => {
-    // The two assertions-by-absence below both hold if the allowlist copy stops
-    // producing anything at all — every field they read comes from the explicit
-    // `preloadedState` overrides. This one fails in that case.
+    // The assertions-by-absence elsewhere also hold if the allowlist copy stops
+    // producing anything at all; this one fails in that case.
     const seeded: RootState = {
       ...fullState,
       contacts: { ...fullState.contacts, contacts: [CONTACT] }

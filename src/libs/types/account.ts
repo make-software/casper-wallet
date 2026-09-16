@@ -11,11 +11,7 @@ export interface Account extends KeyPair {
   hidden: boolean;
   derivationIndex?: number;
   supports?: CasperWalletSupports[];
-  /**
-   * Set only on broadcast copies: true for a watch-only account specifically
-   * (empty secretKey and no `hardware`) — a Ledger account also has an empty
-   * secretKey but is not "watching".
-   */
+  /** Set only on broadcast copies; a Ledger account has an empty secretKey but is not watching. */
   watching?: boolean;
 }
 

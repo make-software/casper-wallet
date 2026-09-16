@@ -42,12 +42,10 @@ const initialState: VaultState = {
 };
 
 describe('vault reducer', () => {
-  // 1
   it('has the expected initial state (@@INIT)', () => {
     expect(reducer(undefined, { type: '@@INIT' } as any)).toEqual(initialState);
   });
 
-  // vaultReseted resets to initial state
   it('resets to initial state on vaultReseted', () => {
     const seeded: VaultState = {
       ...initialState,
@@ -58,7 +56,6 @@ describe('vault reducer', () => {
     expect(reducer(seeded, vaultReseted())).toEqual(initialState);
   });
 
-  // 2
   describe('vaultLoaded', () => {
     const payload: VaultState = {
       secretPhrase: ['w1', 'w2'],
@@ -98,8 +95,8 @@ describe('vault reducer', () => {
         activeAccountName: 'a',
         jsonById: { pj: 'payload-json', existing: 'keep-json' },
         eip712ById: { pe: 'payload-eip', existing: 'keep-eip' },
-        // Renumbered into one sequence: the two carried entries keep their
-        // relative age and both sit below the in-memory one.
+        // Renumbered into one sequence: the carried entries keep their
+        // relative age and sit below the in-memory one.
         payloadSeqById: { pj: 0, pe: 1, existing: 2 }
       });
     });
@@ -120,8 +117,7 @@ describe('vault reducer', () => {
     });
 
     // Asserted on what the reducer owns: at es2017 the merge is emitted as
-    // `Object.assign`, where a string `__proto__` vanishes silently and an
-    // object one replaces the map's prototype.
+    // `Object.assign`, where an object `__proto__` replaces the map's prototype.
     it.each([
       ['a string', '"poison"'],
       ['an object, as the deploy path dispatches', '{ "poisoned": true }']
@@ -151,8 +147,7 @@ describe('vault reducer', () => {
       }
     );
 
-    // The sanitizer must not overreach: a request keyed `constructor` still has
-    // a payload to sign.
+    // The sanitizer must not overreach: `constructor` is a legal request id.
     it.each(['toString', 'constructor', 'valueOf', 'hasOwnProperty'])(
       'keeps a cipher payload stored under the inherited name %s',
       key => {
@@ -184,10 +179,8 @@ describe('vault reducer', () => {
       }
     );
 
-    // A cipher written before the field entered `VaultState` decrypts without
-    // it — `decryptVault` is a bare cast and there is no migration — and a
-    // throw here escapes into `unlockVaultSaga`'s catch, so the vault never
-    // unlocks again.
+    // A cipher written before the field existed decrypts without it, and a
+    // throw here escapes into `unlockVaultSaga`'s catch: no unlock ever again.
     it.each(['jsonById', 'eip712ById'] as const)(
       'loads a cipher written before %s existed as an empty dict instead of throwing',
       field => {
@@ -202,8 +195,7 @@ describe('vault reducer', () => {
       }
     );
 
-    // `Object.keys`, not a bare lookup: an inherited name would answer the
-    // latter.
+    // `Object.keys`, not a bare lookup: an inherited name answers the latter.
     it('returns dicts owning nothing when cipher and memory are both empty', () => {
       const s = reducer(
         initialState,
@@ -214,11 +206,8 @@ describe('vault reducer', () => {
       expect(Object.keys(s.eip712ById)).toEqual([]);
     });
 
-    // The merge is the one writer to these maps no `storePayload` guard covers:
-    // each side is capped at `MAX_STORED_PAYLOADS`, so their union can be twice
-    // that. Bounded here rather than left to `reconcileStalePayloadsSaga`, which
-    // returns without reclaiming on an empty entry read, on a failed window
-    // enumeration and in its catch, and is a `takeLatest` with no retry.
+    // The one writer to these maps no `storePayload` guard covers: each side is
+    // capped at `MAX_STORED_PAYLOADS`, so their union can be twice that.
     describe('over MAX_STORED_PAYLOADS', () => {
       const mapOf = (prefix: string, count: number) =>
         Object.fromEntries(
@@ -233,10 +222,8 @@ describe('vault reducer', () => {
           Array.from({ length: count }, (_, i) => [`${prefix}-${i}`, from + i])
         );
 
-      // Every merge below can evict, and eviction warns. Spied rather than
-      // silenced: the warning is the only signal that tells a support log
-      // "the unlock merge took it" apart from every other reason a pending
-      // transaction vanished, so it is asserted here rather than left to print.
+      // Spied rather than silenced: the warning is the only signal that tells a
+      // support log the unlock merge took a pending transaction.
       let warn: jest.SpyInstance;
 
       beforeEach(() => {
@@ -274,9 +261,8 @@ describe('vault reducer', () => {
         }
       );
 
-      // An in-memory entry arrived in THIS worker session — `signRequest` has
-      // no lock gate, so one lands even while locked — and cannot be a payload
-      // stranded by an earlier session. A cipher entry can.
+      // An in-memory entry arrived in THIS worker session and cannot be a
+      // payload stranded by an earlier one. A cipher entry can.
       it('keeps every in-memory entry and takes the drop from the cipher', () => {
         const inMemory = mapOf('memory', 4);
 
@@ -288,10 +274,8 @@ describe('vault reducer', () => {
         });
       });
 
-      // Cipher order is insertion order across sessions, and a rewrite keeps
-      // its original position, so the oldest key is the entry that has survived
-      // the most locks unanswered — a leak. The newest is the one written just
-      // before this lock, the only one an approval window can still be on.
+      // Cipher order is insertion order across sessions, so the oldest key has
+      // survived the most locks unanswered — a leak — and the newest has not.
       it('drops the oldest cipher entries and keeps the newest', () => {
         const s = loaded(
           mapOf('cipher', MAX_STORED_PAYLOADS),
@@ -323,11 +307,8 @@ describe('vault reducer', () => {
         ]);
       });
 
-      // `room` reaches 0 once the in-memory map is at the ceiling, and before
-      // this the whole cipher side went with it — the live pre-lock request
-      // included — on count alone. A page puts it there on demand:
-      // `signRequest` has no lock gate, so ten requests fired at a locked
-      // wallet fill the map.
+      // `room` reaches 0 once the in-memory map is at the ceiling, and a page
+      // puts it there on demand: `signRequest` has no lock gate.
       it('keeps the newest cipher entries when the in-memory map is at the ceiling', () => {
         const cipher = { ...mapOf('stale', 9), live: 'live-json' };
         const cipherSeq = { ...seqOf('stale', 9), live: 9 };
@@ -343,10 +324,7 @@ describe('vault reducer', () => {
       });
 
       // The slots come out of the in-memory side oldest first: those writes
-      // arrived while the vault was locked and none is approved, so they are
-      // the cheapest to lose. Not free — nothing here answers the dapp, and
-      // the window for an evicted id renders with no payload until the user
-      // closes it. The warning below is the only trace it leaves.
+      // arrived while locked and none is approved, so they are cheapest to lose.
       it('takes the drop from the oldest in-memory entries, not the newest', () => {
         const cipher = { ...mapOf('stale', 9), live: 'live-json' };
         const cipherSeq = { ...seqOf('stale', 9), live: 9 };
@@ -363,10 +341,8 @@ describe('vault reducer', () => {
         ).toBe(`memory-json-${MAX_STORED_PAYLOADS - 1}`);
       });
 
-      // The reserve is two, and both directions cost something: at one the
-      // second pre-lock request is never restored, at three the extra slot is
-      // paid out of live locked-session writes. The fixture above cannot see
-      // either, because it carries a single live cipher entry.
+      // Both directions cost: at a reserve of one the second pre-lock request is
+      // never restored, at three the extra slot is paid out of live writes.
       it('reserves exactly two cipher slots, no more and no fewer', () => {
         const cipher = {
           ...mapOf('stale', 8),
@@ -397,10 +373,8 @@ describe('vault reducer', () => {
         expect(s.eip712ById).toEqual({ ...cipher, ...inMemory });
       });
 
-      // The case above has `carried === MAX - live` exactly, where both clamps
-      // in the slot arithmetic are no-ops. Here the cipher asks for less than
-      // the reserve while the union still fits: dropping either clamp makes
-      // this merge discard entries that had room, on the two sides in turn.
+      // The cipher asks for less than the reserve while the union still fits:
+      // dropping either clamp discards entries that had room.
       it('drops nothing when the cipher asks for less than the reserve', () => {
         const cipher = mapOf('cipher', 3);
         const inMemory = mapOf('memory', 6);
@@ -410,9 +384,7 @@ describe('vault reducer', () => {
         expect(s.jsonById).toEqual({ ...cipher, ...inMemory });
       });
 
-      // The shape the ticket describes: locked with nothing pending, a page
-      // fires a full map at the locked wallet, unlock. The reserve must not be
-      // paid when the cipher is asking for nothing.
+      // The reserve must not be paid when the cipher is asking for nothing.
       it('keeps every locked-session payload when the cipher is empty', () => {
         const inMemory = mapOf('memory', MAX_STORED_PAYLOADS);
 
@@ -422,10 +394,8 @@ describe('vault reducer', () => {
         expect(warn).not.toHaveBeenCalled();
       });
 
-      // `payloadSeqById` decides which locked-session write is destroyed, and
-      // the map's own key order is not a stand-in for it: `orderOldestFirst`
-      // ranks an unstamped integer-like id NEWEST, so falling back to key order
-      // here would spare '42' — which is in fact the oldest entry in the map.
+      // Key order is no stand-in for `payloadSeqById`: `orderOldestFirst` ranks
+      // an unstamped integer-like id NEWEST, so key order would spare '42'.
       it('picks the evicted in-memory entry by ordinal, not by key order', () => {
         let inMemory = reducer(
           initialState,
@@ -439,8 +409,7 @@ describe('vault reducer', () => {
           );
         }
 
-        // Fixture integrity: '42' really is the oldest, by the reducer's own
-        // ordinal, and really is hoisted to the front of the map.
+        // Fixture integrity: '42' is the oldest by ordinal, yet enumerates first.
         expect(inMemory.payloadSeqById['42']).toBe(0);
         expect(Object.keys(inMemory.jsonById)[0]).toBe('42');
 
@@ -474,9 +443,8 @@ describe('vault reducer', () => {
         );
       });
 
-      // The other half, and the one the reserve can take a live request out
-      // of: a carried entry outside the newest `CIPHER_RESERVED_SLOTS` is
-      // dropped whether it is a leak or not, so it says so too.
+      // A carried entry outside the newest `CIPHER_RESERVED_SLOTS` is dropped
+      // whether it is a leak or not, so the warning names those too.
       it('warns with the evicted carried ids and the kept count', () => {
         loaded(
           mapOf('cipher', MAX_STORED_PAYLOADS),
@@ -505,11 +473,8 @@ describe('vault reducer', () => {
         expect(getPayload(s.jsonById, 'shared')).toBe('fresh');
       });
 
-      // "Newest" is read off `payloadSeqById`. Reading it off the map's own
-      // key order is what these pin against: an object hoists integer-like
-      // keys ahead of every string key, in ascending numeric order, and
-      // `requestId` is dapp-chosen — only `__proto__` is rejected — so `"42"`
-      // is an id the wallet accepts and stores.
+      // "Newest" is read off `payloadSeqById`: an object hoists integer-like keys
+      // ahead of string ones, and `requestId` is dapp-chosen, so `"42"` is legal.
       describe('ranked by payloadSeqById, not by key order', () => {
         it('evicts by ordinal even when the key order says the opposite', () => {
           const cipher = { ...mapOf('stale', 9), '42': 'live-json' };
@@ -548,9 +513,6 @@ describe('vault reducer', () => {
           expect(getPayload(s.jsonById, 'stamped-0')).toBe('stamped-json-0');
         });
 
-        // A cipher written before the field existed carries no ordinals at
-        // all, so the merge falls back to the map's own order — what it did
-        // before this ranking, rather than treating every entry as unrankable.
         it('falls back to cipher order when the cipher predates the field', () => {
           const legacy: VaultState = {
             ...payload,
@@ -569,10 +531,8 @@ describe('vault reducer', () => {
           expect(getPayload(s.jsonById, 'cipher-9')).toBe('cipher-json-9');
         });
 
-        // The fallback order lies about exactly one class of id. An
-        // integer-like key is hoisted to the front of the map whenever it was
-        // written, so reading it as the oldest evicts the entry a legacy
-        // cipher is least able to spare.
+        // The fallback order lies about one class of id: an integer-like key is
+        // hoisted to the front whenever it was written.
         it('does not evict an integer-like id from a cipher that predates the field', () => {
           const legacy: VaultState = {
             ...payload,
@@ -593,9 +553,8 @@ describe('vault reducer', () => {
           expect(getPayload(s.jsonById, 'leak-0')).toBeUndefined();
         });
 
-        // An ordinary key's position IS its age, so the fallback still reads
-        // it — the rule is "distrust the hoisted key", not "spare every
-        // unstamped one".
+        // An ordinary key's position IS its age: the rule is "distrust the
+        // hoisted key", not "spare every unstamped one".
         it('still evicts the oldest ordinary id from a cipher that predates the field', () => {
           const legacy: VaultState = {
             ...payload,
@@ -613,10 +572,8 @@ describe('vault reducer', () => {
           expect(getPayload(s.jsonById, 'leak-9')).toBe('leak-json-9');
         });
 
-        // The two sides' ordinals came from different counters — the cipher's
-        // from before the lock, memory's restarted at 0 by `vaultReseted` —
-        // so they are renumbered into one sequence rather than left to be
-        // compared across epochs at the next unlock.
+        // The two sides' ordinals came from different counters — memory's
+        // restarted at 0 by `vaultReseted` — so survivors are renumbered.
         it('renumbers the survivors into one sequence, carried entries first', () => {
           const s = loaded(
             mapOf('cipher', 6),
@@ -650,10 +607,8 @@ describe('vault reducer', () => {
           );
         });
 
-        // The whole cycle, with no hand-written ordinal anywhere: every one of
-        // them is the reducer's own. A dapp that numbers its requests fills the
-        // map before a lock, the live request is the newest, and the unlock
-        // must not hand its slot to nine leaks.
+        // The whole cycle with no hand-written ordinal: a dapp that numbers its
+        // requests fills the map, and the unlock must not evict the live one.
         it('keeps the live numerically-keyed request across a lock', () => {
           let preLock = initialState;
 
@@ -690,13 +645,11 @@ describe('vault reducer', () => {
     });
   });
 
-  // 3
   it('sets the secret phrase on secretPhraseCreated', () => {
     const s = reducer(initialState, secretPhraseCreated(['a', 'b'] as any));
     expect(s).toEqual({ ...initialState, secretPhrase: ['a', 'b'] });
   });
 
-  // 4
   it('appends and activates on accountAdded', () => {
     const s1 = reducer(initialState, accountAdded(acc('a')));
     expect(s1).toEqual({
@@ -709,7 +662,6 @@ describe('vault reducer', () => {
     expect(s2.activeAccountName).toBe('b');
   });
 
-  // 5
   describe('accountImported', () => {
     it('activates only when it is the first account', () => {
       const s = reducer(initialState, accountImported(acc('a')));
@@ -732,7 +684,6 @@ describe('vault reducer', () => {
     });
   });
 
-  // 6
   describe('accountsAdded / accountsImported', () => {
     it('accountsAdded activates the first only when list was empty', () => {
       const empty = reducer(initialState, accountsAdded([acc('a'), acc('b')]));
@@ -768,7 +719,6 @@ describe('vault reducer', () => {
     });
   });
 
-  // 7
   describe('accountRemoved', () => {
     it('reassigns active to first remaining, drops single-member groups, filters name from remaining groups', () => {
       const state: VaultState = {
@@ -820,7 +770,6 @@ describe('vault reducer', () => {
     });
   });
 
-  // 8
   it('renames across accounts, activeAccountName and origin groups on accountRenamed', () => {
     const state: VaultState = {
       ...initialState,
@@ -849,7 +798,6 @@ describe('vault reducer', () => {
     expect(s.accountNamesByOriginDict).toEqual({ o1: ['z'], oUndef: [] });
   });
 
-  // 9
   describe('siteConnected', () => {
     it('records the site title and sets the account names for a fresh origin', () => {
       const s = reducer(
@@ -885,7 +833,6 @@ describe('vault reducer', () => {
     });
   });
 
-  // 10
   describe('anotherAccountConnected', () => {
     it('appends a single name to an existing origin group', () => {
       const state: VaultState = {
@@ -908,7 +855,6 @@ describe('vault reducer', () => {
     });
   });
 
-  // 11
   describe('accountDisconnected', () => {
     it('drops the group when the disconnected account was the last member', () => {
       const state: VaultState = {
@@ -950,7 +896,6 @@ describe('vault reducer', () => {
     });
   });
 
-  // 12
   it('drops the origin key entirely on siteDisconnected', () => {
     const state: VaultState = {
       ...initialState,
@@ -960,13 +905,11 @@ describe('vault reducer', () => {
     expect(s.accountNamesByOriginDict).toEqual({ o2: ['b'] });
   });
 
-  // 13
   it('sets the active account on activeAccountChanged', () => {
     const s = reducer(initialState, activeAccountChanged('a'));
     expect(s).toEqual({ ...initialState, activeAccountName: 'a' });
   });
 
-  // 14
   it('updates only the active account supports on activeAccountSupportsChanged', () => {
     const state: VaultState = {
       ...initialState,
@@ -978,7 +921,6 @@ describe('vault reducer', () => {
     expect(s.accounts).toEqual([{ ...acc('a'), supports }, acc('b')]);
   });
 
-  // 15
   it('returns the FULL initial state on deploysReseted (wipes accounts)', () => {
     const seeded: VaultState = {
       secretPhrase: ['w1'],
@@ -993,13 +935,7 @@ describe('vault reducer', () => {
     expect(reducer(seeded, deploysReseted())).toEqual(initialState);
   });
 
-  // 16
   describe('deployPayloadReceived / eip712PayloadReceived', () => {
-    // The regression WALLET-1384 is about: these used to build a NEW
-    // single-entry dict, so a second request erased the first one's payload.
-    // `cancelRequestsDisplacedBy` spares a request another window still shows
-    // (the Ledger permission window), so that survivor stayed 'open' on screen
-    // with no transaction to sign.
     it('keeps an earlier deploy payload when a second request arrives', () => {
       const state: VaultState = {
         ...initialState,
@@ -1030,9 +966,8 @@ describe('vault reducer', () => {
       });
     });
 
-    // The write order the merge on unlock ranks on. It has to be stored: a
-    // plain object hoists integer-like keys ahead of every string key, so the
-    // maps themselves cannot answer which entry came last.
+    // The write order the merge on unlock ranks on. It has to be stored: a plain
+    // object hoists integer-like keys, so the maps cannot answer what came last.
     describe('payloadSeqById', () => {
       it('stamps one ascending ordinal per stored request, across both maps', () => {
         const s = [
@@ -1044,9 +979,8 @@ describe('vault reducer', () => {
         expect(s.payloadSeqById).toEqual({ first: 0, second: 1, third: 2 });
       });
 
-      // A rewrite is the same request refreshed, and it is the REQUEST's age
-      // the merge ranks on — re-stamping would let a page promote its own
-      // entry past a live one simply by re-sending it.
+      // It is the REQUEST's age the merge ranks on: re-stamping would let a page
+      // promote its own entry past a live one by re-sending it.
       it('keeps the original ordinal when the same id is stored again', () => {
         const s = [
           deployPayloadReceived({ id: 'first', json: 'json-first' }),
@@ -1083,17 +1017,8 @@ describe('vault reducer', () => {
       expect(s.eip712ById).toEqual({ other: 'keep', same: 'fresh' });
     });
 
-    // Asserted on what the reducer owns, so a `target` bump cannot move it.
-    // `tsconfig.json` is es2017 today, which emits the spread as `Object.assign`
-    // and makes `__proto__` run the setter rather than add an entry; at es2018
-    // the native spread would store it as an own property instead. Either way
-    // `storePayload` refuses the id, so the map stays empty and keeps its
-    // prototype — and `getPayload` agrees with the map about both.
-    //
-    // The object case is not a variation for its own sake: the deploy path
-    // dispatches `JSON.parse(...)`, i.e. an object, into a map declared
-    // `Record<string, string>` (sdk-methods.ts), and an object value is what
-    // makes the setter actually replace this map's prototype.
+    // Asserted on what the reducer owns, so a `target` bump cannot move it. The
+    // object case is what makes the setter replace this map's prototype.
     it.each([
       ['a string', 'poison'],
       ['an object, as the deploy path dispatches', { poisoned: true }]
@@ -1108,12 +1033,8 @@ describe('vault reducer', () => {
       expect(getPayload(s.jsonById, '__proto__')).toBeUndefined();
     });
 
-    // On this path the ceiling must never cost an ALREADY STORED request its
-    // payload: within a session the oldest entry is the long-lived one — a
-    // request being confirmed on a Ledger while a page pushes a burst of its
-    // own — and dropping it would reproduce, behind a threshold, exactly the
-    // failure this reducer fixes. Across a lock the age reads the other way,
-    // which is why the merge above evicts the opposite end.
+    // Within a session the oldest entry is the long-lived one, so the ceiling
+    // refuses the incoming write; across a lock the age reads the other way.
     describe('at MAX_STORED_PAYLOADS', () => {
       const atCapacity = (map: 'jsonById' | 'eip712ById'): VaultState => ({
         ...initialState,
@@ -1178,9 +1099,8 @@ describe('vault reducer', () => {
     });
   });
 
-  // 16b — the per-request cleanup. Without it the maps only ever shrink on
-  // `deploysReseted`, and `lockVaultSaga` flushes the cipher BEFORE that reset,
-  // so `vaultLoaded` restores every stale payload on the next unlock.
+  // Without this the maps only shrink on `deploysReseted`, and `lockVaultSaga`
+  // flushes the cipher BEFORE that reset, restoring every stale payload.
   describe('windowRequestResponded', () => {
     it('drops the answered request from jsonById and leaves the rest', () => {
       const state: VaultState = {
@@ -1222,9 +1142,7 @@ describe('vault reducer', () => {
       expect(s.eip712ById).toEqual({ other: 'kept' });
     });
 
-    // `requestId` is dapp-controlled, so an id naming an inherited
-    // Object.prototype member must be answered from OWN properties only — the
-    // same reason windowManagement/request-map.ts exists, on the same key space.
+    // `requestId` is dapp-controlled, so an inherited name is a legal id.
     it.each(['toString', 'constructor', 'valueOf', 'hasOwnProperty'])(
       'drops a stored payload under the inherited name %s',
       key => {
@@ -1254,9 +1172,8 @@ describe('vault reducer', () => {
       }
     );
 
-    // Every `windows.onRemoved` in the browser can reach this reducer, and the
-    // store subscriber does no state-change comparison: a fresh object means a
-    // popupState broadcast to every replica plus a full storage.local rewrite.
+    // The store subscriber does no state-change comparison: a fresh object means
+    // a popupState broadcast to every replica plus a storage.local rewrite.
     it('returns the same state object when the id is in neither map', () => {
       const state: VaultState = {
         ...initialState,
@@ -1269,7 +1186,6 @@ describe('vault reducer', () => {
     });
   });
 
-  // 17
   describe('hideAccountFromListChanged', () => {
     it('toggles hidden and reassigns active when the hidden account was active', () => {
       const state: VaultState = {
@@ -1314,7 +1230,6 @@ describe('vault reducer', () => {
     });
   });
 
-  // 18
   it('appends and activates on addWatchingAccount', () => {
     const state: VaultState = {
       ...initialState,

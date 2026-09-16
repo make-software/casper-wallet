@@ -2,17 +2,8 @@ import { twentyFourWordsSecretPhrase } from '../constants';
 import { DISPATCH_FAILED, breakTransport } from '../error-surface';
 import { onboarding, onboardingExpect } from '../fixtures';
 
-// The onboarding half of the guards. All three writes are the sole source of
-// what the screen does next, and the router catches none of them:
-// `keysDoesExist` stays false on a dropped `initKeys`; on a dropped `initVault`
-// it is already true, so the success page would render over a vault that was
-// never created; and a dropped `recoverVault` used to close the tab regardless,
-// taking the banner down with the tree it is mounted in.
-//
-// The break is aimed at one action type — the rest of the flow rides the same
-// transport and would fail long before the button under test is reached. Every
-// screen here is reached through the SPA router, so the patch survives to the
-// click.
+// The onboarding half of the guards: each of these three writes is the sole
+// source of what the screen does next, and the router catches none of them.
 onboarding.describe('Onboarding UI: a dropped write is not silent', () => {
   onboarding(
     'should keep the password screen when initKeys is dropped',
@@ -24,11 +15,8 @@ onboarding.describe('Onboarding UI: a dropped write is not silent', () => {
       await onboardingExpect(page.getByText(DISPATCH_FAILED)).toBeVisible();
       await onboardingExpect(page).toHaveURL(/.*create-vault-password/);
 
-      // The staying-put is not the guard's doing — `keysDoesExist` is false
-      // either way, so `NoVaultRoutes` keeps this screen up on its own. What the
-      // guard decides is whether the button survives: unguarded, `isSubmitted`
-      // latches on a write that never landed and the only button on the screen
-      // is dead for good, with the banner pointing at it.
+      // The staying-put is `keysDoesExist`, not the guard. What the guard decides
+      // is whether the button survives a write that never landed.
       await onboardingExpect(
         page.getByRole('button', { name: 'Create password' })
       ).toBeEnabled();
@@ -95,15 +83,8 @@ onboarding.describe('Onboarding UI: a dropped write is not silent', () => {
         .getByRole('button', { name: 'Recover selected accounts' })
         .click();
 
-      // What this pins is that the banner reaches THIS tree — the recover screen
-      // is the one place a surfaced error has to survive a `closeActiveTab`.
-      //
-      // It does NOT pin the close-gate itself, and cannot: `closeActiveTab` is
-      // inert under Playwright. The success-path specs prove it — they
-      // `page.goto` the popup on this same `page` right after a recover that
-      // closes the tab in a real browser, which would throw on a closed target.
-      // So the gate at `select-accounts-to-recover/index.tsx` is only held by
-      // review; reverting it to `.finally` leaves this case green.
+      // Pins that the banner reaches THIS tree; it cannot pin the close-gate —
+      // `closeActiveTab` is inert under Playwright.
       await onboardingExpect(page.getByText(DISPATCH_FAILED)).toBeVisible();
       await onboardingExpect(
         page.getByText('Select accounts to recover')

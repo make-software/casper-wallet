@@ -55,10 +55,8 @@ const UI_SENDER = {
   url: 'chrome-extension://ext-id/signature-request.html'
 } as Runtime.MessageSender;
 
-// deliverViaOrigin is `if (!origin) return 0` (deliver-via-origin.ts:14) and the origin it
-// receives prefers the request descriptor's `origin`, falling back to
-// recoverDappOrigin(sender.url) only when there is no descriptor. Mirrors UI_SENDER_WITH_ORIGIN at
-// sdk-response-to-tab.test.ts:63.
+// deliverViaOrigin returns 0 without an origin, and the origin it receives prefers the
+// request descriptor's, falling back to recoverDappOrigin(sender.url) with no descriptor.
 const UI_SENDER_WITH_ORIGIN = {
   id: 'ext-id',
   url: 'chrome-extension://ext-id/signature-request.html?requestId=r1&origin=https://dapp.example&tabId=7#/SignTransaction'
@@ -365,7 +363,7 @@ describe('closeLedgerWindowsAfterResponse', () => {
   });
 });
 
-describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
+describe('handleSdkResponseToTab (Ledger window teardown)', () => {
   it('closes both the approval and the permission window on a successful Ledger sign', async () => {
     // Kills a close that returns early, and one that computes displays but never
     // dispatches windowRequestResponded.
@@ -386,11 +384,8 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   });
 
   it('a withheld response (origin mismatch) still tears down the Ledger permission window', async () => {
-    // Reaches the origin-mismatch withhold branch, not the tabId-mismatch one:
-    // the request's own tabId is used, but `tabs.get` reports a DIFFERENT live
-    // origin than the descriptor recorded. `displays` was already computed by
-    // the optimistic mark before this branch runs, so deleting the teardown
-    // call here strands the Ledger permission window with no way to close it.
+    // Reaches the origin-mismatch withhold branch, not the tabId-mismatch one.
+    // Dropping the teardown here strands the Ledger permission window.
     const store = makeRealStore();
     openWith(store, 'r1', [10, 11]);
     store.dispatch(
@@ -815,10 +810,8 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
   });
 
   it('answering then closing does not self-cancel', async () => {
-    // Single window, so it is genuinely a cancel candidate when it closes
-    // (cancelRequestsDisplacedBy only builds candidates when
-    // windowIds.length === 1, cancel-requests.ts:177-179) — the mark made by
-    // handleSdkResponseToTab is the ONLY thing stopping the cancel.
+    // Single window, so it is genuinely a cancel candidate when it closes — the
+    // mark made by handleSdkResponseToTab is the ONLY thing stopping the cancel.
     jest.useFakeTimers();
     try {
       const store = makeRealStore();
@@ -828,9 +821,8 @@ describe('handleSdkResponseToTab (WALLET-1416 wiring)', () => {
       await handleSdkResponseToTab(makeMessage('r1'), UI_SENDER, store);
       await jest.advanceTimersByTimeAsync(0);
 
-      // Not awaited yet: a real (unanswered) request here would be a genuine
-      // candidate and would sit behind CANCEL_GRACE_MS's setTimeout, which
-      // never fires under fake timers unless the clock is advanced first.
+      // Not awaited yet: a real (unanswered) request would sit behind
+      // CANCEL_GRACE_MS's setTimeout, which never fires until the clock advances.
       const removalPromise = handleWindowRemoved(store, 10);
       await jest.advanceTimersByTimeAsync(CANCEL_GRACE_MS);
       await removalPromise;

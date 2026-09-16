@@ -9,12 +9,8 @@ import { convertBytesToHex, convertHexToBytes } from '@libs/crypto/utils';
 import { spawnScryptWorker } from './spawn-scrypt-worker';
 import { isWorkerError } from './types';
 
-// `scryptAsync` awaits an empty promise between blocks, which queues a microtask
-// and never returns to the event loop, so a derivation blocks its thread for its
-// whole duration. On the MV2 builds the background is a persistent page sharing
-// the popup's thread, so that freezes the UI; a Worker moves it off. MV3 service
-// workers have no Worker constructor, but there the background thread is not the
-// popup's to begin with.
+// `scryptAsync` never returns to the event loop, so a derivation blocks its
+// thread — on MV2 that is the popup's thread, and a Worker moves it off.
 const canOffloadToWorker = typeof Worker !== 'undefined';
 
 const DERIVATION_TIMEOUT_MS = 30_000;
@@ -49,11 +45,8 @@ export function deriveScryptKey(
       outcome();
     };
 
-    // `unlock-requests.ts` chains every derivation on one promise, and a promise
-    // that stays pending can never be displaced — so a worker that dies without
-    // firing `onerror` would wedge the queue until the background restarts. Far
-    // above a real derivation (~350ms) and below the port's own 60s, so the
-    // caller sees a failed attempt rather than a transport timeout.
+    // A worker that dies without firing `onerror` would wedge the serialised
+    // derivation queue until the background restarts; under the port's own 60s.
     const timer = setTimeout(
       () => settle(() => reject(Error('Key derivation timed out'))),
       DERIVATION_TIMEOUT_MS

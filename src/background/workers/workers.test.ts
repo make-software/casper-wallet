@@ -65,8 +65,6 @@ describe.each(WORKERS)('$name', ({ path, data, breakIt }) => {
     expect(isWorkerError(posted[0])).toBe(false);
   });
 
-  // a rejection inside an async onmessage raises no error event on the parent
-  // Worker, so the only way the page can learn about it is this message
   it('posts an error message when the crypto layer rejects', async () => {
     breakIt();
 

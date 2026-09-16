@@ -130,7 +130,6 @@ export const DynamicAccountsListWithSelect = ({
   }, [getValues]);
 
   const handleInputChange = (id: string, newValue: string) => {
-    // Update the state with the new value
     setSelectedAccounts(prevItems =>
       prevItems.map(item =>
         isEqualCaseInsensitive(item.id, id)
@@ -207,13 +206,11 @@ export const DynamicAccountsListWithSelect = ({
 
                     let updatedAccounts;
                     if (accountIndex !== -1) {
-                      // Account exists, remove from list:
                       updatedAccounts = selectedAccounts.filter(
                         alreadySelectedAccount =>
                           alreadySelectedAccount.id !== account.id
                       );
                     } else {
-                      // Account doesn't exist, add to list:
                       updatedAccounts = selectedAccounts.concat({
                         ...account,
                         name: accountName
@@ -296,10 +293,7 @@ export const DynamicAccountsListWithSelect = ({
                           onChange={event => {
                             inputControllerField.onChange(event);
 
-                            // manually trigger validation in case when a few inputs have the same name
-                            // and user change one of them.
-                            // So we validate all of them to remove error from the fields.
-                            // This is an edge case.
+                            // Several inputs can hold the same name, so editing one revalidates all.
                             trigger().then(isValid => {
                               if (isValid) {
                                 handleInputChange(
@@ -343,10 +337,6 @@ export const DynamicAccountsListWithSelect = ({
                                   "Account name can't be longer than 20 characters"
                                 ),
                               unique: value => {
-                                // Filter the inputs of 'accountNames' to only leave those where the checkbox is checked
-                                // and the field index doesn't match the current input field index.
-                                // This leaves us with an array of inputs that are selected
-                                // (checked) and not the one being validated.
                                 const onlyCheckedInputs = accountNames
                                   .map((input, index) =>
                                     checkboxes[index] ? input : null
@@ -357,21 +347,13 @@ export const DynamicAccountsListWithSelect = ({
                                       input !== null
                                   );
 
-                                // Checks to see if the current value exists within the selected inputs.
-                                // The `some` function will return true as soon as it finds a value that matches,
-                                // hence it will return false if the name is unique.
                                 const isUnique = !onlyCheckedInputs.some(
                                   input => input?.name === value
                                 );
 
-                                // Checks if the current value exists in the 'existingAccountNames' array.
                                 const isNotInExistingAccountNames =
                                   !existingAccountNames.includes(value);
 
-                                // Returns the validation results.
-                                // If the entered account name is both unique and not in the existing account names array,
-                                // it returns true (passing validation),
-                                // otherwise it returns the error message.
                                 return (
                                   (isUnique && isNotInExistingAccountNames) ||
                                   t('Account name is already taken')

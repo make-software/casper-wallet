@@ -26,11 +26,8 @@ interface BackupSecretPhrasePasswordPageType {
   setPasswordConfirmed?: () => void;
   onClick?: (password: string) => Promise<void>;
   isLoading?: boolean;
-  // Set when this page is rendered inside a dedicated window rather than the
-  // extension popup (WALLET-1345). Such a window has a single history entry, so
-  // the default "back" link is a no-op and would trap the user; it also has no
-  // business showing the wallet menu / network switcher. Passing this swaps the
-  // header for a bare one whose only action closes the window.
+  // Set when this page renders in a dedicated window: it has a single history
+  // entry, so the header gets a bare close action instead of back and the menu.
   onCloseWindow?: () => void;
 }
 
@@ -63,8 +60,8 @@ export const PasswordProtectionPage = ({
   });
 
   const onSubmit = async () => {
-    // The field is now read-only rather than disabled while verifying (so it
-    // keeps focus), which leaves Enter able to re-submit. Guard against that.
+    // The field stays read-only rather than disabled while verifying so it keeps
+    // focus, which leaves Enter able to re-submit.
     if (isSubmitting) return;
 
     setIsSubmitting(true);
@@ -78,9 +75,8 @@ export const PasswordProtectionPage = ({
       });
 
       if (result.status !== 'ok') {
-        // A transport failure (a rejected requestOverPort call, caught below)
-        // must never be read as a wrong password — that would burn a login
-        // attempt and eventually lock the wallet. Same for 'error' here.
+        // A transport failure (caught below) must never be read as a wrong
+        // password — that would burn a login attempt. Same for 'error' here.
         if (result.status === 'wrong') {
           setError('password', {
             message: t(getErrorMessageForIncorrectPassword(result.attemptsLeft))
@@ -90,9 +86,8 @@ export const PasswordProtectionPage = ({
             message: t('Something went wrong. Please try again.')
           });
         } else if (result.status === 'lockedOut') {
-          // Normally the broadcast swaps the content to the lockout screen
-          // before this is seen. `broadcastToReplicas` swallows delivery
-          // failures though, so this is the only feedback if it's dropped.
+          // The broadcast normally swaps in the lockout screen first, but
+          // `broadcastToReplicas` swallows delivery failures, so this is the fallback.
           setError('password', {
             message: t(
               'Too many failed attempts. Please wait before trying again.'

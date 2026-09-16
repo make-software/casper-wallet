@@ -57,11 +57,8 @@ const slice = createSlice({
       action: PayloadAction<{ origin: string }>
     ) => {
       const { origin } = action.payload;
-      // Copy-then-delete instead of computed-key rest destructuring: the latter
-      // compiles to TS's `__rest` helper, which contains a `typeof key ===
-      // 'symbol'` branch that is unreachable for a string origin (dead branch,
-      // and ts-jest strips inline istanbul-ignore comments). Behaviour is
-      // identical: drop `origin`'s key while keeping the rest.
+      // Copy-then-delete, not computed-key rest: the latter compiles to TS's
+      // `__rest` helper, whose symbol branch is dead for a string origin.
       const rest = {
         ...(state.hashesByOriginDict ?? initialState.hashesByOriginDict)
       };

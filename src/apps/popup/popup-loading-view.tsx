@@ -10,11 +10,7 @@ const Container = styled.div`
   justify-content: center;
 `;
 
-/**
- * The popup's frame while it has nothing to draw yet. The icon opens this document straight
- * from the manifest's `default_popup`, so the window is on screen for a storage round-trip
- * before the background replica reaches it.
- */
+/** The popup's frame while the background replica is still in flight. */
 export const PopupLoadingView = () => (
   <Container>
     <Spinner style={{ marginTop: 0 }} />

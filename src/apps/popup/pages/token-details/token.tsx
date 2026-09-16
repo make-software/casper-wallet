@@ -86,8 +86,7 @@ export const Token = () => {
     !isSafariBuild;
   // The skeleton stands in the same slot as the resolved button, so either fills it.
   const showSwapSlot = isLoadingSwappable || isSwappable;
-  // Send and Receive are unconditional. A fourth action does not fit the card at
-  // the XXXL gap, so the row falls back to the unspaced layout the Home row uses.
+  // A fourth action does not fit at the XXXL gap, so the row falls back to the unspaced layout.
   const footerActionCount = 2 + Number(showBuy) + Number(showSwapSlot);
 
   const getTokenInfoList = (): TokenInfoList[] => {
@@ -105,7 +104,6 @@ export const Token = () => {
           : [])
       ];
     } else {
-      // CEP-18 token case
       const formatedCep18Tokens = formatCep18Tokens(cep18Tokens);
 
       const token =

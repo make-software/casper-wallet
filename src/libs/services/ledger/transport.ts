@@ -53,10 +53,7 @@ const getRealBluetoothAvailabilitySource = ():
   (navigator as unknown as { bluetooth?: BluetoothAvailabilitySource })
     .bluetooth;
 
-/**
- * Reimplements `BluetoothTransport.observeAvailability` (DMK has no equivalent) over the web
- * standard it wrapped: `navigator.bluetooth.getAvailability()` plus `availabilitychanged`.
- */
+/** Stands in for DMK, which has no bluetooth-availability observable, over `navigator.bluetooth`. */
 export const subscribeToBluetoothAvailability = (
   observer: (available: boolean) => void,
   bluetooth:
@@ -100,10 +97,7 @@ type LedgerConnectDmk = Pick<
 
 export const KNOWN_DEVICES_WAIT_MS = 500;
 
-/**
- * Waits for the first real read past the transport's synchronous seeded emission, bounded by
- * `KNOWN_DEVICES_WAIT_MS` so a stalled observable resolves empty. Never calls `startDiscovering`.
- */
+/** Reads past the seeded emission, bounded by `KNOWN_DEVICES_WAIT_MS`; never prompts. */
 function listPermittedDevices(
   dmk: Pick<DeviceManagementKit, 'listenToAvailableDevices'>,
   transport: TransportIdentifier
@@ -139,10 +133,8 @@ function listPermittedDevices(
 }
 
 /**
- * Connects silently to an already-permitted device (`listenToAvailableDevices`); only falls
- * back to the browser's device picker (`startDiscovering`) when none is found, so callers must
- * only invoke this from a user gesture. Throws `LedgerPermissionRequired` when neither yields a
- * device, so `use-ledger.ts` can distinguish that from a device-side connection failure.
+ * Connects silently to an already-permitted device, falling back to the browser's device picker
+ * when none is found, so callers must only invoke this from a user gesture.
  */
 export async function connectLedgerTransport(
   dmk: LedgerConnectDmk,
@@ -173,11 +165,7 @@ export const usbTransportCreator: TransportCreator = () =>
 export const bluetoothTransportCreator: TransportCreator = () =>
   connectLedgerTransport(getDmk(), webBleIdentifier);
 
-/**
- * Answers "is a Ledger already permitted?" without prompting, via `listPermittedDevices`. Only
- * ever probes USB — paired BLE devices cannot be silently enumerated the way
- * `navigator.hid.getDevices()` can, so the return type excludes `'Bluetooth'`.
- */
+/** Answers "is a Ledger already permitted?" without prompting; USB only, as paired BLE cannot. */
 export const getPreferredTransport = async (
   dmk: Pick<DeviceManagementKit, 'listenToAvailableDevices'> = getDmk()
 ): Promise<SelectedTransport> => {

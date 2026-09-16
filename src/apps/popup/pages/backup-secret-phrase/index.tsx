@@ -25,7 +25,6 @@ export function BackupSecretPhrasePage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  // Fetch only after password re-confirmation
   const { secretPhrase, isLoading, error, retry } =
     useSecretPhrase(isPasswordConfirmed);
 

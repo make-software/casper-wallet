@@ -74,7 +74,6 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
         popupPage.getByRole('button', { name: 'Confirm send' })
       ).toBeDisabled();
 
-      // Scroll to the bottom
       await popupPage.evaluate(() => {
         const container = document.querySelector('#ms-container');
 
@@ -165,7 +164,6 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
       popupPage.getByRole('button', { name: 'Confirm send' })
     ).toBeDisabled();
 
-    // Scroll to the bottom
     await popupPage.evaluate(() => {
       const container = document.querySelector('#ms-container');
 

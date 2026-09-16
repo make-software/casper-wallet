@@ -22,9 +22,8 @@ export async function handleBringWeb3(
   store: MainStore
 ): Promise<HandlerResult> {
   if (bringWeb3Events.getActivePublicKey.match(action)) {
-    // Absence must not be shaped like success. A locked vault or a missing
-    // active account reports an explicit null; `bring.ts` already treats a
-    // missing key as "no wallet address" (the kit's getWalletAddress contract).
+    // Absence must not be shaped like success: a locked vault or a missing
+    // active account reports an explicit null.
     const isLocked = selectVaultIsLocked(store.getState());
     const activeAccount = isLocked
       ? undefined
@@ -40,9 +39,8 @@ export async function handleBringWeb3(
     const isLocked = selectVaultIsLocked(store.getState());
 
     if (isLocked) {
-      // Awaited (not fire-and-forget): a rejection from getCurrent/create then
-      // propagates to the message router instead of becoming an unhandled
-      // rejection, and the handler resolves only once the popup is opened.
+      // Awaited, not fire-and-forget: a rejection propagates to the message
+      // router instead of becoming an unhandled rejection.
       const currentWindow = await windows.getCurrent();
       const windowWidth = currentWindow.width ?? 0;
       const xOffset = currentWindow.left ?? 0;

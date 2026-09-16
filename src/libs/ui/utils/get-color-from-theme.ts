@@ -33,7 +33,6 @@ type FillColor =
   | 'fillCriticalClick'
   | 'fillPositive'
   | 'fillNeutral';
-// can extend more color types later here if needed (like FillColor etc.) the utility below can be generic and can work with all of them
 export type Color = ContentColor | BackgroundColor | FillColor;
 
 export function getColorFromTheme(theme: DefaultTheme, color: Color) {
