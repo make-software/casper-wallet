@@ -345,7 +345,7 @@ describe('resolveLegErrorHint', () => {
   it('never renders a Ledger status enum', () => {
     const hint = resolveLegErrorHint(LedgerEventStatus.DeviceLocked, translate);
 
-    expect(hint).toBe('The Ledger device is locked');
+    expect(hint).toBe('Your Ledger device is locked');
     expect(hint).not.toContain('ledger-');
   });
 

@@ -323,18 +323,24 @@ export const TransferNftPage = () => {
       casperNetworkApiVersion
     );
 
-    dispatchToMainStore(
-      ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
-    );
-    dispatchToMainStore(
-      ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
-    );
-    dispatchToMainStore(
-      ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
-    );
+    await Promise.all([
+      dispatchToMainStore(
+        ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
+      ),
+      dispatchToMainStore(
+        ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
+      ),
+      dispatchToMainStore(
+        ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+      )
+    ]);
   };
 
-  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+  const {
+    ledgerEventStatusToRender,
+    makeSubmitLedgerAction,
+    cancelPendingLedgerAction
+  } = useLedger({
     ledgerAction: submitTransfer,
     beforeLedgerActionCb
   });
@@ -400,6 +406,7 @@ export const TransferNftPage = () => {
     onConnect: makeSubmitLedgerAction,
     event: ledgerEventStatusToRender,
     onErrorCtaPressed: () => {
+      cancelPendingLedgerAction();
       setTransferNFTStep(TransferNFTSteps.Confirm);
       setIsSubmitButtonDisable(false);
     }

@@ -299,16 +299,22 @@ export const StakesPage = () => {
         casperNetworkApiVersion
       );
 
-      dispatchToMainStore(
-        ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
-      );
-      dispatchToMainStore(
-        ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
-      );
+      await Promise.all([
+        dispatchToMainStore(
+          ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
+        ),
+        dispatchToMainStore(
+          ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
+        )
+      ]);
     }
   };
 
-  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+  const {
+    ledgerEventStatusToRender,
+    makeSubmitLedgerAction,
+    cancelPendingLedgerAction
+  } = useLedger({
     ledgerAction: submitStake,
     beforeLedgerActionCb
   });
@@ -454,7 +460,10 @@ export const StakesPage = () => {
   const ledgerFooterButton = renderLedgerFooter({
     onConnect: makeSubmitLedgerAction,
     event: ledgerEventStatusToRender,
-    onErrorCtaPressed: () => setStakeStep(StakeSteps.Confirm)
+    onErrorCtaPressed: () => {
+      cancelPendingLedgerAction();
+      setStakeStep(StakeSteps.Confirm);
+    }
   });
 
   const footerButtons = {

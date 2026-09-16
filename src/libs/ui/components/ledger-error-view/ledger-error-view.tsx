@@ -15,6 +15,7 @@ import {
 import {
   ILedgerEvent,
   LedgerEventStatus,
+  isLedgerWaiting,
   ledgerErrorsData
 } from '@libs/services/ledger';
 import { SvgIcon, Typography } from '@libs/ui/components';
@@ -36,9 +37,10 @@ export const LedgerErrorView: React.FC<ILedgerErrorProps> = ({ event }) => {
     event.status === LedgerEventStatus.MsgSignatureCanceled ||
     event.status === LedgerEventStatus.SignatureCanceled;
 
+  const isWaiting = isLedgerWaiting(event);
+
   const withLoader =
-    event.status === LedgerEventStatus.CasperAppNotLoaded ||
-    event.status === LedgerEventStatus.DeviceLocked;
+    event.status === LedgerEventStatus.CasperAppNotLoaded || isWaiting;
 
   useEffect(() => {
     const container = document.querySelector('#ms-container');
@@ -55,9 +57,11 @@ export const LedgerErrorView: React.FC<ILedgerErrorProps> = ({ event }) => {
       <IllustrationContainer>
         <SvgIcon
           src={
-            isRejectedIcon
-              ? 'assets/illustrations/ledger-rejected.svg'
-              : 'assets/illustrations/ledger-error.svg'
+            isWaiting
+              ? 'assets/illustrations/ledger-not-connected.svg'
+              : isRejectedIcon
+                ? 'assets/illustrations/ledger-rejected.svg'
+                : 'assets/illustrations/ledger-error.svg'
           }
           width={296}
           height={120}

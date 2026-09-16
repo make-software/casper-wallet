@@ -25,7 +25,8 @@
     "https://cspr-wallet-api.stg.make.services/*",
     "https://api.casperwallet.io/*",
     "https://api.cspr.trade/*",
-    "https://api.testnet.cspr.trade/*"
+    "https://api.testnet.cspr.trade/*",
+    "https://cspr-trade-api.dev.make.services/*"
   ],
   "declarative_net_request": {
     "rule_resources": [

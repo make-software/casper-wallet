@@ -1,6 +1,7 @@
 import {
   formatProtocolFeePercent,
-  isHighPriceImpact
+  isHighPriceImpact,
+  shouldStackSwapRoute
 } from './swap-details-utils';
 
 describe('isHighPriceImpact', () => {
@@ -29,5 +30,24 @@ describe('formatProtocolFeePercent', () => {
 
   it('drops trailing zeros', () => {
     expect(formatProtocolFeePercent(0.01)).toBe('1');
+  });
+});
+
+describe('shouldStackSwapRoute', () => {
+  it('keeps a direct swap beside the label', () => {
+    expect(shouldStackSwapRoute(2)).toBe(false);
+  });
+
+  it('stacks a routed swap under the label', () => {
+    expect(shouldStackSwapRoute(3)).toBe(true);
+  });
+
+  it('stacks every longer route', () => {
+    expect(shouldStackSwapRoute(4)).toBe(true);
+  });
+
+  it('keeps an empty or single-token route beside the label', () => {
+    expect(shouldStackSwapRoute(0)).toBe(false);
+    expect(shouldStackSwapRoute(1)).toBe(false);
   });
 });

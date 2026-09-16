@@ -1,9 +1,11 @@
+import { LedgerError, createLedgerSubmitResume } from 'casper-wallet-core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { windows } from 'webextension-polyfill';
 
 import { RouterPath } from '@popup/router';
 
+import { closeCurrentWindow } from '@background/close-current-window';
 import { openNewSeparateWindow } from '@background/create-open-window';
 import {
   closeLedgerFlowWindows,
@@ -16,7 +18,9 @@ import {
 } from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
+import { connectLedgerOnce } from '@hooks/ledger-connect-once';
 import { runWithDeviceConfirmationReported } from '@hooks/ledger-device-confirmation';
+import { decideOpenerHandoff } from '@hooks/ledger-opener-handoff';
 import {
   isLedgerPermissionWindowDocument,
   needsLedgerPermissionWindow
@@ -56,6 +60,11 @@ interface LedgerPermissionParams {
 
 interface IUseLedgerParams {
   ledgerAction: () => Promise<void>;
+  /**
+   * Must have parked whatever the permission window will sign by the time it
+   * resolves — a popup opener closes itself once that window exists, taking any
+   * undelivered park with it.
+   */
   beforeLedgerActionCb: () => Promise<void>;
   initialEventToRender?: ILedgerEvent;
   shouldLoadAccountList?: boolean;
@@ -90,10 +99,10 @@ export const useLedger = ({
   const windowId = useSelector(selectLedgerNewWindowId);
   const openerWindowId = useSelector(selectLedgerOpenerWindowId);
   const openerRequestId = useSelector(selectLedgerOpenerRequestId);
-  const shouldTrySignAfterConnectRef = useRef<boolean>(false);
   const selectedTransportRef = useRef<SelectedTransport>(undefined);
   const isFirstEventRef = useRef<boolean>(true);
   const triggeredRef = useRef(false);
+  const submitResume = useMemo(() => createLedgerSubmitResume(), []);
 
   // Built key by key (rather than spread into the constructor) because
   // `LedgerPermissionParams` has optional members: an absent one must be left
@@ -136,13 +145,13 @@ export const useLedger = ({
     await beforeLedgerActionCb();
 
     if (isLedgerConnected) {
-      // Fire-and-forget as before — the status below must render while the
-      // device is being read — but bracketed so the background knows this
-      // request is on the device and leaves the window it runs in alone.
+      // Fire-and-forget: the status below must render while the device is read.
+      // Bracketed so the background leaves the window this request runs in alone.
+      const settleSubmit = submitResume.issued();
       void runWithDeviceConfirmationReported(
         askPermissionUrlData.params?.requestId,
         ledgerAction
-      );
+      ).finally(settleSubmit);
 
       if (shouldLoadAccountList) {
         setLedgerEventStatusToRender({
@@ -150,7 +159,7 @@ export const useLedger = ({
         });
       }
     } else {
-      shouldTrySignAfterConnectRef.current = true;
+      submitResume.awaitingConnect();
 
       const transportToOpen = selectedTransportRef.current;
 
@@ -177,31 +186,57 @@ export const useLedger = ({
 
       try {
         if (selectedTransportRef.current === 'USB') {
-          await ledger.connect(usbTransportCreator, isTransportAvailable);
+          await connectLedgerOnce(() =>
+            ledger.connect(usbTransportCreator, isTransportAvailable)
+          );
         } else if (selectedTransportRef.current === 'Bluetooth') {
-          await ledger.connect(
-            bluetoothTransportCreator,
-            IsBluetoothLedgerTransportAvailable,
-            true
+          await connectLedgerOnce(() =>
+            ledger.connect(
+              bluetoothTransportCreator,
+              IsBluetoothLedgerTransportAvailable,
+              true
+            )
           );
         } else {
           setLedgerEventStatusToRender({
             status: LedgerEventStatus.Disconnected
           });
         }
-      } catch (e) {
-        setIsLedgerConnected(false);
+      } catch (error) {
+        // The subscription below already renders this. Logged because every transport-open
+        // failure arrives as the same status; the message is left out, it carries the key.
+        console.error('useLedger: connecting to the device failed', {
+          transport: selectedTransportRef.current,
+          errorName: (error as Error)?.name,
+          ledgerStatus:
+            error instanceof LedgerError ? error.ledgerEvent.status : undefined
+        });
       }
     }
   };
 
+  // Core clears its own connection flag on states it does not report as `Disconnected` — a
+  // locked device is one — so the flag is subscribed, never derived from the event stream.
+  useEffect(() => {
+    const sub = ledger.connected$.subscribe(connected => {
+      setIsLedgerConnected(connected);
+
+      // A device that leaves mid-action takes the submit with it; the connect branch only
+      // covers one that was already away when the user pressed submit.
+      if (!connected) {
+        submitResume.deviceLeft();
+      }
+    });
+
+    return () => sub.unsubscribe();
+  }, [submitResume]);
+
   useEffect(() => {
     const sub = ledger.subscribeToLedgerEventStatus(event => {
-      if (event.status === LedgerEventStatus.Connected) {
-        setIsLedgerConnected(true);
-      } else if (event.status === LedgerEventStatus.Disconnected) {
-        setIsLedgerConnected(false);
+      // The device has answered for the submit, so recovery must not re-issue it.
+      submitResume.outcomeReported(event.status);
 
+      if (event.status === LedgerEventStatus.Disconnected) {
         if (withWaitingEventOnDisconnect) {
           setLedgerEventStatusToRender({
             status: LedgerEventStatus.WaitingResponseFromDevice
@@ -222,21 +257,29 @@ export const useLedger = ({
         setLedgerEventStatusToRender({
           status: LedgerEventStatus.Disconnected
         });
-        setIsLedgerConnected(false);
       }
 
       isFirstEventRef.current = false;
     });
 
     return () => sub.unsubscribe();
-  }, [withWaitingEventOnDisconnect]);
+  }, [withWaitingEventOnDisconnect, submitResume]);
 
   useEffect(() => {
-    if (isLedgerConnected && shouldTrySignAfterConnectRef.current) {
+    if (isLedgerConnected && submitResume.shouldResume()) {
       makeSubmitLedgerAction(selectedTransportRef.current)();
-      shouldTrySignAfterConnectRef.current = false;
+      submitResume.resumed();
     }
-  }, [isLedgerConnected, makeSubmitLedgerAction]);
+  }, [isLedgerConnected, makeSubmitLedgerAction, submitResume]);
+
+  /**
+   * Drops a submit still waiting for the device. `DeviceLocked` keeps polling
+   * behind the error screen, so a dismissed flow would otherwise sign the moment
+   * the device is unlocked, from a page the user already left. WALLET-1452.
+   */
+  const cancelPendingLedgerAction = useCallback(() => {
+    submitResume.dropped();
+  }, [submitResume]);
 
   // One per hook instance, stable across renders: the effect below arms it and
   // the two effects after it are the only things that take it back down.
@@ -247,10 +290,6 @@ export const useLedger = ({
   // third (`openerWindowId` qualified by `openerRequestId`) rides in the slice
   // so a remounted popup still owns the window its predecessor opened.
   const openedPermissionWindowIdRef = useRef<number | null>(null);
-  // Latched, not derived from the slice: `windowId` is null both before the
-  // window opens and after it closes, and the id lands in the slice through an
-  // async round-trip the render cannot wait for.
-  const [permissionWindowClosed, setPermissionWindowClosed] = useState(false);
   const [hostWindowId, setHostWindowId] = useState<number | null>(null);
   // Mirror for the open effect below, which must not re-run when the state lands.
   const hostWindowIdRef = useRef<number | null>(null);
@@ -316,7 +355,9 @@ export const useLedger = ({
 
         openedPermissionWindowIdRef.current = w.id;
 
-        dispatchToMainStore(
+        // Awaited so the close below cannot drop it: this id is what lets
+        // `handleWindowRemoved` clear the slice when the window goes.
+        await dispatchToMainStore(
           ledgerNewWindowIdChanged({
             windowId: w.id,
             openerWindowId: hostWindowIdRef.current,
@@ -324,7 +365,7 @@ export const useLedger = ({
           })
         );
 
-        registerLedgerPermissionWindow({
+        const permissionWindowAttached = await registerLedgerPermissionWindow({
           domain: askPermissionUrlData.domain,
           requestId: askPermissionUrlData.params?.requestId,
           windowId: w.id
@@ -332,12 +373,35 @@ export const useLedger = ({
 
         triggeredRef.current = true;
 
-        // The permission screen instructs the user to act in a window that no
-        // longer exists once this fires. Nothing else lowers it: the flow runs
-        // in the window's own document, whose `ledger` service is a different
-        // instance, so this one never sees the connection succeed. WALLET-1249.
+        const handoff = decideOpenerHandoff({
+          permissionWindowDomain: askPermissionUrlData.domain,
+          isPermissionWindow: isLedgerPermissionWindowDocument(
+            document.location.search
+          ),
+          permissionWindowAttached
+        });
+
+        if (handoff === 'close-popup') {
+          window.close();
+          return;
+        }
+
+        if (handoff === 'close-approval-window') {
+          try {
+            await closeCurrentWindow();
+            return;
+          } catch (error) {
+            // The opener is still standing, so it still needs the recovery below.
+            console.error(
+              'useLedger: dismissing the opener window failed',
+              error
+            );
+          }
+        }
+
+        // Reached only by an opener that stays — the flow runs in the window's
+        // own document, so nothing else here ever lowers the permission screen.
         closeTracker.arm(w.id, () => {
-          setPermissionWindowClosed(true);
           setLedgerEventStatusToRender({
             status: LedgerEventStatus.Disconnected
           });
@@ -449,10 +513,10 @@ export const useLedger = ({
     ledgerEventStatusToRender,
     isLedgerConnected,
     makeSubmitLedgerAction,
+    cancelPendingLedgerAction,
     closeNewLedgerWindowsAndClearState,
     // Deliberately not the raw slot: a page that branches on "is there a
     // permission window" must not see a foreign flow's.
-    ownPermissionWindowId,
-    permissionWindowClosed
+    ownPermissionWindowId
   };
 };

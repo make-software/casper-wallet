@@ -1,28 +1,83 @@
-import { ledgerUSBVendorId } from '@ledgerhq/devices';
-import Transport from '@ledgerhq/hw-transport';
-import BluetoothTransport from '@ledgerhq/hw-transport-web-ble';
-import TransportWebHID from '@ledgerhq/hw-transport-webhid';
-import TransportWebUsb from '@ledgerhq/hw-transport-webusb';
-import { getLedgerDevices } from '@ledgerhq/hw-transport-webusb/lib/webusb';
-import { LedgerError } from 'casper-wallet-core';
+import type {
+  DeviceManagementKit,
+  DiscoveredDevice,
+  TransportIdentifier
+} from '@ledgerhq/device-management-kit';
+import { webBleIdentifier } from '@ledgerhq/device-transport-kit-web-ble';
+import { webHidIdentifier } from '@ledgerhq/device-transport-kit-web-hid';
+import { LedgerError, type TransportCreator } from 'casper-wallet-core';
+import { type Subscription, firstValueFrom } from 'rxjs';
 
+import {
+  connectSession,
+  getBluetoothAvailabilityDmk,
+  getDmk,
+  getUsbAvailabilityDmk
+} from './dmk';
+import {
+  type DmkLedgerTransport,
+  type DmkSessionHandle,
+  createDmkLedgerTransport
+} from './dmk-transport';
 import { LedgerEventStatus, SelectedTransport } from './types';
 
-export const IsUsbLedgerTransportAvailable = async (): Promise<boolean> => {
-  const hidAvailable = await TransportWebHID.isSupported();
+export const IsUsbLedgerTransportAvailable = (
+  dmk: Pick<
+    DeviceManagementKit,
+    'isEnvironmentSupported'
+  > = getUsbAvailabilityDmk()
+): Promise<boolean> => Promise.resolve(dmk.isEnvironmentSupported());
 
-  if (hidAvailable) {
-    return true;
+export const IsBluetoothLedgerTransportAvailable = (
+  dmk: Pick<
+    DeviceManagementKit,
+    'isEnvironmentSupported'
+  > = getBluetoothAvailabilityDmk()
+): Promise<boolean> => Promise.resolve(dmk.isEnvironmentSupported());
+
+/** The `navigator.bluetooth` surface this module needs; untyped in TS's DOM lib. */
+interface BluetoothAvailabilitySource {
+  getAvailability(): Promise<boolean>;
+  addEventListener(
+    type: 'availabilitychanged',
+    listener: (event: { value: boolean }) => void
+  ): void;
+  removeEventListener(
+    type: 'availabilitychanged',
+    listener: (event: { value: boolean }) => void
+  ): void;
+}
+
+const getRealBluetoothAvailabilitySource = ():
+  BluetoothAvailabilitySource | undefined =>
+  (navigator as unknown as { bluetooth?: BluetoothAvailabilitySource })
+    .bluetooth;
+
+/**
+ * Reimplements `BluetoothTransport.observeAvailability` (DMK has no equivalent) over the web
+ * standard it wrapped: `navigator.bluetooth.getAvailability()` plus `availabilitychanged`.
+ */
+export const subscribeToBluetoothAvailability = (
+  observer: (available: boolean) => void,
+  bluetooth:
+    | BluetoothAvailabilitySource
+    | undefined = getRealBluetoothAvailabilitySource()
+): { unsubscribe: () => void } => {
+  if (!bluetooth) {
+    observer(false);
+    return { unsubscribe: () => {} };
   }
 
-  return await TransportWebUsb.isSupported();
+  const handleChange = (event: { value: boolean }) => observer(event.value);
+
+  bluetooth.getAvailability().then(observer, () => observer(false));
+  bluetooth.addEventListener('availabilitychanged', handleChange);
+
+  return {
+    unsubscribe: () =>
+      bluetooth.removeEventListener('availabilitychanged', handleChange)
+  };
 };
-
-export const IsBluetoothLedgerTransportAvailable = async (): Promise<boolean> =>
-  BluetoothTransport.isSupported();
-
-export const subscribeToBluetoothAvailability =
-  BluetoothTransport.observeAvailability;
 
 export const isTransportAvailable = async () => {
   try {
@@ -37,59 +92,96 @@ export const isTransportAvailable = async () => {
   }
 };
 
-export const usbTransportCreator = async (): Promise<Transport> => {
-  if (await TransportWebHID.isSupported()) {
-    const connected = await TransportWebHID.openConnected();
+type LedgerConnectDmk = Pick<
+  DeviceManagementKit,
+  'listenToAvailableDevices' | 'startDiscovering' | 'connect'
+> &
+  DmkSessionHandle;
 
-    return connected || (await TransportWebHID.request());
-  } else if (await TransportWebUsb.isSupported()) {
-    const connected = await TransportWebUsb.openConnected();
+export const KNOWN_DEVICES_WAIT_MS = 500;
 
-    if (!connected) {
-      throw new LedgerError({
-        status: LedgerEventStatus.LedgerPermissionRequired
-      });
-    }
+/**
+ * Waits for the first real read past the transport's synchronous seeded emission, bounded by
+ * `KNOWN_DEVICES_WAIT_MS` so a stalled observable resolves empty. Never calls `startDiscovering`.
+ */
+function listPermittedDevices(
+  dmk: Pick<DeviceManagementKit, 'listenToAvailableDevices'>,
+  transport: TransportIdentifier
+): Promise<DiscoveredDevice[]> {
+  return new Promise(resolve => {
+    let latest: DiscoveredDevice[] = [];
+    let subscribing = true;
+    let settled = false;
+    const subscriptionRef: { current?: Subscription } = {};
 
-    return connected || (await TransportWebUsb.request());
-  } else {
-    throw new Error('Usb connection not supported');
-  }
-};
-
-export const bluetoothTransportCreator = async () =>
-  BluetoothTransport.create();
-
-export const getPreferredTransport = async (): Promise<SelectedTransport> => {
-  if (await TransportWebHID.isSupported()) {
-    // Copy from TransportWebHID.getLedgerDevices source code
-    const getHID = (): null | Record<'getDevices', () => Promise<any[]>> => {
-      // @ts-ignore
-      const { hid } = navigator;
-
-      if (!hid) return null;
-
-      return hid;
+    const finish = (devices: DiscoveredDevice[]) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      subscriptionRef.current?.unsubscribe();
+      resolve(devices);
     };
 
-    async function getHiDLedgerDevices(): Promise<any[]> {
-      const devices = (await getHID()?.getDevices()) ?? [];
+    const timer = setTimeout(() => finish(latest), KNOWN_DEVICES_WAIT_MS);
 
-      return devices.filter((d: any) => d.vendorId === ledgerUSBVendorId);
-    }
+    subscriptionRef.current = dmk
+      .listenToAvailableDevices({ transport })
+      .subscribe({
+        next: devices => {
+          latest = devices;
+          if (!subscribing) finish(devices);
+        },
+        error: () => finish([])
+      });
 
-    const devices = await getHiDLedgerDevices();
+    subscribing = false;
+  });
+}
 
-    if (devices.length) {
-      return 'USB';
-    }
-  } else if (await TransportWebUsb.isSupported()) {
-    const devices = await getLedgerDevices();
+/**
+ * Connects silently to an already-permitted device (`listenToAvailableDevices`); only falls
+ * back to the browser's device picker (`startDiscovering`) when none is found, so callers must
+ * only invoke this from a user gesture. Throws `LedgerPermissionRequired` when neither yields a
+ * device, so `use-ledger.ts` can distinguish that from a device-side connection failure.
+ */
+export async function connectLedgerTransport(
+  dmk: LedgerConnectDmk,
+  transport: TransportIdentifier
+): Promise<DmkLedgerTransport> {
+  const knownDevices = await listPermittedDevices(dmk, transport);
 
-    if (devices.length) {
-      return 'USB';
-    }
+  const device =
+    knownDevices[0] ??
+    (await firstValueFrom(dmk.startDiscovering({ transport }), {
+      defaultValue: undefined
+    }));
+
+  if (!device) {
+    throw new LedgerError({
+      status: LedgerEventStatus.LedgerPermissionRequired
+    });
   }
 
-  return undefined;
+  const sessionId = await connectSession(dmk, device);
+
+  return createDmkLedgerTransport(dmk, sessionId);
+}
+
+export const usbTransportCreator: TransportCreator = () =>
+  connectLedgerTransport(getDmk(), webHidIdentifier);
+
+export const bluetoothTransportCreator: TransportCreator = () =>
+  connectLedgerTransport(getDmk(), webBleIdentifier);
+
+/**
+ * Answers "is a Ledger already permitted?" without prompting, via `listPermittedDevices`. Only
+ * ever probes USB — paired BLE devices cannot be silently enumerated the way
+ * `navigator.hid.getDevices()` can, so the return type excludes `'Bluetooth'`.
+ */
+export const getPreferredTransport = async (
+  dmk: Pick<DeviceManagementKit, 'listenToAvailableDevices'> = getDmk()
+): Promise<SelectedTransport> => {
+  const devices = await listPermittedDevices(dmk, webHidIdentifier);
+
+  return devices.length ? 'USB' : undefined;
 };

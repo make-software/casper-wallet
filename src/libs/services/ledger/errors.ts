@@ -55,8 +55,8 @@ export const ledgerErrorsData: Record<LedgerEventStatus, ILedgerErrorData> = {
       'Please make sure to open Casper app on your Ledger and try connecting again.'
   },
   [LedgerEventStatus.DeviceLocked]: {
-    title: 'The Ledger device is locked',
-    description: 'Unlock the Ledger device connection and try again'
+    title: 'Your Ledger device is locked',
+    description: 'Unlock it to carry on — this will pick up where it left off'
   },
   [LedgerEventStatus.NotAvailable]: {
     title: "Your browser doesn't support connection to Ledger",
@@ -92,3 +92,11 @@ export const ledgerErrorsData: Record<LedgerEventStatus, ILedgerErrorData> = {
 
 export const isLedgerError = (event: ILedgerEvent) =>
   Boolean(ledgerErrorsData[event.status].title);
+
+/**
+ * A state the user clears on the device, after which the flow resumes on its own — so it is
+ * shown as a wait with a cancel, never as a failure to acknowledge. Still an `isLedgerError`,
+ * which is what routes it to the view that renders its copy.
+ */
+export const isLedgerWaiting = (event: ILedgerEvent) =>
+  event.status === LedgerEventStatus.DeviceLocked;

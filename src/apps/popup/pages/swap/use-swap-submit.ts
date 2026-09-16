@@ -60,6 +60,8 @@ import {
   resolveWrapFlowOutcome
 } from './flow-events';
 import { ILedgerSwapPayload, serializeLedgerSwapPayload } from './ledger-trade';
+import { toStartSwapFlowParams } from './swap-flow-params';
+import { resolveParkedSwapPayload } from './swap-repark';
 import { ISwapReviewData } from './types';
 
 interface UseSwapSubmitParams {
@@ -76,7 +78,7 @@ export interface ISwapSubmitApi {
    * Stores the reviewed trade for the Ledger permission window. Must run from the page's
    * `beforeLedgerActionCb`: the Connect CTA clears the whole ledger slice before calling it.
    */
-  parkLedgerPayload: () => void;
+  parkLedgerPayload: () => Promise<void>;
   flowState: SwapSubmitState;
   isProcessing: boolean;
 }
@@ -117,6 +119,9 @@ export const useSwapSubmit = ({
   // one today, but the confirm screen holds `review` in its parent's state) can't retarget an
   // in-flight flow's rendered rows.
   const runKindRef = useRef<'swap' | 'wrap' | null>(null);
+  // The payload last dispatched to the store, kept so a re-park can amend it (carrying a
+  // recorded approval forward) instead of rebuilding it from settings that may have moved on.
+  const parkedPayloadRef = useRef<ILedgerSwapPayload | null>(null);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isLedgerAccount = useSelector(selectIsActiveAccountFromLedger);
@@ -126,6 +131,16 @@ export const useSwapSubmit = ({
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const slippage = useSelector(selectSwapSlippageSetting);
   const deadline = useSelector(selectSwapDeadlineSetting);
+
+  // Also what a re-park's `isDeploy` comes from: the side that waits for a parked approval
+  // cannot derive which kind of hash it is waiting on.
+  const supportsTransactionV1 =
+    isCasper2Network &&
+    (isLedgerAccount
+      ? activeAccount?.supports?.includes(
+          CasperWalletSupports.signTransactionV1
+        ) === true
+      : true);
 
   // Mirrored into refs so the unmount cleanup can stay dependency-free — re-running it on a
   // network or window-id change would drop a payload the permission window is about to sign.
@@ -138,6 +153,8 @@ export const useSwapSubmit = ({
   // handlers watching its close clear the whole slice. Otherwise a trade signed inline or
   // abandoned stays parked and is re-run by the next flow that opens the window.
   const clearParkedPayload = useCallback(() => {
+    parkedPayloadRef.current = null;
+
     if (isLedgerAccountRef.current && permissionWindowIdRef.current == null) {
       dispatchToMainStore(ledgerSwapPayloadChanged(null));
     }
@@ -178,7 +195,7 @@ export const useSwapSubmit = ({
   const applyOutcome = useCallback(
     (outcome: SwapFlowOutcome) => {
       switch (outcome.kind) {
-        case 'sent':
+        case 'sent': {
           // Every leg is the user's own transaction, so all of them belong in Activity right
           // away, not only the one the success screen gates on.
           dispatchToMainStore(accountPendingDeployHashesChanged(outcome.hash));
@@ -186,9 +203,32 @@ export const useSwapSubmit = ({
           if (outcome.isSubmitted) {
             clearParkedPayload();
             onSubmitted();
+
+            break;
+          }
+
+          // The approval leg re-parks, carrying its hash so a device interruption before the
+          // swap leg waits for it instead of paying for a second one.
+          const nextParked = resolveParkedSwapPayload(
+            outcome,
+            parkedPayloadRef.current,
+            !supportsTransactionV1
+          );
+
+          if (nextParked !== undefined) {
+            parkedPayloadRef.current = nextParked;
+
+            dispatchToMainStore(
+              ledgerSwapPayloadChanged(
+                nextParked == null
+                  ? null
+                  : serializeLedgerSwapPayload(nextParked)
+              )
+            );
           }
 
           break;
+        }
 
         case 'ledger':
           onLedgerStep();
@@ -212,16 +252,29 @@ export const useSwapSubmit = ({
           break;
       }
     },
-    [clearParkedPayload, onLedgerStep, onSubmitted, reportFailure]
+    [
+      clearParkedPayload,
+      onLedgerStep,
+      onSubmitted,
+      reportFailure,
+      supportsTransactionV1
+    ]
   );
 
-  const parkLedgerPayload = useCallback(() => {
+  const parkLedgerPayload = useCallback(async () => {
     if (!isLedgerAccount || review == null) {
       return;
     }
 
     // Snapshots the slippage and deadline in force now, so the permission window signs those
     // rather than whatever the settings sheet holds by the time it opens.
+    // A resumed attempt carries forward whatever approval the previous one already recorded.
+    const previouslyParked = parkedPayloadRef.current;
+    const pendingApproval =
+      review.kind === 'swap' && previouslyParked?.kind === 'swap'
+        ? previouslyParked.pendingApproval
+        : undefined;
+
     const payload: ILedgerSwapPayload =
       review.kind === 'wrap'
         ? {
@@ -229,9 +282,17 @@ export const useSwapSubmit = ({
             direction: review.direction,
             rawAmount: review.rawAmount
           }
-        : { kind: 'swap', trade: review.trade, slippage, deadline };
+        : {
+            kind: 'swap',
+            trade: review.trade,
+            slippage,
+            deadline,
+            ...(pendingApproval ? { pendingApproval } : {})
+          };
 
-    dispatchToMainStore(
+    parkedPayloadRef.current = payload;
+
+    await dispatchToMainStore(
       ledgerSwapPayloadChanged(serializeLedgerSwapPayload(payload))
     );
   }, [deadline, isLedgerAccount, review, slippage]);
@@ -288,14 +349,6 @@ export const useSwapSubmit = ({
         });
       }
 
-      const supportsTransactionV1 =
-        isCasper2Network &&
-        (isLedgerAccount
-          ? activeAccount.supports?.includes(
-              CasperWalletSupports.signTransactionV1
-            ) === true
-          : true);
-
       const deps: ISwapFlowDeps = {
         network,
         publicKey: activeAccount.publicKey,
@@ -331,19 +384,27 @@ export const useSwapSubmit = ({
 
         subscriptionRef.current = subscription;
 
-        handle.done
-          .finally(() => {
-            isSubmittingRef.current = false;
-          })
-          .catch(() => undefined);
+        // Awaited so this call spans the flow instead of its start: a Ledger resume keys off
+        // the action still being outstanding. Rejections are the subscription's to report.
+        await handle.done.catch(() => undefined);
+        isSubmittingRef.current = false;
       } else {
         const runner = createSwapFlowRunner(deps);
-        const handle = runner.start({
-          ...review.trade,
-          slippage,
-          deadline,
-          awaitSettlement: false
-        });
+        // Carries forward whatever the previous attempt recorded, so a retry after a failure
+        // waits for that approval instead of paying for a second one.
+        const pendingApproval =
+          parkedPayloadRef.current?.kind === 'swap'
+            ? parkedPayloadRef.current.pendingApproval
+            : undefined;
+        const handle = runner.start(
+          toStartSwapFlowParams({
+            kind: 'swap',
+            trade: review.trade,
+            slippage,
+            deadline,
+            ...(pendingApproval ? { pendingApproval } : {})
+          })
+        );
 
         const subscription = handle.events$.subscribe({
           next: event => {
@@ -358,11 +419,10 @@ export const useSwapSubmit = ({
 
         subscriptionRef.current = subscription;
 
-        handle.done
-          .finally(() => {
-            isSubmittingRef.current = false;
-          })
-          .catch(() => undefined);
+        // Awaited so this call spans the flow instead of its start: a Ledger resume keys off
+        // the action still being outstanding. Rejections are the subscription's to report.
+        await handle.done.catch(() => undefined);
+        isSubmittingRef.current = false;
       }
     } catch (error) {
       isSubmittingRef.current = false;
@@ -390,7 +450,6 @@ export const useSwapSubmit = ({
     applyOutcome,
     changeActiveAccountSupportsWithEvent,
     deadline,
-    isCasper2Network,
     isLedgerAccount,
     navigate,
     network,
@@ -398,6 +457,7 @@ export const useSwapSubmit = ({
     reportFailure,
     review,
     slippage,
+    supportsTransactionV1,
     t
   ]);
 

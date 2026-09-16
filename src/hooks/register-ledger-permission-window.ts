@@ -18,6 +18,8 @@ import { windowRequestWindowAttached } from '@background/redux/windowManagement/
  * it and legitimately passes no `requestId`. Every other domain does. */
 const INTERNAL_FLOW_DOMAIN = 'popup.html';
 
+/** Resolves true only once the background acknowledged the attach — an approval-window
+ * opener may not close before that. */
 export function registerLedgerPermissionWindow({
   domain,
   requestId,
@@ -26,7 +28,7 @@ export function registerLedgerPermissionWindow({
   domain: string;
   requestId: string | undefined;
   windowId: number;
-}): void {
+}): Promise<boolean> {
   if (requestId == null || requestId === '') {
     if (domain !== INTERNAL_FLOW_DOMAIN) {
       // Never log the URL or its params: a `signMessage` flow carries the
@@ -36,8 +38,10 @@ export function registerLedgerPermissionWindow({
         { domain, windowId }
       );
     }
-    return;
+    return Promise.resolve(false);
   }
 
-  dispatchToMainStore(windowRequestWindowAttached({ requestId, windowId }));
+  return dispatchToMainStore(
+    windowRequestWindowAttached({ requestId, windowId })
+  );
 }

@@ -346,6 +346,7 @@ export function SignTransactionPage() {
   const {
     ledgerEventStatusToRender,
     makeSubmitLedgerAction,
+    cancelPendingLedgerAction,
     closeNewLedgerWindowsAndClearState,
     ownPermissionWindowId
   } = useLedger({
@@ -375,6 +376,7 @@ export function SignTransactionPage() {
     // Unconditional, as it was before the window-ownership work: `closeCurrentWindow`
     // both rejects and — on a window that is not a popup — resolves having done
     // nothing, and either one used to leave the user on a dead error screen.
+    cancelPendingLedgerAction();
     setSigningPageState(SigningPageState.MainContent);
 
     switch (decision) {

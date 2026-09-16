@@ -15,6 +15,7 @@ import {
 } from '@libs/layout';
 import { SvgIcon, Typography } from '@libs/ui/components';
 
+import { shouldStackSwapRoute } from '../swap-details-utils';
 import { DexTokenIcon } from './dex-token-icon';
 
 export interface SwapRouteRowProps extends Pick<
@@ -32,9 +33,9 @@ const Container = styled(FlexColumn)`
   gap: 8px;
 `;
 
-const HopChainRow = styled(AlignedFlexRow)`
+const HopChainRow = styled(AlignedFlexRow)<{ $stacked: boolean }>`
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: ${({ $stacked }) => ($stacked ? 'flex-start' : 'flex-end')};
 
   min-width: 0;
 `;
@@ -55,40 +56,57 @@ export const SwapRouteRow = ({
     tokens
   });
 
+  const isStacked = shouldStackSwapRoute(hopTokens.length);
+
+  const hopChain = (
+    <HopChainRow $stacked={isStacked} gap={SpacingSize.Tiny}>
+      {hopTokens.map((token, index) => (
+        <AlignedFlexRow key={token.id} gap={SpacingSize.Tiny}>
+          {index > 0 && (
+            <SvgIcon
+              src="assets/icons/chevron.svg"
+              size={12}
+              color="contentSecondary"
+            />
+          )}
+          <DexTokenIcon
+            icon={token.icon}
+            symbol={token.symbol}
+            name={token.name}
+            size={16}
+          />
+          <Typography type="captionRegular">{token.symbol}</Typography>
+          {!token.isWhitelisted && !token.isBlacklisted && (
+            <SvgIcon
+              src="assets/icons/info.svg"
+              size={12}
+              color="contentWarning"
+            />
+          )}
+        </AlignedFlexRow>
+      ))}
+    </HopChainRow>
+  );
+
+  const label = (
+    <Typography type="body" color="contentSecondary" noWrap>
+      <Trans t={t}>Swap Route</Trans>
+    </Typography>
+  );
+
   return (
     <Container>
-      <AlignedSpaceBetweenFlexRow gap={SpacingSize.Small}>
-        <Typography type="body" color="contentSecondary" noWrap>
-          <Trans t={t}>Swap Route</Trans>
-        </Typography>
-        <HopChainRow gap={SpacingSize.Tiny}>
-          {hopTokens.map((token, index) => (
-            <AlignedFlexRow key={token.id} gap={SpacingSize.Tiny}>
-              {index > 0 && (
-                <SvgIcon
-                  src="assets/icons/chevron.svg"
-                  size={12}
-                  color="contentSecondary"
-                />
-              )}
-              <DexTokenIcon
-                icon={token.icon}
-                symbol={token.symbol}
-                name={token.name}
-                size={16}
-              />
-              <Typography type="captionRegular">{token.symbol}</Typography>
-              {!token.isWhitelisted && !token.isBlacklisted && (
-                <SvgIcon
-                  src="assets/icons/info.svg"
-                  size={12}
-                  color="contentWarning"
-                />
-              )}
-            </AlignedFlexRow>
-          ))}
-        </HopChainRow>
-      </AlignedSpaceBetweenFlexRow>
+      {isStacked ? (
+        <>
+          {label}
+          {hopChain}
+        </>
+      ) : (
+        <AlignedSpaceBetweenFlexRow gap={SpacingSize.Small}>
+          {label}
+          {hopChain}
+        </AlignedSpaceBetweenFlexRow>
+      )}
 
       <Typography type="captionRegular" color="contentSecondary">
         {t(

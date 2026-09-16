@@ -339,15 +339,17 @@ export const TransferPage = () => {
           casperNetworkApiVersion
         );
 
-        dispatchToMainStore(
-          ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
-        );
-        dispatchToMainStore(
-          ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
-        );
-        dispatchToMainStore(
-          ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
-        );
+        await Promise.all([
+          dispatchToMainStore(
+            ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
+          ),
+          dispatchToMainStore(
+            ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
+          ),
+          dispatchToMainStore(
+            ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+          )
+        ]);
       } else {
         const motesAmount = CSPRtoMotes(amount);
         const memoForTransfer = transferIdMemo || Date.now().toString();
@@ -364,20 +366,26 @@ export const TransferPage = () => {
           casperNetworkApiVersion
         );
 
-        dispatchToMainStore(
-          ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
-        );
-        dispatchToMainStore(
-          ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
-        );
-        dispatchToMainStore(
-          ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
-        );
+        await Promise.all([
+          dispatchToMainStore(
+            ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
+          ),
+          dispatchToMainStore(
+            ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
+          ),
+          dispatchToMainStore(
+            ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+          )
+        ]);
       }
     }
   };
 
-  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+  const {
+    ledgerEventStatusToRender,
+    makeSubmitLedgerAction,
+    cancelPendingLedgerAction
+  } = useLedger({
     ledgerAction: onSubmitSending,
     beforeLedgerActionCb
   });
@@ -477,6 +485,7 @@ export const TransferPage = () => {
     onConnect: makeSubmitLedgerAction,
     event: ledgerEventStatusToRender,
     onErrorCtaPressed: () => {
+      cancelPendingLedgerAction();
       setTransferStep(TransactionSteps.Confirm);
     }
   });

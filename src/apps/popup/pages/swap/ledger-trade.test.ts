@@ -133,4 +133,65 @@ describe('the parked Ledger swap payload', () => {
       parseLedgerSwapPayload(JSON.stringify({ kind: 'stake', trade }))
     ).toBeNull();
   });
+
+  it('parses a swap payload from the installed version, with no pendingApproval field', () => {
+    const parsed = parseLedgerSwapPayload(
+      serializeLedgerSwapPayload(swapPayload)
+    );
+
+    expect(parsed).toEqual(swapPayload);
+    expect(parsed?.kind === 'swap' && parsed.pendingApproval).toBeUndefined();
+  });
+
+  it('round-trips a recorded approval', () => {
+    const payload: ILedgerSwapPayload = {
+      ...swapPayload,
+      pendingApproval: { hash: 'aa'.repeat(32), isDeploy: false }
+    };
+
+    expect(parseLedgerSwapPayload(serializeLedgerSwapPayload(payload))).toEqual(
+      payload
+    );
+  });
+
+  it('preserves isDeploy: true rather than coercing it', () => {
+    const payload: ILedgerSwapPayload = {
+      ...swapPayload,
+      pendingApproval: { hash: 'aa'.repeat(32), isDeploy: true }
+    };
+
+    expect(parseLedgerSwapPayload(serializeLedgerSwapPayload(payload))).toEqual(
+      payload
+    );
+  });
+
+  it('refuses a pendingApproval whose hash is not a string', () => {
+    expect(
+      parseLedgerSwapPayload(
+        JSON.stringify({
+          ...swapPayload,
+          pendingApproval: { hash: 42, isDeploy: false }
+        })
+      )
+    ).toBeNull();
+  });
+
+  it('refuses a pendingApproval missing the isDeploy flag', () => {
+    expect(
+      parseLedgerSwapPayload(
+        JSON.stringify({
+          ...swapPayload,
+          pendingApproval: { hash: 'aa'.repeat(32) }
+        })
+      )
+    ).toBeNull();
+  });
+
+  it('refuses a non-object pendingApproval', () => {
+    expect(
+      parseLedgerSwapPayload(
+        JSON.stringify({ ...swapPayload, pendingApproval: 'aa'.repeat(32) })
+      )
+    ).toBeNull();
+  });
 });

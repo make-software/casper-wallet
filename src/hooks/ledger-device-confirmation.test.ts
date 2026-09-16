@@ -1,5 +1,9 @@
+import { LedgerError } from 'casper-wallet-core';
+
 import { dispatchToMainStore } from '@background/redux/utils';
 import { windowRequestDeviceConfirmationChanged } from '@background/redux/windowManagement/actions';
+
+import { LedgerEventStatus } from '@libs/services/ledger';
 
 import { runWithDeviceConfirmationReported } from './ledger-device-confirmation';
 
@@ -60,8 +64,34 @@ it('surfaces a failed device call instead of swallowing it', async () => {
 
   expect(consoleError).toHaveBeenCalledWith(
     'useLedger: the device action failed',
-    { errorName: 'Error' }
+    { errorName: 'Error', ledgerStatus: undefined }
   );
+});
+
+// Core names every one of its errors `Error`, so the status is the only thing that says which
+// device failure this was.
+it('names the device failure a Ledger error stands for', async () => {
+  await runWithDeviceConfirmationReported('r1', async () => {
+    throw new LedgerError({ status: LedgerEventStatus.DeviceLocked });
+  });
+
+  expect(consoleError).toHaveBeenCalledWith(
+    'useLedger: the device action failed',
+    { errorName: 'Error', ledgerStatus: LedgerEventStatus.DeviceLocked }
+  );
+});
+
+// The message is the whole event, and that carries the key and hash it failed on.
+it('keeps a Ledger error message out of the log', async () => {
+  await runWithDeviceConfirmationReported('r1', async () => {
+    throw new LedgerError({
+      status: LedgerEventStatus.SignatureFailed,
+      publicKey: '0202d1',
+      txHash: 'feb63'
+    });
+  });
+
+  expect(JSON.stringify(consoleError.mock.calls)).not.toContain('0202d1');
 });
 
 // `import-account-from-ledger`, transfer and staking run the same hook with no

@@ -11,6 +11,11 @@ export type ILedgerSwapPayload =
       trade: ISwapQuotedTrade;
       slippage: number;
       deadline: number;
+      /**
+       * An approval this trade already submitted. Parked so the permission window, which starts
+       * a fresh flow, waits for it instead of submitting a second one.
+       */
+      pendingApproval?: { hash: string; isDeploy: boolean };
     }
   | { kind: 'wrap'; direction: WrapDirection; rawAmount: string };
 
@@ -19,6 +24,14 @@ const isDexTokenShape = (value: unknown): boolean =>
   value != null &&
   typeof (value as { amountRaw?: unknown }).amountRaw === 'string' &&
   typeof (value as { symbol?: unknown }).symbol === 'string';
+
+const isPendingApprovalShape = (
+  value: unknown
+): value is { hash: string; isDeploy: boolean } =>
+  typeof value === 'object' &&
+  value != null &&
+  typeof (value as { hash?: unknown }).hash === 'string' &&
+  typeof (value as { isDeploy?: unknown }).isDeploy === 'boolean';
 
 const isQuotedTradeShape = (value: unknown): value is ISwapQuotedTrade =>
   typeof value === 'object' &&
@@ -64,10 +77,11 @@ export const parseLedgerSwapPayload = (
   const { kind } = parsed as { kind?: unknown };
 
   if (kind === 'swap') {
-    const { trade, slippage, deadline } = parsed as {
+    const { trade, slippage, deadline, pendingApproval } = parsed as {
       trade?: unknown;
       slippage?: unknown;
       deadline?: unknown;
+      pendingApproval?: unknown;
     };
 
     if (
@@ -75,9 +89,16 @@ export const parseLedgerSwapPayload = (
       typeof slippage === 'number' &&
       Number.isFinite(slippage) &&
       typeof deadline === 'number' &&
-      Number.isFinite(deadline)
+      Number.isFinite(deadline) &&
+      (pendingApproval === undefined || isPendingApprovalShape(pendingApproval))
     ) {
-      return { kind: 'swap', trade, slippage, deadline };
+      return {
+        kind: 'swap',
+        trade,
+        slippage,
+        deadline,
+        ...(pendingApproval === undefined ? {} : { pendingApproval })
+      };
     }
 
     return null;

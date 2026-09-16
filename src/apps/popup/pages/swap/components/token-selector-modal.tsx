@@ -71,7 +71,7 @@ const WarningPanel = styled.div`
   margin-top: 8px;
   padding: 12px 16px;
 
-  background-color: ${({ theme }) => theme.color.backgroundPrimary};
+  background-color: ${({ theme }) => theme.color.backgroundWarning};
   border-radius: ${({ theme }) => theme.borderRadius.base}px;
 `;
 

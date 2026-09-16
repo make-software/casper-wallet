@@ -16,7 +16,12 @@ export type ContentColor =
   | 'brandRed'
   | 'black';
 
-type BackgroundColor = 'inherit' | 'backgroundPrimary' | 'backgroundSecondary';
+type BackgroundColor =
+  | 'inherit'
+  | 'backgroundPrimary'
+  | 'backgroundSecondary'
+  | 'backgroundWarning'
+  | 'backgroundCritical';
 
 type FillColor =
   | 'inherit'
@@ -36,6 +41,8 @@ export function getColorFromTheme(theme: DefaultTheme, color: Color) {
     inherit: 'inherit',
     backgroundPrimary: theme.color.backgroundPrimary,
     backgroundSecondary: theme.color.backgroundSecondary,
+    backgroundWarning: theme.color.backgroundWarning,
+    backgroundCritical: theme.color.backgroundCritical,
     contentPrimary: theme.color.contentPrimary,
     contentSecondary: theme.color.contentSecondary,
     contentDisabled: theme.color.contentDisabled,

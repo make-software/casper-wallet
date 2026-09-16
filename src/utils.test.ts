@@ -193,7 +193,8 @@ describe('getSafariCspContent', () => {
         'https://api.integration.casperwallet.io/',
         'https://node.integration.cspr.cloud/',
         'https://api.cspr.trade/',
-        'https://api.testnet.cspr.trade/'
+        'https://api.testnet.cspr.trade/',
+        'https://cspr-trade-api.dev.make.services/'
       ].join(' ')
     });
   });
