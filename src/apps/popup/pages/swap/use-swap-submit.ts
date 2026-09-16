@@ -60,6 +60,7 @@ import {
   resolveWrapFlowOutcome
 } from './flow-events';
 import { ILedgerSwapPayload, serializeLedgerSwapPayload } from './ledger-trade';
+import { toStartSwapFlowParams } from './swap-flow-params';
 import { resolveParkedSwapPayload } from './swap-repark';
 import { ISwapReviewData } from './types';
 
@@ -389,12 +390,21 @@ export const useSwapSubmit = ({
         isSubmittingRef.current = false;
       } else {
         const runner = createSwapFlowRunner(deps);
-        const handle = runner.start({
-          ...review.trade,
-          slippage,
-          deadline,
-          awaitSettlement: false
-        });
+        // Carries forward whatever the previous attempt recorded, so a retry after a failure
+        // waits for that approval instead of paying for a second one.
+        const pendingApproval =
+          parkedPayloadRef.current?.kind === 'swap'
+            ? parkedPayloadRef.current.pendingApproval
+            : undefined;
+        const handle = runner.start(
+          toStartSwapFlowParams({
+            kind: 'swap',
+            trade: review.trade,
+            slippage,
+            deadline,
+            ...(pendingApproval ? { pendingApproval } : {})
+          })
+        );
 
         const subscription = handle.events$.subscribe({
           next: event => {

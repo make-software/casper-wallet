@@ -5,7 +5,7 @@ import {
   createSwapFlowRunner,
   createWrapFlowRunner
 } from 'casper-wallet-core';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -17,10 +17,17 @@ import {
   resolveSwapFlowOutcome,
   resolveWrapFlowOutcome
 } from '@popup/pages/swap/flow-events';
-import { parseLedgerSwapPayload } from '@popup/pages/swap/ledger-trade';
+import {
+  ILedgerSwapPayload,
+  parseLedgerSwapPayload,
+  serializeLedgerSwapPayload
+} from '@popup/pages/swap/ledger-trade';
+import { toStartSwapFlowParams } from '@popup/pages/swap/swap-flow-params';
+import { resolveParkedSwapPayload } from '@popup/pages/swap/swap-repark';
 
 import { fetchAccountSecretKey } from '@background/handlers/vault-secrets';
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
+import { ledgerSwapPayloadChanged } from '@background/redux/ledger/actions';
 import {
   selectLedgerDeploy,
   selectLedgerRecipientToSaveOnSuccess,
@@ -77,6 +84,10 @@ export const SignWithLedgerInNewWindowPage = () => {
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
+  // What is currently parked, kept in sync with the store so the approval leg's outcome can
+  // re-park it — this window starts its own flow handle and has no other record of it.
+  const parkedPayloadRef = useRef<ILedgerSwapPayload | null>(null);
+
   const reportFailure = (error: unknown) => {
     if (isLedgerFailure(error)) {
       return;
@@ -86,16 +97,39 @@ export const SignWithLedgerInNewWindowPage = () => {
     setFailure(getTransactionErrorCopy(error, key => t(key)));
   };
 
-  const applyOutcome = (outcome: SwapFlowOutcome) => {
+  // `isDeploy` is irrelevant off the swap arm: `resolveParkedSwapPayload` bails out before
+  // reading it whenever what is parked is not a swap, which is always true for a wrap outcome.
+  const applyOutcome = (outcome: SwapFlowOutcome, isDeploy = false) => {
     switch (outcome.kind) {
-      case 'sent':
+      case 'sent': {
         dispatchToMainStore(accountPendingDeployHashesChanged(outcome.hash));
 
         if (outcome.isSubmitted) {
           setIsSuccess(true);
+
+          break;
+        }
+
+        // The approval leg re-parks, carrying its hash forward, mirroring `useSwapSubmit`'s
+        // `applyOutcome` so a device interruption before the swap leg waits instead of retrying.
+        const nextParked = resolveParkedSwapPayload(
+          outcome,
+          parkedPayloadRef.current,
+          isDeploy
+        );
+
+        if (nextParked !== undefined) {
+          parkedPayloadRef.current = nextParked;
+
+          dispatchToMainStore(
+            ledgerSwapPayloadChanged(
+              nextParked == null ? null : serializeLedgerSwapPayload(nextParked)
+            )
+          );
         }
 
         break;
+      }
 
       case 'failed':
         reportFailure(outcome.error);
@@ -111,6 +145,7 @@ export const SignWithLedgerInNewWindowPage = () => {
 
   const ledgerAction = async () => {
     const parkedPayload = parseLedgerSwapPayload(swapPayloadJson);
+    parkedPayloadRef.current = parkedPayload;
 
     if (parkedPayload && activeAccount) {
       const signer = createLedgerSigner({
@@ -149,15 +184,13 @@ export const SignWithLedgerInNewWindowPage = () => {
           error: reportFailure
         });
       } else {
-        const handle = createSwapFlowRunner(deps).start({
-          ...parkedPayload.trade,
-          slippage: parkedPayload.slippage,
-          deadline: parkedPayload.deadline,
-          awaitSettlement: false
-        });
+        const handle = createSwapFlowRunner(deps).start(
+          toStartSwapFlowParams(parkedPayload)
+        );
 
         handle.events$.subscribe({
-          next: event => applyOutcome(resolveSwapFlowOutcome(event)),
+          next: event =>
+            applyOutcome(resolveSwapFlowOutcome(event), !supportsTransactionV1),
           error: reportFailure
         });
       }
