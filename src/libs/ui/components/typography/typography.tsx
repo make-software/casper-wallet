@@ -22,7 +22,7 @@ type TypographyType =
   | 'CSPRLight'
   | 'CSPRBold'
   | 'listSubtext'
-  | 'formFieldStatus' // TODO: Temporary name. Make a better name
+  | 'formFieldStatus'
   | 'subtitle'
   | 'listSubtextHash';
 

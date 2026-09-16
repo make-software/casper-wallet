@@ -85,9 +85,7 @@ it('keeps a request alive when a second window still displays it (Ledger)', asyn
 
 it('spares a request that regained a window during the grace', async () => {
   // The Ledger attach crosses a runtime.sendMessage round trip, so it can land
-  // AFTER this routine snapshotted its candidates and detached the shared
-  // window. By the time the grace elapses the request is genuinely displayed
-  // again — cancelling it here is the P0 this whole model exists to prevent.
+  // after the candidates were snapshotted, with the request back on screen.
   const getState = jest
     .fn()
     .mockReturnValueOnce(state({ r1: open(3, [7]) }))
@@ -112,11 +110,8 @@ it('never cancels a request that never had this window', async () => {
 });
 
 it('dispatches nothing at all when no open request held the window', async () => {
-  // `windows.onRemoved` now fires for ANY window the user closes, not just the
-  // tracked approval one. Every dispatch reaches the store subscriber, which
-  // does no state-change comparison: a full popupState broadcast to every
-  // replica plus a full storage.local rewrite. An unrelated window close must
-  // cost nothing.
+  // `windows.onRemoved` fires for ANY window the user closes, and every dispatch
+  // costs a popupState broadcast plus a full storage.local rewrite.
   const dispatch = await run(
     jest.fn().mockReturnValue(state({ r1: open(3, [9]) }))
   );
@@ -203,10 +198,8 @@ it('stays silent in the UI when a SUPERSEDE recovered via the page origin', asyn
 });
 
 it('still surfaces a banner on the CLOSE path even when the fallback delivered', async () => {
-  // `cancelRequests` is shared, but the supersede rationale is not: after a
-  // window close there is no replacement screen, and `deliverViaOrigin` only
-  // counts same-origin sends to active tabs that did not throw — that is not
-  // proof the tab holding the dapp's pending promise received anything.
+  // `cancelRequests` is shared, but the supersede rationale is not: after a close
+  // there is no replacement screen, and a same-origin send is not proof of receipt.
   (tabs.sendMessage as jest.Mock).mockRejectedValue(new Error('tab gone'));
   (deliverViaOrigin as jest.Mock).mockResolvedValue(1);
 
@@ -221,10 +214,8 @@ it('still surfaces a banner on the CLOSE path even when the fallback delivered',
       type: 'appEvents/sagaError',
       payload: expect.objectContaining({
         source: 'cancel-on-close',
-        // The TEXT, not just the source: `saga-error-banner.tsx` renders the
-        // message verbatim, and the two arms of this ternary say opposite
-        // things about whether the dapp was told. Collapsing it to the
-        // pessimistic constant must fail here.
+        // The TEXT, not just the source: the two arms of this ternary say
+        // opposite things about whether the dapp was told.
         message: expect.stringContaining('recovered via the page')
       })
     })

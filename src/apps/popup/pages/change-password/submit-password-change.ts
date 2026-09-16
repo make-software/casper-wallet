@@ -8,9 +8,7 @@ import {
 /**
  * The port ack is the only signal that a password change reached the background,
  * and `ui-error-channel` is UI-local — it never reaches the store or a replica.
- * So the caller must stay on this screen until the ack lands: navigating first
- * left the user on Home believing the password had changed, while the old one
- * was still live and every later unlock attempt counted toward the lockout.
+ * So the caller must stay on this screen until the ack lands.
  */
 export async function submitPasswordChange(
   send: () => Promise<unknown>,

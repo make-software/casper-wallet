@@ -13,11 +13,7 @@ import {
   isTokenSwappable
 } from '@libs/services/swap-service/utils';
 
-/**
- * Whether the Swap action should be offered for `tokenData`, and whether that answer is still
- * being fetched. Native CSPR resolves without a request; a CEP-18 token is checked against
- * cspr.trade's whitelist. A failed request resolves to not-swappable rather than throwing.
- */
+/** Whether Swap is offered for `tokenData`; a failed whitelist request means not-swappable. */
 export const useIsTokenSwappable = (tokenData: TokenType | null) => {
   const network = useSelector(selectActiveNetworkSetting);
 

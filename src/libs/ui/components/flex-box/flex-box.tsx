@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { BaseProps } from '@libs/ui/types';
 
 export interface FlexBoxProps extends BaseProps {
-  /* @description will add spacing between children, work depending on row/column layout */
+  /* Spacing between children, applied along the row/column direction. */
   itemsSpacing?: number;
   innerRef?: React.Ref<HTMLDivElement>;
   gap?: React.CSSProperties['gap'];

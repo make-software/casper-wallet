@@ -1,10 +1,7 @@
 import { tabs } from 'webextension-polyfill';
 
-// The live origin of a tab's TOP-LEVEL document, or null when it cannot be
-// established: the tab is gone, it carries no url, or the url is unparseable or
-// opaque. Never throws — the caller treats null as "unverifiable" and withholds
-// the response. Never logs the url either: a dapp url can carry user content in
-// its query, and the caller logs the identifiers it needs.
+// The live origin of a tab's TOP-LEVEL document, or null when unverifiable.
+// Never throws, and never logs the url, which can carry user content.
 export async function getLiveTabOrigin(tabId: number): Promise<string | null> {
   let url: string | undefined;
 

@@ -33,8 +33,7 @@ it('ignores a window that is not the tracked permission window', () => {
   armedListener()(10);
 
   // ledgerStateCleared resets the whole slice, so a close anywhere else in the
-  // browser must not reach the store — and must not consume the listener
-  // either, or the real close clears nothing.
+  // browser must not reach the store — and must not consume the listener either.
   expect(dispatchMock).not.toHaveBeenCalled();
   expect(removeListenerMock).not.toHaveBeenCalled();
 });
@@ -69,9 +68,8 @@ it('detaches a listener whose window is never closed', () => {
 
   tracker.detach();
 
-  // The id guard makes self-removal correct, not guaranteed: ledgerStateCleared
-  // reaches the store from paths that never close this window, and a listener
-  // left armed would later wipe whatever flow replaced this one.
+  // The id guard makes self-removal correct, not guaranteed: a listener left armed
+  // on a window nobody closes would later wipe whatever flow replaced this one.
   expect(removeListenerMock).toHaveBeenCalledWith(listener);
 
   // Already gone: a second detach must not re-remove, and nothing was

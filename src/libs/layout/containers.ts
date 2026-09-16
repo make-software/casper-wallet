@@ -2,9 +2,8 @@ import styled, { css } from 'styled-components';
 
 import { getLinearGradientColor, hexToRGBA } from '@libs/ui/utils';
 
-// Be careful when importing dependencies here
-// Import of getColorFromTheme or getLinearGradientColor from '@libs/ui'
-// cause huge problems with webpack bundle and lead to blank popups
+// Importing getColorFromTheme or getLinearGradientColor from '@libs/ui' here
+// breaks the webpack bundle and leads to blank popups.
 
 export enum SpacingSize {
   None = 'none',
@@ -174,7 +173,6 @@ export const InputsContainer = styled.div`
   }
 `;
 
-// Default direction value is `column`
 interface Props {
   direction?: 'row' | 'column';
 }
@@ -280,10 +278,8 @@ export const BorderContainer = styled.div<BorderBottomPseudoElementProps>`
 export const Overlay = styled.div`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndex.modal};
-  // Spanned top-to-bottom rather than centred with a height: vertical centring
-  // resolves the bottom edge to 50vh + height / 2, so any height that clears the
-  // 72px header overhangs the fold by half of what it skips — which puts a
-  // sheet's footer buttons off-screen and unclickable.
+  // Spanned top-to-bottom rather than centred: a centred height resolves the bottom
+  // edge to 50vh + height / 2, putting a sheet's footer buttons below the fold.
   top: 72px;
   bottom: 0;
   left: 50%;

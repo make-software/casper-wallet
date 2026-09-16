@@ -3,8 +3,7 @@ import {
   encryptAsHexWithCasperPublicKey
 } from './index';
 
-// Pinned ciphertexts: a wire-format change would sail through a pure round-trip
-// but fails here.
+// Pinned ciphertexts: a wire-format change would sail through a pure round-trip.
 const ED_PUBLIC =
   '0179b5562e8fe654f94078b112e8a98ba7901f853ae695bed7e0e3910bad049664';
 const ED_SECRET_B64 = 'AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=';

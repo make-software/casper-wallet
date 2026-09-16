@@ -23,9 +23,8 @@ const ContentContainer = styled.div`
   padding: 0 16px;
 
   flex-grow: 1;
-  // The sheet's height is fixed, so content taller than it has to scroll here or it escapes
-  // past the footer and off-screen. The zero min-height is what lets this flex item shrink
-  // below its content at all; without it the overflow rule has nothing to clip against.
+  // Zero min-height is what lets this flex item shrink below its content, without which
+  // the overflow rule has nothing to clip and taller content escapes past the footer.
   min-height: 0;
   overflow-y: auto;
 `;
@@ -45,10 +44,9 @@ const CancelButton = styled(Typography)`
 interface SwitcherProps {
   label: string;
   closeSwitcher: (e: React.MouseEvent<Element, MouseEvent>) => void;
-  /** Runs when Done is pressed. Defaults to `closeSwitcher`, so a picker whose Done
-   *  only dismisses the sheet needs no change. */
+  /** Runs when Done is pressed; defaults to `closeSwitcher`. */
   onDone?: (e: React.MouseEvent<Element, MouseEvent>) => void;
-  /** Drops the footer, for a sheet whose rows commit on tap and so has nothing for Done to do. */
+  /** Drops the footer, for a sheet whose rows commit on tap. */
   hideDoneButton?: boolean;
   children: React.ReactNode;
 }

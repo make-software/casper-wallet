@@ -2,10 +2,8 @@ import { runtime } from 'webextension-polyfill';
 
 import { SdkMethod } from '@content/sdk-method';
 
-// Message type for the UI→background forwarder. The UI no longer talks to the
-// dapp tab directly; it hands the response to the background, which dedupes by
-// `requestId` (first response for a request wins) and performs the actual
-// `tabs.sendMessage`. See `handlers/sdk-response-to-tab.ts`.
+// Message type for the UI→background forwarder: the UI hands the response to the
+// background, which dedupes by `requestId` and does the `tabs.sendMessage`.
 export const SDK_RESPONSE_TO_TAB = 'CasperWallet:SdkResponseToTab';
 
 export interface SdkResponseToTabMessage {
@@ -15,15 +13,8 @@ export interface SdkResponseToTabMessage {
 }
 
 export function sendSdkResponseToSpecificTab(action: SdkMethod, tabId: number) {
-  // Route through the background so it can dedupe by requestId atomically
-  // (the background store is the single writer). Returns the sendMessage
-  // promise so callers that `await` before closing the window still resolve.
-  //
-  // The `.catch` restores the always-resolves contract of the pre-reroute
-  // implementation: callers (approve-connection / switch-account /
-  // select-account) `await` this then `closeCurrentWindow()` with no try/catch,
-  // so a rejection (e.g. the service worker torn down mid-flight) must NOT
-  // propagate — otherwise the approval window would never close.
+  // Routed through the background so it dedupes by requestId atomically. Must
+  // always resolve: callers `closeCurrentWindow()` right after awaiting it.
   return runtime
     .sendMessage({
       type: SDK_RESPONSE_TO_TAB,

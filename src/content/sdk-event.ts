@@ -2,8 +2,6 @@ import { createAction } from '@reduxjs/toolkit';
 
 import { CasperWalletState } from './sdk-types';
 
-// Event emitted to connected sites
-
 export const sdkEvent = {
   connectedAccountEvent: createAction<CasperWalletState>(
     'connectedAccountEvent'

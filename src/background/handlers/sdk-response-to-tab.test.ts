@@ -24,8 +24,7 @@ jest.mock('webextension-polyfill', () => ({
 }));
 
 // The same-origin fallback delegates to this util; stub it so we can assert it
-// is (or isn't) invoked without touching real `tabs.query`. It now resolves to
-// the COUNT of tabs it successfully delivered to.
+// is (or isn't) invoked. It resolves to the COUNT of tabs it delivered to.
 jest.mock('@background/utils', () => ({
   emitSdkEventToActiveTabsWithOrigin: jest.fn()
 }));
@@ -52,23 +51,21 @@ const DELIVERED_MSG = 'delivered via same-origin fallback';
 const NOT_DELIVERED_MSG =
   'no same-origin fallback available — response not delivered';
 
-// Trusted extension-UI sender (id matches runtime.id, url under the extension
-// origin) — passes `isTrustedUiSender`.
+// Passes `isTrustedUiSender`: our id, url under the extension origin.
 const UI_SENDER = {
   id: 'ext-id',
   url: 'chrome-extension://ext-id/popup.html'
 } as Runtime.MessageSender;
 
-// Trusted UI sender whose page URL carries the dapp origin in its `?origin=`
-// query param — the mechanism the handler uses to recover the origin for the
-// same-origin fallback (no new state / message field is threaded).
+// Trusted UI sender whose page URL carries the dapp origin in `?origin=` — how
+// the handler recovers the origin for the same-origin fallback.
 const UI_SENDER_WITH_ORIGIN = {
   id: 'ext-id',
   url: `chrome-extension://ext-id/signature-request.html?requestId=${REQUEST_ID}&origin=${DAPP_ORIGIN}&tabId=${TAB_ID}#/SignMessage`
 } as Runtime.MessageSender;
 
-// A live, still-open approval request — the status every real request has
-// while the user is looking at the approval window and hasn't answered yet.
+// A live, still-open approval request — the status every real request has while
+// the user has not answered yet.
 const OPEN_REQUEST: Request = {
   status: 'open',
   tabId: TAB_ID,
@@ -79,8 +76,6 @@ const OPEN_REQUEST: Request = {
   seq: 0
 };
 
-// Build a fake store whose `requests` map carries the desired request entry
-// for the request under test, plus a spied dispatch.
 function makeStore(request?: Request, ledgerWindowId: number | null = null) {
   const dispatch = jest.fn();
   const store = {
@@ -97,9 +92,8 @@ function makeStore(request?: Request, ledgerWindowId: number | null = null) {
   return { store, dispatch };
 }
 
-// Stateful store: `dispatch` actually applies `windowRequestResponded` to the
-// `requests` map, so a subsequent `selectRequestStatus` reflects the optimistic
-// mark. Used to prove the dedupe is atomic across an in-flight (un-awaited) send.
+// Stateful store: `dispatch` applies `windowRequestResponded` to the `requests`
+// map, so a subsequent `selectRequestStatus` reflects the optimistic mark.
 function makeStatefulStore() {
   const requests: Record<string, Request> = { [REQUEST_ID]: OPEN_REQUEST };
   const dispatch = jest.fn((action: { payload?: { requestId?: string } }) => {
@@ -129,13 +123,8 @@ function makeMessage(tabId: number = TAB_ID): SdkResponseToTabMessage {
   };
 }
 
-// What a rejecting `tabs.sendMessage` actually hands back: `webextension-polyfill`
-// relays the content-script listener's `Error.message` verbatim into this
-// promise (`sendPromisedResult` → `__mozWebExtensionPolyfillReject__` →
-// `new Error(reply.message)`), and that text is the one part of the logs below
-// this file does not control. Built by the real constructor rather than pinned
-// as a literal, so reverting the content-script redaction fails the no-payload
-// assertions here too, not only the content-script's own test.
+// The content script's `Error.message`, as a rejecting `tabs.sendMessage` hands
+// it back — real constructor, so dropping that redaction fails the tests here.
 function deliveryRejection(): Error {
   return unknownSdkMessageError(makeMessage().action);
 }
@@ -152,9 +141,7 @@ function makeCancelMessage(tabId: number = TAB_ID): SdkResponseToTabMessage {
 }
 
 // Everything a spy actually wrote, as text. `JSON.stringify` alone cannot see an
-// Error's `message` (non-enumerable), and the third log argument IS an Error —
-// so stringifying the raw call list would vet nothing about the channel these
-// logs newly opened.
+// Error's `message` (non-enumerable), and the third log argument IS an Error.
 function loggedText(spy: jest.SpyInstance) {
   return spy.mock.calls
     .flat()
@@ -162,7 +149,6 @@ function loggedText(spy: jest.SpyInstance) {
     .join(' ');
 }
 
-// Find the single `sagaError` dispatch (source === 'sdk-response-to-tab').
 function findSagaError(dispatch: jest.Mock) {
   return dispatch.mock.calls.find(
     ([a]) => a?.payload?.source === 'sdk-response-to-tab'
@@ -170,8 +156,8 @@ function findSagaError(dispatch: jest.Mock) {
 }
 
 describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
-  // The delivery paths below log their cause. The nested `describe` installs its
-  // own spies on top of this one and restores them first, so both coexist.
+  // The nested `describe` installs its own spies on top of these and restores
+  // them first, so both coexist.
   let outerConsoleError: jest.SpyInstance;
   let outerConsoleWarn: jest.SpyInstance;
 
@@ -204,7 +190,6 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
     expect(sendMessageMock).toHaveBeenCalledWith(TAB_ID, message.action);
     expect(dispatch).toHaveBeenCalledTimes(1);
-    // windowRequestResponded({ requestId })
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({ payload: { requestId: REQUEST_ID } })
     );
@@ -226,9 +211,8 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('delivers a response for a request that is still open', async () => {
-    // No test in this file used status 'open' before — the status every live
-    // request has when the user approves. `=== 'responded'` widened to
-    // `!= null` would silently drop real signatures and no test would notice.
+    // `open` is the status every live request has when the user approves, so
+    // widening `=== 'responded'` to `!= null` would drop real signatures.
     const { store } = makeStore(OPEN_REQUEST);
 
     await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
@@ -237,11 +221,8 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   describe('a dropped duplicate is not one thing', () => {
-    // The comment here claimed a dropped `cancelled: true` is benign while a
-    // dropped signature never is, "and the two are distinguishable here" — then
-    // both took the identical console.error and neither reached the user. The
-    // benign case is the overwhelming majority of these lines, which trains a
-    // reader to ignore the one that means a signed transaction was destroyed.
+    // A dropped cancel is benign and is the overwhelming majority; sharing one
+    // severity with a dropped signature trains a reader to ignore both.
     let consoleError: jest.SpyInstance;
     let consoleWarn: jest.SpyInstance;
 
@@ -265,9 +246,8 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
         'sdk-response-to-tab: dropped a completed response — the result was lost',
         { requestId: REQUEST_ID, tabId: TAB_ID, type: expect.any(String) }
       );
-      // Log-only by decision: `SagaErrorBanner` renders `message` verbatim and
-      // untranslated over the approval screens, so the user-facing half needs
-      // copy and an i18n key it does not have yet.
+      // Log-only: `SagaErrorBanner` renders `message` verbatim and untranslated,
+      // so the user-facing half needs copy and an i18n key it does not have.
       expect(findSagaError(dispatch)).toBeUndefined();
       // Identifiers only, never the signed payload — in either channel.
       const logged = JSON.stringify([
@@ -292,9 +272,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     it('treats a bare `false` boolean answer as benign too', async () => {
       // `connectResponse` / `switchAccountResponse` type their payload as a
-      // plain boolean, so a branch on `payload.cancelled` does not generalise
-      // across the union. `false` is what `buildCancelResponse` and the reject
-      // buttons send — nothing is lost by dropping it.
+      // plain boolean, and `false` is what the reject buttons send.
       const { store } = makeStore({ status: 'responded', seq: 0 });
 
       await handleSdkResponseToTab(
@@ -312,12 +290,8 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     });
 
     it('escalates a dropped bare `true` boolean answer — it is an approval', async () => {
-      // The asymmetry this closes: `approve-connection` awaits
-      // `connectAccounts(...)` and `switch-account` awaits
-      // `changeActiveAccount(...)` BEFORE sending, so a dropped `true` leaves
-      // the wallet listing the site as connected while the dapp was told the
-      // user rejected. Classifying it as a cancel logs the exact opposite of
-      // what happened.
+      // Both flows await their state change BEFORE sending, so a dropped `true`
+      // leaves the wallet connected while the dapp was told the user rejected.
       const { store } = makeStore({ status: 'responded', seq: 0 });
 
       await handleSdkResponseToTab(
@@ -351,7 +325,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     );
 
     // No usable tab — but the descriptor knows the origin even though the
-    // sender url carries none, which is exactly what this change buys.
+    // sender url carries none.
     expect(sendMessageMock).not.toHaveBeenCalled();
     expect(emitToOriginMock).toHaveBeenCalledWith(
       DAPP_ORIGIN,
@@ -436,10 +410,9 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       store
     );
 
-    // Direct delivery was attempted (and rejected).
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
-    // Recovered elsewhere → warn, and the log says so. Before, this was byte
-    // identical to the case where the signature was destroyed.
+    // Recovered elsewhere → warn, distinct from the case where the signature
+    // was destroyed.
     expect(outerConsoleWarn).toHaveBeenCalledWith(
       'sdk-response-to-tab: delivery to tab failed; recovered via same-origin fallback',
       {
@@ -451,12 +424,11 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       expect.any(Error)
     );
     expect(outerConsoleError).not.toHaveBeenCalled();
-    // SECURITY: the Error argument included — this is the branch that fires
-    // whenever another same-origin tab is open, i.e. the common outcome.
+    // SECURITY: the Error argument is included, and this branch fires whenever
+    // another same-origin tab is open, i.e. the common outcome.
     expect(loggedText(outerConsoleWarn)).not.toContain('deadbeef');
     expect(sendMessageMock).toHaveBeenCalledWith(TAB_ID, makeMessage().action);
 
-    // Fallback broadcast to the same-origin active tab.
     expect(emitToOriginMock).toHaveBeenCalledTimes(1);
     expect(emitToOriginMock).toHaveBeenCalledWith(
       DAPP_ORIGIN,
@@ -553,9 +525,8 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     await handleSdkResponseToTab(makeMessage(), UI_SENDER_WITH_ORIGIN, store);
 
-    // This log is the newest place that could leak the signed payload, and the
-    // check has to see inside the Error argument too — that is the part whose
-    // text this code does not control.
+    // The check has to see inside the Error argument too — that is the part
+    // whose text this code does not control.
     expect(loggedText(outerConsoleError)).not.toContain('deadbeef');
     expect(outerConsoleError.mock.calls[0][1]).toEqual({
       requestId: REQUEST_ID,
@@ -578,8 +549,8 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     // The emit rejection is swallowed → the error-surface dispatch still runs.
     expect(emitToOriginMock).toHaveBeenCalledTimes(1);
-    // ...but it is no longer indistinguishable from "no same-origin tab was
-    // open": both return 0, and the caller picks banner copy from that 0.
+    // A throw and "no same-origin tab was open" both return 0, and the caller
+    // picks its banner copy from that 0.
     expect(outerConsoleError).toHaveBeenCalledWith(
       'deliverViaOrigin: same-origin fallback failed',
       { origin: DAPP_ORIGIN, type: sdkMethod.signResponse.type },
@@ -628,13 +599,12 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     // the second (beforeunload-cancel) message is processed by the router.
     sendMessageMock.mockReturnValue(new Promise(() => {}));
 
-    // Do NOT await — the first handler yields before the send, but it has
-    // already dispatched `windowRequestResponded` synchronously, which is the
-    // property under test.
+    // Do NOT await — the first handler yields before the send, having already
+    // dispatched `windowRequestResponded` synchronously.
     const first = handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
 
     // Second message for the SAME requestId, processed while the first is still
-    // in flight. It must read status 'responded' and drop.
+    // in flight: it must read status 'responded' and drop.
     const secondResult = await handleSdkResponseToTab(
       makeMessage(),
       UI_SENDER,
@@ -643,13 +613,10 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     expect(secondResult).toEqual({ handled: true, response: undefined });
 
-    // The first invocation now yields at the live-origin read before it sends,
-    // so let its continuation run before counting. A macrotask, not a microtask:
-    // resolving `getLiveTabOrigin` and then the handler's own `await` takes more
-    // than one tick.
+    // The first invocation yields at the live-origin read before it sends. A
+    // macrotask, not a microtask: that continuation takes more than one tick.
     await new Promise(resolve => setTimeout(resolve, 0));
 
-    // Exactly ONE delivery reached the tab — the duplicate was deduped.
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
 
     void first; // keep the first (pending) invocation referenced
@@ -687,10 +654,8 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('no descriptor (residual descriptor-less path) → still delivers, dispatches nothing', async () => {
-    // Every approval-window url carries `?origin=` (all six flows build it), so
-    // a descriptor-less response can still be verified against the live tab.
-    // `UI_SENDER` without one is a synthetic sender no page produces — the
-    // fail-closed case it now exercises has its own test above.
+    // Every approval-window url carries `?origin=`, so a descriptor-less
+    // response can still be verified against the live tab.
     const { store, dispatch } = makeStore(undefined);
 
     const result = await handleSdkResponseToTab(
@@ -750,9 +715,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
   it('a tab-mismatch fallback for a sub-frame request is not broadcast', async () => {
     // `deliverViaOrigin`'s sub-frame guard only fires if the descriptor's
-    // `frameId` actually reaches it — this pins that third argument at the
-    // tab-mismatch call site specifically (not the origin-mismatch or `catch`
-    // call sites, which are covered elsewhere).
+    // `frameId` reaches it; this pins that argument at the tab-mismatch call.
     const { store } = makeStore({ ...OPEN_REQUEST, frameId: 4 });
 
     await handleSdkResponseToTab(makeMessage(3), UI_SENDER_WITH_ORIGIN, store);
@@ -822,10 +785,8 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it('the descriptor origin wins over the sender url origin when they differ', async () => {
-    // Both suites otherwise carry the same origin on the descriptor and the
-    // sender url, so an inverted `??` precedence would keep everything green
-    // elsewhere. Force a tab mismatch so the fallback runs, and give the
-    // sender a DIFFERENT origin than the descriptor.
+    // Elsewhere the descriptor and the sender url carry the same origin, so an
+    // inverted `??` precedence would keep everything green.
     const senderWithOtherOrigin = {
       id: 'ext-id',
       url: `chrome-extension://ext-id/signature-request.html?requestId=${REQUEST_ID}&origin=https://impostor.example&tabId=${TAB_ID}#/SignMessage`
@@ -897,8 +858,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
   it('the same-origin fallback is never attempted for a sub-frame request', async () => {
     // Frame ids are per-tab: a sub-frame id means nothing in another tab, so
-    // broadcasting could deliver to a document that never asked. Only a top
-    // frame (0) or "no descriptor" may reach the emit.
+    // broadcasting could deliver to a document that never asked.
     const { store, dispatch } = makeStore({ ...OPEN_REQUEST, frameId: 4 });
     sendMessageMock.mockRejectedValue(deliveryRejection());
 

@@ -4,7 +4,6 @@ import {
   WrapDirection
 } from 'casper-wallet-core';
 
-/** A composed swap or wrap awaiting a device signature — see `parseLedgerSwapPayload`. */
 export type ILedgerSwapPayload =
   | {
       kind: 'swap';
@@ -45,16 +44,11 @@ const isQuotedTradeShape = (value: unknown): value is ISwapQuotedTrade =>
   ((value as { quoteType?: unknown }).quoteType === SwapQuoteType.ExactIn ||
     (value as { quoteType?: unknown }).quoteType === SwapQuoteType.ExactOut);
 
-/** The composed swap or wrap, as parked for the Ledger permission window. */
 export const serializeLedgerSwapPayload = (
   payload: ILedgerSwapPayload
 ): string => JSON.stringify(payload);
 
-/**
- * The parked swap or wrap, or `null` when nothing usable is stored. Never throws: a window that
- * cannot read a parked payload falls back to the single-transaction flow rather than failing to
- * render.
- */
+/** Never throws: an unreadable parked payload falls back to the single-transaction flow. */
 export const parseLedgerSwapPayload = (
   raw: string | null
 ): ILedgerSwapPayload | null => {

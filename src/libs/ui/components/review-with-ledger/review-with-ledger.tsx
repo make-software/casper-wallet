@@ -22,7 +22,7 @@ interface ReviewWithLedgerProps {
 }
 
 const HeaderTextContainer = styled(ParagraphContainer)`
-  //  We are using this instead of 'top' prop in <ParagraphContainer>, because there is a problem with height when we call it in layout window
+  // Not ParagraphContainer's top prop: that miscomputes the height in a layout window.
   padding-top: 24px;
 `;
 

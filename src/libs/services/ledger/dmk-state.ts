@@ -21,9 +21,8 @@ const readApp = (state: DeviceSessionState): LedgerDeviceState['app'] => {
 };
 
 /**
- * Translates a device session's state into the vocabulary core speaks. The only function in
- * this repository aware of both. A missing `app` means "ask the device", so a blank name is
- * omitted rather than passed through.
+ * Translates a device session's state into the vocabulary core speaks. A missing `app` means
+ * "ask the device", so a blank name is omitted rather than passed through.
  */
 export function toLedgerDeviceState(
   state: DeviceSessionState

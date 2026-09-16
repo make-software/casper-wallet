@@ -9,13 +9,8 @@ import { SignTypedDataParams, SignTypedDataResult } from './sdk-types';
 // Requests and responses ride this port instead of the forgeable window bus.
 let sdkPort: MessagePort | null = null;
 
-// `window.CasperWalletProvider` exists as soon as this bundle evaluates, but the
-// content script only delivers the port a couple of tasks later (in
-// `scriptTag.onload` → handshake `postMessage`). A dapp that polls for the
-// provider and calls a method immediately can land in that gap. Rather than
-// hard-rejecting such requests (a regression versus the old always-present
-// window listener), we park each one here and flush it in order once the port
-// arrives. Every parked request keeps its own per-request timeout as the bound.
+// `window.CasperWalletProvider` exists before the content script delivers the port,
+// so requests fired in that gap park here and flush in order once it arrives.
 const portWaiters: Array<(port: MessagePort) => void> = [];
 
 window.addEventListener('message', (e: MessageEvent) => {
@@ -25,32 +20,30 @@ window.addEventListener('message', (e: MessageEvent) => {
     e.ports[0]
   ) {
     sdkPort = e.ports[0];
-    // begin dispatching queued/incoming messages on the port
     sdkPort.start();
-    // flush any requests that were fired before the handshake completed
     portWaiters.splice(0).forEach(send => send(sdkPort!));
   }
 });
 
 export type SignatureResponse =
   | {
-      cancelled: true; // if sign was cancelled
+      cancelled: true;
       message?: string;
       errorCode?: string; // set → refused by the wallet, see `SdkErrorCode`
     }
   | {
-      cancelled: false; // if sign was successfull
-      signatureHex: string; // signature as hex hash
-      signature: Uint8Array; // signature as byte array
+      cancelled: false;
+      signatureHex: string;
+      signature: Uint8Array;
     };
 
 export type DecryptedResponse =
   | {
-      cancelled: true; // if sign was cancelled
+      cancelled: true;
     }
   | {
-      cancelled: false; // if sign was successfull
-      decryptedMessage: string; // decrypted message
+      cancelled: false;
+      decryptedMessage: string;
     };
 
 const DefaultOptions: CasperWalletProviderOptions = {
@@ -73,10 +66,8 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
       }
       settled = true;
       removeListener?.();
-      // A parked request must not linger in the queue after timing out — the
-      // closure retains the full requestAction (for `sign`, the deploy JSON),
-      // and on a page whose handshake never completes the flush that would
-      // empty the queue never happens.
+      // A parked request must not linger in the queue after timing out: its closure
+      // retains the full requestAction, and a flush may never come to empty it.
       const parkedIndex = portWaiters.indexOf(sendOnPort);
       if (parkedIndex !== -1) {
         portWaiters.splice(parkedIndex, 1);
@@ -97,7 +88,6 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
       const waitForResponse = (e: MessageEvent) => {
         const message = e.data;
 
-        // filter out responses not for this request
         if (
           !isSDKMethod(message) ||
           message.meta.requestId !== requestAction.meta.requestId
@@ -108,7 +98,6 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
         settled = true;
         port.removeEventListener('message', waitForResponse);
         clearTimeout(timeoutId);
-        // check for errors
         if ('error' in message && message.error) {
           reject(message.payload);
         } else {
@@ -124,11 +113,8 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
     };
 
     if (sdkPort) {
-      // handshake already completed — send immediately
       sendOnPort(sdkPort);
     } else {
-      // handshake hasn't completed yet — park until the port arrives; the
-      // timeout above still bounds the wait.
       portWaiters.push(sendOnPort);
     }
   });
@@ -138,11 +124,8 @@ export type CasperWalletProviderOptions = {
   timeout: number; // timeout of request to extension (in ms)
 };
 
-// `crypto.randomUUID` is only defined in a secure context. The content script
-// also matches plain `http://*/*` dapps, where `randomUUID` is `undefined`
-// but `getRandomValues` remains available. Fall back to building an RFC4122
-// v4 UUID from 16 CSPRNG bytes so both paths stay unpredictable and unique —
-// never fall back to `Math.random`.
+// `crypto.randomUUID` is undefined on the plain-http dapps the content script also
+// matches; `getRandomValues` remains available there. Never fall back to `Math.random`.
 const generateRequestId = (): string => {
   if (typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
@@ -169,7 +152,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
   return {
     /**
      * Request the connect interface with the Casper Wallet extension. Will not show UI for already connected accounts and return true immediately.
-     * @returns `true` value when connection request is accepted by the user or when account is already connected, `false` otherwise — including when the wallet refused for its own open-request capacity, currently indistinguishable from a user decline (WALLET-1436 will make it explicit).
+     * @returns `true` value when connection request is accepted by the user or when account is already connected, `false` otherwise — including a wallet-side refusal, currently indistinguishable from a user decline.
      */
     requestConnection(): Promise<boolean> {
       return fetchFromBackground<
@@ -186,7 +169,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
     },
     /**
      * Request the switch account interface with the Casper Wallet extension
-     * @returns `true` value when successfully switched account, `false` otherwise — including when the wallet refused for its own open-request capacity, currently indistinguishable from a user decline (WALLET-1436 will make it explicit).
+     * @returns `true` value when successfully switched account, `false` otherwise — including a wallet-side refusal, currently indistinguishable from a user decline.
      */
     requestSwitchAccount(): Promise<boolean> {
       return fetchFromBackground<
@@ -205,8 +188,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
      * Request the sign deploy interface with the Casper Wallet extension
      * @param deployJson - stringified json of a deploy (use `DeployUtil.deployToJson` from `casper-js-sdk` and `JSON.stringify`)
      * @param signingPublicKeyHex - public key hash (in hex format)
-     * @returns a payload response when user responded to transaction request, it will contain `signature` if approved, or `cancelled === true` flag when rejected.
-     * `cancelled: true` carrying an `errorCode` (`SdkErrorCode`) is a wallet-side refusal: no window was shown and the user rejected nothing.
+     * @returns a payload response containing `signature` if approved, or `cancelled === true` when rejected; `cancelled: true` with an `errorCode` (`SdkErrorCode`) is a wallet-side refusal, not a user rejection.
      */
     sign: (
       deployJson: string,
@@ -225,7 +207,6 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
           }
         )
       ).then(res => {
-        // response empty because it was canceled
         if (res.cancelled) {
           return res;
         }
@@ -261,7 +242,6 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
           }
         )
       ).then(res => {
-        // response empty because it was canceled
         if (res.cancelled) {
           return res;
         }
@@ -295,8 +275,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
     },
     /**
      * Get the encrypted message from the Casper Wallet extension
-     * @returns returns an encrypted message.
-     * Message max length is 4096 symbols.
+     * @returns returns an encrypted message (message max length is 4096 symbols).
      */
     encryptMessage(message: string, signingPublicKeyHex: string) {
       return fetchFromBackground<
@@ -337,7 +316,6 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
           }
         )
       ).then(res => {
-        // response empty because it was canceled
         if (res.cancelled) {
           return res;
         }
@@ -394,10 +372,9 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       );
     },
     /**
-     * @deprecated // TODO remove in future releases
+     * @deprecated
      * Get the encrypted message from the Casper Wallet extension
-     * @returns returns an encrypted message.
-     * Message max length is 4096 symbols.
+     * @returns returns an encrypted message (message max length is 4096 symbols).
      */
     getEncryptedMessage(message: string, signingPublicKeyHex: string) {
       console.warn(
@@ -433,8 +410,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       );
     },
     /**
-     * Get a list of features that the active public key supports.
-     * It can be `sign-deploy`, `sign-transactionv1`, `sign-message`, `sign-typed-data-eip712`, `message-encryption` and `message-decryption`
+     * Get a list of features that the active public key supports: `sign-deploy`, `sign-transactionv1`, `sign-message`, `sign-typed-data-eip712`, `message-encryption` and `message-decryption`
      * @returns returns array of features that supports the active public key.
      * @throws when wallet is locked (err.code: 1)
      * @throws when active account not approved to connect with the site (err.code: 2)

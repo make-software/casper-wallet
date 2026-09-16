@@ -15,10 +15,9 @@ export interface LedgerOpenerHandoffInputs {
 /**
  * What the document that opened the permission window should do with itself.
  *
- * The flow continues in that window, whose `ledger` service is a different
- * instance, so an opener left standing goes on demanding a permission granted
- * elsewhere. An approval window may go only once `permissionWindowAttached`:
- * closing a request's last display answers the dapp with a cancel (WALLET-1416).
+ * The flow continues in that window, so an opener left standing goes on demanding
+ * a permission granted elsewhere. An approval window may go only once
+ * `permissionWindowAttached`: closing a request's last display cancels the dapp.
  */
 export function decideOpenerHandoff({
   permissionWindowDomain,

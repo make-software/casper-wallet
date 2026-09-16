@@ -131,9 +131,8 @@ describe('keep-alive', () => {
   });
 });
 
-// This block resets the module registry, so it must come after the
-// shared-instance describe above — the idempotency guard is module state, and
-// each test needs a freshly evaluated module (mirroring an SW cold start).
+// Resets the module registry, so it must stay after the describe above, which
+// relies on the module instance imported at the top.
 describe('keep-alive idempotency guard', () => {
   const loadFreshKeepAlive = () => {
     jest.resetModules();
@@ -164,9 +163,8 @@ describe('keep-alive idempotency guard', () => {
   });
 
   it('stopKeepAlive as the first call after SW start still clears a persisted stale alarm', () => {
-    // Alarms survive SW restarts: if the SW cold-starts locked while the
-    // previous life's alarm is still scheduled, the first stop must reach
-    // the alarms API even though this module instance never started it.
+    // Alarms survive SW restarts, so the first stop after a cold start must
+    // reach the alarms API even though this instance never started one.
     const { freshAlarms, keepAliveModule } = loadFreshKeepAlive();
 
     keepAliveModule.stopKeepAlive();
@@ -276,13 +274,10 @@ describe('keep-alive on non-Chrome builds', () => {
   });
 
   it('module loads without throwing when the alarms API is unavailable (Firefox/Safari)', () => {
-    // resetModules (not isolateModules) is required here: the top-level import
-    // of @background/keep-alive already cached the module, and isolateModules
-    // would hand back that cached instance instead of re-evaluating it.
+    // resetModules, not isolateModules: the top-level import already cached the
+    // module, and isolateModules would hand back that cached instance.
     jest.resetModules();
 
-    // Firefox/Safari manifests do not declare the `alarms` permission, so
-    // webextension-polyfill exposes no `alarms` namespace there.
     jest.doMock('webextension-polyfill', () => ({
       alarms: undefined,
       runtime: { sendMessage: jest.fn().mockResolvedValue(undefined) }
@@ -290,8 +285,7 @@ describe('keep-alive on non-Chrome builds', () => {
     jest.doMock('@src/utils', () => ({ isChromeBuild: false }));
 
     expect(() =>
-      // A CJS require (not import) is deliberate: it re-evaluates the module
-      // synchronously through jest's reset registry with the doMocks above.
+      // A CJS require re-evaluates the module through jest's reset registry.
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@background/keep-alive')
     ).not.toThrow();

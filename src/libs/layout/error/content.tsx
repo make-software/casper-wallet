@@ -13,7 +13,6 @@ import { SvgIcon, Typography } from '@libs/ui/components';
 import { ErrorContent } from './types';
 
 interface ErrorPageContentProps extends ErrorContent {
-  // TODO: I guess will be better pass it through location state. It require extending of location state type
   pageType: 'onboarding' | 'general';
 }
 

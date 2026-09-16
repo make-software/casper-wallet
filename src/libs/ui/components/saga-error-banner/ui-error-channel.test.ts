@@ -7,9 +7,7 @@ import {
   subscribeToUiErrors
 } from './ui-error-channel';
 
-// The channel is a module singleton by design (`dispatchToMainStore` is a plain
-// function, not a hook, so it cannot reach a React store). Clean up through the
-// public API rather than exporting a test-only reset.
+// A module singleton by design: clean up through the public API, not a test-only reset.
 afterEach(() => {
   getUiErrorsSnapshot().forEach(error => dismissUiError(error.id));
 });
@@ -32,9 +30,7 @@ describe('ui-error-channel', () => {
   });
 
   it('dedupes repeats of the same key into one row', () => {
-    // The service worker restarting while the user clicks three times is the
-    // normal shape of this failure, and the popup is too narrow for three
-    // identical rows.
+    // A service worker restart under three impatient clicks is the normal shape of this.
     reportUiError('dispatch-failed', 'LOCK_VAULT_SAGA');
     reportUiError('dispatch-failed', 'LOCK_VAULT_SAGA');
     reportUiError('dispatch-failed', 'LOCK_VAULT_SAGA');
@@ -53,8 +49,7 @@ describe('ui-error-channel', () => {
   });
 
   it('returns a stable snapshot reference until something changes', () => {
-    // useSyncExternalStore re-renders forever if getSnapshot returns a fresh
-    // array each call.
+    // useSyncExternalStore re-renders forever if getSnapshot returns a fresh array.
     reportUiError('dispatch-failed', 'LOCK_VAULT_SAGA');
     const first = getUiErrorsSnapshot();
 
@@ -136,8 +131,7 @@ describe('ui-error-channel', () => {
     const onChange = jest.fn();
     const unsubscribe = subscribeToUiErrors(onChange);
 
-    // The success path runs on all ~105 dispatches, almost always with nothing
-    // to clear: no allocation and no re-render for those.
+    // The success path runs on every dispatch, almost always with nothing to clear.
     const before = getUiErrorsSnapshot();
     clearUiError('dispatch-failed', 'LOCK_VAULT_SAGA');
 
@@ -151,8 +145,7 @@ describe('ui-error-channel', () => {
   });
 
   it('gives the same snapshot to the server renderer', () => {
-    // useSyncExternalStore throws "Missing getServerSnapshot" under
-    // renderToStaticMarkup, which is how this repo tests components.
+    // useSyncExternalStore throws "Missing getServerSnapshot" under renderToStaticMarkup.
     reportUiError('dispatch-failed', 'LOCK_VAULT_SAGA');
 
     expect(getUiErrorsServerSnapshot()).toBe(getUiErrorsSnapshot());

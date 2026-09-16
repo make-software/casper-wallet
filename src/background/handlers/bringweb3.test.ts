@@ -62,10 +62,7 @@ beforeEach(() => {
 });
 
 // `getActivePublicKey` discloses the active account's public key to the
-// bringweb3 integration. The vault-lock half of P0.6 is closed below: locked or
-// no-active-account now yields an explicit `null` rather than a success-shaped
-// `undefined`. The per-origin CONNECTION check is still missing — a separate P3
-// item; when it lands, the unlocked case here must become gated too.
+// bringweb3 integration, with no per-origin connection check gating it.
 describe('handleBringWeb3 — getActivePublicKey', () => {
   it("returns the active account's public key when unlocked", async () => {
     selectIsLockedMock.mockReturnValue(false);
@@ -116,9 +113,8 @@ describe('handleBringWeb3 — getActivePublicKey', () => {
   });
 });
 
-// NOTE: the locked branch pins the P0.6 forced-popup primitive — any dapp can
-// trigger an unsolicited extension popup with no connection check. Characterized
-// here as current behavior; when P0.6 is closed these expectations must change.
+// The locked branch pins current behaviour: any dapp can trigger an unsolicited
+// extension popup with no connection check.
 describe('handleBringWeb3 — promptLoginRequest', () => {
   it('when locked → opens the bring-web3 unlock popup positioned off the current window', async () => {
     selectIsLockedMock.mockReturnValue(true);
@@ -156,8 +152,6 @@ describe('handleBringWeb3 — promptLoginRequest', () => {
       publicKey: 'PK-1',
       hidden: false
     } as any);
-    // Drive the per-tab callback: a tab without a url is skipped, a tab with a
-    // url produces a changed-connected-account event.
     const perTabResults: unknown[] = [];
     emitMock.mockImplementation(async (cb: any) => {
       perTabResults.push(cb({ url: undefined }));
@@ -171,7 +165,6 @@ describe('handleBringWeb3 — promptLoginRequest', () => {
 
     expect(createWindowMock).not.toHaveBeenCalled();
     expect(emitMock).toHaveBeenCalledTimes(1);
-    // url-less tab → undefined (early return); url tab → an sdk event object
     expect(perTabResults[0]).toBeUndefined();
     expect(perTabResults[1]).toMatchObject({
       type: expect.any(String),

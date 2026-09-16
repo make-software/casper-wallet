@@ -8,7 +8,6 @@ import {
 import { Spinner } from '@libs/ui/components';
 
 interface PrivateStateLoadingPageProps {
-  /** Pass the page's own header when it differs from the standard popup one. */
   renderHeader?: () => JSX.Element;
 }
 
@@ -22,10 +21,8 @@ const renderDefaultHeader = () => (
 );
 
 /**
- * Shown while an on-demand secret fetch is in flight — worst case ~16s against a
- * degraded background, which as a blank render is indistinguishable from a dead
- * popup. Carries the header of the page it precedes so the frame doesn't shift
- * once the data lands.
+ * Shown while an on-demand secret fetch is in flight — worst case ~16s, which as a
+ * blank render is indistinguishable from a dead popup.
  */
 export const PrivateStateLoadingPage = ({
   renderHeader = renderDefaultHeader

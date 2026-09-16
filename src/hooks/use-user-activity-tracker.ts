@@ -26,7 +26,6 @@ export function useUserActivityTracker(): void {
   const keysDoesExist = useSelector(selectKeysDoesExist);
   const vaultIsLocked = useSelector(selectVaultIsLocked);
 
-  // window listeners that dispatch timeout refresh action on any user activity
   useEffect(() => {
     const events = ['mousemove', 'click', 'keydown'];
 

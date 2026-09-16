@@ -58,12 +58,6 @@ export function* onboardingSagas() {
   yield takeLatest(recoverVault.type, recoverVaultSaga);
 }
 
-// Fire-and-forget: delivery runs AFTER the resets below have already
-// completed, from a snapshot taken before any of them. Never awaited by the
-// saga — see the ordering note there. `failRequestOnWindowError` cannot be
-// reused directly here: it needs the store (to dispatch the tombstone), which
-// the wallet no longer has any use for once every slice is already wiped, so
-// this only needs `deliverCancelResponse`, the store-free half it shares.
 function deliverResetCancels(openRequests: readonly OpenRequest[]): void {
   for (const request of openRequests) {
     deliverCancelResponse(request, 'resetVaultSaga').catch(error => {
@@ -76,12 +70,8 @@ function deliverResetCancels(openRequests: readonly OpenRequest[]): void {
   }
 }
 
-// Forked, not a bare `.catch`: a rejection here must reach the store via
-// `put`, and only a saga effect can do that from code that runs after the
-// synchronous reset block (a detached Promise callback has no store to
-// dispatch to). The descriptors and the mirror are already gone by the time
-// this runs, so a failure here is terminal — nothing else will ever find this
-// window again to retry. Window id only; no origins/URLs.
+// Forked, not a bare `.catch`: a rejection must reach the store via `put`, which
+// only a saga effect can do. Window id only; no origins/URLs.
 function* removeResetWindow(windowId: number) {
   try {
     yield call([windows, windows.remove], windowId);
@@ -100,42 +90,18 @@ function* removeResetWindow(windowId: number) {
   }
 }
 
-/**
- *
- */
 function* resetVaultSaga(action: ReturnType<typeof resetVault>) {
   try {
-    // Snapshotted BEFORE any reset: the reducers cleared below throw away the
-    // descriptors this needs to cancel, the approval windows to close, and the
-    // export-keys window id — `selectOpenRequests` alone would miss the
-    // latter two, which are not requests. Widened rather than left to
-    // `selectOpenRequests` alone: without `windowId` here the shared approval
-    // window is never closed, and without `exportKeysWindowId` the
-    // Download-account-keys window survives reset with its single-window
-    // guard defeated for the rest of the service worker's life (the reducer
-    // nulls the id but nothing closes the window it named). No key material
-    // is exposed by the surviving window either way — it renders the error
-    // page — the guard is the loss.
-    //
-    // Accepted residual: a request still between registration and
-    // window-attach contributes no window here (`windowIds` is still `[]`).
-    // Its window opens after this reset, over the now-wiped wallet, gets
-    // tracked via `windowIdChanged` into the fresh slice, and is reused by
-    // the next approval like any other — not compensated for.
+    // Snapshotted before any reset: the reducers below throw away the descriptors
+    // to cancel and the window ids to close, two of which are not requests.
     const openRequests: OpenRequest[] = yield select(selectOpenRequests);
     const windowId: number | null = yield select(selectWindowId);
     const exportKeysWindowId: number | null = yield select(
       selectExportKeysWindowId
     );
 
-    // Order matters and is the whole point (spec §8.3). Today the twelve
-    // `put`s below complete synchronously inside `store.dispatch(resetVault())`
-    // — before `handleReduxAction` responds and before the UI's
-    // `.then(() => closeWindowByReloadExtension())` runs, which on Firefox and
-    // Safari is `runtime.reload()`. Any awaited I/O ahead of them would let
-    // that reload kill the saga first, so the resets and `storage.local.clear()`
-    // would never run. Everything below this comment through `storage.local
-    // .clear()` MUST stay synchronous — no `yield call`/`yield` on a Promise.
+    // Everything through `storage.local.clear()` MUST stay synchronous: on Firefox
+    // and Safari the UI's `runtime.reload()` would kill the saga at any awaited I/O.
     yield put(vaultReseted());
     yield put(vaultCipherReseted());
     yield put(keysReseted());
@@ -152,10 +118,8 @@ function* resetVaultSaga(action: ReturnType<typeof resetVault>) {
 
     storage.local.clear();
 
-    // The reducer above returns the shared `initialState` reference, so when
-    // `windowManagement` was already at rest the subscriber's identity guard
-    // (get-main-store.ts) sees no change and never persists the clear. Join
-    // the write chain directly instead of relying on it.
+    // The reducer returns the shared `initialState` reference, so a slice already
+    // at rest fails the subscriber's identity guard and never persists the clear.
     clearRequestSession().catch(error => {
       console.error(
         'resetVaultSaga: clear request mirror failed',
@@ -163,19 +127,11 @@ function* resetVaultSaga(action: ReturnType<typeof resetVault>) {
       );
     });
 
-    // Deliveries and window removal happen strictly AFTER the synchronous
-    // block above, from the snapshot. A slow or rejecting delivery must not
-    // delay or break the resets or `storage.local.clear()` — it can't, since
-    // none of this is awaited.
+    // Not awaited: a slow or rejecting delivery must not delay the resets above.
     deliverResetCancels(openRequests);
 
-    // The originating window is excluded: `ResetVaultPage` renders inside the
-    // signature-request and connect-to-app approval windows (`LockedRouter`),
-    // so removing it here would kill the page's OWN continuation
-    // (`closeWindowByReloadExtension`) before it runs — and on Firefox/Safari
-    // that also skips `runtime.reload()`. It converges on its own instead:
-    // Chrome closes itself via `window.close()`, Firefox/Safari die with
-    // `runtime.reload()`.
+    // The originating window is excluded: `ResetVaultPage` can render inside an
+    // approval window, and removing it kills the page's own continuation.
     const senderWindowId = action.payload.senderWindowId;
     const windowIdsToRemove = new Set(
       [
@@ -196,9 +152,6 @@ function* resetVaultSaga(action: ReturnType<typeof resetVault>) {
   }
 }
 
-/**
- *
- */
 function* initKeysSage(action: ReturnType<typeof initKeys>) {
   try {
     const { password } = action.payload;
@@ -213,12 +166,8 @@ function* initKeysSage(action: ReturnType<typeof initKeys>) {
     );
     const encryptionKeyHash = convertBytesToHex(encryptionKeyBytes);
 
-    // Session first, keys second, and the order is load-bearing: the store
-    // subscriber broadcasts after every dispatch, so the state between these two
-    // puts really does reach the onboarding tab. `keys && !session` is what a
-    // locked vault looks like, which would flash the locked screen mid-signup;
-    // `session && !keys` reads as a fresh install, whose routes still include
-    // the create-password page this runs from.
+    // Session first, keys second: the store broadcasts between the two puts, and
+    // `keys && !session` looks like a locked vault and flashes that screen.
     yield put(
       encryptionKeyHashCreated({ encryptionKeyHash: encryptionKeyHash })
     );
@@ -237,9 +186,6 @@ function* initKeysSage(action: ReturnType<typeof initKeys>) {
   }
 }
 
-/**
- *
- */
 function* initVaultSaga(action: ReturnType<typeof initVault>) {
   try {
     const { secretPhrase } = action.payload;
@@ -257,7 +203,6 @@ function* initVaultSaga(action: ReturnType<typeof initVault>) {
     yield put(secretPhraseCreated(secretPhrase));
     yield put(accountAdded(account));
     yield put(vaultUnlocked());
-    // cleanup and disabling action handler
     disableOnboardingFlow();
   } catch (err) {
     console.error(err);
@@ -277,7 +222,6 @@ function* recoverVaultSaga(action: ReturnType<typeof recoverVault>) {
     yield put(secretPhraseCreated(secretPhrase));
     yield put(accountsAdded(accounts));
     yield put(vaultUnlocked());
-    // cleanup and disabling action handler
     disableOnboardingFlow();
   } catch (err) {
     console.error(err);

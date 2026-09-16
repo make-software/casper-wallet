@@ -19,9 +19,8 @@ export function Popover({
   isAllAccountsPage = false
 }: PropsWithChildren<PopoverProps>) {
   useEffect(() => {
-    // Manage scroll on the mac-scrollbar container while the popover is open.
-    // Use the CSSOM `style` property (not an inline style-attribute write) so
-    // this is not subject to the nonce-based style-src CSP (WALLET-1343).
+    // The CSSOM `style` property, not an inline style-attribute write, so this is
+    // not subject to the nonce-based style-src CSP.
     const scrollableContainer =
       document.querySelector<HTMLElement>('.ms-container');
     if (!scrollableContainer) {

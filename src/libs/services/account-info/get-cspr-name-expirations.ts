@@ -33,9 +33,7 @@ interface CsprNameResolver {
 }
 
 // An expired or unparseable stored record counts as missing: a renewed name
-// resolves to its new date in the same cycle, a truly expired one resolves to
-// null and gets dropped by the reducer — which is also how stale records are
-// cleaned up.
+// resolves to its new date, a truly expired one resolves to null and is dropped.
 const shouldResolve = (
   csprName: string,
   stored: CsprNameExpirationRecord,
@@ -56,8 +54,7 @@ const shouldResolve = (
 
 export const getCsprNameExpirations = async (
   accountPublicKeys: string[],
-  // Keyed by account hash; comes from the shared ACCOUNT_INFO query cache so
-  // this pipeline doesn't repeat the request `useFetchAccountsInfo` already made
+  // Keyed by account hash; from the shared ACCOUNT_INFO query cache
   accountsInfo: Record<string, IAccountInfo>,
   network: CasperNetwork,
   repository: CsprNameResolver,
@@ -89,8 +86,7 @@ export const getCsprNameExpirations = async (
     const stored = storedExpirations[publicKey];
 
     if (stored != null && !shouldResolve(info.csprName, stored, now)) {
-      // Re-emit the stored record verbatim so the reducer's sameNameAndDate
-      // check preserves the dismissed flag without a network call.
+      // Re-emitted verbatim so the reducer's sameNameAndDate check keeps the flag.
       expirations[publicKey] = {
         csprName: stored.csprName,
         expiresAt: stored.expiresAt
@@ -123,10 +119,8 @@ export const getCsprNameExpirations = async (
         return;
       }
 
-      // A rejected request must stay distinguishable from a name that
-      // legitimately resolved to nothing (the repository returns null for
-      // expired/unknown names) — otherwise a transient error would wipe the
-      // stored record and its dismissed flag.
+      // A rejected request must stay distinguishable from a name that resolved
+      // to nothing, or a transient error would wipe the record and its flag.
       if (error != null) {
         console.error(error);
         failedPublicKeys.push(publicKey);

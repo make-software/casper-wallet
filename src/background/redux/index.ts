@@ -11,10 +11,8 @@ export const createStore = (initialState: Partial<RootState>) => {
   const sagaMiddleware = createSagaMiddleware();
 
   const store = configureStore({
-    // `rootReducer` is a `combineReducers` result; RTK
-    // cannot infer its combined shape, so it collapses `preloadedState` to a
-    // never-shape. Re-assert the reducer's real type (state + `Partial` preload
-    // slot) so `preloadedState: Partial<RootState>` type-checks unchanged.
+    // `rootReducer` is a `combineReducers` result whose combined shape RTK cannot
+    // infer, so it collapses `preloadedState` to a never-shape. Re-assert it here.
     reducer: rootReducer as unknown as Reducer<
       RootState,
       ReduxAction,

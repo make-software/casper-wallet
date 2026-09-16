@@ -16,8 +16,7 @@ import {
   isLedgerFailure
 } from './index';
 
-// The pages hand their i18next `t` in; identity keeps the assertions on the copy
-// this module picks, not on translation.
+// Identity keeps the assertions on the copy this module picks, not on translation.
 const translate = (key: string) => key;
 
 const wrapAsSendFailure = (sourceError: unknown) =>

@@ -1,4 +1,3 @@
-// src/libs/crypto/aes.back-compat.test.ts
 import { createCipheriv } from 'crypto';
 
 import {
@@ -36,8 +35,8 @@ describe('crypto.aes vault byte-compat', () => {
   });
 
   it('decrypts a blob built by an independent AES-256-GCM oracle (fixed key + iv)', async () => {
-    const key = Buffer.from(FIXED_ENCRYPTION_KEY_HASH, 'hex'); // 32 bytes
-    const iv = Buffer.alloc(IV_LENGTH, 7); // deterministic 12-byte nonce
+    const key = Buffer.from(FIXED_ENCRYPTION_KEY_HASH, 'hex');
+    const iv = Buffer.alloc(IV_LENGTH, 7);
     const plaintext = 'casper vault back-compat probe';
 
     const cipher = createCipheriv('aes-256-gcm', key, iv);
@@ -45,7 +44,7 @@ describe('crypto.aes vault byte-compat', () => {
       cipher.update(plaintext, 'utf8'),
       cipher.final()
     ]);
-    const tag = cipher.getAuthTag(); // 16 bytes
+    const tag = cipher.getAuthTag();
     const blob = Buffer.concat([iv, ciphertext, tag]).toString('base64');
 
     const decrypted = await aesDecryptString(FIXED_ENCRYPTION_KEY_HASH, blob);

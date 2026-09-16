@@ -101,7 +101,6 @@ describe('anchorServiceWorker', () => {
 
     releaseA();
 
-    // B still holds the anchor — heartbeat keeps firing.
     jest.advanceTimersByTime(ANCHOR_HEARTBEAT_INTERVAL);
     expect(mockGetPlatformInfo).toHaveBeenCalledTimes(2);
 
@@ -119,7 +118,7 @@ describe('anchorServiceWorker', () => {
     const releaseB = anchorServiceWorker('create-account');
 
     releaseA();
-    releaseA(); // must not decrement B's hold
+    releaseA();
 
     jest.advanceTimersByTime(ANCHOR_HEARTBEAT_INTERVAL);
     expect(mockGetPlatformInfo).toHaveBeenCalledTimes(1);

@@ -14,9 +14,8 @@ import { accountImported, accountsImported } from './vault/actions';
 import { windowRequestWindowAttached } from './windowManagement/actions';
 
 describe('SURFACED_DISPATCH_ACTIONS', () => {
-  // A pin, not a tautology: the list decides which dropped dispatches the user
-  // is told about, and the criterion for adding one is a judgement call. Growing
-  // or shrinking it has to be a deliberate edit, not a side effect.
+  // A pin, not a tautology: growing or shrinking the list has to be a
+  // deliberate edit, not a side effect.
   it('contains exactly the actions whose dropped dispatch is otherwise invisible', () => {
     expect([...SURFACED_DISPATCH_ACTIONS].sort()).toEqual(
       [
@@ -36,9 +35,6 @@ describe('SURFACED_DISPATCH_ACTIONS', () => {
     );
   });
 
-  // The pin above cannot see a rename: both sides read the same creators, so a
-  // renamed slice reducer moves them together. These literals are the only thing
-  // in the file that does not come from a creator.
   it('pins the type strings themselves, which the creator-derived pin cannot', () => {
     expect([...SURFACED_DISPATCH_ACTIONS].sort()).toEqual(
       [

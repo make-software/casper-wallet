@@ -10,15 +10,9 @@ import {
 } from './constants';
 
 /**
- * WALLET-1381 stopped sourcing these chain names from the `CasperNetworkName`
- * enum — a value import pulled `casper-js-sdk` onto every page entry's startup
- * path — and spelled the four strings out by hand.
- *
- * The `` `${CasperNetworkName}` `` annotation catches a typo but is the union of
- * all four values, so any *mis-pairing* still compiles:
- * `[NetworkName.Mainnet]: 'casper-test'` type-checks and no test read either
- * map. These values are signed into deploys, so a permutation means a mainnet
- * transfer signed for `casper-test`.
+ * A mis-pairing still type-checks: the `` `${CasperNetworkName}` `` annotation is
+ * the union of all four values. These values are signed into deploys, so a
+ * permutation means a mainnet transfer signed for `casper-test`.
  */
 describe('network name maps', () => {
   const NETWORKS = Object.values(NetworkName);
@@ -57,8 +51,7 @@ describe('network name maps', () => {
 /**
  * The type system cannot check the pairing: `Record<enum, Union>` enforces exhaustive keys and a
  * member of the union, not that `delegate` maps to `'DELEGATE'`. Mapping it to `'UNDELEGATE'` is
- * a one-token edit that type-checks and moves the stake the opposite way from the confirmed
- * screen — the deploy the Ledger shows is a contract call either way.
+ * a one-token edit that type-checks and moves the stake the opposite way.
  */
 describe('coreAuctionEntryPointMap', () => {
   it('delegates on delegate', () => {

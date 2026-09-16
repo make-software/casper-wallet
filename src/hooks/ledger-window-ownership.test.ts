@@ -43,9 +43,8 @@ describe('resolveOwnPermissionWindowId', () => {
   });
 
   it('a remounted internal flow in the opener window owns it (popup torn down and reopened)', () => {
-    // Neither `openedWindowId` (a fresh ref) nor `hostWindowId` (the browser
-    // window, not the permission window) matches — only the persisted opener.
-    // Both request ids are null: the internal flows have no dapp request.
+    // Neither `openedWindowId` nor `hostWindowId` matches — only the persisted
+    // opener. Both request ids are null: the internal flows have no dapp request.
     expect(
       resolveOwnPermissionWindowId({
         ...none,
@@ -70,10 +69,8 @@ describe('resolveOwnPermissionWindowId', () => {
   });
 
   it('a second dapp request reusing the approval window does NOT inherit the first one’s claim', () => {
-    // The approval window is one tracked slot the next request reuses in place,
-    // so window 100 hosts r2's fresh document while the slice still names r1's
-    // permission window. Owning it here closes window 100 on the back arrow and
-    // cancels r2 — the collateral cancel WALLET-1416 is about.
+    // The approval window is one tracked slot the next request reuses in place, so
+    // owning it here would close window 100 on the back arrow and cancel r2.
     expect(
       resolveOwnPermissionWindowId({
         ...none,
@@ -121,11 +118,8 @@ describe('resolveOwnPermissionWindowId', () => {
   });
 
   it('two unknowns are not a match: no opener recorded and no host window yet → null', () => {
-    // The state the mount race produces — the slice's opener is whatever
-    // `windows.getCurrent()` had resolved to at open time (null if it had not),
-    // and the reading side is null until its own call lands. Without the
-    // `openerWindowId != null` guard both sides compare equal and this instance,
-    // which witnessed nothing, would own a foreign flow's window.
+    // The state the mount race produces: without the `openerWindowId != null` guard
+    // both sides are null and this instance would own a foreign flow's window.
     expect(
       resolveOwnPermissionWindowId({ ...none, slotWindowId: 20 })
     ).toBeNull();

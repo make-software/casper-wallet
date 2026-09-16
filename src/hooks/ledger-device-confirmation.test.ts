@@ -42,8 +42,7 @@ it('brackets the device call with a start and an end', async () => {
 });
 
 // The flag withholds the shared approval window from every later request, so a
-// device call that throws must still release it — otherwise one failed signing
-// attempt makes every subsequent dapp request open a window of its own.
+// device call that throws must still release it.
 it('releases the window when the device call fails', async () => {
   await runWithDeviceConfirmationReported('r1', async () => {
     throw new Error('device says no');
@@ -94,9 +93,8 @@ it('keeps a Ledger error message out of the log', async () => {
   expect(JSON.stringify(consoleError.mock.calls)).not.toContain('0202d1');
 });
 
-// `import-account-from-ledger`, transfer and staking run the same hook with no
-// dapp request behind them: there is no descriptor to flag and no approval
-// window to protect.
+// `import-account-from-ledger`, transfer and staking run the same hook with no dapp
+// request behind them: no descriptor to flag and no approval window to protect.
 it('still runs the device call for an internal flow, reporting nothing', async () => {
   const run = jest.fn().mockResolvedValue(undefined);
 
@@ -112,12 +110,8 @@ it('treats an empty requestId as absent', async () => {
   expect(dispatchMock).not.toHaveBeenCalled();
 });
 
-// Two brackets can overlap in one document: the submit control is not disabled
-// while a call is in flight, and the page state that hides it is only flipped
-// after `getPreferredTransport()` and `beforeLedgerActionCb()` have resolved
-// (use-ledger.ts). The second call fails fast — the transport is busy, so it
-// throws TransportRaceCondition — and a bare release would then unprotect the
-// window while the first call is still on the device.
+// Two brackets can overlap in one document, and a bare release by the second,
+// fast-failing call would unprotect the window while the first is on the device.
 describe('concurrent brackets', () => {
   it('does not release the window until the last bracket settles', async () => {
     let releaseFirst: () => void = () => {};

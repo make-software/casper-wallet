@@ -3,20 +3,13 @@ import { runtime } from 'webextension-polyfill';
 /** Only this port name reaches the privileged router; anything else is ignored. */
 export const BACKGROUND_PORT_NAME = 'cw-privileged';
 
-/** A disconnect means the message never produced a result — safe to re-send. */
 const PORT_RETRY_DELAYS_MS = [250, 500];
 
 /**
- * Liveness backstop. A message delivered before the background attached its
+ * Liveness backstop: a message delivered before the background attached its
  * listener produces neither a response nor a disconnect, so retry alone cannot
- * see it.
- *
- * Sized for the requests this port is built to carry, not for the one it
- * carries today. `changePassword` is acked as soon as the handler dispatches,
- * ahead of any derivation — but the unlock and verify requests answer only
- * *after* their scrypt, and those derivations are serialised process-wide, so a
- * queued request waits out every one ahead of it. `request-with-retry.ts`'s 5s
- * could not bound that, which is why this is a different order of magnitude.
+ * see it. Sized for unlock and verify, which answer only after a scrypt that is
+ * serialised process-wide, so a queued request waits out every one ahead of it.
  */
 export const PORT_RESPONSE_TIMEOUT_MS = 60_000;
 
@@ -62,9 +55,8 @@ function attempt<Res>(request: PortRequest): Promise<Res> {
     try {
       port.postMessage(request);
     } catch (error) {
-      // Same shape as the two listeners above: without it this exit leaves the
-      // timeout armed, holding the closure — and the request's passwords — for
-      // its full duration.
+      // Without this the timeout stays armed, holding the closure — and the
+      // request's passwords — for its full duration.
       if (!settled) {
         settled = true;
         clearTimeout(timer);

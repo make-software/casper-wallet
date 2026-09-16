@@ -15,7 +15,6 @@ export async function emitSdkEventToActiveTabs(
   await Promise.all(
     tabsList.map(async tab => {
       if (tab.id) {
-        // skip non http windows
         if (tab.url && hasHttpPrefix(tab.url)) {
           const action = callback(tab);
           if (action == null) {
@@ -34,14 +33,11 @@ export async function emitSdkEventToActiveTabs(
   );
 }
 
-// Returns the number of tabs the action was SUCCESSFULLY delivered to. The
-// same-origin delivery fallback (`handleSdkResponseToTab`) uses this count to
-// decide whether the response actually reached the dapp; the SDK-event callers
-// ignore the return value (backward-compatible).
+// Returns the number of tabs the action was SUCCESSFULLY delivered to;
+// `handleSdkResponseToTab` uses the count to decide whether the dapp got it.
 export async function emitSdkEventToActiveTabsWithOrigin(
   origin: string,
-  // A method **response** may also be broadcast through here as a same-origin
-  // delivery fallback (see `handleSdkResponseToTab`), hence `SdkEvent | SdkMethod`.
+  // A method **response** may also be broadcast here as a same-origin fallback.
   action: SdkEvent | SdkMethod,
   // Response delivery passes the frame that made the request; SDK events pass
   // nothing and keep reaching every frame, which is what an event is for.
@@ -60,7 +56,6 @@ export async function emitSdkEventToActiveTabsWithOrigin(
   await Promise.all(
     tabsList.map(async tab => {
       if (tab.id) {
-        // skip non http windows
         if (
           tab.url &&
           hasHttpPrefix(tab.url) &&

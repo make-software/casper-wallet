@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { isValidSecretKeyHash } from '@libs/crypto/is-valid-secret-key-hash';
 
-// Kept out of form-validation-rules.ts on purpose: that module is on the eager startup
-// path of the onboarding entry, and isValidSecretKeyHash value-imports casper-js-sdk.
+// Kept out of form-validation-rules.ts: that module is on the onboarding entry's
+// eager startup path, and isValidSecretKeyHash value-imports casper-js-sdk.
 export const useTorusSecretKeyRule = () => {
   const { t } = useTranslation();
 

@@ -12,8 +12,7 @@ jest.mock('@background/handlers/vault-secrets', () => ({
   fetchAccountSecretKeys: jest.fn()
 }));
 
-// Pass-through: this suite drives the rejection paths, and the real retry loop
-// would spend ~750ms of wall clock per rejection test.
+// Pass-through: the real retry loop would spend ~750ms of wall clock per rejection test.
 jest.mock('@libs/messaging/request-with-retry', () => ({
   requestWithRetry: jest.fn((send: () => Promise<unknown>) => send())
 }));
@@ -23,8 +22,7 @@ const mockFetchSecretKeys = fetchAccountSecretKeys as jest.Mock;
 
 const PHRASE = ['abandon', 'ability'];
 
-// Replica copies: `secretKey` is always blanked, `watching` is what the
-// broadcast sanitizer derived.
+// Replica copies: `secretKey` is always blanked, `watching` is what the sanitizer derived.
 const imported = (name: string, watching = false): Account =>
   ({
     name,
@@ -71,8 +69,7 @@ it('assembles the payload and requests imported names only', async () => {
   });
 });
 
-// The mobile client re-derives derived accounts from the phrase, so their keys
-// must never ride along even if the map happens to carry the name.
+// The mobile client re-derives these from the phrase, so their keys must never ride along.
 it('never takes a derived account key from the map', async () => {
   mockFetchSecretKeys.mockResolvedValue({ 'Account 1': 'sk-derived' });
 
@@ -108,9 +105,7 @@ it('refuses when the keys request rejects', async () => {
   expect(await buildQrSyncPayload([], [imported('alice')])).toBeNull();
 });
 
-// An all-watch-only wallet legitimately produces an empty map: those accounts
-// hold no key to sync, and `''` is the same payload they had before the vault
-// secrets moved off the broadcast.
+// An all-watch-only wallet legitimately produces an empty map.
 it('syncs an all-watch-only wallet from an empty map', async () => {
   mockFetchSecretKeys.mockResolvedValue({});
 
@@ -125,8 +120,7 @@ it('syncs an all-watch-only wallet from an empty map', async () => {
   ]);
 });
 
-// The rename/removal race: the account holds a key, the map came back without
-// it, and syncing it keyless would look like success on both ends.
+// The rename/removal race: syncing a keyless account would look like success on both ends.
 it('refuses when a non-watching imported account is missing from the map', async () => {
   mockFetchSecretKeys.mockResolvedValue({});
 

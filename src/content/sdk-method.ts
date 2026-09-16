@@ -10,11 +10,10 @@ export const SdkMethodEventType = {
 
 type Meta = { requestId: string };
 
-/** FSA-compatible (payload, meta) creator with exact type string */
 const createSdkAction = <P, T extends string = string>(type: T) =>
   createAction(type, (payload: P, meta: Meta) => ({ payload, meta }));
 
-/** FSA error envelope: {payload, meta, error: true} — wire shape must not change */
+/** FSA error envelope — the wire shape must not change. */
 const createSdkErrorAction = <T extends string>(type: T) =>
   createAction(type, (payload: SdkError | Error, meta: Meta) => ({
     payload,

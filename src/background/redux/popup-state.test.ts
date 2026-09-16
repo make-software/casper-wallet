@@ -4,7 +4,6 @@ import { RootState } from '@background/redux/store-types';
 
 import { HardwareWalletType } from '@libs/types/account';
 
-// A full, untouched RootState — every slice at its reducer's initial value.
 const fullState = rootReducer(undefined, { type: '@@INIT' }) as RootState;
 
 // Spelled out rather than imported from POPUP_SLICES: the module under test

@@ -49,9 +49,8 @@ import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
 import { selectVaultIsLocked } from '../redux/session/selectors';
 import { HandlerResult } from './types';
 
-// The six methods that register a request and open an approval window. Kept as
-// one set, checked once below, so the duplicate guard cannot be forgotten by a
-// seventh flow the way it would be if it were copied into each branch.
+// The methods that register a request and open an approval window. Kept as one
+// set so the duplicate guard cannot be forgotten by a seventh flow.
 const APPROVAL_REQUEST_TYPES: ReadonlySet<string> = new Set([
   sdkMethod.connectRequest.type,
   sdkMethod.switchAccountRequest.type,
@@ -63,11 +62,8 @@ const APPROVAL_REQUEST_TYPES: ReadonlySet<string> = new Set([
 
 const CAPACITY_REFUSAL_MESSAGE = 'Too many pending signature requests';
 
-// The dapp half of a capacity refusal is `errorCode`; this is the extension
-// half, so a wallet refusing every signature is not invisible on this side
-// either. Identifiers only — never the deploy, the typed data or the origin.
-// Log-only rather than `sagaError`: this path is dapp-triggerable, and a banner
-// mounted over every app surface would be a page's to spam.
+// Log-only rather than `sagaError`: this path is dapp-triggerable, so a banner
+// would be a page's to spam. Identifiers only — never payload or origin.
 function reportCapacityRefusal(action: SdkMethod) {
   console.error(
     'sdk-methods: pending-payload map at capacity, request refused',
@@ -75,13 +71,8 @@ function reportCapacityRefusal(action: SdkMethod) {
   );
 }
 
-// Same LOGGING rationale as `reportCapacityRefusal` (this side is not
-// invisible to the wallet even when refused silently) — but not the same dapp
-// half: only the two payload-bearing refusals (`sign`, `signTypedData`) carry
-// `errorCode`. For the four capless methods the refusal is indistinguishable
-// from an ordinary user decline on the dapp side until WALLET-1436 gives it
-// one too. `openCount` is the count AFTER the refused write — it names how
-// full the map the refusal fired against actually was.
+// Same logging rationale as `reportCapacityRefusal`. `openCount` is the count
+// AFTER the refused write — how full the map the refusal fired against was.
 function reportOpenRequestCapacityRefusal(
   action: SdkMethod,
   openCount: number
@@ -98,21 +89,11 @@ export async function handleSdkMethod(
   sender: Runtime.MessageSender,
   store: MainStore
 ): Promise<HandlerResult> {
-  // `requestId` is page-generated (`generateRequestId`, src/content/sdk.ts),
-  // i.e. dapp-controlled. The slice reducer already refuses to overwrite a live
-  // request or resurrect a tombstone, but that no-op was invisible to the
-  // caller: every branch below went on to open a window anyway. The result was
-  // a fully functional approval screen for a request the wallet could never
-  // answer — a replayed id renders normally, the user approves, and the
-  // response is dropped by the dedup with the dapp none the wiser. Reusing a
-  // LIVE id under another method is worse still: the first descriptor is kept,
-  // so a later cancel is built in the wrong shape. Refuse both here, before
-  // anything is dispatched.
+  // `requestId` is dapp-controlled, and the reducer refuses a duplicate
+  // silently — refuse here so no window opens on a request it never registered.
   if (APPROVAL_REQUEST_TYPES.has(action.type)) {
-    // `__proto__` cannot be a key in the requests map, so the reducer refuses
-    // it — and without answering here, the caller would go on to open a window
-    // for a request the store never registered: outside cancellation on close,
-    // on supersede, the response dedup and the window-open recovery alike.
+    // An unstorable id is refused by the reducer too, leaving the request
+    // outside cancel-on-close, supersede, response dedup and window recovery.
     if (!isStorableRequestId(action.meta.requestId)) {
       throw Error('Invalid requestId');
     }
@@ -165,9 +146,8 @@ export async function handleSdkMethod(
         })
       );
 
-      // At `MAX_OPEN_REQUESTS` the reducer refused the write silently; this is
-      // the analogue of the `getPayload(...) == null` check above, for a method
-      // with no capacity map of its own to read back.
+      // At `MAX_OPEN_REQUESTS` the reducer refused the write silently; this
+      // method has no capacity map of its own to read back.
       if (
         selectRequestStatus(store.getState(), action.meta.requestId) == null
       ) {
@@ -257,10 +237,8 @@ export async function handleSdkMethod(
     try {
       deployJson = JSON.parse(action.payload.deployJson);
     } catch (err) {
-      // The dapp-facing message stays generic (it crosses a trust boundary);
-      // the cause is kept here, otherwise a parse failure is unrecoverable
-      // from a bug report.
-      // Static message + error object, never the payload.
+      // The dapp-facing message stays generic; the cause is kept here as a
+      // static message + error object, never the payload.
       console.error('sdk-methods: deploy json string parse failed:', err);
       throw Error('Deploy json string parse error');
     }
@@ -294,9 +272,8 @@ export async function handleSdkMethod(
       })
     );
 
-    // At capacity `storePayload` refuses the INCOMING write. Answering here is
-    // what makes that residual visible: without it the window opens on a
-    // payload the page can never read.
+    // At capacity `storePayload` refuses the INCOMING write; without answering
+    // here the window opens on a payload the page can never read.
     if (
       getPayload(
         selectDeploysJsonById(store.getState()),
@@ -328,15 +305,8 @@ export async function handleSdkMethod(
       })
     );
 
-    // At `MAX_OPEN_REQUESTS` the reducer refused the write silently, same as
-    // the four capless methods above — but the payload above has ALREADY been
-    // accepted into the map, so it is stranded here rather than refused; it is
-    // reclaimed by `reconcileStalePayloadsSaga` since no descriptor and no
-    // window will ever claim it. `windowRequestResponded` reclaims it
-    // immediately instead: the vault reducer deletes the payload keyed off
-    // this exact action (the WALLET-1418 orphan mechanism, and it is in the
-    // re-encrypt debounce list so the deletion reaches the cipher), and the
-    // windowManagement case no-ops for an id with no open row.
+    // The payload above has ALREADY been accepted, so a silent refusal here
+    // strands it; `windowRequestResponded` makes the vault reducer drop it.
     if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
       reportOpenRequestCapacityRefusal(
         action,
@@ -480,11 +450,7 @@ export async function handleSdkMethod(
       })
     );
 
-    // Same residual as the deploy branch: the payload above is already
-    // accepted, so a refusal here strands it for `reconcileStalePayloadsSaga`
-    // to reclaim rather than refusing the payload write itself.
-    // `windowRequestResponded` reclaims it immediately instead — same
-    // mechanism as the `sign` branch above.
+    // Same residual as the deploy branch, reclaimed the same way.
     if (selectRequestStatus(store.getState(), action.meta.requestId) == null) {
       reportOpenRequestCapacityRefusal(
         action,

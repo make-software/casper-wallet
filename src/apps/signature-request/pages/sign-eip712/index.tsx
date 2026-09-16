@@ -83,8 +83,7 @@ export function SignEip712Page() {
     options?: IEIP712SignTypedDataOptions;
     isInvalidPayload?: boolean;
   }>(() => {
-    // `getPayload`, never a bare index — `requestId` is dapp-controlled and an
-    // inherited Object.prototype member would parse as anything but typed data.
+    // `getPayload`, never a bare index: `requestId` is dapp-controlled.
     const raw = getPayload(eip712JsonById, requestId);
 
     if (!raw) {
@@ -98,7 +97,6 @@ export function SignEip712Page() {
     }
   }, [eip712JsonById, requestId]);
 
-  // Stored payload is present but not valid JSON — cannot proceed.
   if (isInvalidPayload) {
     const error = Error(
       ErrorMessages.signTypedData.INVALID_TYPED_DATA.description
@@ -115,7 +113,6 @@ export function SignEip712Page() {
     [accounts, signingPublicKeyHex]
   );
 
-  // signing account should exist in wallet
   if (!signingAccount) {
     const error = Error(
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
@@ -127,7 +124,6 @@ export function SignEip712Page() {
     throw error;
   }
 
-  // Ledger hardware wallets do not support EIP-712 typed data signing.
   if (signingAccount.hardware === HardwareWalletType.Ledger) {
     const error = Error(
       ErrorMessages.signTypedData.LEDGER_NOT_SUPPORTED.description

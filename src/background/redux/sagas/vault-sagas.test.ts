@@ -126,9 +126,8 @@ const mockWindowsGetAll = windows.getAll as jest.Mock;
 const NOW = 1_700_000_000_000;
 const FIVE_SECONDS = 5000;
 
-// A shape-complete empty vault. The re-encrypt path never reads its contents in
-// these tests (encryptVault is always stubbed/spied), so empty fields suffice —
-// this just gives the `selectVault` provides an honest VaultState type.
+// encryptVault is always stubbed here, so only the shape matters — this keeps
+// what `selectVault` provides an honest VaultState.
 const EMPTY_VAULT: VaultState = {
   secretPhrase: null,
   accounts: [],
@@ -257,12 +256,8 @@ describe('setDelayForLockoutVaultSaga', () => {
 });
 
 describe('armLockoutSaga — root-saga wiring', () => {
-  // The four tests below invoke the saga directly, so replacing the trigger
-  // array in `vaultSagas` leaves them all green with the saga wired to nothing.
-  // These dispatch through the real root saga instead.
-  // `selectLoginRetryLockoutTime` is here because arming wakes
-  // `setDelayForLockoutVaultSaga`, which reads it; without it that saga runs
-  // against an undefined state and the failure looks like a wiring problem.
+  // Dispatched through the real root saga: invoking the saga directly stays green
+  // with the trigger array in `vaultSagas` wired to nothing.
   const armProviders = [
     [matchers.select.selector(selectLoginRetryCount), 5],
     [matchers.select.selector(selectHasLoginRetryLockoutTime), false],
@@ -278,9 +273,6 @@ describe('armLockoutSaga — root-saga wiring', () => {
       .silentRun(50);
   });
 
-  // The resume half: a count persisted past the limit with nothing armed. No
-  // test covered this trigger at all — every other `startBackground` in the
-  // suite invokes a saga directly, and no e2e restarts the worker.
   it('arms on startBackground, for a stale count that survived a restart', async () => {
     await expectSaga(vaultSagas)
       .provide(armProviders)
@@ -418,9 +410,8 @@ describe('timeoutCounterSaga', () => {
 });
 
 describe('lockVaultSaga', () => {
-  // The flush re-encryption added at the top of lockVaultSaga now reaches these
-  // selectors and the encrypt call; provide a live key + stub cipher so the
-  // flush runs for real rather than throwing on a missing session.
+  // The flush re-encryption reaches these selectors and the encrypt call; a live
+  // key + stub cipher let it run for real rather than throw on a missing session.
   const flushProvides: Array<
     [
       (
@@ -444,9 +435,8 @@ describe('lockVaultSaga', () => {
   it('emits the locked event to tabs before touching storage, so a storage failure cannot skip the emit', async () => {
     await expectSaga(lockVaultSaga).provide(flushProvides).run();
 
-    // tabs.query is the first thing emitSdkEventToActiveTabs does; asserting
-    // its global invocation order against storage.local.remove proves the
-    // emit is no longer sequenced behind the fallible storage call.
+    // tabs.query is the first thing emitSdkEventToActiveTabs does, so its order
+    // against storage.local.remove proves the emit precedes the fallible call.
     expect(mockTabsQuery).toHaveBeenCalled();
     expect(mockStorageRemove).toHaveBeenCalledWith(AUTO_LOCK_DEADLINE_KEY);
     expect(mockTabsQuery.mock.invocationCallOrder[0]).toBeLessThan(
@@ -455,10 +445,8 @@ describe('lockVaultSaga', () => {
   });
 
   it('flushes a synchronous re-encryption before tearing the session down', async () => {
-    // NB: no `.put(vaultCipherCreated(...))` expectation here — a matched
-    // `.put()` expectation removes that effect from the returned `effects.put`
-    // array, which would defeat the ordering assertion below. The
-    // `toBeGreaterThanOrEqual(0)` check still proves the flush was put.
+    // No `.put(vaultCipherCreated(...))` expectation: a matched `.put()` removes
+    // that effect from `effects.put`, defeating the ordering assertion below.
     const { effects } = await expectSaga(lockVaultSaga)
       .provide([
         [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
@@ -491,12 +479,8 @@ describe('unlockVaultSaga', () => {
     newEncryptionKeyHash
   });
 
-  // Both selectors read after the puts. Provide them so the saga's happy path
-  // runs to completion (no catch, no leaked console.error). `activeAccount`
-  // toggles the SDK-event emit branch. `emitSdkEventToActiveTabs` /
-  // `anchorServiceWorker` are not jest.mocked — same as `lockVaultSaga` above,
-  // they run for real against the mocked `webextension-polyfill` (and the
-  // anchor is a no-op off Chrome), so `mockTabsQuery` is the emit witness.
+  // `activeAccount` toggles the SDK-event emit branch; the emit itself is not
+  // jest.mocked, so `mockTabsQuery` is the witness that it ran.
   const provides = (
     activeAccount: unknown
   ): Array<[ReturnType<typeof matchers.select.selector>, unknown]> => [
@@ -520,8 +504,7 @@ describe('unlockVaultSaga', () => {
   });
 
   it('yields those puts in a deterministic order', async () => {
-    // No `.put()` expectations here: a matched `.put()` removes that effect from
-    // the returned `effects.put` array, which would defeat the ordering check.
+    // A matched `.put()` would remove that effect from `effects.put`.
     const { effects } = await expectSaga(unlockVaultSaga, unlockAction)
       .provide(provides({ name: 'Account 1', publicKey: '0201abc' }))
       .run();
@@ -547,8 +530,7 @@ describe('unlockVaultSaga', () => {
       .put(vaultUnlocked())
       .run();
 
-    // tabs.query is the first thing emitSdkEventToActiveTabs does — its call is
-    // the witness that the emit branch ran.
+    // tabs.query is the witness that the emit branch ran.
     expect(mockTabsQuery).toHaveBeenCalled();
   });
 
@@ -598,17 +580,8 @@ describe('updateVaultCipher debounce', () => {
     expect(encryptSpy).toHaveBeenCalledTimes(1);
   });
 
-  // WALLET-1384: the vault reducer deletes an answered request's signing
-  // payload, and that deletion must reach the cipher. Otherwise an MV3
-  // service-worker restart re-loads the entry from a stale blob through
-  // `vaultLoaded`, for a requestId whose `windowRequestResponded` has already
-  // fired — so nothing would ever remove it.
-  //
-  // Driven through the REAL vault reducer (`withReducer`) and asserted on the
-  // value handed to `encryptVault`, not on a call count. Providing `selectVault`
-  // instead would pin only that `windowRequestResponded.type` sits in the
-  // debounce array — the reducer half of the contract would go unobserved, and
-  // deleting the whole `extraReducers` block would leave the test green.
+  // Driven through the REAL vault reducer and asserted on the value handed to
+  // `encryptVault`: providing `selectVault` would leave the reducer half unobserved.
   it('re-encrypts the vault WITHOUT the answered payload', async () => {
     const encryptSpy = jest
       .spyOn(vaultCryptoModule, 'encryptVault')
@@ -642,11 +615,8 @@ describe('updateVaultCipher debounce', () => {
   });
 
   it('re-encrypts once per edit when edits are spaced beyond the debounce window', async () => {
-    // The other half of the debounce contract: coalescing must not become
-    // over-coalescing. Edits further apart than the window must each persist —
-    // the burst test above cannot distinguish a correct trailing-edge debounce
-    // from a configuration that swallows every edit after the first (e.g. a
-    // future swap to throttle/takeLeading, or a fattened window).
+    // Edits further apart than the window must each persist: the burst test above
+    // cannot tell a trailing-edge debounce from one that swallows all but the first.
     const encryptSpy = jest
       .spyOn(vaultCryptoModule, 'encryptVault')
       .mockResolvedValue('cipher-blob');
@@ -665,11 +635,8 @@ describe('updateVaultCipher debounce', () => {
   });
 
   it('is a silent no-op when a debounced run lands after the session is locked', async () => {
-    // Straggler-after-lock: a trigger fired < 500ms before a lock re-arms the
-    // debounce, then lockVaultSaga wipes the session key, and the trailing run
-    // lands with encryptionKeyHash === null. It must NOT re-encrypt (no stale
-    // cipher can overwrite the lock flush) and must NOT surface a sagaError to
-    // the UI banner — a locked session is not an error.
+    // Straggler-after-lock: the trailing run lands with a null key. It must not
+    // re-encrypt over the lock flush, and a locked session is not a sagaError.
     const encryptSpy = jest.spyOn(vaultCryptoModule, 'encryptVault');
 
     const { effects } = await expectSaga(vaultSagas)
@@ -689,15 +656,8 @@ describe('updateVaultCipher debounce', () => {
   });
 });
 
-// WALLET-1418. `MAX_STORED_PAYLOADS` refuses the INCOMING write once
-// `jsonById`/`eip712ById` hold ten entries, and the only path that evicts a
-// stored one is `mergePayloadMaps` — which runs inside the reducer, on the same
-// `vaultLoaded` this saga takes, so it has already decided what survives before
-// this saga sees the action and cannot be relied on to reclaim anything for it.
-// So ten payloads whose `windowRequestResponded` never arrived — a clean
-// auto-lock with an approval window open is enough, no worker death needed —
-// permanently refuse every later `sign` on the profile. This saga is the
-// deliberate replacement for the accidental exit `vaultLoaded` used to provide.
+// `MAX_STORED_PAYLOADS` refuses the incoming write once ten entries are stored, and
+// nothing evicts a stored one, so unanswered payloads refuse every later `sign`.
 describe('reconcileStalePayloadsSaga', () => {
   const EMPTY_WINDOW_MANAGEMENT: WindowManagementState = {
     windowId: null,
@@ -740,9 +700,8 @@ describe('reconcileStalePayloadsSaga', () => {
   const vaultOf = (storeState: unknown) =>
     (storeState as { vault: VaultState }).vault;
 
-  // The window half of the keep-set. On a residual descriptor-less path (a
-  // lost mirror write, a sanitizer-dropped row, etc.) the descriptor is gone
-  // while the window is still on screen and still signable.
+  // The window half of the keep-set: on a descriptor-less path the descriptor is
+  // gone while the window is still on screen and still signable.
   it('keeps a payload whose requestId appears in an open window tab URL, with no descriptor in the store', async () => {
     mockWindowsGetAll.mockResolvedValue([
       { id: 1, tabs: [{ url: approvalWindowUrl('live-1') }] }
@@ -795,15 +754,13 @@ describe('reconcileStalePayloadsSaga', () => {
       )
       .run();
 
-    // `toEqual`, never `toMatchObject`: a subset match tolerates the very key
-    // this test proves is gone.
+    // `toEqual`, never `toMatchObject`: a subset match tolerates the purged key.
     expect(vaultOf(storeState).jsonById).toEqual({ 'live-1': '{"deploy":1}' });
     expect(vaultOf(storeState).eip712ById).toEqual({});
   });
 
-  // `windowManagement`'s reducer no-ops the transition unless the request is
-  // 'open', so an orphan spends none of the `MAX_RESPONDED_TOMBSTONES` budget,
-  // while the vault reducer keys off the action and still deletes the payload.
+  // `windowManagement` no-ops the transition unless the request is 'open', so an
+  // orphan spends no tombstone budget while the vault reducer still deletes it.
   it('does not leave a responded tombstone behind for a purged orphan', async () => {
     mockWindowsGetAll.mockResolvedValue([]);
 
@@ -963,11 +920,8 @@ describe('reconcileStalePayloadsSaga', () => {
     expect(effects.put ?? []).toEqual([]);
   });
 
-  // The ordering guard: hoisting the two `sagaSelect` calls above the `sagaCall`
-  // leaves every other test in this file green. `fresh` arrives during the round
-  // trip, so a keep-set read before it would purge a request the user is about
-  // to sign. The provider — not a `.dispatch()`, which only flushes against a
-  // matching `take` — is what observes WHEN the read happens.
+  // The ordering guard: `fresh` arrives during the round trip, so a keep-set read
+  // before it would purge a request the user is about to sign.
   it('computes the keep-set AFTER the window round trip, so a request registered during it survives', async () => {
     let roundTripDone = false;
 
@@ -1011,7 +965,7 @@ describe('reconcileStalePayloadsSaga', () => {
           return next();
         }
       } as never)
-      // The cipher contributes the leaked `orphan`; the merge is Task 1's.
+      // The cipher contributes the leaked `orphan`.
       .dispatch(
         vaultLoaded({ ...EMPTY_VAULT, jsonById: { orphan: '{"deploy":9}' } })
       )
@@ -1052,8 +1006,7 @@ describe('reconcileStalePayloadsSaga', () => {
   });
 
   // Without a re-encryption the cipher still holds the entry and the next
-  // `vaultLoaded` resurrects it; this pins `windowRequestResponded.type` in the
-  // debounce array.
+  // `vaultLoaded` resurrects it.
   it('carries the reclaimed slots into the re-encrypted cipher', async () => {
     mockWindowsGetAll.mockResolvedValue([
       { id: 1, tabs: [{ url: approvalWindowUrl('live-1') }] }
@@ -1085,12 +1038,8 @@ describe('reconcileStalePayloadsSaga', () => {
   });
 });
 
-// WALLET-1418. `eip712ById` entered `VaultState` after v2.4.2 shipped,
-// `decryptVault` is a bare `JSON.parse` cast and no migration exists, so an old
-// cipher decrypts without the field. A throw in `sanitizePayloadMap` lands in
-// `put(vaultLoaded(vault))`, is swallowed by `unlockVaultSaga`'s own catch, and
-// the vault never unlocks again. Driven through the REAL crypto: a hand-shaped
-// `vaultLoaded` payload cannot show that the round trip produces that shape.
+// `decryptVault` is a bare `JSON.parse` cast with no migration, so a cipher written
+// before `eip712ById` existed decrypts without the field. Driven through real crypto.
 describe('unlockVaultSaga on a cipher written before a payload map existed', () => {
   const PAYLOAD_MAPS = ['jsonById', 'eip712ById'] as const;
 
@@ -1290,9 +1239,8 @@ describe('createAccountSaga', () => {
   });
 });
 
-// Every catch in this module funnels into the same broadcast error channel.
-// Each test forces exactly one of them and pins its `source` string — the
-// banner and the saga are wired together by that literal.
+// Every catch funnels into the same broadcast error channel; the banner and the
+// saga are wired together by the `source` literal each test pins.
 describe('saga error channel', () => {
   it('reports an encryption failure from updateVaultCipher', async () => {
     jest
@@ -1662,9 +1610,8 @@ describe('changePasswordSaga', () => {
   });
 
   it('bails without persisting when the vault locks mid-derivation', async () => {
-    // First selectVaultIsLocked call is the pre-check (unlocked); the second is
-    // the post-encrypt re-check — a lock landing while the scrypt derivations
-    // and `encryptVault` are still in flight.
+    // First selectVaultIsLocked call is the pre-check (unlocked); the second is the
+    // post-encrypt re-check — a lock landing while the crypto is still in flight.
     let isLockedCalls = 0;
 
     stubDerivation();

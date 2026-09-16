@@ -1,22 +1,9 @@
 #!/usr/bin/env node
 /**
- * Runs the annotated unit tests for the custom rules in .semgrep.yml.
- *
- * Why a script instead of a plain `semgrep --test` call:
- *
- * 1. `semgrep --test --config=<file> <directory>` crashes in semgrep 1.157
- *    (test.py `relatively_eq` -> IndexError: tuple index out of range). When the
- *    config is a single file, semgrep tries to name-match it against each test
- *    file and indexes an empty relative path. Only `--config=<file> <file>` — a
- *    file target, not a directory — takes the branch that runs every rule in the
- *    config against the target. So each test file needs its own invocation.
- *
- * 2. A rule can only be considered tested if some test file actually exercises
- *    it. This script fails when a rule in .semgrep.yml has no annotations
- *    anywhere, so a new rule cannot be added without tests.
- *
- * Caveat: `semgrep --test` ignores each rule's `paths:` include/exclude globs,
- * so these tests validate patterns only, never path scoping.
+ * Runs the annotated unit tests for the custom rules in .semgrep.yml, one invocation
+ * per test file: `--config=<file> <directory>` crashes in semgrep 1.157, and only a
+ * file target runs every rule in the config. Fails when a rule has no annotations
+ * anywhere. `semgrep --test` ignores `paths:` globs, so it validates patterns only.
  */
 
 import { spawn } from 'node:child_process';
@@ -29,7 +16,6 @@ const configPath = join(repoRoot, '.semgrep.yml');
 const testsDir = join(repoRoot, '.semgrep', 'rule-tests');
 const CONCURRENCY = 4;
 
-/** Rule ids declared in .semgrep.yml, in file order. */
 function declaredRuleIds() {
   const yaml = readFileSync(configPath, 'utf8');
   return [...yaml.matchAll(/^\s*-\s+id:\s*(\S+)\s*$/gm)].map(m => m[1]);
@@ -69,7 +55,6 @@ function runSemgrepTest(file) {
   });
 }
 
-/** Flattens semgrep's nested --test --json shape into per-rule check records. */
 function extractChecks(parsed) {
   const checks = [];
   for (const configResult of Object.values(parsed.results ?? {})) {

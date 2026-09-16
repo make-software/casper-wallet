@@ -74,8 +74,7 @@ export const SignWithLedgerInNewWindowPage = () => {
   const activeNetworkSetting = useSelector(selectActiveNetworkSetting);
   const network = getCasperNetwork(activeNetworkSetting);
   const [isSuccess, setIsSuccess] = useState(false);
-  // Non-null once a submission has failed for a reason the device cannot show. Ledger failures
-  // are left to `LedgerConnectionView`, which renders them from the status channel.
+  // Non-null once a submission has failed for a reason the device cannot show.
   const [failure, setFailure] = useState<{
     header: string;
     content: string;

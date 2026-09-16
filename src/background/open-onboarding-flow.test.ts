@@ -30,8 +30,6 @@ describe('syncOnboardingFlow', () => {
     expect(storage.local.remove).toHaveBeenCalled();
   });
 
-  // An empty string, never `null`: `null` restores the manifest's `default_popup`, which is
-  // the popup this call exists to get out of the way.
   it('detaches the manifest default while onboarding is unfinished', async () => {
     await syncOnboardingFlow(false);
 

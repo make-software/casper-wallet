@@ -13,9 +13,8 @@ type Language = Lang | string;
 const languageDetector = {
   name: 'customLanguageDetector',
   lookup(options: { lookupLocalStorage: string }) {
-    let result: Language = Lang.EN; // default language. Used as fallback.
+    let result: Language = Lang.EN;
 
-    // check if language previously stored in localStorage
     if (options.lookupLocalStorage && localStorageAvailable()) {
       const lng = window.localStorage.getItem(options.lookupLocalStorage);
       if (lng) {
@@ -23,8 +22,6 @@ const languageDetector = {
       }
     }
 
-    // if not found in localStorage, then check userAgent and try to found in
-    // the list of available languages
     if (navigatorAvailable() && window.navigator.language !== undefined) {
       if (ActiveLanguages.includes(window.navigator.language as Lang)) {
         result = window.navigator.language;

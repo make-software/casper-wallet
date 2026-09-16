@@ -36,7 +36,6 @@ const TokenIcon = ({ row }: { row: ISwapAmountRow }) => (
   <DexTokenIcon icon={row.icon} symbol={row.symbol} />
 );
 
-/** The right-hand mark of a progress row: spinning while it runs, then a check or an error mark. */
 const ProgressStatusIndicator = ({
   status
 }: {

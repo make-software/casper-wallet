@@ -18,7 +18,6 @@ import {
 import { Button } from '@libs/ui/components';
 import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 
-// Design of this page is temporary. Should be changed after it will be done in Figma
 const TabFooterContainer = styled(TabFooterContainerBase)`
   margin-top: 0;
 `;

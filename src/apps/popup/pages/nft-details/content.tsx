@@ -65,8 +65,7 @@ const AudioNftContainer = styled(CenteredFlexRow)`
 `;
 
 // Without an explicit width this column shrink-to-fits the 120px placeholder icon,
-// which collapses the player's `width: 100%` to 120px — narrow enough that the
-// browser drops the seek bar and timestamp from the native controls.
+// collapsing the player's `width: 100%` and dropping the native seek bar.
 const AudioNftWrapper = styled(CenteredFlexColumn)`
   width: 100%;
 `;
@@ -99,22 +98,13 @@ const ButtonContainer = styled(CenteredFlexColumn)<{ disabled: boolean }>`
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 `;
 
-// NFT video previews are arbitrary third-party media with no caption track
-// available, so this player is intentionally rendered without one.
-//
-// A plain <video> rather than react-player: the only sources that reach this
-// branch are ones deriveNftMediaType resolved to a `video/*` content type (it
-// returns 'unknown' for anything else, which renders EmptyMediaPlaceholder
-// instead). An HLS or DASH manifest is served as application/vnd.apple.mpegurl
-// or application/dash+xml, and an embed page as text/html, so react-player's
-// streaming and oEmbed players — dashjs, hls.js and @mux/mux-player-react,
-// 1.8 MB of the package between them — were unreachable here (WALLET-1380).
+// Third-party media with no caption track available, so no <track>; only video/*
+// reaches this branch, so a streaming player would add ~1.8 MB for nothing.
 const VideoPlayer = styled.video`
   max-width: 312px;
   max-height: 312px;
 `;
 
-// Half volume, as react-player was configured to play these at.
 const PREVIEW_VOLUME = 0.5;
 
 interface NftDetailsContentProps {

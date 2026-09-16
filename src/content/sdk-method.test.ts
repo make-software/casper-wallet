@@ -1,15 +1,7 @@
 /**
- * Wire-contract freeze test (DEP-99 / WALLET-1343, Task 1.3).
- *
  * These `.type` strings are the external contract that dapps and
- * `@bringweb3/chrome-extension-kit` match literally. This test pins every
- * value verbatim so any accidental drift (in this PR's SDK plumbing or a
- * future refactor) fails loudly.
- *
- * None of the modules under test touch DOM/`window` at import time (they
- * only import `@reduxjs/toolkit` + local types), so a plain top-level
- * import works under `testEnvironment: 'node'` — no window/document stub
- * needed here.
+ * `@bringweb3/chrome-extension-kit` match literally; this test pins every value
+ * verbatim so drift fails loudly.
  */
 import { bringWeb3Events } from '@background/bring-web3-events';
 
@@ -218,8 +210,8 @@ describe('sdkEvent', () => {
     expect(sdkEvent.disconnectedAccountEvent.type).toBe(
       'disconnectedAccountEvent'
     );
-    // NOTE key/type mismatch — freeze it as-is: key is `changedTab`, wire
-    // string is `changedTabEvent`.
+    // key/type mismatch, frozen as-is: the key is `changedTab`, the wire string
+    // is `changedTabEvent`.
     expect(sdkEvent.changedTab.type).toBe('changedTabEvent');
     expect(sdkEvent.changedConnectedAccountEvent.type).toBe(
       'changedConnectedAccountEvent'

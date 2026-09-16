@@ -49,8 +49,7 @@ describe('LedgerEventStatus', () => {
     });
   });
 
-  // The waiting screen is still rendered by the error view, so it has to keep
-  // reporting as one — only its copy and its footer differ.
+  // The waiting screen is still rendered by the error view, so it has to report as one.
   it('keeps a locked device on the path that renders its copy', () => {
     expect(isLedgerError({ status: LedgerEventStatus.DeviceLocked })).toBe(
       true

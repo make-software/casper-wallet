@@ -16,13 +16,10 @@ interface HomeTabContextValue {
 const HomeTabContext = createContext<HomeTabContextValue | null>(null);
 
 /**
- * Owns the active Home tab for the lifetime of the popup session.
- *
- * Deliberately ephemeral: it is destroyed when the popup closes (and when the
- * vault locks), so reopening always starts on Tokens. The tab must not travel
- * in react-router `location.state` — state is bound to a history entry, so a
- * later `navigate(-1)` would restore whatever tab was intended when that entry
- * was created rather than the tab the user actually left (WALLET-1360).
+ * Owns the active Home tab for the lifetime of the popup session — deliberately
+ * ephemeral, so reopening always starts on Tokens. The tab must not travel in
+ * react-router `location.state`: state is bound to a history entry, so `navigate(-1)`
+ * would restore the tab intended when that entry was created, not the one left.
  */
 export const HomeTabProvider = ({ children }: { children: ReactNode }) => {
   const [activeHomeTab, setActiveHomeTab] = useState<HomePageTabName>(

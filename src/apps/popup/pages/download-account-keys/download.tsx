@@ -64,9 +64,7 @@ export const Download = ({
 
   const toggleAccount = (account: AccountListRows) => {
     setSelectedAccounts(prevAccounts => {
-      // check if the account is already selected
       const foundIndex = prevAccounts.findIndex(acc => acc.id === account.id);
-      // if not selected yet, add to list, otherwise remove
       if (foundIndex === -1) {
         return [...prevAccounts, account];
       } else {

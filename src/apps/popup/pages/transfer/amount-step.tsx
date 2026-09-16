@@ -214,7 +214,6 @@ export const AmountStep = ({
             {...register('transferIdMemo')}
             disabled={disabled}
             onChange={e => {
-              // replace all non-numeric characters
               e.target.value = e.target.value.replace(/[^0-9]/g, '');
               onChangeTransferIdMemo(e);
               setTransferIdMemo(e.target.value);

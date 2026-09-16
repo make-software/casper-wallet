@@ -12,9 +12,6 @@ import {
   isValidPublicKey
 } from './utils';
 
-// Splits a `directive value; directive value` policy string into a
-// { directiveName: value } map. Tolerant of a trailing semicolon, repeated
-// whitespace inside a directive, and a directive with no value.
 const parseCspDirectives = (policy: string): Record<string, string> =>
   Object.fromEntries(
     policy
@@ -74,8 +71,7 @@ describe('isBundledAssetPath', () => {
       isBundledAssetPath('https://casper-assets.s3.amazonaws.com/a.svg')
     ).toBe(false);
     expect(isBundledAssetPath('http://example.com/a.svg')).toBe(false);
-    // hasHttpPrefix is case-sensitive; this predicate must not inherit that gap,
-    // because whatever it rejects is what stays out of react-inlinesvg.
+    // hasHttpPrefix is case-sensitive; this predicate must not inherit that gap.
     expect(isBundledAssetPath('HTTPS://example.com/a.svg')).toBe(false);
     expect(isBundledAssetPath('//example.com/a.svg')).toBe(false);
   });
@@ -98,10 +94,8 @@ describe('isBundledAssetPath', () => {
     expect(isBundledAssetPath('  assets/icons/a.svg')).toBe(false);
   });
 
-  // The prefix is the easy half. These all START with a legitimate `assets/`,
-  // so a `^/?assets/` test accepts every one of them — and react-inlinesvg
-  // inlines any string containing `<svg` verbatim, with no fetch and therefore
-  // no connect-src gate, on the signing screens AccountInfoIcon renders in.
+  // These all START with a legitimate `assets/`, so a `^/?assets/` test accepts
+  // every one — and react-inlinesvg inlines any string containing `<svg` verbatim.
   it('rejects markup smuggled into the remainder of a valid prefix', () => {
     expect(isBundledAssetPath('assets/<svg onload=1></svg>')).toBe(false);
     expect(
@@ -114,10 +108,8 @@ describe('isBundledAssetPath', () => {
     expect(isBundledAssetPath('assets/../../etc/passwd')).toBe(false);
   });
 
-  // Guards the other direction: a rejected bundled path falls through to
-  // RemoteIcon, which renders it as <img> and so loses SvgIcon's
-  // fill="currentColor" pass — the icon still appears but stops following the
-  // theme, which no other test would catch.
+  // The other direction: a rejected bundled path falls through to RemoteIcon's
+  // <img>, losing the fill="currentColor" pass, so the icon stops following the theme.
   it('stays permissive enough for asset shapes webpack may emit later', () => {
     expect(isBundledAssetPath('assets/icons/icon.min.svg')).toBe(true);
     expect(isBundledAssetPath('assets/images/logo.png')).toBe(true);
@@ -128,9 +120,7 @@ describe('isBundledAssetPath', () => {
 describe('getSafariCspContent', () => {
   it('pins the script-src token set Safari enforces', () => {
     // Deliberate: Safari inherits 'wasm-unsafe-eval' from the shared
-    // baseDirectives (libsodium compiles WebAssembly). Before the CSP was
-    // single-sourced Safari had 'self' only, so this assertion is the record
-    // of that change and the guard against the next silent one.
+    // baseDirectives (libsodium compiles WebAssembly).
     const scriptSrcDirective = getSafariCspContent()
       .split('; ')
       .find(directive => directive.startsWith('script-src '));
@@ -144,26 +134,8 @@ describe('getSafariCspContent', () => {
   });
 
   it('pins every directive by exact value, including the full connect-src host list', () => {
-    // Parsed into a { directive: value } map and compared whole against
-    // literals below. That closes two gaps `toContain` and a self-import
-    // left open: `toContain("default-src 'none'")` still matches
-    // "default-src 'none' https:", so widening a directive stayed green; and
-    // a directive with no assertion at all (or a newly appended one) was
-    // matched by nothing. A map diff catches a widened, narrowed, removed,
-    // or newly appended directive alike.
-    //
-    // The connect-src host list is intentionally hand-written here rather
-    // than read from `cspConfig.connectSrc` (src/csp.json) — comparing
-    // csp.json against itself proves nothing about its contents, only that
-    // getSafariCspContent() assembles the string getSafariCspContent()
-    // assembles. src/csp.json now single-sources this list into the Chrome
-    // manifest, the Firefox manifest, and this Safari <meta> tag, which is
-    // exactly why pinning its actual contents (not its own echo) matters.
-    //
-    // Trade-off: every legitimate host addition or removal in src/csp.json
-    // now also requires editing the literal below. That is the intended
-    // effect, not an accident — it forces a host-list change through review
-    // instead of silently widening (or breaking) all three CSP targets.
+    // The connect-src hosts are hand-written rather than read from src/csp.json:
+    // comparing that file against itself proves nothing.
     const directives = parseCspDirectives(getSafariCspContent());
 
     expect(directives).toEqual({
@@ -205,16 +177,9 @@ describe('getSafariCspContent', () => {
 });
 
 /**
- * The slice of the DOM `setCSPForSafari` touches, and nothing else:
- * `querySelector`, `createElement`, and `getElementsByTagName('head')[0]
- * .appendChild`. Hand-built rather than jsdom-backed — jsdom is not a
- * dependency of this repo, and one function is not worth the tree.
- *
- * `querySelector` implements the single `[http-equiv]` selector for real (it
- * scans head for an element carrying that attribute) instead of returning a
- * canned value, so the early-out branch is decided by the state of the stub
- * head rather than by the test. Any other selector throws: reaching one means
- * the function changed and this stub no longer models what it does.
+ * The slice of the DOM `setCSPForSafari` touches, hand-built because jsdom is
+ * not a dependency here. `querySelector` implements `[http-equiv]` for real, so
+ * the early-out is decided by the stub head, not the test; anything else throws.
  */
 interface StubElement {
   tagName: string;
@@ -267,10 +232,8 @@ const createStubDocument = (initialHeadChildren: StubElement[] = []) => {
   };
 };
 
-// isSafariBuild is frozen at module load from process.env.BROWSER, so the build
-// flavour cannot be flipped per test — each one has to be evaluated under the
-// env it is about. Loaded once per flavour here rather than per test because
-// re-evaluating this module also re-evaluates casper-js-sdk.
+// isSafariBuild is frozen at module load from process.env.BROWSER. Loaded once
+// per flavour because re-evaluating this module re-evaluates casper-js-sdk.
 const loadUtilsForBrowser = (browser: Browser): typeof import('./utils') => {
   const previousBrowser = process.env.BROWSER;
 
@@ -279,8 +242,7 @@ const loadUtilsForBrowser = (browser: Browser): typeof import('./utils') => {
   let loaded: typeof import('./utils') | undefined;
 
   jest.isolateModules(() => {
-    // A static import is hoisted above the env assignment above, which is the
-    // one thing this must not do.
+    // A static import would hoist above the env assignment above.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     loaded = require('./utils');
   });
@@ -328,9 +290,8 @@ describe('setCSPForSafari', () => {
 
     expect(meta.tagName).toBe('meta');
     expect(meta.getAttribute('http-equiv')).toBe('Content-Security-Policy');
-    // Compared against the shared builder rather than a literal: what the
-    // policy should say is pinned by the getSafariCspContent suite above, and
-    // what this asserts is that the very same string reaches the document.
+    // Compared against the shared builder: what the policy should say is pinned
+    // by the getSafariCspContent suite above.
     expect(meta.getAttribute('content')).toBe(
       safariUtils.getSafariCspContent()
     );
@@ -345,11 +306,8 @@ describe('setCSPForSafari', () => {
     expect(stubDocument.head.children).toHaveLength(1);
   });
 
-  // The guard is on `[http-equiv]`, not on `[http-equiv="Content-Security-
-  // Policy"]`, so ANY http-equiv meta in a page template suppresses the only
-  // CSP a Safari build gets, silently and with the suite still green. None of
-  // the five index.html templates carries one today; this test is here so that
-  // the day one does, the consequence is written down rather than discovered.
+  // The guard is on `[http-equiv]`, not on the Content-Security-Policy one, so
+  // ANY http-equiv meta in a page template suppresses Safari's only CSP.
   it('appends nothing when the document already carries any http-equiv meta', () => {
     const unrelatedMeta = createStubElement('meta', {
       'http-equiv': 'refresh',
@@ -376,11 +334,8 @@ describe('setCSPForSafari', () => {
   );
 });
 
-// Gates every recipient address the user can type. WALLET-1381 changed how it
-// decides — `PublicKey.fromHex` throwing, versus casper-wallet-core's SDK-free
-// derivation throwing — so the boundaries of the accept set are pinned here: a
-// looser one sends funds to an unresolvable address, a tighter one rejects
-// valid keys.
+// Gates every recipient address the user can type, so the boundaries of the
+// accept set are pinned: a looser one sends funds to an unresolvable address.
 describe('isValidPublicKey', () => {
   const ED25519 =
     '0125c4ffb9cc43f8211f9f5917f1eb941ccd0a8aec086154b046d4dbd290c476c5';
@@ -411,16 +366,13 @@ describe('isValidPublicKey', () => {
 
   it('accepts a well-formed SECP256K1 key that is not on the curve', () => {
     // Matches casper-js-sdk: `PublicKey.fromHex` validates shape, not curve
-    // membership. Recorded so tightening it stays a decision rather than a
-    // surprise — it would start rejecting input the wallet accepts today.
+    // membership.
     expect(isValidPublicKey('02' + '02' + '00'.repeat(32))).toBe(true);
   });
 });
 
-// setCSPForSafari only protects the documents that call it, and the call is a
-// single line inside each app's root component — easy to drop in a refactor and
-// easy to forget in a new app. The entries are enumerated from disk rather than
-// listed here so that a sixth app is covered the day it is added.
+// setCSPForSafari only protects the documents that call it, one line in each
+// app root. Entries come from disk so a sixth app is covered the day it lands.
 describe('app entrypoints', () => {
   const appsDir = path.resolve(__dirname, 'apps');
   const apps = fs
@@ -430,8 +382,8 @@ describe('app entrypoints', () => {
     .filter(app => fs.existsSync(path.join(appsDir, app, 'index.tsx')));
 
   it('all five are discovered', () => {
-    // A rename that left the scan above matching nothing would otherwise turn
-    // the assertions below into a silent no-op.
+    // A rename that left the scan above matching nothing would make the
+    // assertions below a silent no-op.
     expect(apps.length).toBe(5);
   });
 

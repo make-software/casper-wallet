@@ -24,16 +24,13 @@ export const useFetchCsprNameExpirations = (): void => {
   useQuery({
     queryKey: ['CSPR_NAME_EXPIRATIONS', accountPublicKeys.toString(), network],
     enabled: accountPublicKeys.length > 0,
-    // Fetch once per popup session per network: staleTime keeps the cached
-    // result fresh and refetchInterval:false overrides the query client's
-    // 3-minute polling default so this does not re-run while Home is mounted.
+    // Fetch once per popup session per network: refetchInterval:false overrides
+    // the query client's 3-minute polling default.
     staleTime: Infinity,
     refetchInterval: false,
     queryFn: async () => {
       try {
-        // Reuses the ACCOUNT_INFO cache entry populated by
-        // `useFetchAccountsInfo` on the same screen; fetches only on a miss,
-        // and a concurrent in-flight request with the same key is deduped.
+        // Reuses the ACCOUNT_INFO cache entry `useFetchAccountsInfo` fills.
         const accountsInfo = await queryClient.ensureQueryData(
           getAccountsInfoQueryOptions(accountPublicKeys, networkSetting)
         );
@@ -53,9 +50,8 @@ export const useFetchCsprNameExpirations = (): void => {
 
         return expirations;
       } catch (error) {
-        // The query error is consumed nowhere (no retry, no polling), so log
-        // it here — otherwise a failed fetch leaves the banner silently
-        // hidden for the whole popup session with nothing to debug from.
+        // The query error is consumed nowhere, so a failed fetch would hide the
+        // banner for the whole popup session with nothing to debug from.
         console.error(error);
 
         throw error;

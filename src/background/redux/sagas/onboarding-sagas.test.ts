@@ -43,9 +43,8 @@ const rootReducer = combineReducers({
 });
 
 /**
- * The two puts are broadcast separately, so the state between them is a state
- * the onboarding tab renders. `keys && !session` is indistinguishable from a
- * locked vault and would flash the locked screen over the create-password page.
+ * The two puts are broadcast separately, so `keys && !session` between them is
+ * indistinguishable from a locked vault and would flash the locked screen.
  */
 it('never leaves keys visible without a session while creating them', async () => {
   const seenRoutingStates: Array<{
@@ -79,19 +78,16 @@ it('never leaves keys visible without a session while creating them', async () =
 });
 
 /**
- * spec §8.3 — cancel-then-clear on wallet reset. The resets and
- * `storage.local.clear()` must complete synchronously inside the saga, before
- * anything the saga does not await (delivery, `windows.remove`, the session
- * mirror clear) has a chance to run — a slow or rejecting delivery must never
- * hold up the reset itself.
+ * The resets and `storage.local.clear()` must complete synchronously, before
+ * anything the saga does not await (delivery, `windows.remove`, mirror clear)
+ * has a chance to run.
  */
-describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', () => {
+describe('resetVaultSaga (cancel-then-clear on wallet reset)', () => {
   const openRequest = {
     status: 'open' as const,
     tabId: 3,
-    // Present in the fixture so a dropped-frameId pass-through fails a test:
-    // an omitted `frameId` resumes the unscoped broadcast
-    // (`deliver-via-origin`'s sub-frame refusal keys on `frameId != null`).
+    // Present in the fixture so a dropped-frameId pass-through fails a test: an
+    // omitted `frameId` resumes the unscoped broadcast.
     frameId: 5,
     origin: 'https://dapp',
     method: 'sign' as const,
@@ -152,25 +148,11 @@ describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', ()
     expect(storage.local.clear).toHaveBeenCalled();
   });
 
-  // `expectSaga(...).silentRun(50)` above only pins that the resets and
-  // `storage.local.clear()` complete WITHIN 50ms of the dispatch — it would
-  // stay green even if a `yield delay(0)` (or any other awaited effect) were
-  // inserted ABOVE the first reset `put`, because 0ms/near-0ms async work
-  // still resolves well inside a 50ms window. That is exactly the Firefox/
-  // Safari regression spec §8.3 describes: on those targets the UI's
-  // `.then(() => closeWindowByReloadExtension())` — `runtime.reload()` — races
-  // the FIRST microtask/macrotask boundary after `store.dispatch(resetVault())`
-  // returns, not a 50ms deadline. Only a real store + real saga middleware,
-  // asserted on the very next synchronous line with no `await`, proves the
-  // resets land inside the same synchronous flush as the dispatch call itself
-  // (redux-saga drains `put`/`select` effects synchronously at semaphore 0,
-  // before yielding back to the caller of `dispatch`).
+  // `silentRun(50)` above would stay green with a `yield delay(0)` inserted; only
+  // a real store asserted on the next synchronous line pins the flush ordering.
   it('lands every reset and storage.local.clear() SYNCHRONOUSLY inside store.dispatch(resetVault()) — before window removal or the mirror clear, which never resolve, could ever run', () => {
-    // Resolved, not never-resolving: the CALL below is what pins the snapshot
-    // ordering (see the next assertion), and it happens synchronously either
-    // way — this only changes what the promise does afterward, which this
-    // test does not care about. `windows.remove` / `clearRequestSession` stay
-    // never-resolving; they are what proves this saga does not wait on them.
+    // Resolved, not never-resolving: the CALL is what pins the snapshot ordering.
+    // `windows.remove` / `clearRequestSession` prove the saga does not wait on them.
     (deliverCancelResponse as jest.Mock).mockResolvedValue(1);
     (windows.remove as jest.Mock).mockReturnValue(new Promise(() => {}));
     (clearRequestSession as jest.Mock).mockReturnValue(new Promise(() => {}));
@@ -201,11 +183,8 @@ describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', ()
       exportKeysWindowId: null,
       requests: {}
     });
-    // Pins that `select(selectOpenRequests)` ran BEFORE the resets: the call
-    // (not its resolution — that's still pending, deliberately) already
-    // carries the PRE-reset row. If the select ran after
-    // `windowManagementReseted()` instead, `openRequests` would be empty and
-    // this would never be called at all.
+    // Pins that `select(selectOpenRequests)` ran BEFORE the resets: after them
+    // `openRequests` would be empty and this would never be called at all.
     expect(deliverCancelResponse).toHaveBeenCalledWith(
       expect.objectContaining({ requestId: 'r1' }),
       'resetVaultSaga'
@@ -220,9 +199,8 @@ describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', ()
       .dispatch(resetVault())
       .silentRun(50);
 
-    // Not just a partial `objectContaining` that omits `frameId`: an
-    // omitted field here would still pass a check that doesn't name it, even
-    // though the row silently lost its frame scoping on the way through.
+    // Not a partial `objectContaining` that omits `frameId`: a row that silently
+    // lost its frame scoping would still pass a check that doesn't name it.
     expect(deliverCancelResponse).toHaveBeenCalledWith(
       expect.objectContaining({
         requestId: 'r1',
@@ -301,9 +279,8 @@ describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', ()
     const [, , loggedError] = consoleError.mock.calls.find(
       ([message]) => message === 'resetVaultSaga: cancel delivery rejected'
     )!;
-    // Pins that the argument is `redactUrlQuery`'s output, not the raw
-    // rejection: a raw `Error` would fail the type check, and an
-    // un-redacted string would still carry the `?...=` query.
+    // Pins that the argument is `redactUrlQuery`'s output: a raw `Error` fails the
+    // first check, an un-redacted string still carries the `?...=` query.
     expect(loggedError).not.toBeInstanceOf(Error);
     expect(loggedError).not.toMatch(/\?[^"]*=/);
     consoleError.mockRestore();
@@ -325,11 +302,8 @@ describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', ()
     await Promise.resolve();
     await Promise.resolve();
 
-    // The descriptors and the mirror are already gone by the time this fires
-    // — nothing else will ever find this window again, so it must not stay
-    // console-only. The ordering invariant (resets land before this) still
-    // holds: `windowManagementReseted` landed before this rejecting `put`
-    // could even have been effect-scheduled.
+    // The descriptors and the mirror are already gone by the time this fires, so
+    // nothing else will ever find this window again: it must not stay console-only.
     expect(countPutsOfType(allEffects, windowManagementReseted.type)).toBe(1);
     expect(countPutsOfType(allEffects, sagaError.type)).toBe(1);
     expect(consoleError).toHaveBeenCalledWith(
@@ -411,10 +385,8 @@ describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', ()
       .dispatch(resetVault())
       .silentRun(50);
 
-    // Neither is a request, so `selectOpenRequests` alone would miss both:
-    // the shared approval window would never close, and the export-keys
-    // window's single-window guard would stay defeated for the rest of the
-    // service worker's life.
+    // Neither is a request, so `selectOpenRequests` alone would miss both — the
+    // approval window would never close and the export-keys guard would stay off.
     expect(windows.remove).toHaveBeenCalledTimes(2);
     expect(windows.remove).toHaveBeenCalledWith(7);
     expect(windows.remove).toHaveBeenCalledWith(8);
@@ -462,10 +434,8 @@ describe('resetVaultSaga (spec §8.3 — cancel-then-clear on wallet reset)', ()
       .silentRun(50);
 
     expect(deliverCancelResponse).toHaveBeenCalledTimes(2);
-    // 42 appears in both r1 and r2: removed once. 43 is the origin: excluded
-    // even though it names a request window. 44 (windowId) and 45
-    // (exportKeysWindowId) are added from the widened snapshot. Three calls
-    // total — {42, 44, 45} — not four and not five.
+    // 42 is shared by r1 and r2, 43 is the excluded origin, 44 and 45 come from
+    // the widened snapshot: {42, 44, 45}, not four and not five.
     expect(windows.remove).toHaveBeenCalledTimes(3);
     expect(windows.remove).toHaveBeenCalledWith(42);
     expect(windows.remove).toHaveBeenCalledWith(44);

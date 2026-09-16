@@ -49,9 +49,8 @@ it('found request → marks responded, surfaces sagaError, delivers the method-c
       type: 'appEvents/sagaError',
       payload: expect.objectContaining({
         source: 'open-window-failed',
-        // Pins the delivered arm's TEXT. The banner renders it verbatim, and
-        // the other arm tells the user the site may still be waiting — so
-        // collapsing this ternary either way must fail a test.
+        // Pins the delivered arm's TEXT: the banner renders it verbatim, and the
+        // other arm tells the user the site may still be waiting.
         message: expect.stringContaining('the request was cancelled')
       })
     })
@@ -89,9 +88,8 @@ it('tabs.sendMessage rejects → falls back to deliverViaOrigin', async () => {
 });
 
 it('both delivery routes fail → the banner says the site was not told', async () => {
-  // The tombstone is already written by then, and `sdk-response-to-tab` drops
-  // anything that arrives later, so this is terminal: the dapp got nothing and
-  // will hang. Telling the user "the request was cancelled" is then wrong.
+  // The tombstone is already written and anything arriving later is dropped, so
+  // this is terminal: "the request was cancelled" would be wrong.
   (tabs.sendMessage as jest.Mock).mockRejectedValue(new Error('tab gone'));
   (deliverViaOrigin as jest.Mock).mockResolvedValue(0);
   const dispatch = jest.fn();
@@ -294,12 +292,8 @@ describe('policy parameter (source)', () => {
     expect(dispatch).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'appEvents/sagaError' })
     );
-    // The `sendMessage` rejection above also logs its OWN unconditional
-    // `${source}: cancel delivery failed` at error level, before the
-    // delivered-ternary log this test is actually about — a loose
-    // `stringContaining(source)` match is satisfied by that first, unrelated
-    // call and stays blind to the ternary collapsing to unconditional `warn`.
-    // Pin the exact message the ternary produces, and that `warn` is untouched.
+    // The `sendMessage` rejection above logs its own error line first, so a loose
+    // `stringContaining(source)` match would pass with the ternary collapsed to `warn`.
     expect(consoleError).toHaveBeenCalledWith(
       expect.stringContaining('cancelled an orphaned request'),
       expect.anything()
@@ -311,12 +305,8 @@ describe('policy parameter (source)', () => {
 });
 
 it('never logs a raw URL or a raw Error — only redacted identifiers appear across any log line', async () => {
-  // The rejection itself echoes the URL back, the way a real `tabs.sendMessage`
-  // rejection can (`Could not establish connection` etc. sometimes quote the
-  // target). If the vehicle ever logs this Error object directly instead of
-  // `redactUrlQuery(error)`, `JSON.stringify` on a bare Error argument would
-  // render `{}` and hide the leak from a whole-array serialization — so this
-  // walks each logged argument individually instead.
+  // The rejection echoes the URL back, the way a real `tabs.sendMessage` rejection
+  // can, and a bare Error stringifies to `{}` — so each argument is walked singly.
   (tabs.sendMessage as jest.Mock).mockRejectedValue(
     new Error('tab gone: https://dapp/page?message=super-secret&x=1')
   );
@@ -340,12 +330,8 @@ it('never logs a raw URL or a raw Error — only redacted identifiers appear acr
       // rejection embedded, un-redacted, past this check entirely.
       expect(arg).not.toBeInstanceOf(Error);
 
-      // `JSON.stringify` alone would miss a surgical revert of
-      // `error: redactUrlQuery(error)` back to `error: error` inside the
-      // object argument: `Error#message` is a non-enumerable own property, so
-      // stringifying a raw Error renders `{}` and the secret text check below
-      // would pass right past it. Walk every object argument's own values
-      // directly instead of trusting the serialization to surface them.
+      // `Error#message` is non-enumerable, so a raw Error nested in an object
+      // argument renders `{}` and the secret-text check below would miss it.
       if (typeof arg === 'object' && arg != null) {
         for (const value of Object.values(arg)) {
           expect(value).not.toBeInstanceOf(Error);

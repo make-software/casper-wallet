@@ -9,8 +9,7 @@ import type { LedgerEventStatus } from 'casper-wallet-core';
 import { TOKEN_DISPLAY_DECIMALS } from 'casper-wallet-core/src/domain/constants/config';
 import { IDexToken } from 'casper-wallet-core/src/domain/swap';
 
-// Deep paths: the layout barrel reaches webextension-polyfill, which throws under the node-only
-// jest environment this module's tests run in, and the ledger barrel reaches its transports.
+// Deep paths: these barrels reach modules that throw under the node-only jest environment.
 import type { NavLinkTokenBalance } from '@libs/layout/header/nav-link-balance';
 import { getCoreErrorCopy } from '@libs/services/core-errors';
 import { ledgerErrorsData } from '@libs/services/ledger/errors';
@@ -37,7 +36,6 @@ export const getPreviousSwapStep = (step: SwapSteps): SwapSteps | null => {
   }
 };
 
-/** One leg of the swap, as the confirm screen's first card renders it. */
 export interface ISwapAmountRow {
   id: 'pay' | 'receive';
   label: string;
@@ -47,19 +45,17 @@ export interface ISwapAmountRow {
   fiat: string | null;
 }
 
-/** One key/value line of the confirm screen's details card. */
 export interface ISwapDetailRow {
   id: 'rate' | 'priceImpact' | 'fee' | 'networkCost';
   text: string;
   value: string;
 }
 
-/** One leg of the running flow, as the confirm screen renders it while submitting. */
 export interface ISwapProgressRow {
   id: 'approval' | 'swap' | 'wrap';
   text: string;
   status: TransactionStatus;
-  /** A short note under the row — "Not needed", or the leg's error. `null` when there is none. */
+  /** "Not needed", or the leg's error. */
   hint: string | null;
 }
 
@@ -110,11 +106,7 @@ export const buildSwapAmountRows = (
   ];
 };
 
-/**
- * The three lines cspr.trade shows when reviewing a swap. A line whose value is unknown is left
- * out rather than shown empty. A wrap or unwrap has no rate, price impact or fee, so gas is all
- * it has to show.
- */
+/** A line whose value is unknown is left out; a wrap has no rate, impact or fee, so only gas. */
 export const buildSwapDetailRows = (
   review: ISwapReviewData,
   translate: (key: string) => string
@@ -158,10 +150,8 @@ const isLedgerEventStatus = (value: string): value is LedgerEventStatus =>
   Object.prototype.hasOwnProperty.call(ledgerErrorsData, value);
 
 /**
- * Wallet copy for a leg error, which core has already flattened to a string: a device status
- * enum, an `errors:*` key, or a node message. i18next runs here with `nsSeparator: false`, so
- * the first two would otherwise render verbatim; the third is shown as it arrived, being the
- * only text that says what the network actually objected to.
+ * Wallet copy for a leg error, which core has flattened to a string: a device status enum or an
+ * `errors:*` key (verbatim under i18next's `nsSeparator: false`), or a node message, shown as-is.
  */
 export const resolveLegErrorHint = (
   error: string | undefined,
@@ -204,10 +194,7 @@ export const buildSwapProgressRows = (
   }
 ];
 
-/**
- * The wrap flow's single leg, as the confirm screen renders it while submitting. Unlike a swap
- * it has no approval, and `IWrapFlowState` carries no direction, so the caller passes one in.
- */
+/** `IWrapFlowState` carries no direction, so the caller passes one in. */
 export const buildWrapProgressRows = (
   state: IWrapFlowState,
   direction: WrapDirection,
@@ -221,11 +208,7 @@ export const buildWrapProgressRows = (
   }
 ];
 
-/**
- * The pay leg's balance for the header, formatted like the amount cards. `null` until a token
- * is selected, so the header keeps its CSPR default rather than labelling a balance with no
- * symbol.
- */
+/** `null` until a token is selected, so the header keeps its CSPR default. */
 export const buildPayTokenBalance = (
   payToken: IDexToken | null,
   formattedBalance: string
@@ -240,7 +223,6 @@ export const buildPayTokenBalance = (
         symbol: payToken.symbol
       };
 
-/** What the form knows about the pay leg's affordability, from whichever hook drives it. */
 export interface ISwapBalanceFlags {
   isAmountEntered: boolean;
   hasInsufficientBalance: boolean;
@@ -250,10 +232,7 @@ export interface ISwapBalanceFlags {
 export type SwapBalanceBanner =
   'insufficientBalance' | 'insufficientCsprForFee';
 
-/**
- * The one affordability banner the form may show, or `null`. Both flags fire together when the
- * pay leg is CSPR, and the balance is the half the user can act on by lowering the amount.
- */
+/** Both flags fire together when the pay leg is CSPR; the balance is the actionable half. */
 export const resolveSwapBalanceBanner = ({
   isAmountEntered,
   hasInsufficientBalance,

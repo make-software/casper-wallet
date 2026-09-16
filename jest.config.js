@@ -11,9 +11,7 @@ module.exports = {
     '<rootDir>/node_modules/(?!(@lapo/asn1js|@noble/ciphers|@formatjs|intl-messageformat|casper-wallet-core|uuid|@ledgerhq/device-transport-kit-web-hid|@ledgerhq/device-transport-kit-web-ble)/)'
   ],
   // __CSP_NONCE__ is substituted by webpack's DefinePlugin, which never runs under
-  // jest. Without this the free variable would throw ReferenceError in any test that
-  // pulls in a module reading it; null matches both its declared type
-  // (src/@types/custom.d.ts) and what every non-Chrome-production build gets.
+  // jest; null matches its declared type and every non-Chrome-production build.
   globals: {
     __CSP_NONCE__: null
   },
@@ -46,14 +44,8 @@ module.exports = {
     '^@libs/(.*)$': '<rootDir>/src/libs/$1',
     '^@hooks/(.*)$': '<rootDir>/src/hooks/$1'
   },
-  // Coverage universe (DEP-16 → DEP-99/P8.2): reducers keep the global 100%
-  // gate; the background message handlers (the runtime security boundary) and
-  // the redux sagas are now enforced too, at realistic per-directory floors set
-  // to the coverage actually achieved (see coverageThreshold below). A file
-  // matched by a path-specific threshold group is checked against it and
-  // dropped from `global`; since reducers live under neither `handlers/` nor
-  // `sagas/`, they stay on the `global` 100 gate while handlers/sagas are held
-  // to their own overrides.
+  // A file matched by a path-specific threshold group is dropped from `global`;
+  // reducers match neither, so they stay on the `global` 100% gate.
   collectCoverageFrom: [
     'src/background/redux/**/reducer.ts',
     'src/background/handlers/**/*.ts',
@@ -77,19 +69,16 @@ module.exports = {
       lines: 100,
       statements: 100
     },
-    // Handlers (security boundary) — achieved ~95% stmts/lines, ~85% branch,
-    // 100% funcs. sdk-methods' repeated per-method "missing tab id" throws are
-    // intentionally not all exercised (full 100% of the 474-L router isn't a
-    // goal); the floor reflects reality without filler tests.
+    // Handlers (security boundary): sdk-methods' repeated per-method "missing tab
+    // id" throws are intentionally not all exercised, so the floor is below 100.
     './src/background/handlers/': {
       branches: 85,
       functions: 100,
       lines: 95,
       statements: 95
     },
-    // Sagas — vault-sagas is now broadly covered (account-derivation collision loop
-    // and all sagaError paths); onboarding/check-casper2-network/trusted-wasm remain untested.
-    // Floor set to achieved.
+    // Sagas — onboarding, check-casper2-network and trusted-wasm are untested;
+    // the floor is set to the coverage actually achieved.
     './src/background/redux/sagas/': {
       branches: 74,
       functions: 63,

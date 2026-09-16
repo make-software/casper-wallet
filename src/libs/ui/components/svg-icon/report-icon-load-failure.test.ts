@@ -23,8 +23,8 @@ describe('reportIconLoadFailure', () => {
     }
   });
 
-  // The dedupe set is module-level and therefore shared across this file, so
-  // every case below owns a src no other case uses.
+  // The dedupe set is module-level and shared across this file, so every case
+  // below owns a src no other case uses.
 
   it('reports the failed src and the reason behind it', () => {
     reportIconLoadFailure(
@@ -55,11 +55,8 @@ describe('reportIconLoadFailure', () => {
     expect(consoleError.mock.calls[1][0]).toContain('assets/icons/second.svg');
   });
 
-  // e2e-tests/fixtures.ts fails the run on any console line starting with
-  // '[SvgIcon]' — that gate belongs to assertLocalIconSrc, which catches a
-  // non-bundled src reaching this component. A failed fetch is not a policy
-  // violation, so this marker deliberately sits outside that prefix. Pinned
-  // here so a later rename cannot silently re-arm the gate.
+  // A failed fetch is not a policy violation, so the marker sits outside the
+  // '[SvgIcon]' prefix the e2e gate fails the run on.
   it('uses a marker the e2e violation gate does not match', () => {
     reportIconLoadFailure('assets/icons/marker.svg', new Error('Not found'));
 
@@ -69,8 +66,6 @@ describe('reportIconLoadFailure', () => {
     expect(message.startsWith('[SvgIcon]')).toBe(false);
   });
 
-  // Unlike assertLocalIconSrc, which is silent outside observed builds: this
-  // is a runtime failure that otherwise only ever happens on a user's machine.
   it('stays ungated by build, unlike assertLocalIconSrc', () => {
     process.env.NODE_ENV = 'production';
     delete process.env.TEST_ENV;

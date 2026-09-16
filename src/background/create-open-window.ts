@@ -44,13 +44,8 @@ export function getUrlByWindowApp(
   }
 }
 
-// Approval-window tracking, and therefore all three of these, is background-only.
-// The UI's only consumers (`useWindowManager` → account-list, navigation-menu)
-// both pass `isNewWindow: true`, which forces `id = null` below — so the reuse
-// branch and `clearWindowId` are unreachable from the UI, and the `!isNewWindow`
-// guard makes `setWindowId` unreachable too. Optional here rather than
-// no-op'd at the call site, so a UI caller cannot accidentally retarget the
-// shared approval slot.
+// Optional here rather than no-op'd at the call site, so a UI caller cannot
+// accidentally retarget the shared approval slot.
 interface CreateOpenWindowProps {
   windowId?: number | null;
   clearWindowId?: () => void;
@@ -63,7 +58,6 @@ export interface OpenWindowProps {
   searchParams?: WindowSearchParams;
 }
 
-// This function returns a window instance that was created or reused
 export function createOpenWindow({
   windowId = null,
   setWindowId,
@@ -85,8 +79,6 @@ export function createOpenWindow({
 
     return { window: await openNewWindow(), reused: false };
 
-    // helpers
-
     async function reuseExistingWindow(
       id: number
     ): Promise<Windows.Window | undefined> {
@@ -96,12 +88,10 @@ export function createOpenWindow({
       if (existingWindow) {
         const window = await windows.get(id, { populate: true });
         if (window?.id != null) {
-          // Bring popup window to the front
           await windows.update(window.id, {
             focused: true,
             drawAttention: true
           });
-          // update tab url
           const tab = window.tabs?.[0];
           if (tab?.id != null) {
             await tabs.update(tab.id, {
@@ -117,7 +107,6 @@ export function createOpenWindow({
 
     async function openNewWindow(): Promise<Windows.Window> {
       return windows.getCurrent().then(async currentWindow => {
-        // If this flag is true, we create a new window without any size and positions.
         const isTestEnv = Boolean(process.env.TEST_ENV);
 
         const windowWidth = currentWindow.width ?? 0;
@@ -127,9 +116,8 @@ export function createOpenWindow({
         const popupWidth = 360 + crossPlatformWidthOffset;
         const popupHeight = 700;
         const newWindow =
-          // We need this check for Firefox. If the Firefox browser is in fullscreen mode it ignores the width and height that we set and opens a popup in a small size.
-          // So we check it and if it is in a fullscreen mode we didn't set width and height, and the popup will also open in fullscreen mode.
-          // This is a default behavior for Safari and Chrome, but Firefox doesn't do this, so we need to do this manually for it.
+          // Firefox in fullscreen ignores the width and height we set and opens a
+          // small popup, so we omit them and let it open fullscreen as well.
           currentWindow.state === 'fullscreen' || isTestEnv
             ? windows.create({
                 url: getUrlByWindowApp(windowApp, searchParams),
@@ -147,10 +135,8 @@ export function createOpenWindow({
               });
 
         return newWindow.then(newWindow => {
-          // `isNewWindow` opens a deliberately SEPARATE window (import-account
-          // flows). Tracking it would retarget the shared approval slot: a
-          // later close of that separate window would clear the tracked id
-          // and a dapp approval could be cancelled by the wrong event.
+          // `isNewWindow` opens a deliberately SEPARATE window; tracking it would
+          // retarget the shared approval slot to the wrong window's close event.
           if (newWindow.id && !isNewWindow) {
             setWindowId?.(newWindow.id);
           }
@@ -170,7 +156,6 @@ export async function openNewSeparateWindow({
 }: IOpenNewSeparateWindowParams): Promise<Windows.Window> {
   const currentWindow = await windows.getCurrent();
 
-  // If this flag is true, we create a new window without any size and positions.
   const isTestEnv = Boolean(process.env.TEST_ENV);
 
   const windowWidth = currentWindow.width ?? 0;
@@ -180,9 +165,8 @@ export async function openNewSeparateWindow({
   const popupWidth = 360 + crossPlatformWidthOffset;
   const popupHeight = 800;
   const newWindow =
-    // We need this check for Firefox. If the Firefox browser is in fullscreen mode it ignores the width and height that we set and opens a popup in a small size.
-    // So we check it and if it is in a fullscreen mode we didn't set width and height, and the popup will also open in fullscreen mode.
-    // This is a default behavior for Safari and Chrome, but Firefox doesn't do this, so we need to do this manually for it.
+    // Firefox in fullscreen ignores the width and height we set and opens a
+    // small popup, so we omit them and let it open fullscreen as well.
     currentWindow.state === 'fullscreen' || isTestEnv
       ? await windows.create({
           url,

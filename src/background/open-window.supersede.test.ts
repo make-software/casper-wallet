@@ -13,14 +13,8 @@ import { CANCEL_GRACE_MS } from './handlers/cancel-requests';
 import { deliverViaOrigin } from './handlers/deliver-via-origin';
 import { openWindow } from './open-window';
 
-// This test wires the REAL windowManagement reducer and the REAL
-// cancel-requests module (only the browser surface is mocked) so it exercises
-// the actual invariant this task establishes: `openWindow` must dispatch the
-// supersede-cancel for the DISPLACED request before it attaches the INCOMING
-// one, so the incoming request can never appear in the cancel snapshot. A test
-// that mocks `./handlers/cancel-requests` wholesale (as `open-window.test.ts`
-// does, to test ONLY the store-routing wiring) cannot detect the two blocks
-// being swapped — this file exists specifically to catch that.
+// Wires the REAL reducer and cancel-requests module to catch the ordering
+// invariant: the displaced request is cancelled before the incoming attaches.
 jest.mock('webextension-polyfill', () => ({
   windows: {
     getAll: jest.fn(),
@@ -62,8 +56,7 @@ beforeEach(() => {
   (tabs.sendMessage as jest.Mock).mockResolvedValue(undefined);
   (deliverViaOrigin as jest.Mock).mockResolvedValue(0);
   // `openWindow`'s post-attach liveness check calls `windows.get`; default it
-  // to "still alive" since this test is about the supersede/attach ordering,
-  // not that check.
+  // to "still alive", since this test is about the supersede/attach ordering.
   (windows.get as jest.Mock).mockResolvedValue({ id: 7 });
 });
 
@@ -103,19 +96,17 @@ it('cancels the displaced request, not the incoming one, when a window is reused
     requestId: 'B'
   });
 
-  // Flush the `.then` microtask so `cancelRequestsDisplacedBy`'s synchronous
-  // work (the candidate snapshot + `windowDetachedFromRequests` dispatch) runs
-  // before the grace delay, then let the grace elapse and the cancel sends flush.
+  // Flush the `.then` microtask so the candidate snapshot is taken before the
+  // grace delay, then let the grace elapse and the cancel sends flush.
   await jest.advanceTimersByTimeAsync(0);
   await jest.advanceTimersByTimeAsync(CANCEL_GRACE_MS);
   await jest.advanceTimersByTimeAsync(0);
 
   const state = store.getState().windowManagement;
-  expect(state.requests.A?.status).toBe('responded'); // displaced one cancelled
-  expect(state.requests.B?.status).toBe('open'); // incoming one survives
-  expect((state.requests.B as any).windowIds).toEqual([7]); // and is attached
+  expect(state.requests.A?.status).toBe('responded');
+  expect(state.requests.B?.status).toBe('open');
+  expect((state.requests.B as any).windowIds).toEqual([7]);
 
-  // The cancel was actually delivered to A's tab, not B's.
   expect(tabs.sendMessage).toHaveBeenCalledWith(
     3,
     expect.objectContaining({ type: expect.stringContaining('Sign:Response') })

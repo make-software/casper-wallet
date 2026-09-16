@@ -24,10 +24,8 @@ export async function enableOnboardingFlow() {
 }
 
 /**
- * Points the toolbar icon at the flow the vault's state calls for. The manifest opens
- * `popup.html` by default, so an unfinished onboarding has to detach it explicitly: whatever
- * the icon does before this resolves is what the manifest says, and the store it reads from
- * only exists after a storage round-trip.
+ * Points the toolbar icon at the flow the vault's state calls for: the manifest
+ * opens `popup.html`, so an unfinished onboarding has to detach it explicitly.
  */
 export async function syncOnboardingFlow(isOnboardingCompleted: boolean) {
   return isOnboardingCompleted
@@ -44,7 +42,6 @@ export async function openOnboardingUi() {
       const tab = await tabs.get(tabId);
       if (tab != null) {
         tabExist = true;
-        // activate existing tab
         windows.update(windowId, { focused: true });
         tabs.update(tabId, { active: true });
       }
@@ -55,15 +52,9 @@ export async function openOnboardingUi() {
 
   // this needed for case when the user goes to another url from onboarding
   // and then click on Casper Wallet from the extension menu
-  const tab =
-    tabId != null &&
-    (await tabs.get(tabId).catch(() => {
-      // catch error if the tab does not exist
-    }));
-  // check if the tab URL is the onboarding URL
+  const tab = tabId != null && (await tabs.get(tabId).catch(() => {}));
   const isOnboardingUrl = tab && tab.url?.includes('onboarding.html');
 
-  // create a tab if it does not exist or if it's not an onboarding URL
   if (!tabExist || !isOnboardingUrl) {
     tabs
       .create({ url: 'onboarding.html', active: true })
@@ -83,7 +74,6 @@ async function loadState() {
     );
     return (state || {}) as OnboardingFlowState;
   } catch {
-    // reset on error
     localStorage.setItem(ONBOARDING_TAB_STATE_KEY, '{}');
     return {} as OnboardingFlowState;
   }

@@ -17,10 +17,8 @@ export interface SettingsState {
   systemColorScheme: 'dark' | 'light' | null;
   /**
    * Max swap slippage, in percent. Always inside [MIN_SLIPPAGE, MAX_SLIPPAGE] once set.
-   *
-   * Optional because this slice is hydrated from `storage.local` as `preloadedState`, which
-   * Redux does not merge with `initialState`: a vault written before swap existed reaches the
-   * selectors without it, and the `??` in `selectSwapSlippageSetting` is what supplies a value.
+   * Optional because `preloadedState` from `storage.local` is not merged with `initialState`:
+   * a vault written before swap existed arrives without it, and the selector supplies the default.
    */
   swapSlippage?: number;
   /** Swap transaction deadline, in minutes. See {@link SettingsState.swapSlippage}. */

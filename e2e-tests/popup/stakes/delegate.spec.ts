@@ -39,7 +39,6 @@ popup.describe('Popup UI: Delegation', () => {
 
       await popupPage.getByRole('button', { name: 'Next' }).click();
 
-      // Scroll to the bottom
       await popupPage.evaluate(() => {
         const container = document.querySelector('#ms-container');
 

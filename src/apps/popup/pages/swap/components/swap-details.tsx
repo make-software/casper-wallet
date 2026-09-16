@@ -48,9 +48,8 @@ export interface SwapDetailsProps extends Pick<
   ISwapDependencies,
   'network' | 'swapRepository'
 > {
-  /** The section heading, worded for the mode — see `swapModeLabels`. */
   title: string;
-  /** `null` before a quote exists — the whole block, label included, is not rendered (D5). */
+  /** `null` before a quote exists — the whole block, label included, is not rendered. */
   quote: string | null;
   priceImpact: string | null;
   protocolFee: string | null;
@@ -58,7 +57,6 @@ export interface SwapDetailsProps extends Pick<
   maxSlippage: string;
   path: string[];
   tokens: IDexToken[];
-  /** Package hash of the unlisted selected token, or `null` when neither token is unlisted. */
   unlistedTokenPackageHash: string | null;
 }
 

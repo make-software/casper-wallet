@@ -2,7 +2,6 @@ import { IDexToken, ISwapQuotedTrade, WrapDirection } from 'casper-wallet-core';
 
 export interface ISwapTradeReview {
   kind: 'swap';
-  /** The four fields the swap is started from, all read off one quote. */
   trade: ISwapQuotedTrade;
   rate: string | null;
   priceImpact: string | null;
@@ -23,10 +22,5 @@ export interface IWrapTradeReview {
   networkCost: string;
 }
 
-/**
- * Everything the confirm screen needs, as one object, so every value on it comes from the same
- * quote. Plain JSON throughout: it travels through router state, which is structured-cloned.
- *
- * The swap form produces it; the confirm step consumes it.
- */
+/** Plain JSON throughout: it travels through router state, which is structured-cloned. */
 export type ISwapReviewData = ISwapTradeReview | IWrapTradeReview;

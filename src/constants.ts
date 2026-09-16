@@ -1,6 +1,5 @@
 // Type-only: importing the `CasperNetworkName` enum as a value would link the whole
-// `casper-js-sdk` UMD bundle into every consumer of these constants, and `@src/constants` is on
-// the startup path of every page entry. The chain-name strings are spelled out literally below.
+// `casper-js-sdk` UMD bundle into `@src/constants`, which every page entry loads at startup.
 import type { CasperNetworkName } from 'casper-js-sdk';
 import type {
   AuctionManagerEntryPointType,
@@ -20,7 +19,7 @@ export const DEPLOY_DETAILS_REFRESH_RATE = 30 * SECOND;
 
 export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
 
-export const MOTES_PER_CSPR_RATE = '1000000000'; // 1 000 000 000 MOTES === 1 CSPR
+export const MOTES_PER_CSPR_RATE = '1000000000';
 export const TRANSFER_COST_MOTES = '100000000'; // 0.1 CSPR
 export const TRANSFER_MIN_AMOUNT_MOTES = '2500000000'; // 2.5 CSPR
 export const ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES = '3000000000'; // 3 CSPR
@@ -182,7 +181,7 @@ export const ExecutionTypesMap: { [key in number]: string } = {
   4: 'Contract call', //"StoredVersionedContractByHash",
   5: 'Contract call', //"StoredVersionedContractByName",
   6: 'Transfer',
-  7: 'WASM deploy' // new type
+  7: 'WASM deploy'
 };
 
 export enum DeployIcon {
@@ -333,9 +332,8 @@ export const DeployResultEntryPointNameMap: { [key: string]: string } = {
 };
 
 /**
- * The `CasperNetworkName` values spelled out literally, so this module carries no runtime
- * dependency on `casper-js-sdk`. The `${CasperNetworkName}` annotation is the union of the enum's
- * values, so a value renamed in the SDK fails the build here rather than silently going unmapped.
+ * The `${CasperNetworkName}` annotation is the union of the enum's values, so a value renamed in
+ * the SDK fails the build here rather than silently going unmapped.
  */
 export const networkNameToSdkNetworkNameMap: Record<
   NetworkName,
@@ -347,7 +345,6 @@ export const networkNameToSdkNetworkNameMap: Record<
   [NetworkName.Integration]: 'integration-test'
 };
 
-/** Keyed by the `CasperNetworkName` values; see {@link networkNameToSdkNetworkNameMap}. */
 export const chainNameToNetworkSettingsMap: Record<
   CasperNetworkName,
   NetworkSetting

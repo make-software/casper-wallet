@@ -7,21 +7,14 @@ export interface RefresherControl {
 }
 
 export interface RefresherGate {
-  /**
-   * Lets the refresher run while at least one caller holds the returned release. Calling a
-   * release more than once is a no-op.
-   */
+  /** Runs the refresher while a caller holds the returned release; releasing twice is a no-op. */
   beginObserving(): () => void;
   /** Suppresses the refresher for the span of `exchange`, including when it rejects. */
   duringExchange<T>(exchange: () => Promise<T>): Promise<T>;
-  /** Drops every hold the gate is holding. */
   dispose(): void;
 }
 
-/**
- * Runs the device session's refresher only while its state is being observed, and never
- * during an exchange the caller initiated.
- */
+/** Runs the refresher only while device state is observed, and never during an exchange. */
 export function createRefresherGate(
   dmk: RefresherControl,
   sessionId: string

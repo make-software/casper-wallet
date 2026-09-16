@@ -80,9 +80,8 @@ describe('createReportingOpenWindow', () => {
   });
 
   it('logs the error name only — never the rejection, never the props', async () => {
-    // `searchParams` is embedded in the URL `windows.create` is given, and a
-    // sign-message plaintext can ride there, so a rejection built from that URL
-    // must not reach the console.
+    // `searchParams` rides in the URL `windows.create` is given, so a rejection
+    // built from that URL can carry a sign-message plaintext.
     const secret = 'plaintext-the-user-is-about-to-sign';
     const open = jest
       .fn()

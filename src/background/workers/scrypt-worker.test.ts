@@ -8,10 +8,8 @@ const SALT = '00'.repeat(32);
 type Posted = { key?: Uint8Array; error?: true };
 
 /**
- * The worker installs a global `onmessage` and answers through a global
- * `postMessage`. Nothing else executes this file — the offload wrapper's tests
- * drive a hand-written fake — so without this the two sides of the message
- * contract are never checked against each other.
+ * Nothing else executes this file, so without this the two sides of the
+ * worker's message contract are never checked against each other.
  */
 async function runWorker(data: { password: string; saltHash: string }) {
   const posted: Posted[] = [];
@@ -41,8 +39,7 @@ it('answers with the { key } envelope the wrapper unwraps', async () => {
 
   expect(posted).toHaveLength(1);
   // A bare `postMessage(key)` also "works" until the wrapper reads `.key` and
-  // gets undefined — which breaks unlock, verify, onboarding and change-password
-  // together on the MV2 builds.
+  // gets undefined, breaking unlock, verify, onboarding and change-password.
   expect(isWorkerError(posted[0])).toBe(false);
   expect(posted[0].key).toHaveLength(32);
 });

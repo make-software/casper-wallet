@@ -1,10 +1,8 @@
 import { SwapFlowEvent, WrapFlowEvent } from 'casper-wallet-core';
 
 /**
- * What a view must do about one event of a running swap or wrap flow.
- *
- * `sent` carries `isSubmitted` because a swap has two `*:sent` events and only the second one
- * means the trade went out — the success screen gates on it.
+ * What a view must do about one event of a running swap or wrap flow. `sent` carries
+ * `isSubmitted` because a swap has two `*:sent` events and only the second one went out.
  */
 export type SwapFlowOutcome =
   | { kind: 'progress' }

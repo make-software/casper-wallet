@@ -51,8 +51,6 @@ describe('dispatchToMainStore', () => {
   });
 
   it('resolves false instead of rejecting when the send fails', async () => {
-    // 105 call sites do not catch. Rejecting here would turn each of them into
-    // an unhandled rejection.
     sendMessageMock.mockRejectedValue(new Error('no receiving end'));
 
     await expect(dispatchToMainStore(lockVault())).resolves.toBe(false);
@@ -81,9 +79,6 @@ describe('dispatchToMainStore', () => {
   });
 
   it('resolves false instead of throwing when the send throws synchronously', async () => {
-    // `Extension context invalidated` has this shape, and four app entries
-    // dispatch from a render body that sits ABOVE the ErrorBoundary — an
-    // escaping throw blanks the page instead of reaching the banner.
     sendMessageMock.mockImplementation(() => {
       throw new Error('Extension context invalidated');
     });
@@ -97,8 +92,6 @@ describe('dispatchToMainStore', () => {
   });
 
   it('takes down the row left by an earlier failure once the send succeeds', async () => {
-    // The guards keep the user on the page to retry, so the retry that works
-    // lands on the screen where the stale row is still showing.
     sendMessageMock.mockResolvedValue(undefined);
 
     await dispatchToMainStore(lockVault());
@@ -110,7 +103,6 @@ describe('dispatchToMainStore', () => {
   });
 
   it('logs but does not surface an action that is not allow-listed', async () => {
-    // A dropped theme change is not worth a banner; the log still records it.
     sendMessageMock.mockRejectedValue(new Error('no receiving end'));
 
     await dispatchToMainStore(themeModeSettingChanged(ThemeMode.LIGHT));

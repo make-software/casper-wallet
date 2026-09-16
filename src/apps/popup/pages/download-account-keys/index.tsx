@@ -62,9 +62,8 @@ export const DownloadAccountKeysPage = () => {
   };
 
   const headerButton = {
-    // "Back" is only used where it genuinely steps back inside the flow. The
-    // entry step has nowhere to go back to in a dedicated window, so it closes
-    // instead — labelling that "Back" would be a lie (WALLET-1345).
+    // The entry step has nowhere to go back to in a dedicated window, so it closes
+    // instead; "Back" is only used where it genuinely steps back inside the flow.
     [DownloadAccountKeysSteps.Instruction]: (
       <HeaderSubmenuBarNavLink
         linkType="close"
@@ -134,10 +133,8 @@ export const DownloadAccountKeysPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        // Deliberately bare: this window exists to export secret keys and
-        // nothing else. The wallet menu / network switcher / connection status
-        // would let the user navigate the full wallet inside a 376px export
-        // window and strand themselves there (WALLET-1345).
+        // Deliberately bare: the wallet menu / network switcher / connection status
+        // would let the user navigate the full wallet inside this export window.
         <HeaderPopup
           renderSubmenuBarItems={() => headerButton[downloadAccountKeysStep]}
         />

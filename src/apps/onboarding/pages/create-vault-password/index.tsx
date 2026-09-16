@@ -59,9 +59,8 @@ export function CreateVaultPasswordPage({
   }, [navigate, keysDoesExist]);
 
   async function onSubmit(data: CreatePasswordFormValues) {
-    // A dropped `initKeys` leaves `keysDoesExist` false, so the router keeps
-    // rendering this page — and `isSubmitSuccessful` used to disable the only
-    // button on it for good, leaving the banner with nothing to retry.
+    // A dropped `initKeys` leaves `keysDoesExist` false, so the router keeps rendering
+    // this page and its only button has to stay live for the retry.
     if (await dispatchToMainStore(initKeys({ password: data.password }))) {
       setIsSubmitted(true);
       saveIsLoggedIn(true);

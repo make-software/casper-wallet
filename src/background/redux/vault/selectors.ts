@@ -29,11 +29,8 @@ const selectVaultAccountsExceptLedgersAccounts = createSelector(
   accounts => accounts.filter(account => !account.hardware)
 );
 
-// Replica-only: its single call site is the popup's Download-account-keys page,
-// where every `secretKey` is blanked, so exportability is read from the flag the
-// broadcast sanitizer derives instead. Watch accounts are stored with
-// `secretKey: ''` and no `hardware`, so they pass
-// selectVaultAccountsExceptLedgersAccounts but have nothing to export.
+// Replica-only: every `secretKey` is blanked in the broadcast, so exportability
+// is read off the flags — a watch account has no `hardware` but nothing to export.
 export const selectVaultAccountsAvailableForExport = createSelector(
   selectVaultAccountsExceptLedgersAccounts,
   accounts => accounts.filter(account => !account.watching)

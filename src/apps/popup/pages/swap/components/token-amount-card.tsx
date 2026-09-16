@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-// Deep paths: the barrels re-export the header, which loads webextension-polyfill
-// and throws under the node-only jest environment this file's render test uses.
+// Deep paths: the barrels re-export the header, which throws in this file's node-only jest tree.
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
@@ -52,8 +51,7 @@ const TopRow = styled(AlignedSpaceBetweenFlexRow)`
   align-items: flex-start;
 `;
 
-// Not `@libs/ui` Input: that renders a boxed 4rem field with its own background,
-// where the card needs a borderless amount sitting on the card's own surface.
+// Not `@libs/ui` Input: the card needs a borderless amount on its own surface, not a boxed field.
 const AmountInput = styled.input<{ $hasError: boolean }>`
   flex-grow: 1;
   min-width: 0;

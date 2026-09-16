@@ -1,8 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-// Deep path, not the '@libs/ui/components' barrel — see token-amount-card.tsx
-// for why that barrel is unsafe to import in this file's node-jest tree.
+// Deep path, not the '@libs/ui/components' barrel — see token-amount-card.tsx.
 import { SvgIcon } from '@libs/ui/components/svg-icon/svg-icon';
 
 const Button = styled.button`

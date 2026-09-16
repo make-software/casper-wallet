@@ -12,11 +12,7 @@ interface ICoreErrorCopy {
   description: string;
 }
 
-/**
- * Wallet copy for every i18n key `casper-wallet-core` can put in an error's `message`. Core
- * ships no strings of its own; an unmapped key renders on screen verbatim, because i18next
- * runs here with `nsSeparator: false` and returns an unknown key unchanged.
- */
+/** Copy for every i18n key core puts in a `message`; an unmapped key renders verbatim. */
 const coreErrorCopy: Record<CoreErrorMessageKey, ICoreErrorCopy> = {
   'errors:already-signed': {
     message: 'Already signed',
@@ -162,22 +158,17 @@ const coreErrorCopy: Record<CoreErrorMessageKey, ICoreErrorCopy> = {
 const isCoreErrorMessageKey = (value: string): value is CoreErrorMessageKey =>
   (CORE_ERROR_MESSAGE_KEYS as readonly string[]).includes(value);
 
-/** A Ledger failure is rendered by the Ledger views; reporting it again would double up. */
+/** Ledger views render their own failures, so a Ledger failure must leave by that same door. */
 export const isLedgerFailure = (error: unknown): boolean =>
   error instanceof LedgerError;
 
-/** Copy for an error core signalled with one of its i18n keys; null for anything else. */
 export const getCoreErrorCopy = (error: unknown): ICoreErrorCopy | null => {
   const message = error instanceof Error ? error.message : '';
 
   return isCoreErrorMessageKey(message) ? coreErrorCopy[message] : null;
 };
 
-/**
- * Header and content for the wallet's error page. Node-provided detail wins — it is the only
- * text that says what the network actually objected to — then core's mapped copy, then the
- * error's own message.
- */
+/** Error-page copy: node detail wins, then core's mapped copy, then the error's message. */
 export const getTransactionErrorCopy = (
   error: unknown,
   translate: (key: string) => string
@@ -189,8 +180,8 @@ export const getTransactionErrorCopy = (
 
   if (nodeDetails) {
     return {
-      // Verbatim: node text is not a translation key, and an RPC `data` object carries
-      // account hashes and full deploy JSON, so only an already-plain string is shown.
+      // An RPC `data` object carries account hashes and full deploy JSON, so only a plain
+      // string is shown, and node text is not a translation key.
       header: nodeDetails.message,
       content:
         typeof nodeDetails.data === 'string' ? nodeDetails.data : genericContent

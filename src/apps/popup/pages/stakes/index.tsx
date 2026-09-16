@@ -182,7 +182,7 @@ export const StakesPage = () => {
 
         const secretKey = await fetchAccountSecretKey(activeAccount.name);
 
-        // Ledger accounts legitimately have no secret key here too (see transfer/index.tsx).
+        // Ledger accounts legitimately have no secret key.
         if (!secretKey && activeAccount.hardware == null) {
           setIsSubmitButtonDisable(false);
           navigate(
@@ -250,8 +250,7 @@ export const StakesPage = () => {
           });
       }
     } catch (error) {
-      // The Ledger views render their own failures, and the hook that runs this handler for
-      // a Ledger account swallows what it throws — so this must leave by the same door.
+      // The hook that runs this for a Ledger account swallows what it throws — leave by that door.
       if (isLedgerFailure(error)) {
         throw error;
       }
@@ -477,7 +476,7 @@ export const StakesPage = () => {
             const { validatorPublicKey } = getValuesValidatorForm();
 
             setStakeStep(StakeSteps.Amount);
-            // nosemgrep: javascript.react.correctness.hooks.set-state-no-op.calling-set-state-on-current-state — local var holds the form value, not the state value; names just coincide
+            // nosemgrep: javascript.react.correctness.hooks.set-state-no-op.calling-set-state-on-current-state — local var holds the form value, not the state value
             setValidatorPublicKey(validatorPublicKey);
           }}
         >
@@ -583,17 +582,12 @@ export const StakesPage = () => {
             const shouldAskForReview =
               askForReviewAfter == null || currentDate > askForReviewAfter;
 
-            // Set once here, before the branch, rather than on the Home leg
-            // only: every exit from RateApp is a post-submission exit, and its
-            // four `navigate(RouterPath.Home)` calls would otherwise return the
-            // user to whatever tab they started the transfer from.
+            // Every exit from RateApp is a post-submission exit, and sets no tab itself.
             setActiveHomeTab(HomePageTabName.Activity);
 
             if (ratedInStore || !shouldAskForReview) {
               navigate(RouterPath.Home);
             } else {
-              // Navigate to "RateApp" when the application has not been rated in the store,
-              // and it's time to ask for a review.
               navigate(RouterPath.RateApp);
             }
           }}

@@ -66,7 +66,6 @@ export function HeaderViewInExplorer({
           );
         }
       } else {
-        // ERC-20 token case
         const token = cep18Tokens?.find(
           token => token.contractPackageHash === tokenName
         );

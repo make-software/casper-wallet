@@ -93,10 +93,6 @@ export const ledgerErrorsData: Record<LedgerEventStatus, ILedgerErrorData> = {
 export const isLedgerError = (event: ILedgerEvent) =>
   Boolean(ledgerErrorsData[event.status].title);
 
-/**
- * A state the user clears on the device, after which the flow resumes on its own — so it is
- * shown as a wait with a cancel, never as a failure to acknowledge. Still an `isLedgerError`,
- * which is what routes it to the view that renders its copy.
- */
+/** A state the user clears on the device and the flow resumes — a wait, not a failure. */
 export const isLedgerWaiting = (event: ILedgerEvent) =>
   event.status === LedgerEventStatus.DeviceLocked;

@@ -35,10 +35,8 @@ import {
   Typography
 } from '@libs/ui/components';
 
-// At 120px the modules were 2.45px each — the smallest QR we render, on the
-// screen with the most room to spare (WALLET-1347). The tile gives us 296px;
-// 240 takes the modules to 5.33px and still reads as an inset thumbnail rather
-// than taking over the screen.
+// 240px rather than 120: it puts the QR modules at 5.33px each, up from 2.45px, and
+// still reads as an inset thumbnail.
 const QrCodeContainer = styled(VerticalSpaceContainer)`
   display: flex;
   justify-content: center;

@@ -33,8 +33,6 @@ const cspConfig = require('./src/csp.json');
 
 const isDev = env.NODE_ENV === 'development';
 
-// Stamped into manifest.version_name below. Must be derivable without `.git`,
-// which the source package reviewers rebuild from does not carry.
 const commitHash = resolveCommitHash({ root: __dirname, isDev });
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
@@ -46,7 +44,6 @@ const buildDir = isChrome
 
 const alias = {};
 
-// load the secrets
 const secretsPath = path.join(__dirname, 'secrets.' + env.NODE_ENV + '.js');
 
 const fileExtensions = [
@@ -66,35 +63,19 @@ if (fileSystem.existsSync(secretsPath)) {
   alias['secrets'] = secretsPath;
 }
 
-// One nonce per build, and ONLY for Chrome production — that is the sole CSP arm
-// that pins style-src to it (see getCSP below). Emitting a random literal into
-// Firefox/Safari bundles that never read it makes those builds irreproducible,
-// which AMO source review requires (it rebuilds and compares byte-for-byte).
-// Where it does apply, the same value is wired to __webpack_nonce__ (style-loader)
-// and __CSP_NONCE__ (styled-components' CspStyleSheetManager) below, so the
-// manifest CSP and the injected <style> tags always match.
-//
-// This is the ONLY place the Chrome-production predicate is spelled out: getCSP()
-// and the DefinePlugin literal both derive from the value, never re-derive the
-// condition. A second copy could drift and emit `'nonce-null'` — syntactically
-// valid, matched by nothing, blocking every stylesheet in all five apps.
+// One nonce per build, and ONLY for Chrome production — the sole CSP arm that pins
+// style-src. A random literal elsewhere breaks the byte-for-byte rebuild AMO review does.
 const CSP_NONCE =
   isChrome && !isDev ? crypto.randomBytes(16).toString('base64') : null;
 
 const getCSP = () => {
-  // Chrome-production locks <style>/<link> ELEMENTS to the build nonce (style-src,
-  // via which style-src-elem falls back) so an injected stylesheet is blocked, while
-  // keeping inline style ATTRIBUTES / element.style writes allowed via style-src-attr.
-  // The latter is unavoidable: React applies every `style={{…}}` prop and lottie-web /
-  // react-loading-skeleton / react-tiny-popover mutate element.style at runtime, all of
-  // which the CSP treats as "applying inline style" — a nonce cannot cover them. Dev,
-  // Firefox and Safari keep 'unsafe-inline' plus 'self' so packaged stylesheets (fonts.css) still load.
+  // Inline style ATTRIBUTES stay allowed because React's `style={{…}}` props and
+  // lottie-web / react-loading-skeleton / react-tiny-popover write element.style directly.
   const styleDirectives = CSP_NONCE
     ? `style-src 'self' 'nonce-${CSP_NONCE}'; style-src-attr 'unsafe-inline'`
     : "style-src 'self' 'unsafe-inline'";
-  // `baseDirectives` (which now also carries img-src/media-src) and `connectSrc`
-  // are shared with the Safari runtime <meta> policy in src/utils.ts — see
-  // src/csp.json. Only the style arm differs per target, so it stays here.
+  // `baseDirectives` and `connectSrc` are shared with the Safari runtime <meta> policy
+  // in src/utils.ts. Only the style arm differs per target, so it stays here.
   const csp = `${cspConfig.baseDirectives}; ${styleDirectives}; connect-src ${cspConfig.connectSrc.join(' ')}`;
 
   if (isFirefox) {
@@ -113,29 +94,16 @@ const getCSP = () => {
 };
 
 // Single source for the nonce-setter entry: the emit-time assertion below finds the
-// bundles it has to check by looking for this exact path in webpack's normalized
-// entry, so the list of guarded bundles cannot drift from the list that actually gets
-// the setter prepended.
+// bundles it has to check by looking for this exact path in webpack's normalized entry.
 const NONCE_SETTER = path.join(__dirname, 'src', 'set-webpack-nonce.ts');
 
-// HotModuleReplacementPlugin — added only by utils/webserver.js, so only in `npm run dev:*`
-// — registers each rebuild's hot-update chunk as a file of the chunk it patches. The HMR
-// runtime applies those; nothing loads them as part of the entry, so the assertions below
-// would otherwise fail every watch rebuild that touches a single-file entry.
+// HMR registers each rebuild's hot-update chunk as a file of the chunk it patches;
+// nothing loads those as part of the entry, so the assertions below must skip them.
 const isBundleJs = file =>
   file.endsWith('.js') && !file.includes('.hot-update.');
 
-// The two kinds of entry this config produces, split by how the browser loads them.
-//
-// PAGE entries are HTML pages. Each gets a <script> per file from
-// HtmlWebpackPlugin, so webpack may hoist a module several of them share into a
-// separate chunk that every page loads alongside its own bundle — which is what
-// optimization.splitChunks below does.
-//
-// SINGLE_FILE entries cannot do that. The MV3 service worker is registered as one
-// file and the two content scripts are injected as one file each by the manifest;
-// nothing loads a sibling chunk for them. A module hoisted out of one would just
-// be missing at runtime, in a context with no page to report it.
+// Split by how the browser loads them: a PAGE entry is an HTML page that can also load
+// a hoisted chunk; a SINGLE_FILE entry is loaded as one file by the manifest.
 const PAGE_ENTRY_NAMES = [
   'popup',
   'importAccountWithFile',
@@ -145,30 +113,8 @@ const PAGE_ENTRY_NAMES = [
 ];
 const SINGLE_FILE_ENTRY_NAMES = ['background', 'contentScript', 'sdk'];
 
-// The manifest CSP and the bundles receive the nonce through two different plugins
-// (CopyWebpackPlugin's manifest transform and DefinePlugin), so "the two agree" holds
-// only for as long as both keep deriving from CSP_NONCE. WALLET-1388 is what it looks
-// like when they stop: an ambient CSP_NONCE reached the bundles through
-// dotenv-webpack's `systemvars` while the manifest kept the generated value. The build
-// succeeded, the manifest looked right, and the extension rendered completely unstyled.
-//
-// Routing the value through __CSP_NONCE__ instead of process.env closed that particular
-// hole — dotenv-webpack only ever defines `process.env.*` keys — but the failure mode is
-// silent by nature, and the next source of drift will not announce itself either. So
-// this checks the artifacts rather than the intent: whatever the built manifest pins
-// must be exactly what this build generated, and exactly what every bundle carrying the
-// nonce setter contains.
-//
-// It runs on the last processAssets stage — after CopyWebpackPlugin has added the
-// manifest (it emits at PROCESS_ASSETS_STAGE_ADDITIONAL) and while asset sources are
-// still readable. afterEmit is too late: webpack swaps every emitted source for a
-// SizeOnlySource, and reading one throws. Working from the compilation rather than from
-// disk also keeps this working under webpack-dev-server, which never writes files.
-//
-// Throwing rejects the build rather than logging: tapable forwards the exception to the
-// seal callback, webpack hands it to the compiler callback as a fatal error, and
-// utils/build.js rethrows it — a non-zero exit. Pushing to compilation.errors would not
-// do that, since utils/build.js never inspects stats.
+// Drift between the manifest's nonce and the bundles' is silent — every app renders
+// unstyled with the build green — so check the emitted assets, before afterEmit voids them.
 class AssertCspNonceIntegrity {
   apply(compiler) {
     compiler.hooks.thisCompilation.tap(
@@ -210,16 +156,15 @@ const assertNonceIntegrity = (compiler, compilation) => {
     return;
   }
 
-  // Not a hard-coded list of app entries: the guarded set is whichever entries webpack
-  // was actually given the nonce setter for, read back from the normalized entry.
+  // Not a hard-coded list: the guarded set is whichever entries webpack was actually
+  // given the nonce setter for.
   for (const [name, entry] of Object.entries(compiler.options.entry)) {
     if (!(entry.import ?? []).includes(NONCE_SETTER)) {
       continue;
     }
 
-    // "at least one file", not "every file": an entrypoint can emit a runtime chunk
-    // alongside its main bundle, and only the chunk holding set-webpack-nonce carries
-    // the substituted literal.
+    // "at least one file", not "every file": only the chunk holding set-webpack-nonce
+    // carries the substituted literal.
     const carriesNonce = compilation.entrypoints
       .get(name)
       .getFiles()
@@ -236,10 +181,8 @@ const assertNonceIntegrity = (compiler, compilation) => {
   }
 };
 
-// Same argument as the nonce assertion above, one layer earlier: rather than trust
-// that the splitChunks predicate still names the right chunks, check the artifact.
-// Each single-file entry must still emit exactly one JS file — if splitChunks ever
-// reaches one, the build fails here instead of the service worker failing to boot.
+// Each single-file entry must emit exactly one JS file — if splitChunks ever reaches
+// one, the build fails here instead of the service worker failing to boot.
 class AssertSingleFileEntries {
   apply(compiler) {
     compiler.hooks.thisCompilation.tap(
@@ -276,14 +219,8 @@ const assertSingleFileEntries = compilation => {
       );
     }
 
-    // No async chunks either. With no `target` set, loading defaults to jsonp,
-    // and publicPath is '/': a content script would fetch the chunk from the
-    // visited site's origin and the callback would land in the page world,
-    // where the isolated world's promise never settles. The service worker has
-    // no document to append a <script> to at all.
-    //
-    // Nothing emits one today. To let the worker load chunks, set
-    // `chunkLoading: 'import-scripts'` on that entry first, then exempt it here.
+    // No async chunks either — jsonp loading from publicPath '/' resolves in neither
+    // context. To let the worker load chunks, give it `chunkLoading: 'import-scripts'`.
     const asyncFiles = collectAsyncFiles(entrypoint);
 
     if (asyncFiles.length > 0) {
@@ -312,15 +249,8 @@ const collectAsyncFiles = (group, seen = new Set()) => {
   return files;
 };
 
-// casper-js-sdk is a prebuilt UMD blob with no ESM build, so one value import
-// costs ~900 KB no bundler can shake out — parsed on every popup open
-// (WALLET-1381). Whether it stays out turns on which *names* eagerly-reached
-// modules pull from the @libs/ui/components barrel: `NoConnectedLedger` re-links
-// it through @libs/services/ledger, and nothing else would fail. Hence a
-// tripwire rather than a one-off measurement.
-//
-// Not every page entry: importAccountWithFile and signatureRequest still link it
-// eagerly. Add one here once it is cleaned up.
+// casper-js-sdk is a prebuilt UMD blob with no ESM build, so one value import costs
+// ~900 KB no bundler can shake out, parsed on every open of the page that links it.
 const SDK_FREE_PAGE_ENTRY_NAMES = ['popup', 'connectToApp', 'onboarding'];
 const CASPER_SDK_RESOURCE = /node_modules[\\/]casper-js-sdk[\\/]/;
 
@@ -341,9 +271,8 @@ class AssertSdkFreePageEntries {
   }
 }
 
-// A ConcatenatedModule has no `resource` of its own — its merged modules hang
-// off `.modules`. Missing that would blind the check in production builds,
-// which is where concatenation runs.
+// A ConcatenatedModule has no `resource` of its own — its merged modules hang off
+// `.modules`, and concatenation is what production builds do.
 const resourcesOf = module =>
   module.modules?.length
     ? module.modules.flatMap(resourcesOf)
@@ -361,9 +290,7 @@ const assertSdkFreePageEntries = compilation => {
 
     const offenders = new Set();
 
-    // Initial chunks only: the entry's own plus any split chunk the page loads
-    // with it. Chunks behind a dynamic import are the intended fix, not a
-    // violation.
+    // Initial chunks only — a chunk behind a dynamic import is the intended fix.
     for (const chunk of entrypoint.chunks) {
       for (const module of compilation.chunkGraph.getChunkModulesIterable(
         chunk
@@ -395,12 +322,8 @@ const options = {
   },
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    // The nonce-setter is prepended as an array entry, not imported from inside
-    // each entry file: webpack executes array-entry modules strictly in order
-    // before the rest of the entry's module graph, so __webpack_nonce__ is set
-    // before any CSS (style-loader/styled-components) is evaluated. A source-level
-    // import can't guarantee this — prettier's import-sort would order it after
-    // the css imports in some entries.
+    // Prepended as an array entry rather than imported: webpack runs array-entry modules
+    // in order before the rest of the graph, so __webpack_nonce__ precedes any CSS.
     popup: [
       NONCE_SETTER,
       path.join(__dirname, 'src', 'apps', 'popup', 'index.tsx')
@@ -432,7 +355,7 @@ const options = {
     sdk: path.join(__dirname, 'src', 'content', 'sdk.ts')
   },
   chromeExtensionBoilerplate: {
-    notHotReload: ['background', 'contentScript', 'devtools', 'sdk'] // Probably can be improved. Background and sdk were added to prevent infinite reloading after changes
+    notHotReload: ['background', 'contentScript', 'devtools', 'sdk'] // Prevents infinite reloading after changes
   },
   output: {
     path: path.resolve(__dirname, buildDir),
@@ -445,13 +368,9 @@ const options = {
     rules: [
       {
         test: /\.wasm$/,
-        // Tells WebPack that this module should be included as
-        // base64-encoded binary file and not as code
         loader: 'base64-loader',
-        // Disables WebPack's opinion where WebAssembly should be,
-        // makes it think that it's not WebAssembly
-        //
-        // Error: WebAssembly module is included in initial chunk.
+        // Makes WebPack think it is not WebAssembly — otherwise: "WebAssembly module
+        // is included in initial chunk."
         type: 'javascript/auto'
       },
       {
@@ -493,27 +412,18 @@ const options = {
     new Dotenv({
       systemvars: true
     }),
-    // expose and write the allowed env vars on the compiled bundle
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       'process.env.MOCK_STATE': JSON.stringify(process.env.MOCK_STATE),
       'process.env.BROWSER': JSON.stringify(process.env.BROWSER),
       'process.env.TEST_ENV': JSON.stringify(process.env.TEST_ENV),
-      // Not routed through process.env: @types/node types every ProcessEnv member
-      // as `string | undefined`, which cannot express the `null` substituted on
-      // non-Chrome targets. A dedicated global is declared as `string | null`
-      // (src/@types/custom.d.ts), so the null-handling at each reader is enforced
-      // by tsc instead of being a convention nothing can check.
-      // The key stays defined for EVERY target on purpose — dropping it would
-      // leave the free variable unreplaced and throw ReferenceError at runtime.
+      // A dedicated global because ProcessEnv cannot express the `null`. Defined for
+      // EVERY target: an unreplaced free variable throws ReferenceError at runtime.
       __CSP_NONCE__: JSON.stringify(CSP_NONCE)
     }),
-    // Guards the two consumers above and below against drifting apart. Runs on
-    // afterEmit, so registration order here does not matter.
     new AssertCspNonceIntegrity(),
     new AssertSingleFileEntries(),
     new AssertSdkFreePageEntries(),
-    // manifest file generation
     new CopyWebpackPlugin({
       patterns: [
         {
@@ -525,7 +435,6 @@ const options = {
           to: path.join(__dirname, buildDir, 'manifest.json'),
           force: true,
           transform: function (content) {
-            // generates the manifest file using the package.json informations
             const manifest = {
               ...JSON.parse(content.toString()),
               name: pkg.name,
@@ -535,7 +444,7 @@ const options = {
               description: pkg.description,
               content_security_policy: getCSP()
             };
-            // Removing the key from manifest for Chrome production build
+            // The key pins the dev extension id; a published build must not carry it.
             if (isChrome && !isDev) {
               delete manifest.key;
             }
@@ -594,7 +503,6 @@ const options = {
         }
       ]
     }),
-    // copy locales
     new CopyWebpackPlugin({
       patterns: [
         {
@@ -604,7 +512,6 @@ const options = {
         }
       ]
     }),
-    // copy assets
     new CopyWebpackPlugin({
       patterns: [
         {
@@ -689,9 +596,8 @@ const options = {
   }
 };
 
-// Both lists above are hand-written, and splitChunks only opts in what PAGE_ENTRY_NAMES
-// names. An entry added to `entry` but to neither list would quietly keep a private copy
-// of everything — the exact thing this config exists to stop — so refuse to build instead.
+// An entry in `entry` but in neither list would quietly keep a private copy of every
+// shared dependency, so refuse to build instead.
 const unclassifiedEntries = Object.keys(options.entry).filter(
   name =>
     !PAGE_ENTRY_NAMES.includes(name) && !SINGLE_FILE_ENTRY_NAMES.includes(name)
@@ -704,19 +610,9 @@ if (unclassifiedEntries.length > 0) {
 }
 
 options.optimization = {
-  // Before this, every entry bundled its own private copy of every shared dependency:
-  // casper-js-sdk alone shipped eight times over (7.3 MB of an 18 MB package), react-dom
-  // five times. Hoisting what the page entries share into chunks they all load removes
-  // the duplicates without changing what any page can reach (WALLET-1380).
   splitChunks: {
-    // Not 'all'. That would also split the single-file entries, which cannot load a
-    // second chunk — see PAGE_ENTRY_NAMES / SINGLE_FILE_ENTRY_NAMES above, and
-    // AssertSingleFileEntries, which fails the build if this predicate stops holding.
-    //
-    // `!chunk.canBeInitial()` keeps webpack's default treatment of chunks created by a
-    // dynamic import (the built-in default is `chunks: 'async'`, which this replaces
-    // wholesale): they are loaded on demand by the webpack runtime of whichever entry
-    // pulled them in, so they stay splittable whatever their parent entry is.
+    // Not 'all': that would also split the single-file entries, which cannot load a
+    // second chunk. `!chunk.canBeInitial()` keeps webpack's default for async chunks.
     chunks: chunk =>
       PAGE_ENTRY_NAMES.includes(chunk.name) || !chunk.canBeInitial()
   }
@@ -736,8 +632,6 @@ if (isDev) {
   ];
 }
 
-// Bundle size report — strictly opt-in, zero footprint unless ANALYZE=true.
-// `npm run build:analyze` sets it; never enabled by normal build/dev/start scripts.
 if (process.env.ANALYZE === 'true') {
   const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
   options.plugins.push(

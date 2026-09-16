@@ -13,10 +13,8 @@ export interface ResolvedIconSrc {
 }
 
 /**
- * Icon urls arrive inside API responses, so a missing url and a failed load are
- * both normal states rather than errors. Keeping the branching here — instead of
- * inside the component — is what makes it testable in the repo's DOM-less jest
- * environment.
+ * Icon urls arrive inside API responses: a missing url and a failed load are both
+ * normal states rather than errors.
  */
 export const resolveIconSrc = ({
   src,

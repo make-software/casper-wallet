@@ -60,11 +60,8 @@ it('stays silent for the internal flow, which legitimately has no request', asyn
 });
 
 it('reports a dapp-approval flow that arrived without a requestId', async () => {
-  // Skipping the attach here is the P0 coming back: `windowIds` stays
-  // `[approvalWindow]`, and the next dapp request reusing that window cancels
-  // this one while the user is confirming on the device. `params` is a plain
-  // string record at the call sites, so this is indistinguishable from the
-  // internal flow at runtime unless it is said out loud.
+  // Skipping the attach here leaves `windowIds` as `[approvalWindow]`, so the next
+  // dapp request reusing that window cancels this one mid-confirmation.
   await expect(
     registerLedgerPermissionWindow({
       domain: 'signature-request.html',

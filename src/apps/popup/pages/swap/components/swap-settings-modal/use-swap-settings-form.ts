@@ -32,8 +32,7 @@ export const useSwapSettingsForm = (): UseSwapSettingsFormReturn => {
   const slippage = useSelector(selectSwapSlippageSetting);
   const deadline = useSelector(selectSwapDeadlineSetting);
 
-  // Seeded once: <Modal> unmounts its content while closed, so every open starts from
-  // the stored values and Cancel needs no rollback.
+  // Seeded once: <Modal> unmounts its content while closed, so Cancel needs no rollback.
   const [slippageInput, setSlippageInput] = useState(() => String(slippage));
   const [deadlineInput, setDeadlineInput] = useState(() => String(deadline));
 
@@ -49,8 +48,7 @@ export const useSwapSettingsForm = (): UseSwapSettingsFormReturn => {
     []
   );
 
-  // The reducer is the clamping site, so an out-of-range or empty field is dispatched
-  // as-is and comes back clamped on the next read.
+  // The reducer is the clamping site, so an out-of-range or empty field is dispatched as-is.
   const commit = useCallback(() => {
     dispatchToMainStore(
       swapSlippageSettingChanged(parseSlippageInput(slippageInput))

@@ -16,9 +16,8 @@ export const useExpiringCsprNames = () => {
 
   const network = getCasperNetwork(networkSetting);
 
-  // Time reference captured once per mount, keeping render pure (react-hooks
-  // purity rule). A popup session lives seconds while the notice window spans
-  // days, so a stable "now" cannot change which names count as expiring.
+  // Captured once per mount to keep render pure; a popup session lives seconds
+  // while the notice window spans days, so a stable "now" changes nothing.
   const [now] = useState(() => Date.now());
 
   const expiringNames = useMemo(

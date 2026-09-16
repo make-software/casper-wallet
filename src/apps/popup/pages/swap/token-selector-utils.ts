@@ -56,8 +56,7 @@ export function getCustomTokenStatus({
     return 'idle';
   }
 
-  // Reported as not-found, never as blacklisted: such a token is deliberately unreachable, and
-  // naming the list is an invitation to look for a way around it.
+  // Reported as not-found, never as blacklisted: naming the list invites looking for a way round.
   if (token.isBlacklisted) {
     return 'not-found';
   }

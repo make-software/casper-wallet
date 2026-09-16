@@ -7,8 +7,8 @@ popup.describe('Popup UI: Home tabs', () => {
       await unlockVault();
       await new Promise(r => setTimeout(r, 2000));
 
-      // Reach Home the way that used to stamp the stale tab index onto the
-      // history entry: open an NFT and come back.
+      // Open an NFT and come back: the path that stamped the stale tab index
+      // onto the history entry.
       await popupPage.getByText('NFTs').click();
       await new Promise(r => setTimeout(r, 2000));
 
@@ -23,7 +23,6 @@ popup.describe('Popup UI: Home tabs', () => {
       await popupPage.getByText('Back').click();
       await popupExpect(popupPage.getByTitle('NFTs')).toBeVisible();
 
-      // Switch to Tokens, open a token, come back.
       await popupPage.getByText('Tokens').click();
       await popupExpect(popupPage.getByTitle('Tokens')).toBeVisible();
 
@@ -110,23 +109,20 @@ popup.describe('Popup UI: Home tabs', () => {
     async ({ popupPage, unlockVault, lockVault }) => {
       await unlockVault();
 
-      // Home opens on Tokens. Waiting for that rather than sleeping a fixed
-      // 2s keeps a slow unlock from surfacing as an opaque timeout on the
-      // tab click below.
+      // Home opens on Tokens. Waiting for that rather than sleeping a fixed 2s
+      // keeps a slow unlock from surfacing as an opaque timeout on the tab click.
       await popupExpect(popupPage.getByTitle('Tokens')).toBeVisible();
 
       await popupPage.getByText('NFTs').click();
       await popupExpect(popupPage.getByTitle('NFTs')).toBeVisible();
 
-      // The tab is a plain `useState` with no persistence and no reset of its
-      // own — its ephemerality rests entirely on `HomeTabProvider` sitting
-      // below the `isLocked` gate in `app-router.tsx`, so the subtree unmounts.
+      // The tab is a plain `useState`: its reset rests entirely on
+      // `HomeTabProvider` sitting below the `isLocked` gate in `app-router.tsx`.
       await lockVault();
       await unlockVault();
 
       // `lockVault` goes through the burger menu, and `showNavigationMenu`
-      // outlives the lock in `location.state` — so unlocking lands back in the
-      // menu rather than on Home. Closing it is what the user does next.
+      // outlives the lock in `location.state`, so unlocking lands back in it.
       await popupPage.getByTestId('menu-close-icon').click();
 
       await popupExpect(popupPage.getByTitle('Tokens')).toBeVisible();

@@ -72,10 +72,6 @@ it('leaves the export-keys id alone for an unrelated window', async () => {
 });
 
 it('still clears the export-keys id when the cancellation throws', async () => {
-  // The cancel and the export-keys cleanup are independent. Sharing one
-  // try/catch — or none — means a failure in the first silently skips the
-  // second, leaving a tracked id whose window is gone: the next export-keys
-  // open then focuses a dead window.
   cancelMock.mockRejectedValue(new Error('cancel blew up'));
   const { store, dispatch } = makeStore(7);
 

@@ -17,7 +17,6 @@ const slice = createSlice({
     }
   },
   extraReducers: builder => {
-    // session's vaultUnlocked also refreshes activity time.
     builder.addCase(
       vaultUnlocked,
       (_state, action) => action.payload.lastActivityTime

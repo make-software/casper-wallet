@@ -66,32 +66,28 @@ import { ISwapReviewData } from './types';
 
 interface UseSwapSubmitParams {
   review: ISwapReviewData | null;
-  /** Called once the swap leg has been accepted by a node. */
   onSubmitted: () => void;
-  /** Called when a Ledger account starts signing, so the page can show the device step. */
   onLedgerStep: () => void;
 }
 
 export interface ISwapSubmitApi {
   submit: () => Promise<void>;
   /**
-   * Stores the reviewed trade for the Ledger permission window. Must run from the page's
-   * `beforeLedgerActionCb`: the Connect CTA clears the whole ledger slice before calling it.
+   * Must run from the page's `beforeLedgerActionCb`: the Connect CTA clears the whole ledger
+   * slice before calling it.
    */
   parkLedgerPayload: () => Promise<void>;
   flowState: SwapSubmitState;
   isProcessing: boolean;
 }
 
-/** Which flow the hook ran, and its folded state — a swap has an approval leg, a wrap does not. */
 type SwapSubmitState =
   | { kind: 'swap'; state: ISwapFlowState }
   | { kind: 'wrap'; state: IWrapFlowState };
 
 /**
- * Runs the two-leg swap flow or the single-leg wrap flow, whichever `review` names, and folds
- * its `events$` through core's reducer for the matching arm. The runner and its signer are built
- * at submit time — never before, so the secret key's lifetime matches the flow's.
+ * Runs the swap or wrap flow `review` names, folding its `events$` through core's reducer. The
+ * runner and its signer are built at submit time, so the secret key's lifetime matches the flow's.
  */
 export const useSwapSubmit = ({
   review,
@@ -111,13 +107,10 @@ export const useSwapSubmit = ({
     initialWrapFlowState
   );
 
-  // Set synchronously rather than derived from the flow handle: a software-key account awaits a
-  // vault round-trip before a runner exists, and a second press in that window would swap twice.
+  // Set synchronously: before a runner exists, a second press would swap twice.
   const isSubmittingRef = useRef(false);
   const subscriptionRef = useRef<Subscription | null>(null);
-  // Which arm actually ran, pinned once `submit` starts so a later `review` change (there isn't
-  // one today, but the confirm screen holds `review` in its parent's state) can't retarget an
-  // in-flight flow's rendered rows.
+  // Pinned once `submit` starts, so a later `review` change can't retarget an in-flight flow.
   const runKindRef = useRef<'swap' | 'wrap' | null>(null);
   // The payload last dispatched to the store, kept so a re-park can amend it (carrying a
   // recorded approval forward) instead of rebuilding it from settings that may have moved on.
@@ -142,16 +135,13 @@ export const useSwapSubmit = ({
         ) === true
       : true);
 
-  // Mirrored into refs so the unmount cleanup can stay dependency-free — re-running it on a
-  // network or window-id change would drop a payload the permission window is about to sign.
+  // Mirrored into refs so the unmount cleanup can stay dependency-free.
   const permissionWindowIdRef = useRef(permissionWindowId);
   const isLedgerAccountRef = useRef(isLedgerAccount);
   permissionWindowIdRef.current = permissionWindowId;
   isLedgerAccountRef.current = isLedgerAccount;
 
-  // Skipped while a permission window is open, because that window owns the payload and the
-  // handlers watching its close clear the whole slice. Otherwise a trade signed inline or
-  // abandoned stays parked and is re-run by the next flow that opens the window.
+  // Skipped while a permission window is open: that window owns the payload.
   const clearParkedPayload = useCallback(() => {
     parkedPayloadRef.current = null;
 
@@ -196,8 +186,7 @@ export const useSwapSubmit = ({
     (outcome: SwapFlowOutcome) => {
       switch (outcome.kind) {
         case 'sent': {
-          // Every leg is the user's own transaction, so all of them belong in Activity right
-          // away, not only the one the success screen gates on.
+          // Every leg is the user's own transaction, so all of them belong in Activity.
           dispatchToMainStore(accountPendingDeployHashesChanged(outcome.hash));
 
           if (outcome.isSubmitted) {
@@ -236,8 +225,7 @@ export const useSwapSubmit = ({
           break;
 
         case 'cancelled':
-          // The reducer has already returned the step to `confirm`; releasing the guard is what
-          // lets the user press the CTA again, and the retry re-parks through the page.
+          // Releasing the guard lets the user press the CTA again; the retry re-parks via the page.
           isSubmittingRef.current = false;
           clearParkedPayload();
 
@@ -266,8 +254,6 @@ export const useSwapSubmit = ({
       return;
     }
 
-    // Snapshots the slippage and deadline in force now, so the permission window signs those
-    // rather than whatever the settings sheet holds by the time it opens.
     // A resumed attempt carries forward whatever approval the previous one already recorded.
     const previouslyParked = parkedPayloadRef.current;
     const pendingApproval =
@@ -275,6 +261,7 @@ export const useSwapSubmit = ({
         ? previouslyParked.pendingApproval
         : undefined;
 
+    // Snapshots the slippage and deadline in force now, not what the settings sheet holds later.
     const payload: ILedgerSwapPayload =
       review.kind === 'wrap'
         ? {
@@ -384,8 +371,7 @@ export const useSwapSubmit = ({
 
         subscriptionRef.current = subscription;
 
-        // Awaited so this call spans the flow instead of its start: a Ledger resume keys off
-        // the action still being outstanding. Rejections are the subscription's to report.
+        // Awaited so this call spans the flow: a Ledger resume keys off the outstanding action.
         await handle.done.catch(() => undefined);
         isSubmittingRef.current = false;
       } else {
@@ -419,8 +405,6 @@ export const useSwapSubmit = ({
 
         subscriptionRef.current = subscription;
 
-        // Awaited so this call spans the flow instead of its start: a Ledger resume keys off
-        // the action still being outstanding. Rejections are the subscription's to report.
         await handle.done.catch(() => undefined);
         isSubmittingRef.current = false;
       }

@@ -17,14 +17,8 @@ import {
 /**
  * Firefox e2e smoke — the DNR Referer rewrite on a real Firefox build.
  *
- * Three assertions (per the Task 5.4 brief):
- *   1. Firefox launches with the built extension loaded (temporary install).
- *   2. An extension page (popup.html) opens under the moz-extension:// origin.
- *   3. `fetch('https://node.cspr.cloud/rpc', …)` from that extension page
- *      returns HTTP 200. It returns 401 if the extension's declarativeNetRequest
- *      rule did NOT rewrite the Referer header — so a 200 proves the rewrite
- *      fired on the real Firefox build (Task 5.1 audit: the API authenticates by
- *      `Referer: https://casperwallet.io`).
+ * The RPC API authenticates by `Referer: https://casperwallet.io`, so a 200 from
+ * an extension page proves the declarativeNetRequest rule rewrote it; 401 if not.
  */
 
 const FIREFOX_BINARY =
@@ -44,13 +38,6 @@ const RPC_URL = 'https://node.cspr.cloud/rpc';
 let driver: FirefoxDriver | undefined;
 let tmpDir: string | undefined;
 
-/**
- * Copy the built extension to a temp dir, inject a fixed gecko add-on id into
- * its manifest.json, and zip it into an unsigned .xpi. A fixed id is required so
- * the pre-seeded `extensions.webextensions.uuids` pref maps to it and the
- * moz-extension origin becomes deterministic (avoids the random-UUID discovery
- * problem after a temporary install).
- */
 function buildXpi(): { xpiPath: string; tmpDir: string } {
   if (!fs.existsSync(path.join(BUILD_DIR, 'manifest.json'))) {
     throw new Error(
@@ -96,7 +83,6 @@ test('Firefox loads the extension and the DNR Referer rewrite makes RPC return 2
   const options = new Options();
   options.setBinary(FIREFOX_BINARY);
   options.addArguments('-headless');
-  // Pre-seed the internal UUID so the extension origin is known up-front.
   options.setPreference(
     'extensions.webextensions.uuids',
     JSON.stringify({ [ADDON_ID]: EXTENSION_UUID })
@@ -109,27 +95,22 @@ test('Firefox loads the extension and the DNR Referer rewrite makes RPC return 2
 
   const service = new ServiceBuilder(geckodriverPath);
 
-  // `Builder#build()` is typed to return the base `WebDriver`, but configuring
-  // `forBrowser('firefox')` with a Firefox `ServiceBuilder` makes it construct
-  // a `firefox.Driver` under the hood — the narrowing below reflects that
-  // runtime fact so `installAddon` (Firefox-only) type-checks honestly.
+  // `Builder#build()` is typed as the base `WebDriver`, but `forBrowser('firefox')`
+  // with a Firefox `ServiceBuilder` constructs a `firefox.Driver` at runtime.
   driver = (await new Builder()
     .forBrowser('firefox')
     .setFirefoxOptions(options)
     .setFirefoxService(service)
     .build()) as FirefoxDriver;
 
-  // Assertion 1: Firefox launched with the built extension loaded.
   const installedId = await driver.installAddon(built.xpiPath, true);
   expect(installedId).toBeTruthy();
 
-  // Assertion 2: an extension page opens under the pre-seeded origin.
   const popupUrl = `moz-extension://${EXTENSION_UUID}/popup.html`;
   await driver.get(popupUrl);
   const currentUrl = await driver.getCurrentUrl();
   expect(currentUrl).toBe(popupUrl);
 
-  // Assertion 3: RPC from the extension page returns 200 => DNR rewrite fired.
   const result = (await driver.executeAsyncScript(
     `
       const done = arguments[arguments.length - 1];

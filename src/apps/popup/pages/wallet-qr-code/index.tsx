@@ -47,9 +47,7 @@ export const WalletQrCodePage = () => {
 
     const payload = await buildQrSyncPayload(derivedAccounts, importedAccounts);
 
-    // A refused or incomplete payload must not reach the phone. Returning
-    // resolves the promise the password page awaits, so it renders no form
-    // error on top of the error page.
+    // Returning resolves the password page's promise, so it shows no form error over the error page.
     if (!payload) {
       setIsLoading(false);
       setHasError(true);
@@ -63,8 +61,7 @@ export const WalletQrCodePage = () => {
       )
     );
 
-    // settles only once the QR data exists, so a worker failure rejects into
-    // the password page's catch instead of leaving it spinning forever
+    // settles only once the QR data exists, so a worker failure rejects instead of spinning forever
     return new Promise<void>((resolve, reject) => {
       worker.postMessage({ password, ...payload });
 
@@ -89,8 +86,7 @@ export const WalletQrCodePage = () => {
         resolve();
       };
 
-      // only reached by a script load failure — a rejection inside the worker
-      // arrives through onmessage instead
+      // only reached by a script load failure — a worker rejection arrives through onmessage
       worker.onerror = error => fail(error);
     });
   };

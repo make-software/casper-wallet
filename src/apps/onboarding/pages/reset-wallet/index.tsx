@@ -11,8 +11,6 @@ import { Button, Checkbox } from '@libs/ui/components';
 
 import { ResetWalletPageContent } from './content';
 
-// Design of this page is temporary. Should be changed after it will be done in Figma
-
 export function ResetWalletPage() {
   const navigate = useTypedNavigate();
   const [isChecked, setIsChecked] = useState<boolean>(false);

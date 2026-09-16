@@ -24,7 +24,6 @@ export interface SwapRouteRowProps extends Pick<
 > {
   path: string[];
   tokens: IDexToken[];
-  /** Cost quoted in the `Best price route costs {{cost}}` paragraph. */
   networkCost: string | null;
 }
 

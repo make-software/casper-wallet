@@ -15,14 +15,7 @@ export interface DexTokenIconProps {
   size?: number;
 }
 
-/**
- * Logo of a token in the swap flow.
- *
- * The url comes from the trade API and points at whatever host the token's own
- * team runs, so an icon that 404s or 502s is a normal state, not an anomaly —
- * hence the bundled fallback, without which the row loses its leading slot and
- * the text jumps left.
- */
+/** The url is whatever host the token's own team runs, so falling back is a normal path. */
 export const DexTokenIcon = ({
   icon,
   symbol,

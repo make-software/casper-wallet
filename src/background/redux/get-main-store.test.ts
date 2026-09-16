@@ -6,28 +6,16 @@ import {
 } from '@background/redux/windowManagement/actions';
 import { REQUEST_SESSION_KEY } from '@background/redux/windowManagement/session-store';
 
-// --- storage / runtime mock -------------------------------------------------
 // storage.local.get returns the per-test snapshot; set/remove/sendMessage are
-// no-op spies that absorb the subscribe-persist write and the saga deadline
-// clears armed by startBackground (no real timers are scheduled for a
-// keys-only snapshot). This is the same mock style as the handler/saga tests.
-// `storage.session` is here to exercise hydration, not to avoid a throw.
+// no-op spies that absorb the subscribe-persist write and the saga deadline clears.
 const storageGet = jest.fn<Promise<Record<string, unknown>>, [unknown]>();
 const storageSet = jest.fn().mockResolvedValue(undefined);
 const storageRemove = jest.fn().mockResolvedValue(undefined);
 const runtimeSendMessage = jest.fn().mockResolvedValue(undefined);
 const sessionGet = jest.fn<Promise<Record<string, unknown>>, [unknown]>();
 const sessionSet = jest.fn().mockResolvedValue(undefined);
-// Absent until now, so the fire-and-forget `sweepOrphanedRequests(...).catch`
-// in `getExistingMainStoreSingletonOrInit` silently swallowed a
-// `windows.getAll is not a function` TypeError in every test here — the sweep
-// call was wired but never actually observed to run.
-//
-// Defaults to reporting `mirroredRequest`'s own requestId ('req-1') as still
-// LIVE. Every hydration test below seeds that same row, and the sweep only
-// short-circuits (no `delay(CANCEL_GRACE_MS)`, no cancel/log side effects)
-// when it finds a hydrated open row's id among the live ones — anything else
-// would race a real 250ms timer against whichever test runs next.
+// Defaults to reporting `mirroredRequest`'s own requestId as still live: the
+// sweep short-circuits only then, and otherwise races a real timer into the next test.
 const windowsGetAll = jest.fn().mockResolvedValue([
   {
     id: 1,
@@ -69,9 +57,8 @@ jest.mock('@src/utils', () => ({
   isEphemeralBackgroundBuild: true
 }));
 
-// Drive the REAL preload of getExistingMainStoreSingletonOrInit with a fresh
-// module registry so the module-level `storeSingleton` let is undefined each
-// time. Returns the initialised store.
+// Fresh module registry per call, so the module-level `storeSingleton` let is
+// undefined each time.
 async function initWithKeysSnapshot(keys: KeysState | undefined) {
   let store: Awaited<
     ReturnType<
@@ -104,7 +91,6 @@ describe('getExistingMainStoreSingletonOrInit — keysDoesExist preload derivati
       passwordHash: 'x',
       passwordSaltHash: 'y',
       keyDerivationSaltHash: 'z',
-      // Poisoned: contradicts the hashes. Must be ignored / recomputed.
       keysDoesExist: false
     });
 
@@ -116,7 +102,6 @@ describe('getExistingMainStoreSingletonOrInit — keysDoesExist preload derivati
       passwordHash: null,
       passwordSaltHash: null,
       keyDerivationSaltHash: null,
-      // Poisoned: contradicts the (absent) hashes. Must be ignored / recomputed.
       keysDoesExist: true
     });
 
@@ -130,10 +115,8 @@ describe('getExistingMainStoreSingletonOrInit — keysDoesExist preload derivati
   });
 });
 
-// Every key the background pushes to UI replicas. Pinned exactly: a new slice
-// must be an explicit decision, and `windowManagement` must stay narrowed to
-// `windowId` — `requests` maps each in-flight requestId to its dapp origin and
-// tabId, which no replica reads and every replica would otherwise receive.
+// Pinned exactly: a new slice must be an explicit decision, and
+// `windowManagement` must stay narrowed to `windowId`.
 const EXPECTED_POPUP_STATE_KEYS = [
   'accountInfo',
   'activeOrigin',
@@ -205,12 +188,10 @@ describe('selectPopupState broadcast — replica privacy narrowing', () => {
       })
     );
 
-    // The request IS in the background store…
     expect(store.getState().windowManagement.requests['req-1']).toMatchObject({
       status: 'open',
       origin: 'https://dapp.example'
     });
-    // …and must NOT be anywhere in what replicas receive.
     expect(JSON.stringify(lastPopupStateBroadcast())).not.toContain(
       'dapp.example'
     );
@@ -333,9 +314,8 @@ describe('preload hydration — the session mirror', () => {
   });
 
   it('actually runs the sweep on the hydration-enabled path, not just calls it', async () => {
-    // A non-empty hydrated OPEN row is required: `sweepOrphanedRequests`
-    // returns before enumerating windows when there is nothing to sweep, so
-    // an empty map would pass even with a totally disconnected sweep call.
+    // A non-empty hydrated OPEN row is required: the sweep returns before
+    // enumerating windows when there is nothing to sweep.
     sessionGet.mockResolvedValue({
       [REQUEST_SESSION_KEY]: {
         requests: { 'req-1': mirroredRequest },
@@ -418,9 +398,8 @@ describe('replica broadcast — rejection handling', () => {
   it('stays silent when the rejection is a bare string, not an Error', async () => {
     const store = await initWithKeysSnapshot(undefined);
     consoleErrorSpy.mockClear();
-    // Some polyfills reject with a plain string rather than an Error. The
-    // guard must match on the message text regardless of the rejection's
-    // type, or every store change with no popup open would log.
+    // Some polyfills reject with a plain string, so the guard must match on the
+    // message text regardless of the rejection's type.
     runtimeSendMessage.mockRejectedValue(
       'Could not establish connection. Receiving end does not exist.'
     );

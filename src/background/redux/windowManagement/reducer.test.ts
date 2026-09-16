@@ -135,11 +135,8 @@ describe('windowManagement reducer', () => {
   });
 
   it('windowManagementReseted returns the shared initialState reference', () => {
-    // Load-bearing for spec §8.3: the get-main-store.ts subscriber guard
-    // compares `requests`/`windowId` by reference, so a state that was already
-    // at rest must reset to the SAME object — the reset flow does not rely on
-    // that guard to persist the clear, but the identity is still the contract
-    // this reducer promises every other reset case.
+    // The get-main-store.ts subscriber guard compares `requests`/`windowId` by
+    // reference, so a state already at rest must reset to the SAME object.
     const first = reducer(empty, windowManagementReseted());
     const second = reducer(first, windowManagementReseted());
 
@@ -187,10 +184,8 @@ describe('windowManagement requests', () => {
   });
 
   it('windowRequestOpened records frameId 0 rather than erasing it', () => {
-    // `0` is the top-frame value and falsy, so `action.payload.frameId ||
-    // undefined` would erase exactly this case while leaving `frameId: 4`
-    // above untouched — assert the WHOLE descriptor so an erased `0` cannot
-    // pass as a `toEqual`-ignored `undefined` key.
+    // `0` is the top-frame value and falsy, so assert the WHOLE descriptor — an
+    // erased `0` would otherwise pass as a `toEqual`-ignored `undefined` key.
     const state = reducer(
       undefined,
       windowRequestOpened({
@@ -342,11 +337,7 @@ describe('windowManagement requests', () => {
 
   describe('a requestId that collides with an Object.prototype member', () => {
     // `requestId` is dapp-controlled and the map is a plain object, so
-    // `requests[id]` can read an INHERITED member. Reading it with `!= null`
-    // and with `?.status` then disagree — and the SDK entry guard used the
-    // second while this reducer used the first, so one of five string literals
-    // was refused registration here while the caller was told it was fresh: an
-    // approval window for a request the model never knew about.
+    // `requests[id] != null` and `?.status` disagree on an INHERITED member.
     it.each(['toString', 'constructor', 'valueOf', 'hasOwnProperty'])(
       'registers %s like any other id',
       key => {
@@ -381,10 +372,8 @@ describe('windowManagement requests', () => {
     });
 
     it('refuses `__proto__` outright, leaving the map untouched', () => {
-      // Unlike the other four this one cannot be stored at all: the copy immer
-      // makes assigns the key, and assigning `__proto__` sets the object's
-      // PROTOTYPE instead of adding an entry — so the descriptor would become
-      // the prototype of every later lookup in the map.
+      // Unlike the other four this one cannot be stored at all: assigning
+      // `__proto__` sets the object's PROTOTYPE instead of adding an entry.
       const next = reducer(empty, opened('__proto__'));
 
       expect(next).toBe(empty);
@@ -393,11 +382,8 @@ describe('windowManagement requests', () => {
   });
 
   describe('a hole in the requests map is skipped, not crashed on', () => {
-    // `requests` is `Partial<Record<…>>` so that the existence guards are real
-    // code to the compiler rather than provably-dead branches. That makes an
-    // explicitly `undefined` entry representable — persistence rehydration and
-    // `delete`-based eviction both produce shapes near this — so the two places
-    // that walk the whole map must tolerate it.
+    // `requests` is `Partial<Record<…>>` so the existence guards are real code
+    // to the compiler; an explicitly `undefined` entry must be tolerated.
     const withHole = { ...empty, requests: { ghost: undefined } };
 
     it('windowDetachedFromRequests leaves it alone', () => {
@@ -418,13 +404,8 @@ describe('windowManagement requests', () => {
   });
 
   describe('the tombstone is a transition, not an upsert', () => {
-    // Its two siblings refuse to act on a missing or wrong-status entry; this
-    // one wrote unconditionally, so the union modelled ∅ → open → responded
-    // while the reducer permitted ∅ → responded. Reachable whenever the UI
-    // forwards a response for an id the store no longer has — one of the
-    // residual descriptor-less paths — and the orphan then consumes a slot in
-    // the tombstone cap and makes the SDK entry guard reject that id as a
-    // duplicate.
+    // The union models ∅ → open → responded: an unconditional write would let a
+    // response for an id the store no longer has leave an orphan tombstone.
     it('refuses to tombstone a requestId that was never registered', () => {
       const next = reducer(
         empty,
@@ -446,13 +427,8 @@ describe('windowManagement requests', () => {
 
   describe('tombstone eviction', () => {
     it('caps the responded entries instead of growing for the whole session', () => {
-      // Nothing ever deleted a key. Before the session mirror, an MV3
-      // service-worker restart eventually wiped the map; now Chrome/Edge
-      // tombstones survive it too (residual paths aside). But
-      // `manifest.v2.json` and `manifest.v2.safari.json` both declare
-      // `"persistent": true` — on Firefox and Safari the background page is
-      // never torn down, so this grows by one permanent entry per request,
-      // keyed by a dapp-supplied string, for the entire browser session.
+      // On Firefox and Safari the background page is persistent, so without a
+      // cap this grows by one permanent dapp-keyed entry per request.
       let state = empty;
       for (let i = 0; i < MAX_RESPONDED_TOMBSTONES + 10; i++) {
         state = reducer(state, opened(`r${i}`));
@@ -473,9 +449,8 @@ describe('windowManagement requests', () => {
       });
     });
 
-    // Eviction ranked on `Object.keys`, whose order is not registration order:
-    // an integer-like dapp-chosen key is enumerated ahead of every string key
-    // however recently it was written, so `"42"` was always evicted first.
+    // `Object.keys` order is not registration order: an integer-like dapp-chosen
+    // key enumerates ahead of every string key however recently it was written.
     it('does not evict an integer-like key ahead of older string-keyed tombstones', () => {
       let state = empty;
       for (let i = 0; i < MAX_RESPONDED_TOMBSTONES; i++) {
@@ -496,14 +471,8 @@ describe('windowManagement requests', () => {
       expect(state.requests.r0).toBeUndefined();
     });
 
-    // Eviction is oldest-ANSWERED-first, not oldest-REGISTERED-first: a
-    // request that registered before every other one but is answered last
-    // must get the highest seq and outlive tombstones for requests that
-    // registered later but were answered sooner. Restamping the tombstone at
-    // respond time (rather than keeping the registration seq) is what makes
-    // this hold — otherwise `first` would answer with its own registration
-    // seq of 0, making it the lowest-seq (oldest) tombstone and evicting
-    // itself in the very dispatch that created it.
+    // Eviction is oldest-ANSWERED-first, not oldest-REGISTERED-first: restamping
+    // at respond time is what stops `first` evicting its own tombstone.
     it('a request registered first but answered last survives eviction over an earlier-answered tombstone', () => {
       let state = reducer(empty, opened('first'));
 
@@ -584,10 +553,8 @@ describe('windowManagement requests', () => {
       state = reducer(state, opened('over-cap'));
       state = reducer(state, windowRequestResponded({ requestId: 'r0' }));
 
-      // If the refused 'over-cap' write had ALSO consumed an ordinal, the next
-      // accepted one would be stamped one past where it should be. The
-      // `windowRequestResponded` restamp above is the one ordinal genuinely
-      // spent between the loop (0..MAX_OPEN_REQUESTS-1) and this request.
+      // A refused write must consume no ordinal; the `windowRequestResponded`
+      // restamp above is the one genuinely spent before this request.
       const accepted = reducer(state, opened('under-cap'));
       expect(accepted.requests['under-cap']).toMatchObject({
         seq: MAX_OPEN_REQUESTS + 1
@@ -710,10 +677,8 @@ describe('windowManagement device confirmation', () => {
     expect(next).toBe(empty);
   });
 
-  // Identity, not just equality. The store subscriber does no state-change
-  // comparison, so every new object is a popupState broadcast to every replica
-  // plus a full storage.local rewrite — the same cost `windowDetachedFromRequests`
-  // gates its dispatch on. A repeated report must not pay it.
+  // Identity, not just equality: the store subscriber does no comparison, so a
+  // new object costs a broadcast to every replica plus a storage.local rewrite.
   it('returns the same state when the flag already holds that value', () => {
     let state = reducer(empty, opened('r1'));
     state = reducer(

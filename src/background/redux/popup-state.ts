@@ -6,9 +6,8 @@ import { WindowManagementState } from '@background/redux/windowManagement/types'
 
 import { Account } from '@libs/types/account';
 
-// The single definition of what leaves the background for UI replicas. A slice is
-// broadcast only by being listed here, and only in the shape the overrides below
-// pin — adding either is a deliberate, reviewable edit.
+// The single definition of what leaves the background for UI replicas: a slice is
+// broadcast only by being listed here, and only in the shape the overrides below pin.
 export const POPUP_SLICES = [
   'keys',
   'session',
@@ -48,9 +47,8 @@ type BroadcastVaultState = Omit<
 };
 
 type PopupSliceOverrides = {
-  // Cipher/hash material stays background-only since WALLET-1424 — see
-  // handlers/unlock-requests.ts, which verifies passwords and unlocks the
-  // vault without ever sending this to a replica.
+  // Cipher/hash material stays background-only — see handlers/unlock-requests.ts,
+  // which verifies passwords without ever sending this to a replica.
   keys: Omit<
     KeysState,
     'passwordHash' | 'passwordSaltHash' | 'keyDerivationSaltHash'
@@ -102,10 +100,8 @@ export const selectPopupState = (state: RootState): PopupState => ({
   csprNameExpirations: state.csprNameExpirations
 });
 
-// Field-by-field, not `{ ...session, encryptionKeyHash: null }`: a spread both
-// satisfies and widens the override type, so the next field added to
-// SessionState — the slice that holds session-secret material — would reach
-// every page with no compile error.
+// Field-by-field, not a spread: a spread both satisfies and widens the override
+// type, so the next field added to SessionState would reach every page silently.
 function popupSession(session: SessionState): PopupSliceOverrides['session'] {
   return {
     encryptionKeyHash: null,
@@ -120,9 +116,8 @@ function popupVault(vault: VaultState): BroadcastVaultState {
     secretPhrase: null,
     accounts: vault.accounts.map(({ secretKey, ...account }) => ({
       ...account,
-      // The literal type is the enforcement: forgetting to blank a key is a
-      // compile error. `watching` means watch-only specifically — a Ledger
-      // account also has an empty secretKey but is excluded via `hardware`.
+      // The literal type is the enforcement: forgetting to blank a key is a compile
+      // error. `watching` means watch-only — a Ledger account is excluded via `hardware`.
       secretKey: '' as const,
       watching: secretKey === '' && account.hardware == null
     })),

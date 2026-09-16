@@ -39,11 +39,8 @@ export async function buildQrSyncPayload(
     return null;
   }
 
-  // The map is keyed by name and matched against the live vault, while these
-  // names come from the replica snapshot — a rename or removal in another window
-  // makes a key vanish. A non-watching account without one must fail the sync
-  // rather than reach the phone as `secretKey: ''` behind a Success screen; the
-  // key export path holds the same invariant (WALLET-1345).
+  // These names come from the replica snapshot while the map is keyed against the live vault: a
+  // non-watching account whose key went missing must fail the sync, not reach the phone as `''`.
   const missing = importedAccounts.filter(
     account => account.watching !== true && !secretKeys[account.name]
   ).length;
@@ -56,8 +53,7 @@ export async function buildQrSyncPayload(
 
   return {
     secretPhrase,
-    // The worker sends only derived accounts' names — the mobile client
-    // re-derives their keys from the phrase.
+    // The mobile client re-derives derived accounts' keys from the phrase.
     derivedAccounts: derivedAccounts.map(({ name, publicKey }) => ({
       name,
       publicKey,

@@ -1,27 +1,9 @@
 #!/usr/bin/env node
 /**
- * Runtime dependency audit gate.
- *
- * Replaces `npm audit --omit=dev --audit-level=high`, which could not express the
- * rule the CI step actually wants: fail on a high or critical advisory **that
- * reaches the shipped bundle**. Plain `npm audit` has no notion of reachability,
- * so a package that is declared a runtime dependency but never bundled fails the
- * build with nothing to fix.
- *
- * This script keeps the same threshold and adds a reviewed allowlist:
- *
- * - Any high/critical advisory NOT in ACCEPTED fails the build. New advisories
- *   still break CI, which is the whole point of the gate.
- * - Every ACCEPTED entry carries the reason it does not apply and a `reviewBy`
- *   date. Past that date the entry stops suppressing and the build fails, so an
- *   exception cannot quietly become permanent.
- * - Accepted advisories are always printed. Suppressed-and-invisible is how a
- *   real finding gets lost.
- *
- * Note that `npm audit` reports one entry per node in the dependency chain, so a
- * single advisory shows up several times (brace-expansion, minimatch, glob,
- * casper-js-sdk, casper-wallet-core = one advisory). Findings are deduplicated by
- * advisory id.
+ * Runtime dependency audit gate: a high or critical advisory fails the build unless
+ * it is in ACCEPTED, whose entries stop suppressing past their `reviewBy` date so an
+ * exception cannot quietly become permanent. `npm audit` reports one entry per node
+ * in the dependency chain, so findings are deduplicated by advisory id.
  */
 
 import { execFile } from 'node:child_process';
@@ -29,19 +11,14 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
-/** Severities that fail the build. */
 const BLOCKING = new Set(['high', 'critical']);
 
 /**
- * Advisories reviewed and found not to affect the shipped extension.
- *
- * Before adding an entry, establish that the vulnerable code cannot run in the
- * product — not merely that it is inconvenient to fix. Record how that was
- * checked, so the next person can repeat it instead of trusting this comment.
+ * Advisories reviewed and found not to affect the shipped extension. Establish that
+ * the vulnerable code cannot run in the product, and record how that was checked.
  */
 const ACCEPTED = [];
 
-/** Runs npm audit. A non-zero exit is expected when advisories exist. */
 async function runNpmAudit() {
   try {
     const { stdout } = await execFileAsync(
@@ -57,13 +34,11 @@ async function runNpmAudit() {
   }
 }
 
-/** Extracts the GHSA id from an advisory entry. */
 function advisoryId(via) {
   const fromUrl = /GHSA-[a-z0-9-]+/i.exec(via.url ?? '');
   return fromUrl ? fromUrl[0] : `npm-${via.source}`;
 }
 
-/** Collects distinct blocking advisories across every reported package. */
 function collectBlockingAdvisories(report) {
   const byId = new Map();
   for (const entry of Object.values(report.vulnerabilities ?? {})) {

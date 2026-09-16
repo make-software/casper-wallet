@@ -12,7 +12,6 @@ jest.mock('webextension-polyfill', () => ({
 
 const mockConnect = runtime.connect as jest.Mock;
 
-/** A fake Port whose listeners the test drives directly. */
 function makePort() {
   const messageListeners: ((message: unknown) => void)[] = [];
   const disconnectListeners: (() => void)[] = [];
@@ -54,8 +53,7 @@ it('resolves with the first message and disconnects', async () => {
   port.emitMessage({ status: 'ok' });
 
   await expect(pending).resolves.toEqual({ status: 'ok' });
-  // The background returns early for any other port name *without*
-  // disconnecting, so a wrong name costs the caller the whole backstop.
+  // A wrong port name returns early without disconnecting, costing the backstop.
   expect(mockConnect).toHaveBeenCalledWith({ name: BACKGROUND_PORT_NAME });
   // Payload included: the background refuses a request whose payload is missing.
   expect(port.postMessage).toHaveBeenCalledWith(request);
@@ -70,8 +68,7 @@ it('retries when the port disconnects before a response', async () => {
   const pending = requestOverPort<{ status: string }>({ type: 'X' });
   first.emitDisconnect();
 
-  // Just short of the first delay: a zeroed backoff would already have
-  // reconnected here, and the retry count alone cannot see that.
+  // Just short of the first delay: a zeroed backoff would already have reconnected.
   await jest.advanceTimersByTimeAsync(249);
   expect(mockConnect).toHaveBeenCalledTimes(1);
 
@@ -131,9 +128,7 @@ it('gives up after the configured retries', async () => {
   expect(mockConnect).toHaveBeenCalledTimes(3);
 });
 
-// The one exit that left the timer armed. A synchronous throw rejected with
-// `settled` still false, so the timeout stayed pending for its full duration —
-// holding the executor's closure and, with it, the request's passwords.
+// An armed timeout holds the executor's closure, and with it the request's passwords.
 it('clears the timeout when postMessage throws synchronously', async () => {
   const port = makePort();
   port.postMessage.mockImplementation(() => {
@@ -146,8 +141,6 @@ it('clears the timeout when postMessage throws synchronously', async () => {
   await expect(pending).rejects.toThrow('Extension context invalidated');
   expect(port.disconnect).toHaveBeenCalledTimes(1);
 
-  // If the timer were still armed it would fire here and disconnect a second
-  // time.
   await jest.advanceTimersByTimeAsync(PORT_RESPONSE_TIMEOUT_MS * 2);
   expect(port.disconnect).toHaveBeenCalledTimes(1);
 });

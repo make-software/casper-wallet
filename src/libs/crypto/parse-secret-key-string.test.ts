@@ -7,8 +7,6 @@ import { AsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 
 import { parseSecretKeyString } from './parse-secret-key-string';
 
-/** manual testing should confirm that imported keys have the same public key and private key than legacy signer */
-
 it('should import key pair from the pem file, validate keys and generate the same file from this key pair', () => {
   (
     [

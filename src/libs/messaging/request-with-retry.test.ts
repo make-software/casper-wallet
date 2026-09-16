@@ -1,7 +1,6 @@
 import { requestWithRetry } from './request-with-retry';
 
-// Mirrors the module's un-exported constants (kept module-private after
-// WALLET-1424 removed `use-private-state.ts`, its only outside reader).
+// Mirrors the module's un-exported constants.
 const FETCH_TIMEOUT_MS = 5000;
 const RETRY_DELAYS_MS = [250, 500];
 
@@ -77,13 +76,9 @@ describe('requestWithRetry', () => {
 
     const result = requestWithRetry(send);
 
-    // First attempt exhausts its own full timeout window.
     await jest.advanceTimersByTimeAsync(FETCH_TIMEOUT_MS);
     expect(send).toHaveBeenCalledTimes(1);
 
-    // Backoff, then the second attempt — already past a hypothetical
-    // cumulative 5s budget, yet it still gets its own fresh window and
-    // succeeds well inside it.
     await jest.advanceTimersByTimeAsync(RETRY_DELAYS_MS[0]);
     expect(send).toHaveBeenCalledTimes(2);
 

@@ -57,7 +57,6 @@ import './signing-repositories';
 import { emitSdkEventToActiveTabsWithOrigin } from './utils';
 import './wallet-repositories';
 
-// setup default onboarding action
 async function handleActionClick() {
   await openOnboardingUi();
 }
@@ -81,12 +80,6 @@ runtime.onStartup.addListener(init);
 management?.onEnabled?.addListener(init);
 
 runtime.onInstalled.addListener(async () => {
-  // this will run on installation or update so
-  // first clear previous rules, then register new rules
-  // DEV MODE: clean store on installation
-  // storage.local.remove([REDUX_STORAGE_KEY]);
-  //
-  // after installation/update check if onboarding is completed
   isOnboardingCompleted().then(async yes => {
     await syncOnboardingFlow(yes);
 
@@ -103,7 +96,6 @@ const updateOrigin = async (windowId: number) => {
   }
 
   const window = await windows.get(windowId);
-  // skip when non-normal windows
   if (window.type !== 'normal') {
     return;
   }
@@ -116,7 +108,6 @@ const updateOrigin = async (windowId: number) => {
   const tab0 = activeTabs[0];
 
   let newActiveOrigin = null;
-  // use only http based windows
   if (activeTabs.length === 1 && tab0.url && hasHttpPrefix(tab0.url)) {
     newActiveOrigin = getUrlOrigin(tab0.url) || null;
   }
@@ -170,19 +161,8 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
-// Single init-time listener for the approval-window lifecycle. Replaces the
-// per-creation `windows.onRemoved` listeners that used to be added inside
-// `createOpenWindow` (one leaked per opened window). `windows.onRemoved` fires
-// for ANY window; `handleWindowRemoved` itself decides whether the removed
-// window was the last display for any open request (a request the Ledger
-// permission window still shows survives), waits a grace period, then cancels
-// the survivors, nulls the slice `windowId` if it is still tracking the removed
-// window, and clears the tracked export-keys id.
-//
-// The body lives in a handler so it can be tested — this entry point is
-// imported by no test. Only the store init is left here, and its rejection is
-// caught: `getExistingMainStoreSingletonOrInit` can reject, and `void` on a
-// bare IIFE would discard that with no `unhandledrejection` handler anywhere.
+// Fires for ANY window; `handleWindowRemoved` decides what the removal means.
+// The store init can reject, and nothing else would report that.
 windows.onRemoved.addListener((removedWindowId: number) => {
   void (async () => {
     const store = await getExistingMainStoreSingletonOrInit();
@@ -190,22 +170,14 @@ windows.onRemoved.addListener((removedWindowId: number) => {
   })().catch(error => console.error('windows.onRemoved handler failed', error));
 });
 
-// NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 // Thin router: parse → route → delegate. All business logic lives in
-// `@background/handlers/*`; each handler returns a `HandlerResult`:
-//   { handled: false }                   → try the next handler
-//   { handled: true }                    → handled, never respond (promise
-//                                           stays pending — e.g. popupStateUpdated)
-//   { handled: true, response: <value> } → handled, sendResponse(value)
-// A thrown error becomes sendError(error).
+// `@background/handlers/*`.
 runtime.onMessage.addListener(
   async (message: unknown, sender: Runtime.MessageSender) => {
     const store = await getExistingMainStoreSingletonOrInit();
 
     return new Promise(async (sendResponse, sendError) => {
-      // A handled result either carries a `response` (→ sendResponse) or not
-      // (→ leave the promise pending). Centralized so all handler call sites
-      // route their result identically.
+      // A handled result with no `response` leaves the promise pending.
       const respond = (result: { response?: unknown }) =>
         'response' in result ? sendResponse(result.response) : undefined;
 
@@ -227,10 +199,8 @@ runtime.onMessage.addListener(
         if (typeof action.type === 'string') {
           const typedAction = action as { type: string };
 
-          // Redux forwarding takes `sender`: its window-attach branch decides a
-          // request's lifecycle, so that one is gated the same way the two
-          // handlers below are. It is therefore called directly rather than
-          // through a uniform (action, store) loop.
+          // Redux forwarding takes `sender`: its window-attach branch decides
+          // a request's lifecycle, so it is gated like the handlers below.
           const reduxResult = await handleReduxAction(
             typedAction,
             sender,
@@ -245,8 +215,7 @@ runtime.onMessage.addListener(
             return respond(bringWeb3Result);
           }
 
-          // SDK-response reroute is gated on `sender` (only extension UI may
-          // originate it), so it is called outside the uniform loop above.
+          // Gated on `sender`: only extension UI may originate an SDK response.
           const sdkResponseResult = await handleSdkResponseToTab(
             typedAction,
             sender,
@@ -256,8 +225,6 @@ runtime.onMessage.addListener(
             return respond(sdkResponseResult);
           }
 
-          // Legacy import handler is gated on `sender` (P0.1), so it is called
-          // outside the uniform loop above.
           const legacyResult = handleLegacyImport(typedAction, sender, store);
           if (legacyResult.handled) {
             return respond(legacyResult);
@@ -302,7 +269,7 @@ initKeepAlive().catch(error => {
 
 if (isChromeBuild) {
   bringInitBackground({
-    identifier: process.env.PLATFORM_IDENTIFIER || '', // The identifier key you obtained from Bringweb3
+    identifier: process.env.PLATFORM_IDENTIFIER || '',
     apiEndpoint: process.env.NODE_ENV === 'production' ? 'prod' : 'sandbox',
     isEnabledByDefault: true
   });

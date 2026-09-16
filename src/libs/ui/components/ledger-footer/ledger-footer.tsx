@@ -38,10 +38,8 @@ export const renderLedgerFooter = ({
   return undefined;
 };
 
-/**
- * The flow behind this screen is still live and resumes on its own, so the button is the way
- * out of it rather than an acknowledgement.
- */
+// The flow behind this screen is still live, so the button is an exit rather than
+// an acknowledgement.
 const LedgerWaitingFooter: React.FC<
   Pick<IRenderLedgerFooterParams, 'onErrorCtaPressed'>
 > = ({ onErrorCtaPressed }) => {

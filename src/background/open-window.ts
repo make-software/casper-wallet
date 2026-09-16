@@ -19,34 +19,18 @@ import {
 } from '@background/redux/windowManagement/selectors';
 
 export interface OpenApprovalWindowProps extends OpenWindowProps {
-  /**
-   * Required. `openWindow` has exactly one non-test importer (`sdk-methods`)
-   * and every one of its six call sites is a dapp approval flow — the UI's
-   * internal-window path is a different function entirely (`useWindowManager`
-   * → `createOpenWindow`). The optional it used to be was not free: every
-   * branch that saves a request from being stranded is gated on this field, so
-   * a seventh approval flow that forgot it would compile green, open a window
-   * that is never attached, and leave `{status: 'open', windowIds: []}` — the
-   * one state no window event can ever cancel.
-   */
+  /** Every branch that saves a request from being stranded is gated on this. */
   requestId: string;
 }
 
-// Fire-and-forget by design (the message handler must not block on a browser
-// window), but every terminal state is now handled:
-//   reused   → the displaced request loses its last window and is cancelled
-//   opened   → the window is attached to the request
-//   no id    → the request is cancelled and the dapp is told (see below)
-//   rejected → the request is cancelled and the dapp is told, instead of
-//              hanging until its own 30-minute timeout
+// Fire-and-forget by design: the message handler must not block on a browser
+// window.
 export function openWindow(
   store: MainStore,
   { requestId, ...openWindowProps }: OpenApprovalWindowProps
 ) {
-  // Fire-and-forget recovery shared by every "no window will ever display this
-  // request" outcome: log identifiers only (never the action/payload) and fail
-  // the request so its dapp promise doesn't hang until its own 30-minute
-  // timeout.
+  // Recovery shared by every "no window will ever display this request"
+  // outcome: log identifiers only, never the action or payload.
   const failIncomingRequest = (context: string, details: unknown) => {
     console.error(context, details);
 
@@ -56,11 +40,7 @@ export function openWindow(
   };
 
   // Withheld while a Ledger confirmation is in flight in it — reuse navigates
-  // that window's tab out from under the device call (see
-  // `awaitingDeviceConfirmation` in windowManagement/types). `null` REDIRECTS
-  // the reuse rather than suppressing it: the new-window branch still runs
-  // `setWindowId`, so the slot retracks and only the protected window leaves
-  // the rotation. WALLET-1394.
+  // that window's tab out from under the device call.
   const trackedWindowId = selectWindowId(store.getState());
   const reusableWindowId =
     trackedWindowId != null &&
@@ -75,9 +55,8 @@ export function openWindow(
   })(openWindowProps).then(
     ({ window, reused }) => {
       if (window.id == null) {
-        // No `windows.onRemoved` will ever fire for a window without an id, so
-        // without this the request is silently stranded: it stays 'open' with
-        // no attached window, and nothing will ever cancel it.
+        // No `windows.onRemoved` fires for a window without an id, so nothing
+        // else would ever cancel the request.
         failIncomingRequest('openWindow: resolved window has no id', {
           requestId
         });
@@ -86,13 +65,8 @@ export function openWindow(
 
       const windowId = window.id;
 
-      // Runs BEFORE the attach below: it snapshots its candidates and dispatches
-      // the detach synchronously, so the incoming request — which has no window
-      // yet on its first `windowRequestOpened` — can never be among them. (The
-      // one exception is a dapp re-sending an already-attached `requestId`:
-      // `windowRequestOpened` no-ops on a duplicate, so "incoming" there is
-      // really the same already-open request, and it would be cancelled by its
-      // own supersede. That's dapp-controlled, not a regression.)
+      // Runs before the attach below, snapshotting its candidates synchronously,
+      // so the incoming request — which has no window yet — is never among them.
       if (reused) {
         void cancelRequestsDisplacedBy(
           store,
@@ -101,27 +75,13 @@ export function openWindow(
         ).catch(error => console.error('cancel-on-supersede: failed', error));
       }
 
-      // The reuse chain makes several browser round-trips (getAll → get →
-      // update → tabs.update, see create-open-window.ts) before this `.then`
-      // runs, and window creation is itself an awaited round-trip, so the
-      // window can close in that gap. `attachWindowToRequest` owns both the
-      // dispatch and the liveness repair for that case — see the rationale
-      // there, and note the Ledger hook reaches the same helper across a wider
-      // gap still.
+      // The window can close during the awaited round-trips above;
+      // `attachWindowToRequest` owns the liveness repair for that case.
       attachWindowToRequest(store, requestId, windowId);
     },
     error => {
-      // Fire-and-forget: if `windows.create` rejects, surface it instead of an
-      // unhandled rejection. The slice's window id is left cleared (no id was
-      // set).
-      //
-      // Never log the raw error: a `signMessage` window URL embeds the user's
-      // plaintext message as a query param, and a rejection's text can echo the
-      // URL it failed on. But dropping everything but `.name` dropped the
-      // diagnosis too — `.name` is the string "Error" for a `windows.create` /
-      // `windows.update` / `tabs.update` rejection, i.e. it says nothing. Cut
-      // from the first `?` (where any secret would be) and cap the length: the
-      // secret stays out, the reason stays in.
+      // Never log the raw error: a rejection's text can echo the URL it failed
+      // on, and a `signMessage` URL carries the plaintext message.
       failIncomingRequest('openWindow: failed to open approval window', {
         requestId,
         windowApp: openWindowProps.windowApp,
@@ -129,12 +89,8 @@ export function openWindow(
       });
     }
   );
-  // The two-arm form above is deliberate — `onRejected` must not catch the
-  // recovery it triggers — but that leaves the success arm covered by nothing.
-  // A throw there (from `attachWindowToRequest`) would open a window that is
-  // never attached, i.e. a request with an empty `windowIds` that no window
-  // event can ever cancel. That is unrecoverable, so at minimum it must be
-  // visible.
+  // The two-arm form above must not catch the recovery it triggers, leaving the
+  // success arm uncovered: a throw there strands the request, so make it visible.
   void chain.catch(error =>
     console.error('openWindow: post-open handling failed', error)
   );

@@ -17,10 +17,7 @@ describe('decideLedgerFlowControl', () => {
     expect(decideLedgerFlowControl(false, null)).toBe('return-to-main');
   });
 
-  // The reason this takes an owned id rather than `state.ledger.windowId`: with
-  // the global slot, a foreign flow holding it turned every one of these into
-  // 'dismiss-this-window', and dismissing the request's only display cancels the
-  // dapp — reachable from the raw-JSON back arrow with no Ledger error in play.
+  // With the global `state.ledger.windowId`, a foreign flow's id would dismiss this request.
   it('a foreign flow holding the slot is not this flow, so nothing is dismissed', () => {
     const ownPermissionWindowId = null;
 

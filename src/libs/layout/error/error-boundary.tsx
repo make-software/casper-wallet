@@ -32,9 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      // Webpack's message is developer-facing ("Loading chunk 12 failed.
-      // (missing: ...)"), and since the routes became chunks this is a failure
-      // real users hit. Give it wording they can act on.
+      // Webpack's chunk-load message is developer-facing; users need wording they can act on.
       const isChunkLoadError = this.state.error?.name === 'ChunkLoadError';
 
       // TODO: Add localizations below

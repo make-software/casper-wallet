@@ -77,7 +77,6 @@ export const RedelegateValidatorDropdownInput = ({
     if (formState.isValid) {
       setShowValidatorPlate(true);
     }
-    //   This should trigger only once
     //   eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

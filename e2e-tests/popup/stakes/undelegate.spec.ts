@@ -39,7 +39,6 @@ popup.describe('Popup UI: Undelegation', () => {
         popupPage.getByText(VALIDATOR_FOR_UNDELEGATE.publicKey)
       ).toBeVisible();
 
-      // Scroll to the bottom
       await popupPage.evaluate(() => {
         const container = document.querySelector('#ms-container');
 

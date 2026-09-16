@@ -14,7 +14,6 @@ import {
 } from './transport';
 import { LedgerEventStatus } from './types';
 
-/** Flushes pending microtasks, including chained `.then()` callbacks. */
 const flushMicrotasks = () => new Promise(resolve => setImmediate(resolve));
 
 function createFakeBluetoothSource(
@@ -48,11 +47,7 @@ function createFakeBluetoothSource(
 
 const fakeDevice = { id: 'device-1' } as unknown as DiscoveredDevice;
 
-/**
- * Models the real transport's `BehaviorSubject`-backed `listenToAvailableDevices`: a seeded
- * empty array synchronously on subscribe, then the real read on a later tick. `neverUpdates`
- * models an observable that never gets past the seed, to exercise the bounded-wait fallback.
- */
+/** Models `listenToAvailableDevices`: a seeded empty array, then the real read a tick later. */
 function createSeededDevicesObservable(
   devices: DiscoveredDevice[],
   {

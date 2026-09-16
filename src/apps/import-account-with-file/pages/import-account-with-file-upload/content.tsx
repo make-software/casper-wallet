@@ -36,7 +36,6 @@ export function ImportAccountWithFileUploadPageContent({
 
   const { ref, ...rest } = register('secretKeyFile');
 
-  // Here we open the upload file input after the component is mounted.
   useEffect(() => {
     inputRef.current?.click();
   }, []);
@@ -66,7 +65,7 @@ export function ImportAccountWithFileUploadPageContent({
           }
           {...rest}
           ref={e => {
-            // https://react-hook-form.com/faqs#Howtosharerefusage
+            // react-hook-form's own ref must still be called when merged with a local ref.
             ref(e);
             inputRef.current = e;
           }}

@@ -147,14 +147,12 @@ export function SignTransactionPage() {
   );
 
   // `getPayload`, never a bare index: `requestId` is dapp-controlled, so
-  // `deployJsonById['constructor']` would hand this page an inherited
-  // Object.prototype member instead of transaction JSON.
+  // `deployJsonById['constructor']` would hand back a prototype member.
   const transactionJson = useMemo<string | undefined>(
     () => getPayload(deployJsonById, requestId),
     [deployJsonById, requestId]
   );
 
-  // signing account should exist in wallet
   if (!signingAccount) {
     const error = Error(
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
@@ -237,12 +235,8 @@ export function SignTransactionPage() {
     let signatureHex: string | null = null;
 
     if (!transaction) {
-      // Every signing route funnels through here, including the Ledger footer's
-      // Connect, which is outside the `disabled` gate on the main footer. If the
-      // payload is gone the request can never be answered from this window, so
-      // returning silently strands both the window and the dapp.
-      // Keyed on `transactionJson`: a payload present but not yet parsed is an
-      // ordinary in-flight state and must not error out.
+      // Keyed on `transactionJson`, not `transaction`: a payload present but not
+      // yet parsed is in-flight, while a payload gone strands window and dapp.
       if (!transactionJson) {
         const error = Error(
           ErrorMessages.signTransaction.REQUEST_NO_LONGER_AVAILABLE.description
@@ -373,9 +367,8 @@ export function SignTransactionPage() {
       ownPermissionWindowId
     );
 
-    // Unconditional, as it was before the window-ownership work: `closeCurrentWindow`
-    // both rejects and — on a window that is not a popup — resolves having done
-    // nothing, and either one used to leave the user on a dead error screen.
+    // Unconditional: `closeCurrentWindow` both rejects and — on a window that is
+    // not a popup — resolves having done nothing, leaving a dead error screen.
     cancelPendingLedgerAction();
     setSigningPageState(SigningPageState.MainContent);
 
@@ -494,11 +487,8 @@ export function SignTransactionPage() {
           <Button
             color="primaryRed"
             flexWidth
-            // `!signatureRequest` mirrors the eip712 page. `transaction` is
-            // local state that outlives the payload it was parsed from, so
-            // once the answered request's payload is dropped from the vault
-            // this button would stay enabled over the empty pane the content
-            // branch below renders without a `signatureRequest`.
+            // `transaction` outlives the payload it was parsed from, so without
+            // `!signatureRequest` this stays enabled over an empty pane.
             disabled={
               !transaction ||
               !signatureRequest ||
@@ -566,17 +556,8 @@ export function SignTransactionPage() {
           );
         }
 
-        // `isLoadingSignatureRequest` is the query's `isFetching`, which is
-        // false for a DISABLED query — so once the answered request's payload
-        // is gone the two content children below are guarded away and this
-        // branch rendered an empty pane. Per-request deletion makes that
-        // routine, not hypothetical.
-        //
-        // `LedgerEventView` is the exception and is excluded from the added
-        // term: it carries no `signatureRequest`, and it is the only thing the
-        // Ledger permission window — the second window, the one that survives a
-        // supersede — has to show while the device is being read. Replacing it
-        // with a skeleton would blank exactly the screen this fix protects.
+        // `isFetching` is false for a DISABLED query, so a dropped payload needs
+        // `!signatureRequest` too — except on Ledger, whose view carries none.
         return isLoadingSignatureRequest ||
           (!signatureRequest &&
             signingPageState !== SigningPageState.LedgerConfirmation) ? (

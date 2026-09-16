@@ -30,7 +30,6 @@ interface HeaderSubmenuBarNavLinkProps {
   linkType: LinkType;
   onClick?: () => void;
   backTypeWithBalance?: boolean;
-  /** Balance of the token the flow spends; without it the link shows the CSPR balance. */
   tokenBalance?: NavLinkTokenBalance | null;
 }
 

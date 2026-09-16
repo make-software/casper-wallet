@@ -9,7 +9,6 @@ export const useSubmitButton = (isConfirmStep: boolean) => {
 
     const layoutContentContainer = document.querySelector('#ms-container');
 
-    // if the content is not scrollable, we can enable the submit button
     if (
       layoutContentContainer &&
       layoutContentContainer.clientHeight ===
@@ -34,10 +33,8 @@ export const useSubmitButton = (isConfirmStep: boolean) => {
       }
     };
 
-    // add event listener to the scrollable container
     layoutContentContainer?.addEventListener('scroll', handleScroll);
 
-    // remove event listener on cleanup
     return () => {
       layoutContentContainer?.removeEventListener('scroll', handleScroll);
     };

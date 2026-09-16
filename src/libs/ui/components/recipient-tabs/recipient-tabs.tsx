@@ -74,7 +74,6 @@ export const RecipientTabs = ({
     if (formState.isValid) {
       setShowSelectedRecipient(true);
     }
-    //   This should trigger only once
     //   eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

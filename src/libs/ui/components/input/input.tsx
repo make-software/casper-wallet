@@ -67,7 +67,6 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
     fontSize: '1.5rem'
   },
   // Hiding the password reveal button in the MS Edge
-  // https://github.com/make-software/casper-wallet/issues/547
   '::-ms-reveal': {
     display: 'none'
   },
@@ -121,8 +120,7 @@ export interface InputProps extends BaseProps {
   type?: HTMLInputTypeAttribute;
   required?: boolean;
   error?: boolean;
-  /** Amber advisory under the field. Unlike `error` it keeps `suffixText` visible and
-   *  never blocks submission. `error` wins when both are set. */
+  /** Amber advisory: keeps `suffixText` visible and never blocks submission; `error` wins. */
   warning?: boolean;
   validationType?: InputValidationType;
   validationText?: string | null;

@@ -23,8 +23,7 @@ const mockPutDeploy = jest.fn();
 const mockSetReferrer = jest.fn();
 const mockSetCustomHeaders = jest.fn();
 
-// Mocked at the same seam core's own repository test uses: only the RPC transport is
-// faked, so `getDateForDeploy` / `sendSignedTx` exercise the real repository logic.
+// Only the RPC transport is faked, so the tests exercise the real repository logic.
 jest.mock('casper-js-sdk', () => ({
   ...jest.requireActual('casper-js-sdk'),
   HttpHandler: class {
@@ -139,9 +138,7 @@ describe('deployer-service', () => {
 
     it('rejects when a 1.x node has no deploy form to submit', async () => {
       const tx = txFromDeployFixture();
-      // A CSPR-transfer transaction always has a Deploy form; the "no deploy form" case only
-      // arises for transaction kinds the legacy Deploy shape cannot represent, which this test
-      // reproduces directly rather than reconstructing such a transaction from the SDK.
+      // Only transaction kinds the legacy Deploy shape cannot represent reach this path.
       tx.getDeploy = jest.fn().mockReturnValue(undefined);
 
       await expect(sendSignedTx(tx, NETWORK, '1.5.8')).rejects.toThrow();
@@ -154,8 +151,7 @@ describe('deployer-service', () => {
     it('signs with a software key producing bytes identical to tx.sign(keys.secretKey)', async () => {
       const { publicKeyHex, secretKeyBase64 } = generateKeyPairFixture();
       const keys = createAsymmetricKeys(publicKeyHex, secretKeyBase64);
-      // Empty on purpose: outside the background the redux account holds no secret material,
-      // so a signer built from `account.secretKey` would sign with nothing.
+      // Empty on purpose: outside the background the redux account holds no secret material.
       const account = accountFixture({
         publicKey: publicKeyHex,
         secretKey: ''

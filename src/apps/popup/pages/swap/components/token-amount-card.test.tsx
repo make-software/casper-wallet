@@ -72,8 +72,6 @@ describe('TokenAmountCard', () => {
     return sheet.getStyleTags();
   };
 
-  // Matrix: "No token chosen" — token button reads `Choose token` in `contentAction`,
-  // behind the same placeholder logo the slot shows once a token is chosen.
   it('renders "Choose token" when no token is chosen', () => {
     const html = render();
 
@@ -82,13 +80,11 @@ describe('TokenAmountCard', () => {
     expect(html).not.toContain('Unlisted token');
   });
 
-  // react-inlinesvg fetches the bundled placeholder in the browser, so only the
-  // sized box it renders into is visible from here — the 32px icon slot.
+  // react-inlinesvg fetches the bundled placeholder in the browser; only its sized box is visible.
   it('keeps the icon slot filled when no token is chosen', () => {
     expect(render()).toContain('size="32"');
   });
 
-  // Matrix: "Token chosen" — symbol in `contentPrimary`.
   it('renders the symbol and no "Unlisted token" for a listed token', () => {
     const html = render({ token: listedToken });
 
@@ -96,19 +92,15 @@ describe('TokenAmountCard', () => {
     expect(html).not.toContain('Unlisted token');
   });
 
-  // Matrix: "Unlisted token chosen" — truncated package hash over a second
-  // line reading `Unlisted token`.
   it('renders the truncated package hash and "Unlisted token" for an unlisted token', () => {
     const html = render({ token: unlistedToken });
 
     expect(html).toContain('aabbc...78899');
     expect(html).toContain('Unlisted token');
-    // The symbol still appears as the icon's alt text; only the primary
-    // label (bodySemiBold) is asserted here, per the token's unlisted status.
+    // The symbol still appears as the icon's alt text; only the primary label is asserted.
     expect(html).not.toMatch(/bodySemiBold"[^<]*>FATSO</);
   });
 
-  // Matrix: "`Swap max` absent" — the control is not rendered on the receive card.
   it('does not render "Swap max" when onSwapMax is not provided', () => {
     const html = render();
 
@@ -121,7 +113,6 @@ describe('TokenAmountCard', () => {
     expect(html).toContain('Swap max');
   });
 
-  // Matrix: "Wrap or unwrap" — the shortcut follows the mode the form is in.
   it('renders the given maxLabel in place of "Swap max"', () => {
     const html = render({ onSwapMax: () => {}, maxLabel: 'Unwrap max' });
 
@@ -129,7 +120,6 @@ describe('TokenAmountCard', () => {
     expect(html).not.toContain('Swap max');
   });
 
-  // Matrix: "Empty amount" — `0.00` placeholder, fiat `$0`.
   it('renders the placeholder and fiat amount when the amount is empty', () => {
     const html = render({ amount: '', fiatAmount: '$0' });
 
@@ -138,7 +128,6 @@ describe('TokenAmountCard', () => {
     expect(html).toContain('$0');
   });
 
-  // Matrix: "Typed amount" — `500` displayed, fiat from the hook.
   it('renders the formatted amount and the given fiat amount', () => {
     const html = render({ amount: '500', fiatAmount: '$1,000.00' });
 
@@ -146,7 +135,6 @@ describe('TokenAmountCard', () => {
     expect(html).toContain('$1,000.00');
   });
 
-  // Matrix: "Amount the balance cannot cover" — the typed amount turns critical.
   it('renders the amount in the critical colour when the card has an error', () => {
     expect(renderCss({ hasError: true })).toContain(
       `color:${lightTheme.color.contentActionCritical}`

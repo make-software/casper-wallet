@@ -1,22 +1,14 @@
-// Import necessary modules
 import { Browser } from '@src/constants';
 
-// Enum for different steps involved in a rate app
 export enum RateAppSteps {
-  Navigation = 'navigation', // The navigation step in the rate app process
-  Rate = 'rate', // The main rate-writing step
-  Support = 'support' // The customer support step (if any) in the review process
+  Navigation = 'navigation',
+  Rate = 'rate',
+  Support = 'support'
 }
 
-/**
- * Function to identify the browser from the user agent.
- *
- * @returns {Browser | 'Unknown'} - The name of the browser the user is using.
- */
 export const getBrowserFromUserAgent = (): Browser | 'Unknown' => {
   const userAgent = navigator.userAgent;
 
-  // Run regex tests on the userAgent to identify the browser
   if (/chrome/i.test(userAgent) && !/edg/i.test(userAgent)) {
     return Browser.Chrome;
   } else if (/firefox/i.test(userAgent)) {
@@ -26,12 +18,10 @@ export const getBrowserFromUserAgent = (): Browser | 'Unknown' => {
   } else if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) {
     return Browser.Safari;
   } else {
-    // if the browser can't be identified, return 'Unknown'
     return 'Unknown';
   }
 };
 
-// Map of rate app links for different browsers
 export const RateAppLinks = {
   [Browser.Chrome]:
     'https://chromewebstore.google.com/detail/casper-wallet/abkahkcbhngaebpcgfmhkoioedceoigp/reviews',

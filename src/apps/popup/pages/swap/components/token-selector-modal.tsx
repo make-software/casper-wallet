@@ -35,13 +35,10 @@ import { TokenSelectorRow } from './token-selector-row';
 
 const SKELETON_ROW_COUNT = 5;
 
-// The list scrolls, the sheet around it must not: 528px of sheet, less the 56px header,
-// the 52px title, the 64px search field and the 40px of gaps above the tile.
+// 528px of sheet, less the 56px header, 52px title, 64px search field and 40px of gaps.
 const LIST_HEIGHT = 312;
 
-// `Modal` is not usable here even though `ModalSwitcher` is: `Modal` owns its open state behind
-// its own trigger, and this sheet's open state lives in core's `useSwapTokens`, so the parent
-// renders it conditionally instead.
+// `Modal` owns its open state behind its own trigger; this sheet's lives in core's `useSwapTokens`.
 const SheetContainer = styled.div`
   position: absolute;
   bottom: 0;
@@ -113,7 +110,6 @@ export const TokenSelectorModal = ({
   const query = useWatch({ control, name: 'tokenSearch' }) ?? '';
 
   const handleClose = () => {
-    // Dismiss clears search (matrix row), regardless of which control closed it.
     setValue('tokenSearch', '');
     closeModal();
   };

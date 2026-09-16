@@ -71,7 +71,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
     }));
 
     setAccountListRows(accountListRows);
-    // We need to sort the account list only on the component mount and when new accounts are added
+    // Sorted on mount and when accounts are added, not on every rename or reconnect
     //   eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleAccounts]);
 

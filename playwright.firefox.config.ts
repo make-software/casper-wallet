@@ -1,16 +1,10 @@
 import { defineConfig } from '@playwright/test';
 
 /**
- * Firefox e2e smoke harness (WALLET-1343 / DEP-99, Task 5.4 spike).
- *
- * This config does NOT use Playwright's browser automation. Playwright cannot
- * install a temporary extension into its bundled Firefox and cannot attach to a
- * system Firefox, so the smoke drives a real Firefox 152 via selenium-webdriver
- * + geckodriver (see e2e-tests/firefox/smoke.spec.ts). We reuse the Playwright
- * test runner purely for TypeScript execution, test structure and `expect`.
- *
- * Kept separate from the Chrome config (playwright.config.ts) so the two suites
- * never share projects/fixtures.
+ * Firefox e2e smoke harness. Playwright can neither install a temporary extension
+ * into its bundled Firefox nor attach to a system one, so the smoke drives a real
+ * Firefox via selenium-webdriver + geckodriver; the Playwright runner is reused
+ * only for TypeScript execution, test structure and `expect`.
  */
 export default defineConfig({
   testDir: './e2e-tests/firefox',

@@ -8,11 +8,8 @@ import {
 } from './selectors';
 import { Request } from './types';
 
-// Typed as `Record<string, Request>` (not `any`) so a future shape change to
-// `Request` fails this file at build time instead of silently returning `[]`
-// / `undefined` at runtime, which is exactly what happened when the mock
-// drifted from the flat `{ [id]: status }` + `pendingRequests` shape to this
-// discriminated union.
+// Typed as `Record<string, Request>` (not `any`) so a shape change to `Request`
+// fails this file at build time instead of silently returning `[]`/`undefined`.
 const requests: Record<string, Request> = {
   a: {
     status: 'open',
@@ -115,9 +112,8 @@ describe('selectIsWindowBusyWithDevice', () => {
     expect(selectIsWindowBusyWithDevice(state, 7)).toBe(false);
   });
 
-  // A request the permission window still displays has two windows; the shared
-  // approval window among them is not the one hosting the device call, but it
-  // is still the one a reuse would navigate out from under the flow.
+  // A request the permission window still displays has two windows, and reusing
+  // either would navigate out from under the device flow.
   it('reports every window the awaiting request displays in', () => {
     const busy = stateWith(['a', awaiting([7, 9])]);
 

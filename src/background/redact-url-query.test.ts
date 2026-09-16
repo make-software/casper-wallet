@@ -1,9 +1,8 @@
 import { redactUrlQuery } from './redact-url-query';
 
 describe('redactUrlQuery', () => {
-  // The reason this function exists: a `signMessage` approval URL carries the
-  // user's plaintext message as a search param, and a windows-API rejection can
-  // quote the URL it failed on.
+  // A `signMessage` approval URL carries the user's plaintext message as a
+  // search param, and a windows-API rejection can quote the URL it failed on.
   it('drops everything from the first ? onward', () => {
     expect(
       redactUrlQuery(

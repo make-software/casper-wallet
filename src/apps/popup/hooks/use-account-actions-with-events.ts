@@ -38,7 +38,6 @@ function findAccountInAListClosestToGivenAccountFilteredByNames(
   givenAccount: Account,
   allowedAccountNames: string[]
 ): Account | undefined {
-  // if account already connected return
   if (allowedAccountNames.includes(givenAccount.name)) {
     return givenAccount;
   }
@@ -79,9 +78,6 @@ export function useAccountManager() {
     [accountNamesByOriginDict]
   );
 
-  /**
-   * connect site
-   */
   const connectSiteWithEvent = useCallback(
     async (accountNames: string[], origin: string, siteTitle: string) => {
       if (!activeAccount?.name || origin == null || isLocked) {
@@ -128,9 +124,6 @@ export function useAccountManager() {
     [activeAccount, isLocked, accounts]
   );
 
-  /**
-   * connect another account
-   */
   const connectAnotherAccountWithEvent = useCallback(
     async (accountName: string, origin: string | null) => {
       if (!activeAccount?.name || origin == null || isLocked) {
@@ -170,9 +163,6 @@ export function useAccountManager() {
     [accounts, activeAccount, isLocked]
   );
 
-  /**
-   * change active account
-   */
   const changeActiveAccountWithEvent = useCallback(
     async (accountName: string) => {
       if (!activeAccount?.name || accountName === activeAccount.name) {
@@ -214,9 +204,6 @@ export function useAccountManager() {
     [activeAccount?.name, accounts, isLocked, isAccountConnectedWithOrigin]
   );
 
-  /**
-   * disconnect site
-   */
   const disconnectSiteWithEvent = useCallback(
     async (origin: string) => {
       if (!activeAccount?.name || !origin || isLocked) {
@@ -253,9 +240,6 @@ export function useAccountManager() {
     ]
   );
 
-  /**
-   * disconnect account
-   */
   const disconnectAccountWithEvent = useCallback(
     async (accountName: string, origin: string) => {
       if (
@@ -267,7 +251,6 @@ export function useAccountManager() {
         return;
       }
 
-      // disconnected active account, so need to emit event
       if (accountName === activeAccount.name) {
         emitSdkEventToActiveTabsWithOrigin(
           origin,
@@ -292,9 +275,6 @@ export function useAccountManager() {
     [accountNamesByOriginDict, activeAccount, isLocked]
   );
 
-  /**
-   * change active account supports
-   */
   const changeActiveAccountSupportsWithEvent = useCallback(
     async (publicKey: string, supportsTransactionV1: boolean) => {
       if (

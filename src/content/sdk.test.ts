@@ -6,15 +6,8 @@ import { SDK_HANDSHAKE_TYPE } from './sdk-channel';
 import { sdkMethod } from './sdk-method';
 import { SdkErrorCode, SignTypedDataResult } from './sdk-types';
 
-// The project's jest config runs with `testEnvironment: 'node'` (no
-// `jest-environment-jsdom` dependency is installed), so `window`/`document`
-// don't exist as globals here. `sdk.ts` touches both at module-evaluation
-// time (it registers a `window` message listener for the handshake and assigns
-// `window.CasperWalletProvider = ...` at the bottom of the file) and at call
-// time (`document.title`), so the minimal stand-ins below must be in place
-// *before* the module is required. A top-level `import` would run too early for
-// that (module side effects execute at import time), so the module under test is
-// `require`d lazily inside the loader after the globals are set.
+// `testEnvironment: 'node'` has no `window`/`document`, and `sdk.ts` touches both
+// at module-evaluation time, so the module is `require`d lazily after the stubs.
 const ORIGIN = 'https://dapp.example';
 
 type Listener = (e: unknown) => void;
@@ -42,9 +35,8 @@ const loadSdk = (): {
   return { ...mod, window: { messageListeners } };
 };
 
-// A fake MessagePort: `sdk.ts` posts requests via `postMessage` and listens for
-// responses via `addEventListener('message', ...)`. We only need to capture the
-// posted requests here (responses never arrive; the per-call timeout rejects).
+// A fake MessagePort that only captures the posted requests; responses never
+// arrive, so the per-call timeout rejects.
 const makeFakePort = () => ({
   postMessage: jest.fn(),
   addEventListener: jest.fn(),
@@ -53,11 +45,8 @@ const makeFakePort = () => ({
 });
 
 describe('CasperWalletProvider requestId', () => {
-  // Each test loads a fresh copy of `sdk.ts` (it registers its `window` message
-  // listener at module-evaluation time against whatever `global.window` is
-  // current then). Without resetting the module registry between tests, the
-  // second `loadSdk()` call would return the first test's cached module —
-  // still bound to the first test's fake window/port.
+  // `sdk.ts` registers its `window` message listener at module-evaluation time,
+  // so each test needs a fresh copy bound to its own fake window/port.
   beforeEach(() => {
     jest.resetModules();
   });
@@ -78,13 +67,11 @@ describe('CasperWalletProvider requestId', () => {
     );
 
     // A short timeout keeps the internal `setTimeout` (default 30 min) from
-    // outliving the test as an open handle — the calls below are never resolved
-    // by a real response, only by this timeout firing.
+    // outliving the test as an open handle; nothing else settles these calls.
     const provider = CasperWalletProvider({ timeout: 1 });
     provider.requestConnection().catch(() => undefined);
     provider.requestConnection().catch(() => undefined);
 
-    // requests are now posted on the port, not dispatched as window events.
     const ids = port.postMessage.mock.calls
       .map(
         ([msg]) => (msg as { meta?: { requestId?: string } })?.meta?.requestId
@@ -97,10 +84,8 @@ describe('CasperWalletProvider requestId', () => {
   });
 
   it('falls back to a crypto.getRandomValues-based UUID v4 when crypto.randomUUID is unavailable (non-secure http context)', () => {
-    // `crypto.randomUUID` is only defined in a secure context. The content
-    // script also matches plain `http://*/*` dapps, where `randomUUID` is
-    // `undefined` but `getRandomValues` remains available. Simulate that by
-    // stubbing `randomUUID` away for this test only, then restoring it.
+    // `crypto.randomUUID` is only defined in a secure context; the content script
+    // also matches plain `http://*/*` dapps, where only `getRandomValues` remains.
     const originalRandomUUID = crypto.randomUUID;
     const getRandomValuesSpy = jest.spyOn(crypto, 'getRandomValues');
     (crypto as unknown as { randomUUID: unknown }).randomUUID = undefined;
@@ -144,12 +129,8 @@ describe('CasperWalletProvider requestId', () => {
 });
 
 describe('CasperWalletProvider pre-handshake queueing', () => {
-  // `window.CasperWalletProvider` is live before the content-script handshake
-  // delivers the port. A request fired in that gap must be parked and flushed
-  // once the port arrives — never hard-rejected (the pre-DEP-99 window listener
-  // always existed, so this preserves that behaviour). Fake timers keep the
-  // per-request timeout from firing (or leaking as an open handle) unless a test
-  // explicitly advances it.
+  // A request fired before the handshake delivers the port must be parked and
+  // flushed once it arrives, never hard-rejected. Fake timers pin the timeout.
   beforeEach(() => {
     jest.resetModules();
     jest.useFakeTimers();
@@ -168,7 +149,6 @@ describe('CasperWalletProvider pre-handshake queueing', () => {
     provider.getVersion().catch(onReject);
 
     const port = makeFakePort();
-    // parked: nothing posted yet and — crucially — not hard-rejected
     expect(port.postMessage).not.toHaveBeenCalled();
     expect(onReject).not.toHaveBeenCalled();
 
@@ -182,7 +162,6 @@ describe('CasperWalletProvider pre-handshake queueing', () => {
       })
     );
 
-    // the parked request is now flushed onto the private port
     expect(port.postMessage).toHaveBeenCalledTimes(1);
     expect((port.postMessage.mock.calls[0][0] as { type: string }).type).toBe(
       'CasperWalletProvider:GetVersion'
@@ -196,7 +175,6 @@ describe('CasperWalletProvider pre-handshake queueing', () => {
     const onReject = jest.fn();
     provider.getVersion().catch(onReject);
 
-    // no handshake — advance past the per-request timeout
     jest.advanceTimersByTime(1000);
     await Promise.resolve();
 
@@ -205,7 +183,6 @@ describe('CasperWalletProvider pre-handshake queueing', () => {
       /SDK RESPONSE TIMEOUT/
     );
 
-    // a late handshake must NOT resurrect the already-timed-out request
     const port = makeFakePort();
     const win = (global as { window: unknown }).window;
     window.messageListeners.forEach(cb =>
@@ -223,15 +200,12 @@ describe('CasperWalletProvider pre-handshake queueing', () => {
     const { CasperWalletProvider, window } = loadSdk();
     const provider = CasperWalletProvider({ timeout: 1000 });
 
-    // parked, then timed out — must be removed from the queue, not just
-    // neutralized by the `settled` guard (the closure retains the full
-    // requestAction, e.g. a deploy JSON for `sign`).
+    // Once timed out it must leave the queue, not just be neutralized by the
+    // `settled` guard: the closure retains the full requestAction, e.g. a deploy.
     provider.getVersion().catch(() => undefined);
     jest.advanceTimersByTime(1000);
     await Promise.resolve();
 
-    // a later request + handshake must flush exactly ONE message — the live
-    // request, not the expired one still sitting in the queue.
     provider.getVersion().catch(() => undefined);
     const port = makeFakePort();
     const win = (global as { window: unknown }).window;
@@ -248,9 +222,8 @@ describe('CasperWalletProvider pre-handshake queueing', () => {
   });
 });
 
-// A port that can answer, unlike `makeFakePort` above: `fetchFromBackground`
-// subscribes with addEventListener, so responses are delivered through the
-// captured listeners.
+// A port that can answer, unlike `makeFakePort`: `fetchFromBackground` subscribes
+// with addEventListener, so responses arrive through the captured listeners.
 const makeAnsweringPort = () => {
   const listeners: ((e: { data: unknown }) => void)[] = [];
   return {
@@ -366,10 +339,8 @@ describe('fetchFromBackground response routing', () => {
   });
 });
 
-// Compile-level: a dapp must be able to branch on the marker WITHOUT a cast —
-// TS consumers are the audience most likely to handle the refusal properly, and
-// ts-jest type-checks this file, so dropping `errorCode` from either public
-// result type fails here rather than silently shipping a JS-only guarantee.
+// Compile-level: ts-jest type-checks this file, so dropping `errorCode` from
+// either public result type fails here rather than shipping a JS-only guarantee.
 describe('a wallet-generated refusal is readable from the public types', () => {
   it('exposes `errorCode` on both signature result types after narrowing', () => {
     const deployRefusal: SignatureResponse = {

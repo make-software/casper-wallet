@@ -16,10 +16,8 @@ export class ApduStatusError extends Error {
 export const MAX_APDU_DATA_LENGTH = 256;
 
 /**
- * Adapts DMK's `sendApdu` (which splits the response into `statusCode`/`data` and never
- * throws on a bad status word) to the `LedgerTransport.send` shape `@zondax/ledger-casper`
- * expects: header framing, a single concatenated `Buffer`, and a throw on any status word
- * not in `statusList`.
+ * Adapts DMK's `sendApdu` to the `LedgerTransport.send` shape `@zondax/ledger-casper` expects:
+ * header framing, a single concatenated `Buffer`, and a throw on any unlisted status word.
  */
 export function createApduSend(sendApdu: ApduSender) {
   return async (
