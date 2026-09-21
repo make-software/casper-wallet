@@ -1,7 +1,4 @@
-import {
-  type DeviceSessionState,
-  DeviceStatus
-} from '@ledgerhq/device-management-kit';
+import type { DeviceSessionState } from '@ledgerhq/device-management-kit';
 import type { ILedgerTransport, LedgerDeviceState } from 'casper-wallet-core';
 import { Observable, share } from 'rxjs';
 
@@ -68,7 +65,7 @@ export function createDmkLedgerTransport(
       next: state => {
         if (hasFiredDisconnect) return;
 
-        if (state.deviceStatus === DeviceStatus.NOT_CONNECTED) {
+        if (toLedgerDeviceState(state).status === 'disconnected') {
           hasFiredDisconnect = true;
           disconnectListeners.forEach(listener => listener());
         }

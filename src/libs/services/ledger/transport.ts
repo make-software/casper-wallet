@@ -10,6 +10,7 @@ import { type Subscription, firstValueFrom } from 'rxjs';
 
 import {
   connectSession,
+  describeDeviceFailure,
   getBluetoothAvailabilityDmk,
   getDmk,
   getUsbAvailabilityDmk
@@ -141,6 +142,7 @@ export async function connectLedgerTransport(
   transport: TransportIdentifier
 ): Promise<DmkLedgerTransport> {
   const knownDevices = await listPermittedDevices(dmk, transport);
+  const fromChooser = knownDevices.length === 0;
 
   const device =
     knownDevices[0] ??
@@ -154,7 +156,20 @@ export async function connectLedgerTransport(
     });
   }
 
-  const sessionId = await connectSession(dmk, device);
+  const startedAt = Date.now();
+
+  const sessionId = await connectSession(dmk, device).catch(error => {
+    // Core reports every transport-open failure as the one `ErrorOpeningDevice`; `elapsedMs`
+    // is what separates its 6 s GATT connect from its 2 s MTU handshake.
+    console.error('ledger: opening the device session failed', {
+      transport,
+      fromChooser,
+      elapsedMs: Date.now() - startedAt,
+      ...describeDeviceFailure(error)
+    });
+
+    throw error;
+  });
 
   return createDmkLedgerTransport(dmk, sessionId);
 }
