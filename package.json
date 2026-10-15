@@ -198,7 +198,7 @@
     "allowScripts": {
       "@lavamoat/preinstall-always-fail#3.0.0": false,
       "eslint-import-resolver-typescript>unrs-resolver#1.12.2": true,
-      "geckodriver#6.1.1": false,
+      "geckodriver#7.0.0": false,
       "i18next-parser>esbuild#0.25.12": true,
       "jest>@jest/core>jest-haste-map>@parcel/watcher#2.6.0": false
     }
