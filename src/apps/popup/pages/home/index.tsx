@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 import styled, { css } from 'styled-components';
 
@@ -14,6 +14,8 @@ import {
   selectDismissedAppEvents,
   selectVaultActiveAccount
 } from '@background/redux/root-selector';
+
+import { useCasperToken } from '@hooks/use-casper-token';
 
 import {
   CenteredFlexColumn,
@@ -45,6 +47,7 @@ import { DeploysList } from './components/deploys-list';
 import { MoreButtonsModal } from './components/more-buttons-modal';
 import { NftList } from './components/nft-list';
 import { TokensList } from './components/tokens-list';
+import { HomeAction, selectHomeActions } from './home-actions';
 
 const ButtonsContainer = styled(CenteredFlexRow)`
   margin-top: 24px;
@@ -88,6 +91,51 @@ export function HomePageContent() {
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
+  const casperToken = useCasperToken();
+
+  const homeActions = selectHomeActions({
+    buy: network === NetworkSetting.Mainnet && !isSafariBuild,
+    send: true,
+    swap: isSwapAvailable(network, isSafariBuild),
+    delegate: true,
+    receive: true
+  });
+
+  const homeActionConfigs: Record<
+    HomeAction,
+    { icon: string; label: string; onClick: () => void }
+  > = {
+    buy: {
+      icon: 'assets/icons/card.svg',
+      label: t('Buy'),
+      onClick: () => navigate(RouterPath.BuyCSPR)
+    },
+    send: {
+      icon: 'assets/icons/transfer.svg',
+      label: t('Send'),
+      onClick: () => navigate(RouterPath.Transfer)
+    },
+    swap: {
+      icon: 'assets/icons/swap.svg',
+      label: t('Swap'),
+      onClick: () =>
+        navigate(RouterPath.Swap, {
+          state: { swapFromTokenId: toSwapTokenId() }
+        })
+    },
+    delegate: {
+      icon: 'assets/icons/delegate.svg',
+      label: t('Delegate'),
+      onClick: () => navigate(RouterPath.Delegate)
+    },
+    receive: {
+      icon: 'assets/icons/receive.svg',
+      label: t('Receive'),
+      onClick: () =>
+        navigate(RouterPath.Receive, { state: { tokenData: casperToken } })
+    }
+  };
+
   useFetchCsprNameExpirations();
 
   const { showExpirationBanner, dismissExpiringNames } = useExpiringCsprNames();
@@ -121,56 +169,24 @@ export function HomePageContent() {
           <Container>
             <AccountBalance />
             <ButtonsContainer gap={SpacingSize.XXXL}>
-              {network === NetworkSetting.Mainnet && !isSafariBuild && (
-                <ButtonContainer
-                  gap={SpacingSize.Small}
-                  onClick={() => navigate(RouterPath.BuyCSPR)}
-                >
-                  <Button circle>
-                    <SvgIcon
-                      src="assets/icons/card.svg"
-                      color="contentOnFill"
-                    />
-                  </Button>
-                  <Typography type="captionMedium" color="contentAction">
-                    <Trans t={t}>Buy</Trans>
-                  </Typography>
-                </ButtonContainer>
-              )}
-              <ButtonContainer
-                gap={SpacingSize.Small}
-                onClick={() => navigate(RouterPath.Transfer)}
-              >
-                <Button circle>
-                  <SvgIcon
-                    src="assets/icons/transfer.svg"
-                    color="contentOnFill"
-                  />
-                </Button>
-                <Typography type="captionMedium" color="contentAction">
-                  <Trans t={t}>Send</Trans>
-                </Typography>
-              </ButtonContainer>
-              {isSwapAvailable(network, isSafariBuild) && (
-                <ButtonContainer
-                  gap={SpacingSize.Small}
-                  onClick={() =>
-                    navigate(RouterPath.Swap, {
-                      state: { swapFromTokenId: toSwapTokenId() }
-                    })
-                  }
-                >
-                  <Button circle>
-                    <SvgIcon
-                      src="assets/icons/swap.svg"
-                      color="contentOnFill"
-                    />
-                  </Button>
-                  <Typography type="captionMedium" color="contentAction">
-                    <Trans t={t}>Swap</Trans>
-                  </Typography>
-                </ButtonContainer>
-              )}
+              {homeActions.map(action => {
+                const { icon, label, onClick } = homeActionConfigs[action];
+
+                return (
+                  <ButtonContainer
+                    key={action}
+                    gap={SpacingSize.Small}
+                    onClick={onClick}
+                  >
+                    <Button circle>
+                      <SvgIcon src={icon} color="contentOnFill" />
+                    </Button>
+                    <Typography type="captionMedium" color="contentAction">
+                      {label}
+                    </Typography>
+                  </ButtonContainer>
+                );
+              })}
               <MoreButtonContainer>
                 <MoreButtonsModal />
               </MoreButtonContainer>
