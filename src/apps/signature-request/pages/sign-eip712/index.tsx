@@ -91,7 +91,12 @@ export function SignEip712Page() {
     }
 
     try {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      // Wallet policy, not a dapp option.
+      return {
+        ...parsed,
+        options: { ...parsed.options, rejectUnknownFields: true }
+      };
     } catch {
       return { isInvalidPayload: true };
     }
