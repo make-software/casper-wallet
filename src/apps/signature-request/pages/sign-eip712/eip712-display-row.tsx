@@ -85,7 +85,11 @@ export function Eip712DisplayRow({ row }: Eip712DisplayRowProps) {
           withCopyIcon
         />
       ) : (
-        <Typography type="bodyHash" color="contentPrimary" overflowWrap>
+        <Typography
+          type="bodyHash"
+          color="contentPrimary"
+          style={{ overflowWrap: 'anywhere' }}
+        >
           {row.displayValue}
         </Typography>
       )}
