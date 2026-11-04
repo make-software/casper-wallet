@@ -17,6 +17,8 @@ import { getFaviconUrlFromOrigin } from '@libs/ui/components/site-favicon-badge/
 import { formatPrimaryTypeLabel } from '@libs/ui/utils';
 
 import { Eip712DisplayRow, Eip712NetworkRow } from './eip712-display-row';
+import { Eip712RowGroup } from './eip712-row-group';
+import { groupEip712Rows } from './group-eip712-rows';
 
 const RowDataContainer = styled(AlignedFlexRow)`
   margin: 16px;
@@ -114,12 +116,23 @@ export function SignEip712Content({
 
         <List
           headerLabel={formatPrimaryTypeLabel(signatureRequest.primaryType)}
-          rows={signatureRequest.messageRows.map((row, index) => ({
-            id: `message-${index}-${row.label}`,
-            label: row.label,
-            value: row
-          }))}
-          renderRow={({ value }) => <Eip712DisplayRow row={value} />}
+          rows={groupEip712Rows(signatureRequest.messageRows).map(
+            (entry, index) => ({
+              id: `message-${index}-${entry.kind === 'row' ? entry.item.label : entry.label}`,
+              entry
+            })
+          )}
+          renderRow={({ entry }, index) =>
+            entry.kind === 'row' ? (
+              <Eip712DisplayRow row={entry.item.row} />
+            ) : (
+              <Eip712RowGroup
+                label={entry.label}
+                items={entry.items}
+                isFirst={index === 0}
+              />
+            )
+          }
           marginLeftForItemSeparatorLine={16}
         />
 

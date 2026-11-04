@@ -26,14 +26,19 @@ const RowDataContainer = styled(SpaceBetweenFlexRow)`
 
 interface Eip712DisplayRowProps {
   row: IEIP712DisplayRow;
+  /** Replaces `row.label`, e.g. with the field's own name inside its struct's group. */
+  label?: string;
 }
 
-export function Eip712DisplayRow({ row }: Eip712DisplayRowProps) {
+export function Eip712DisplayRow({
+  row,
+  label = row.label
+}: Eip712DisplayRowProps) {
   if (row.contractPackage) {
     return (
       <RowDataContainer>
         <Typography type="body" color="contentSecondary">
-          {row.label}
+          {label}
         </Typography>
         <ContractInfoRow
           contractPackageHash={row.value}
@@ -51,7 +56,7 @@ export function Eip712DisplayRow({ row }: Eip712DisplayRowProps) {
     return (
       <RowDataContainer>
         <Typography type="body" color="contentSecondary">
-          {row.label}
+          {label}
         </Typography>
         <AccountInfoRow
           publicKey={publicKey ?? row.value}
@@ -73,7 +78,7 @@ export function Eip712DisplayRow({ row }: Eip712DisplayRowProps) {
   return (
     <RowDataContainer>
       <Typography type="body" color="contentSecondary">
-        {row.label}
+        {label}
       </Typography>
       {row.presentation === 'hash' ? (
         <Hash
