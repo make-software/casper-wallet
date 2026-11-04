@@ -122,15 +122,11 @@ export function SignEip712Content({
               entry
             })
           )}
-          renderRow={({ entry }, index) =>
+          renderRow={({ entry }) =>
             entry.kind === 'row' ? (
               <Eip712DisplayRow row={entry.item.row} />
             ) : (
-              <Eip712RowGroup
-                label={entry.label}
-                items={entry.items}
-                isFirst={index === 0}
-              />
+              <Eip712RowGroup label={entry.label} items={entry.items} />
             )
           }
           marginLeftForItemSeparatorLine={16}

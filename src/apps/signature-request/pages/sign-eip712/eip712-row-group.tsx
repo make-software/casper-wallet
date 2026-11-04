@@ -11,16 +11,13 @@ import { Eip712DisplayRow } from './eip712-display-row';
 import { Eip712RowItem } from './group-eip712-rows';
 
 // Sticky within the group's own box, so a field's struct stays named while any of its rows is visible.
-const GroupHeader = styled.div<{ isFirst: boolean }>`
+// The card's own colour, so it reads as plain text yet hides rows scrolling beneath it.
+const GroupHeader = styled.div`
   position: sticky;
   top: 0;
   z-index: 1;
   padding: 12px 16px;
-  background: ${({ theme }) => theme.color.fillNeutral};
-  border-radius: ${({ theme, isFirst }) =>
-    isFirst
-      ? `${theme.borderRadius.twelve}px ${theme.borderRadius.twelve}px 0 0`
-      : '0'};
+  background: ${({ theme }) => theme.color.backgroundPrimary};
 `;
 
 const GroupRows = styled.div<BorderBottomPseudoElementProps>`
@@ -37,13 +34,12 @@ const GroupRow = styled.div`
 interface Eip712RowGroupProps {
   label: string;
   items: Eip712RowItem[];
-  isFirst: boolean;
 }
 
-export function Eip712RowGroup({ label, items, isFirst }: Eip712RowGroupProps) {
+export function Eip712RowGroup({ label, items }: Eip712RowGroupProps) {
   return (
     <>
-      <GroupHeader isFirst={isFirst}>
+      <GroupHeader>
         <Typography type="bodySemiBold" color="contentPrimary">
           {label}
         </Typography>
