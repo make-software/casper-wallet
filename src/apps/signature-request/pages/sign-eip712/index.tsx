@@ -1,8 +1,4 @@
 import { Conversions, PrivateKey, PublicKey } from 'casper-js-sdk';
-import {
-  IEIP712SignTypedDataOptions,
-  IEIP712TypedData
-} from 'casper-wallet-core';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
@@ -12,6 +8,7 @@ import { getPrivateKeyHexFromSecretKey, getSigningAccount } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
+import { parseEip712Payload } from '@signature-request/pages/sign-eip712/parse-eip712-payload';
 import { SignEip712Content } from '@signature-request/pages/sign-eip712/sign-eip712-content';
 import { SignatureRequestLoading } from '@signature-request/pages/sign-transaction/signature-request-loading';
 import { SignatureRequestRawJson } from '@signature-request/pages/sign-transaction/signature-request-raw-json';
@@ -78,29 +75,11 @@ export function SignEip712Page() {
     shallowEqual
   );
 
-  const { typedData, options, isInvalidPayload } = useMemo<{
-    typedData?: IEIP712TypedData;
-    options?: IEIP712SignTypedDataOptions;
-    isInvalidPayload?: boolean;
-  }>(() => {
+  const { typedData, options, isInvalidPayload } = useMemo(
     // `getPayload`, never a bare index: `requestId` is dapp-controlled.
-    const raw = getPayload(eip712JsonById, requestId);
-
-    if (!raw) {
-      return {};
-    }
-
-    try {
-      const parsed = JSON.parse(raw);
-      // Wallet policy, not a dapp option.
-      return {
-        ...parsed,
-        options: { ...parsed.options, rejectUnknownFields: true }
-      };
-    } catch {
-      return { isInvalidPayload: true };
-    }
-  }, [eip712JsonById, requestId]);
+    () => parseEip712Payload(getPayload(eip712JsonById, requestId)),
+    [eip712JsonById, requestId]
+  );
 
   if (isInvalidPayload) {
     const error = Error(
