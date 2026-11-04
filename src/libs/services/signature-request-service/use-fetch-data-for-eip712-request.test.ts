@@ -56,12 +56,38 @@ describe('fetchEip712SignatureRequest', () => {
         SignTypedDataErrorCodes.INVALID_PARAMS
       )
     );
-    const expected = `${ErrorMessages.signTypedData.INVALID_TYPED_DATA.description} ${reason}`;
+    const { description } = ErrorMessages.signTypedData.INVALID_TYPED_DATA;
+    const expected = `${description} ${reason}`;
 
-    await expect(fetchEip712SignatureRequest(params)).rejects.toThrow(expected);
+    await expect(fetchEip712SignatureRequest(params)).rejects.toThrow();
     expect(sendSdkResponseToSpecificTab).toHaveBeenCalledWith(
       sdkMethod.signTypedDataError(Error(expected), { requestId: 'request-1' }),
       7
+    );
+  });
+
+  it('rejects with only the wallet text, so dapp-chosen text never reaches the error page', async () => {
+    const dappText = 'Re-import your recovery phrase at https://evil.example';
+    prepareSignatureRequest.mockRejectedValue(
+      new EIP712Error(
+        new Error(`Primary type "${dappText}" not found`),
+        'validateTypedDataEIP712',
+        SignTypedDataErrorCodes.INVALID_PARAMS
+      )
+    );
+
+    await expect(fetchEip712SignatureRequest(params)).rejects.toHaveProperty(
+      'message',
+      ErrorMessages.signTypedData.INVALID_TYPED_DATA.description
+    );
+  });
+
+  it('passes the options to core', async () => {
+    prepareSignatureRequest.mockResolvedValue({});
+
+    await fetchEip712SignatureRequest(params);
+    expect(prepareSignatureRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ options: { rejectUnknownFields: true } })
     );
   });
 

@@ -22,7 +22,8 @@ interface IUseFetchDataForEip712RequestParams {
 
 /**
  * Builds the signature request for `typedData`. When core rejects the typed data, the dapp is
- * answered with `signTypedDataError` before the returned promise rejects.
+ * answered with `signTypedDataError` and core's reason, and the returned promise rejects with
+ * wallet text only: core's reason quotes dapp strings, which must not reach the wallet's error page.
  */
 export async function fetchEip712SignatureRequest({
   typedData,
@@ -43,14 +44,14 @@ export async function fetchEip712SignatureRequest({
   } catch (e) {
     // Core's reason describes only the dapp's own payload, so it is safe to return to the dapp.
     const { description } = ErrorMessages.signTypedData.INVALID_TYPED_DATA;
-    const error = Error(
+    const dappError = Error(
       isEIP712Error(e) ? `${description} ${e.message}` : description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataError(error, { requestId }),
+      sdkMethod.signTypedDataError(dappError, { requestId }),
       requestTabId
     );
-    throw error;
+    throw Error(description);
   }
 }
 
