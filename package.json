@@ -95,7 +95,7 @@
     "casper-js-sdk": "5.3.0",
     "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#v2.1.0",
     "date-fns": "^4.1.0",
-    "i18next": "^26.7.2",
+    "i18next": "^27.0.1",
     "i18next-browser-languagedetector": "^8.3.0",
     "i18next-http-backend": "^4.0.10",
     "jszip": "^3.10.2",
